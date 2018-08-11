@@ -1,0 +1,37 @@
+def whitespace(""): true
+def whitespace(w): w == " " or w == "\t" or w == "\n" or w == "\r"
+def whitespace(w + v if whitespace(w)): whitespace(v)
+def cnumber(w): w >= "0" and w <= "9"
+def rnumber(w if cnumber(w)): w
+def rnumber(w + n if cnumber(w): w + rnumber(n)
+def pnumber("-" + n): "-" + rnumber(n)
+def pnumber(n): rnumber(n)
+def cfloat(w): cnumber(w) or w == "+" or w == "-" or w == "e" or w == "E" or w == "."
+def pfloat(w if cfloat(w)): w
+def pfloat(w + n if cfloat(w)): w + pfloat(n)
+def strConst(""): ""
+def strConst("\\\\" + n): "\\" + strConst(n)
+def strConst("\\t" + n): "\t" + strConst(n)
+def strConst("\\b" + n): "\b" + strConst(n)
+def strConst("\\n" + n): "\n" + strConst(n)
+def strConst("\\r" + n): "\r" + strConst(n)
+def strConst("\\\"" + n): "\"" + strConst(n)
+def strConst(v + n if v != "\""): v + strConst(n)
+def json(w + v if whitespace(w)): json(v)
+def json("[" + v + w + "]" if whitespace(w)): range(v)
+def json("{" + f + w + "}" if whitespace(w)): fields(f)
+def json("true"): true
+def json("false"): false
+def json("null"): null
+def json("\"" + s + "\""): strConst(s)
+def json(f): float(pfloat(f))
+def json(n): number(pnumber(n))
+def range(""): []
+def range(w + v if whitespace(w)): range(v)
+def range(v + w + "," + n if whitespace(w)): [json v] + range(n)
+def range(v): [json(v)]
+def fields(""): {}
+def fields(w + v if whitespace(w)): fields(v)
+def fields(f): field(f)
+def fields(f + w + "," + n if whitespace(w)): field(f) + fields(n)
+def field("\"" + s + "\"" + w + ":" + v if whitespace(w)): { strConst(s): json(v) }

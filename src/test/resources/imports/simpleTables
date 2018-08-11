@@ -1,0 +1,15 @@
+RECORD Record
+
+# remark
+
+id=10, name=Testing, parent=0, fields=[
+  name=id, type=Integer, key=false, allowedNull=false, position=32, bits=32
+  name=name, type=String, key=false, allowedNull=false, position=0, bits=32
+], indexes=[
+  name=simpleName, type=Unique, fields=[
+    field=2
+  ]
+  name=simpleId, type=Unique, fields=[
+    field=1
+  ]
+], size=8, initial=100

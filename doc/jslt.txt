@@ -1,0 +1,29 @@
+main: {def <identifier>(<parameter>[, <parameter>]): <expr>} <expr>
+parameter: <match> [if <expr>]
+match: <mpart> {+ <mpart>}
+mpart: true | false | null | [<marray>] | {<mobject>} | "<string>" | '<string>' | [-]<number> |
+	[(STRING | NUMBER | FLOAT | BOOLEAN | ARRAY | OBJECT) :] <identifier>
+marray: <mpart> {, <mpart>}
+mobject: <identifier> : <mpart> {, <identifier> : <mpart>}
+expr: <cond> [in <cond>]
+cond: <or> [ ? <or> : <or> ]
+or: <and> { or <and> }
+and: <test> { and <test> }
+test: <add> { ( <= | == | != | >= | < | > ) <add> }
+add: <mult> { ( + | - ) <mult> }
+mult: <single> { ( * | / | % ) <single> }
+single: <const> { (
+		<elements> |
+		'.' (<identifier> | length() | name() | type() | first() | last() | index '(' [<expr>] ')' |
+		? <expr>
+	) }
+elements: '[' <elmPart> { ',' <elmPart> } ']'
+elmPart:
+	('/' | '\')  <expr> |
+	<expr> [ ':' [ <expr> ] [ ':' [ <expr> ] ] ]
+const: ! <const> | true | false | null | @ | $ | pow(<expr>, <expr>) | string(<expr>) | number(<expr>) |
+    float(<expr>) | boolean(<expr>) | <macro>(<expr {, <expr>}) | '[' <array> ']' | '{' <object> '}' |
+    '"' <string> '"' | ' <string> ' | [-] <number>
+array: <expr> { , <expr> }
+object: <identifier> : <expr> { , <identifier> : <expr> }
+string: ' { <character> } { '&{' <expr> '}' { <character> } } '

@@ -1,0 +1,141 @@
+JSLT:
+- remove spurious implements from definitions
+- add missing @Override to definitions
+- call of included set/get correctly
+- add * to jpath ... only 1 level object
+- add [*] to jpath .. only 1 level array
+- add .. to jpath .. possibly more than 1 level
+- add sorting to jpath
+- allow string align
+- allow numeric layout & align, also via expressions
+- allow date layout & align
+- initial macro support
+- types on macro parameters
+- allow type casting via macro parameters
+- write set of files from output
+- imports of other scripts
+- documentation of RecordInterface, ChangeInterface
+- output from a script can define the input of another script
+- add more type information from expressions
+- simple jolt defaults / override / remove
+- constants matching in macro definitions
+- iterator unwinding in macro definitions
+- change content of field
+- sync
+- local named definitions
+- global named definitions.. possibly from context
+
+TODO:
+- introduce indexes as RadixTrees.
+- spatial layouts:
+	bounding boxes with content boxes
+	QuadTree = split space in two in different dimensions.. allow empty elements that do not split
+	Radix tree with bits interleaved between dimensions
+- unit test deletes
+- Clear current ARRAY values when parsing them from data
+- Correct parser of multi-layered Relations: unit-test them
+	test changes to indexes due to change of relation
+		reuse the Change<Record> if possible and start a new one when not.. find correct check for it
+	write new unittest to validate index positions after relation change
+
+- validate that each record is linked somewhere:
+	has it's own index
+	or has a parent record
+	or is in use as an Array record
+	more information in Index definition: primary
+- allow min/max/undefined fields on numbers and use only needed bits
+- more compact records by defer bit packing to later.. an lowest number of bits at last
+- allow fields that point to the same ARRAY record definition to have the same name
+    or at least error on the occurrence
+- correct Store use:
+	show number of top level indexes.. claim space for them in Store
+- validate writing escaped data into multi-line strings.. do not escape , or } or /n but do the rest
+	more efficient code to write data.. do not try to fined \t or , tokens in each string that cannot contain them
+- pure memory-map version for store.strings UTF8 for efficiency
+- free-space maintenance thread:
+	start new toFree index for continued functionality but keep top for current loop
+	iterate through whole structure & set pointers to free objects to actually null
+		use output routine with a custom Writer that un-sets pointers to freed records
+	move toFree records on the working list to actual free records
+	combine freed spaces
+- document all public classes and methods.
+
+- implement a session that stores the internal records in a malloc space and writes them to the real store on commit
+	test the commit on a simple case
+	test a single index that can hold new, changed and old records
+	test the same data after a commit
+	test removed records
+	negative record numbers indicate a session store
+	test writing the session change data to string
+	test reading this session data into a separate database
+- implement a multi-layered session that commits on the lower one
+	allow second level session stores where the most upper bit is the store indicator
+
+- new SUB type: as related record field.. keep space of whole record on parent
+- optional fields linked with single enumerate value
+	during claim keep structure of all free bits instead of 1 position
+- create JSON writer/parser back-end
+- write general JSON data parser into the database.. use this to write parser from JSON
+
+- luxe iterator:
+	prevent showing mutated records that get inserted after the current
+		IntSet of records that are changed.. do not show them again
+    concurrent modifications
+    	modCount on structure.. 
+    		only position is next to top.. only on set and let indexes point to the same number
+    		optional (unit-test environment)
+    		optional inside store.. more strict but functional
+    	insert/delete/clear/resize increases modCount
+    	iterator remembers initial modCount & remembers on own remove
+
+- later in array:
+	remove().. move records internally & lower size
+	remove(index).. move records internally & lower size
+	add(index).. create space of number of records
+
+
+*** further development ***
+- Reader using the own type data structures
+
+- unit test on server: for now only in unit test environment
+	define unit test structure
+		test.. input & output & changes
+		input
+			data: datafile in multiline string = input
+			session(moment, label)
+			commit
+			read: path to element = output
+				$.store.book[0].title
+				path + * for all children
+				path + [state=text,name>123]: filter in path: 'and' / 'or' / '<=' / 'like()' / [0] = first / [-1] = last / [-3:-1]: last 3
+			json output/input.. json templates:
+				element = $[path]
+				for-each(path + filter)
+				for-each(path + filter, sort)
+				if (filter) .. else .. 
+				macro
+				var(name, path)
+			data change through input.. checks
+	return record structure
+	return record data
+	change record in session & validate that indexes return the last version
+	show changes
+	add record
+	validate that the new record is returned in the indexes
+	delete record
+	validate that this record is removed from the indexes
+	sort records
+	page records
+	filter records
+
+- transaction session:
+	verify
+		temporary copy of mapping
+		verify session store
+		loop session in logical order
+			validate existence in mapping of change/delete records
+		remove remainder mappings
+
+- validate actual number of objects created: verify JAVA-8 on stack objects
+	jmap -dump:format=b,file=cheap.bin <pid>
+	jhat

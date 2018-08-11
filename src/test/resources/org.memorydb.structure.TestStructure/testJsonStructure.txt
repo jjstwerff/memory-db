@@ -1,0 +1,22 @@
+Records
+name=Field, parent=Part, size=35, full=true, fields=
+  name=name, type=STRING, pos=32, key=true
+  name=upRecord, type=RELATION, related=Part, pos=136
+& includes=
+  record=Part, pos=26
+& indexes=
+  index=object, pos=9, parentPos=1
+name=Json, size=13, full=true, includes=
+  record=Part, pos=4
+name=Part, size=9, related=true, fields=
+  name=type, type=ENUMERATE, pos=0, condition=true
+  name=array, type=ARRAY, related=Value, pos=8, when=ARRAY
+  name=boolean, type=BOOLEAN, pos=8, when=BOOLEAN
+  name=float, type=FLOAT, pos=8, when=FLOAT
+  name=number, type=LONG, pos=8, when=NUMBER
+  name=object, type=SET, related=Field, pos=8, when=OBJECT
+  name=value, type=STRING, pos=8, when=STRING
+name=Value, size=9, includes=
+  record=Part, pos=0
+
+Indexes

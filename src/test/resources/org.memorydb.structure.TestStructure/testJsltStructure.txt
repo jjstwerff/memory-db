@@ -1,0 +1,108 @@
+Records
+name=Alternative, parent=Macro, size=29, full=true, fields=
+  name=nr, type=INTEGER, pos=32, key=true
+  name=parameters, type=ARRAY, related=Parameter, pos=64
+  name=code, type=ARRAY, related=Step, pos=96
+  name=upRecord, type=RELATION, related=Macro, pos=200
+& indexes=
+  index=alternatives, pos=17, parentPos=8
+name=Expr, size=22, full=true, includes=
+  record=Operator, pos=4
+name=Field, size=22, fields=
+  name=name, type=OBJECT, related=Expr, pos=0
+& includes=
+  record=Operator, pos=4
+name=Level, parent=Listener, size=47, full=true, fields=
+  name=level, type=INTEGER, pos=32, key=true
+  name=order, type=ARRAY, related=Step, pos=64
+  name=slice, type=ARRAY, related=Step, pos=96
+  name=upRecord, type=RELATION, related=Listener, pos=200
+& includes=
+  record=Operator, pos=29
+& indexes=
+  index=levels, pos=17, parentPos=8
+name=Listener, parent=Source, size=43, related=true, full=true, fields=
+  name=nr, type=INTEGER, pos=32, key=true
+  name=levels, type=SET, related=Level, pos=64
+  name=upRecord, type=RELATION, related=Source, pos=168
+& includes=
+  record=Operator, pos=25
+& indexes=
+  index=listeners, pos=13, parentPos=8
+name=Macro, size=21, related=true, full=true, fields=
+  name=name, type=STRING, pos=32, key=true
+  name=alternatives, type=SET, related=Alternative, pos=64
+& indexes=
+  index=macros, pos=13, parentPos=16
+name=Match, size=9, fields=
+  name=type, type=ENUMERATE, pos=0, condition=true
+  name=marray, type=ARRAY, related=SubMatch, pos=8, when=ARRAY
+  name=variable, type=OBJECT, related=Variable, pos=8, when=VARIABLE
+  name=boolean, type=BOOLEAN, pos=8, when=BOOLEAN
+  name=float, type=FLOAT, pos=8, when=FLOAT
+  name=number, type=LONG, pos=8, when=NUMBER
+  name=string, type=STRING, pos=8, when=STRING
+  name=iterate, type=ARRAY, related=SubMatch, pos=8, when=ITERATE
+  name=mobject, type=ARRAY, related=MatchField, pos=8, when=OBJECT
+name=MatchField, size=13, fields=
+  name=name, type=STRING, pos=0
+& includes=
+  record=Match, pos=4
+name=Operator, size=18, fields=
+  name=operation, type=ENUMERATE, pos=0, condition=true
+  name=function, type=ENUMERATE, pos=8, mandatory=true, when=FUNCTION
+  name=fnParm1, type=OBJECT, related=Expr, pos=16, when=FUNCTION
+  name=fnParm2, type=OBJECT, related=Expr, pos=48, when=FUNCTION
+  name=conExpr, type=OBJECT, related=Expr, pos=8, when=CONDITION
+  name=conTrue, type=OBJECT, related=Expr, pos=40, when=CONDITION
+  name=conFalse, type=OBJECT, related=Expr, pos=72, when=CONDITION
+  name=number, type=LONG, pos=8, when=NUMBER
+  name=float, type=FLOAT, pos=8, when=FLOAT
+  name=string, type=STRING, pos=8, when=STRING
+  name=array, type=ARRAY, related=Step, pos=8, when=ARRAY
+  name=append, type=ARRAY, related=Step, pos=8, when=APPEND
+  name=object, type=ARRAY, related=Field, pos=8, when=OBJECT
+  name=boolean, type=BOOLEAN, pos=8, when=BOOLEAN
+  name=macro, type=RELATION, related=Macro, pos=8, when=CALL
+  name=callParms, type=ARRAY, related=Step, pos=40, when=CALL
+  name=for, type=OBJECT, related=Expr, pos=8, when=FOR
+  name=forExpr, type=OBJECT, related=Expr, pos=40, when=FOR
+  name=sort, type=OBJECT, related=Expr, pos=8, when=SORT
+  name=sortParms, type=ARRAY, related=Step, pos=40, when=SORT
+  name=if, type=OBJECT, related=Expr, pos=8, when=IF
+  name=ifTrue, type=ARRAY, related=Step, pos=40, when=IF
+  name=ifFalse, type=ARRAY, related=Step, pos=72, when=IF
+  name=listenSource, type=STRING, related=Listener, pos=8, when=READ
+  name=listemNr, type=INTEGER, related=Listener, pos=40, when=READ
+& includes=
+  record=ResultType, pos=13
+name=Parameter, size=13, fields=
+  name=if, type=OBJECT, related=Expr, pos=0
+& includes=
+  record=Match, pos=4
+name=ResultType, size=5, fields=
+  name=type, type=ENUMERATE, pos=0, mandatory=true
+  name=record, type=STRING, pos=8
+name=Source, size=21, related=true, full=true, fields=
+  name=name, type=STRING, pos=32, key=true
+  name=listeners, type=SET, related=Listener, pos=64
+& indexes=
+  index=sources, pos=13, parentPos=12
+name=Step, size=18, includes=
+  record=Operator, pos=0
+name=SubMatch, size=9, includes=
+  record=Match, pos=0
+name=Variable, size=15, full=true, fields=
+  name=name, type=STRING, pos=32, mandatory=true
+  name=eager, type=BOOLEAN, pos=64
+  name=extension, type=BOOLEAN, pos=72
+& includes=
+  record=ResultType, pos=10
+
+Indexes
+name=sources, record=Source, fields=[
+	field=name
+], fieldPos=104, flagPos=96, parentPos=12, primary=true
+name=macros, record=Macro, fields=[
+	field=name
+], fieldPos=104, flagPos=96, parentPos=16, primary=true

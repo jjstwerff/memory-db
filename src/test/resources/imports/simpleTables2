@@ -1,0 +1,17 @@
+RECORD Record
+
+id=10, name=Simple, fields=[
+  name=id, type=Integer, key=true, position=96
+  name=name, type=String, key=true, position=64
+  name=state, type=Enumerate, values=Active\,Stopped, key=false, allowedNull=false, position=128, bits=1
+  name=from, type=Date, key=false, allowedNull=false, position=0, bits=64
+], indexes=[
+  name=simpleName, fields=[
+    field=2
+    field=4
+  ]
+  name=simpleId, type=Unique, fields=[
+    field=1
+    field=4
+  ]
+], size=17

@@ -1,0 +1,32 @@
+Records[0]: set=[
+  Record[4]: name=ta, fields=[
+    Field[17]: id=1, name=fa, type=Integer, position=2
+    Field[34]: id=2, name=fb, type=Relation, position=3, toRecord={name=ta}
+    Field[51]: id=3, name=fc, type=Relation, position=4, toRecord={name=tb}
+    Field[68]: id=4, name=fd, type=Relation, position=5, toRecord={name=tc}
+  ], size=9, indexes=[
+    Index[85]: name=primary, fields=[
+      IndexField[93]: indexField=1, field={id=1}
+    ]
+  ]
+  Record[100]: name=tb, fields=[
+    Field[113]: id=1, name=fa, type=Integer, position=3
+    Field[130]: id=2, name=fb, type=Relation, position=4, toRecord={name=ta}
+    Field[147]: id=3, name=fc, type=Relation, position=5, toRecord={name=tb}
+    Field[164]: id=4, name=fd, type=Relation, position=6, toRecord={name=tc}
+  ], size=10, indexes=[
+    Index[181]: name=primary, fields=[
+      IndexField[189]: indexField=1, field={id=1}
+    ]
+  ]
+  Record[196]: name=tc, fields=[
+    Field[209]: id=1, name=fa, type=Integer, position=3
+    Field[226]: id=2, name=fb, type=Relation, position=4, toRecord={name=ta}
+    Field[243]: id=3, name=fc, type=Relation, position=5, toRecord={name=tb}
+    Field[260]: id=4, name=fd, type=Relation, position=6, toRecord={name=tc}
+  ], size=10, indexes=[
+    Index[277]: name=primary, fields=[
+      IndexField[285]: indexField=1, field={id=1}
+    ]
+  ]
+]

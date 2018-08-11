@@ -1,0 +1,9 @@
+def test(STRING:name, should, was): should != was ? name + " " : ""
+
+projects += { name:"first", pack:"what"};
+projects += { name:"first", pack:"something"};
+projects += { name:"second", pack:"something2"};
+projects[@.name=="second"].pack = "else";
+test("length", 2, projects.length) +
+test("second.pack", "something", projects[@.name=first].pack)
+test("second.pack", "else", projects[1].pack) +
