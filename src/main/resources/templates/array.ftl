@@ -26,9 +26,6 @@ import org.memorydb.structure.ChangeInterface;
 <#if hasMandatory>
 import org.memorydb.handler.MutationException;
 </#if>
-<#if rec.includes?size == 0>
-import org.memorydb.structure.ChangeInterface;
-</#if>
 <#if rec.fields?size gt 0>
 import org.memorydb.structure.FieldData;
 </#if>

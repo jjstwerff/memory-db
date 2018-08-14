@@ -119,7 +119,7 @@ public class Expr implements Operator {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 0 && field <= 25)
+		if (field >= 0 && field <= 27)
 			return Operator.super.getOperator(field - 0);
 		switch (field) {
 		default:
@@ -129,7 +129,7 @@ public class Expr implements Operator {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 25)
+		if (field >= 0 && field <= 27)
 			return Operator.super.iterateOperator(field - 0);
 		switch (field) {
 		default:
@@ -139,7 +139,7 @@ public class Expr implements Operator {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 0 && field <= 25)
+		if (field >= 0 && field <= 27)
 			return Operator.super.typeOperator(field - 0);
 		switch (field) {
 		default:
@@ -149,7 +149,7 @@ public class Expr implements Operator {
 
 	@Override
 	public String name(int field) {
-		if (field >= 0 && field <= 25)
+		if (field >= 0 && field <= 27)
 			return Operator.super.nameOperator(field - 0);
 		switch (field) {
 		default:

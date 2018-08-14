@@ -15,7 +15,8 @@ public class JsltStructure {
 		Project project = new Project("Jslt", "org.memorydb.jslt", "src/main/java/org/memorydb/jslt");
 
 		Record type = project.content("ResultType");
-		type.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "FLOAT", "NUMBER", "NULL", "OBJECT", "STRING", "STRUCTURE").defaultValue("NULL").mandatory();
+		type.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "FLOAT", "NUMBER", "NULL", "OBJECT", "STRING",
+				"STRUCTURE").defaultValue("NULL").mandatory();
 		type.field("record", Type.STRING);
 
 		Record step = project.record("Step");
@@ -38,10 +39,11 @@ public class JsltStructure {
 		source.index("sources", "name");
 
 		Record oper = project.content("Operator");
-		oper.field("operation", Type.ENUMERATE, "FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT", "BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "SORT", "IF",
-				"CURRENT", "READ").condition();
-		oper.field("function", Type.ENUMERATE, "NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT", "LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX",
-				"LENGTH", "NUMBER", "FLOAT", "FILTER", "STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT").mandatory().when("FUNCTION");
+		oper.field("operation", Type.ENUMERATE, "FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT",
+				"BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "FILTER", "SORT", "IF", "CURRENT", "READ").condition();
+		oper.field("function", Type.ENUMERATE, "NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT",
+				"LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "FILTER",
+				"STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT").mandatory().when("FUNCTION");
 		oper.field("fnParm1", Type.OBJECT, expr).when("FUNCTION");
 		oper.field("fnParm2", Type.OBJECT, expr).when("FUNCTION");
 		oper.field("conExpr", Type.OBJECT, expr).when("CONDITION");
@@ -58,6 +60,8 @@ public class JsltStructure {
 		oper.field("callParms", Type.ARRAY, step).when("CALL");
 		oper.field("for", Type.OBJECT, expr).when("FOR");
 		oper.field("forExpr", Type.OBJECT, expr).when("FOR");
+		oper.field("filter", Type.OBJECT, expr).when("FILTER");
+		oper.field("filterExpr", Type.OBJECT, expr).when("FILTER");
 		oper.field("sort", Type.OBJECT, expr).when("SORT");
 		oper.field("sortParms", Type.ARRAY, step).when("SORT");
 		oper.field("if", Type.OBJECT, expr).when("IF");
@@ -85,7 +89,8 @@ public class JsltStructure {
 		Record mfield = project.record("MatchField");
 
 		Record match = project.content("Match");
-		match.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "NULL", "VARIABLE", "FLOAT", "NUMBER", "STRING", "ITERATE", "OBJECT").condition();
+		match.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "NULL", "VARIABLE", "FLOAT", "NUMBER", "STRING",
+				"ITERATE", "OBJECT").condition();
 		match.field("marray", Type.ARRAY, subMatch).when("ARRAY");
 		match.field("variable", Type.OBJECT, variable).when("VARIABLE");
 		match.field("boolean", Type.BOOLEAN).when("BOOLEAN");

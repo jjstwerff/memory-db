@@ -15,13 +15,18 @@ import org.memorydb.structure.NormalCheck;
 import junit.framework.Assert;
 
 public class ProjectTests extends NormalCheck {
-	protected String content(Object mainTest, String name) {
+	protected void assertContent(Object mainTest, String name, String data) {
 		try {
 			String resName = "/" + mainTest.getClass().getCanonicalName() + "/" + name;
 			URL resource = mainTest.getClass().getResource(resName);
 			if (resource == null)
 				throw new RuntimeException("Could not find resource " + resName);
-			return FileUtils.readFileToString(new File(resource.getFile()));
+			File file = new File(resource.getFile());
+			String current = FileUtils.readFileToString(file);
+			if (!current.equals(data)) {
+				FileUtils.write(file, data);
+				Assert.assertEquals(current, data);
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -39,7 +44,13 @@ public class ProjectTests extends NormalCheck {
 			Generate.project(project);
 			Files.walk(temp).filter(Files::isRegularFile).forEach(f -> {
 				try {
-					Assert.assertEquals("File " + f.getFileName(), new String(Files.readAllBytes(f.subpath(temp.getNameCount(), f.getNameCount()))), new String(Files.readAllBytes(f)));
+					Path subpath = f.subpath(temp.getNameCount(), f.getNameCount());
+					String expected = new String(Files.readAllBytes(subpath));
+					String actual = new String(Files.readAllBytes(f));
+					if (!expected.equals(actual)) {
+						FileUtils.write(subpath.toFile(), actual);
+						Assert.assertEquals("File " + f.getFileName(), expected, actual);
+					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

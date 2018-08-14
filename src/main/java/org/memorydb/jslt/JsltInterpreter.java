@@ -41,7 +41,9 @@ public class JsltInterpreter {
 			return null;
 		switch (code.getOperation()) {
 		case ARRAY:
-			return null;
+			throw new RuntimeException();
+		case OBJECT:
+			throw new RuntimeException();
 		case APPEND:
 			return null;
 		case BOOLEAN:
@@ -55,18 +57,6 @@ public class JsltInterpreter {
 		case FOR:
 			return null;
 		case FUNCTION:
-			if (code.getFunction() == Function.ELEMENT) {
-				Expr p1 = code.getFnParm1();
-				Expr p2 = code.getFnParm2();
-				if (p1.getOperation() == Operation.OBJECT) {
-					String fname = getString(inter(p2));
-					for (ObjectArray fld : p1.getObject()) {
-						if (getString(inter(fld.getName())).equals(fname))
-							return inter(fld);
-					}
-					return null;
-				}
-			}
 			return doFunction(code);
 		case IF:
 			return null;
@@ -74,14 +64,14 @@ public class JsltInterpreter {
 			return null;
 		case NUMBER:
 			return code.getNumber();
-		case OBJECT:
-			return null;
 		case SORT:
-			return null;
+			return sort(code);
 		case STRING:
 			return code.getString();
 		case CURRENT:
-			return null;
+			if (current instanceof Operator)
+				return inter((Operator) current);
+			return current;
 		case READ:
 			return data;
 		default:
@@ -93,12 +83,6 @@ public class JsltInterpreter {
 		if (code.getOperation() == null)
 			return;
 		switch (code.getOperation()) {
-		case ARRAY:
-			result.startArray();
-			for (ArrayArray a : code.getArray())
-				inter(result, a);
-			result.endArray();
-			break;
 		case APPEND:
 			result.append(true);
 			for (AppendArray a : code.getAppend())
@@ -147,7 +131,8 @@ public class JsltInterpreter {
 					if (getString(inter(fld.getName())).equals(fname))
 						inter(result, fld);
 				}
-			} else if (code.getFunction() == Function.ELEMENT && code.getFnParm1().getOperation() == Operation.CURRENT) {
+			} else if (code.getFunction() == Function.ELEMENT
+					&& code.getFnParm1().getOperation() == Operation.CURRENT) {
 				if (current instanceof Operator && ((Operator) current).getOperation() == Operation.OBJECT) {
 					String fname = getString(inter(code.getFnParm2()));
 					for (ObjectArray fld : ((Operator) current).getObject()) {
@@ -181,14 +166,6 @@ public class JsltInterpreter {
 			break;
 		case NUMBER:
 			result.element(code.getNumber());
-			break;
-		case OBJECT:
-			result.startObject();
-			for (ObjectArray o : code.getObject()) {
-				result.field(inter(o.getName()).toString());
-				inter(result, o);
-			}
-			result.endObject();
 			break;
 		case SORT:
 			sort(result, code);
@@ -227,7 +204,7 @@ public class JsltInterpreter {
 		write.startObject();
 		for (int field = f; field > 0; field = rec.next(field)) {
 			if (rec.type(field) == FieldType.OBJECT)
-				iterate(maxDepth-1, write, rec.name(field), (RecordInterface) rec.get(field));
+				iterate(maxDepth - 1, write, rec.name(field), (RecordInterface) rec.get(field));
 			else
 				nonObject(maxDepth, write, rec, field);
 		}
@@ -282,7 +259,7 @@ public class JsltInterpreter {
 		write.startObject();
 		for (int field = f; field >= 0; field = rec.next(field)) {
 			if (rec.type(field) == FieldType.OBJECT)
-				iterate(maxDepth-1, write, rec.name(field), (RecordInterface) rec.get(field), ops);
+				iterate(maxDepth - 1, write, rec.name(field), (RecordInterface) rec.get(field), ops);
 			else
 				nonObject(maxDepth, write, rec, field, ops);
 		}
@@ -351,6 +328,18 @@ public class JsltInterpreter {
 					this.first = firstForValue;
 					this.index = c;
 					this.last = c == nr - 1;
+					inter(result, code.getForExpr());
+					firstForValue = false;
+				}
+			} else if (expr instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<ChangeOperator> elms = (List<ChangeOperator>) expr;
+				int c = 0;
+				for (ChangeOperator elm : elms) {
+					current = elm;
+					this.first = firstForValue;
+					this.index = c++;
+					this.last = c == elms.size() - 1;
 					inter(result, code.getForExpr());
 					firstForValue = false;
 				}
@@ -428,37 +417,24 @@ public class JsltInterpreter {
 		result.endArray();
 	}
 
-	/*private Object slice(Operator code) {
-		long start = getNumber(inter(code.getCallParms(1)));
-		long stop = getNumber(inter(code.getCallParms(2)));
-		long step = getNumber(inter(code.getCallParms(3)));
-		String str = getString(inter(code.getCallParms(0)));
-		StringBuilder bld = new StringBuilder();
-		int size = str.length();
-		if (step < 0) {
-			if (start < 0)
-				start += size;
-			if (stop < 0 && stop != Long.MIN_VALUE)
-				stop += size;
-			if (stop == Long.MIN_VALUE)
-				stop = -1;
-			for (long i = start; i > stop; i += step)
-				bld.append(str.charAt((int) i));
-		} else {
-			if (start < 0)
-				start += size;
-			if (stop < 0)
-				stop += size;
-			for (long i = start; i < stop; i += step)
-				bld.append(str.charAt((int) i));
-		}
-		return bld.toString();
-	}*/
+	/*
+	 * private Object slice(Operator code) { long start =
+	 * getNumber(inter(code.getCallParms(1))); long stop =
+	 * getNumber(inter(code.getCallParms(2))); long step =
+	 * getNumber(inter(code.getCallParms(3))); String str =
+	 * getString(inter(code.getCallParms(0))); StringBuilder bld = new
+	 * StringBuilder(); int size = str.length(); if (step < 0) { if (start < 0)
+	 * start += size; if (stop < 0 && stop != Long.MIN_VALUE) stop += size; if (stop
+	 * == Long.MIN_VALUE) stop = -1; for (long i = start; i > stop; i += step)
+	 * bld.append(str.charAt((int) i)); } else { if (start < 0) start += size; if
+	 * (stop < 0) stop += size; for (long i = start; i < stop; i += step)
+	 * bld.append(str.charAt((int) i)); } return bld.toString(); }
+	 */
 
-	private void sort(Writer result, Operator code) {
+	private List<ChangeOperator> sort(Operator code) {
 		Expr sort = code.getSort();
-		int size = code.getSortParms().getSize();
 		List<ChangeOperator> list = new ArrayList<>();
+		int size = code.getSortParms().getSize();
 		for (ArrayArray a : sort.getArray())
 			list.add(a);
 		list.sort((e1, e2) -> {
@@ -473,7 +449,11 @@ public class JsltInterpreter {
 			}
 			return 0;
 		});
-		for (ChangeOperator e : list)
+		return list;
+	}
+
+	private void sort(Writer result, Operator code) {
+		for (ChangeOperator e : sort(code))
 			inter(result, e);
 	}
 
@@ -556,7 +536,8 @@ public class JsltInterpreter {
 		Object p1 = inter(code.getFnParm1());
 		Object p2 = null;
 		Function function = code.getFunction();
-		if (function != Function.FILTER && function != Function.OR && function != Function.AND && code.getFnParm2().getRec() != 0)
+		if (function != Function.FILTER && function != Function.OR && function != Function.AND
+				&& code.getFnParm2().getRec() != 0)
 			p2 = inter(code.getFnParm2());
 		switch (function) {
 		case ADD:
@@ -604,7 +585,8 @@ public class JsltInterpreter {
 				RecordInterface rec = (RecordInterface) p1;
 				if (p2 instanceof Long) {
 					long s = getNumber(p2);
-					if (s == Long.MIN_VALUE || Math.abs(s) > Integer.MAX_VALUE || rec.name(1 + (int) s) != null || rec.type(1 + (int) s) == null)
+					if (s == Long.MIN_VALUE || Math.abs(s) > Integer.MAX_VALUE || rec.name(1 + (int) s) != null
+							|| rec.type(1 + (int) s) == null)
 						return null;
 					if (s < 0)
 						s += rec.size();
@@ -644,16 +626,10 @@ public class JsltInterpreter {
 			return first;
 		case FILTER:
 			/*
-			if (res == Type.ARRAY) {
-				result.setType(res);
-				for (org.memorydb.json.ArrayArray a : p1.getArray()) {
-					current = a;
-					inter(p2, code.getFnParm2());
-					if (p2.isBoolean())
-						arrayAdd(result, a);
-				}
-			}
-			*/
+			 * if (res == Type.ARRAY) { result.setType(res); for
+			 * (org.memorydb.json.ArrayArray a : p1.getArray()) { current = a; inter(p2,
+			 * code.getFnParm2()); if (p2.isBoolean()) arrayAdd(result, a); } }
+			 */
 			return null;
 		case FLOAT:
 			return getFloat(p1);
@@ -676,23 +652,12 @@ public class JsltInterpreter {
 		case INDEX:
 			return index;
 		/*
-		if (res == Type.STRING) {
-			String str = p1.getValue();
-			int indexOf = str.indexOf(getString(p2));
-			if (indexOf < 0)
-				result.setType(Type.NULL);
-			else
-				result.setNumber(indexOf);
-		} else if (res == Type.ARRAY) {
-			int i = 0;
-			for (org.memorydb.json.ArrayArray a : p1.getArray()) {
-				if (equal(a, p2)) {
-					result.setNumber(i);
-					break;
-				}
-				i++;
-			}
-		}*/
+		 * if (res == Type.STRING) { String str = p1.getValue(); int indexOf =
+		 * str.indexOf(getString(p2)); if (indexOf < 0) result.setType(Type.NULL); else
+		 * result.setNumber(indexOf); } else if (res == Type.ARRAY) { int i = 0; for
+		 * (org.memorydb.json.ArrayArray a : p1.getArray()) { if (equal(a, p2)) {
+		 * result.setNumber(i); break; } i++; } }
+		 */
 		case LAST:
 			return last;
 		case LE:
@@ -704,6 +669,8 @@ public class JsltInterpreter {
 				return ((String) p1).compareTo(getString(p2)) <= 0;
 			return null;
 		case LENGTH:
+			if (p1 == null && code.getFnParm1().getOperation() == Operation.ARRAY)
+				return code.getFnParm1().getArray().getSize();
 			if (p1 instanceof String)
 				return ((String) p1).length();
 			if (p1 instanceof RecordInterface)
@@ -821,8 +788,8 @@ public class JsltInterpreter {
 	}
 
 	/**
-	 * @param result  
-	 * @param a 
+	 * @param result
+	 * @param a
 	 */
 	private RecordInterface dataAdd(RecordInterface result, Object a) {
 		// TODO implement me

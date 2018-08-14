@@ -1,7 +1,4 @@
 JSLT:
-- remove spurious implements from definitions
-- add missing @Override to definitions
-- call of included set/get correctly
 - add * to jpath ... only 1 level object
 - add [*] to jpath .. only 1 level array
 - add .. to jpath .. possibly more than 1 level

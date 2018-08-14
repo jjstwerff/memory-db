@@ -549,7 +549,7 @@ public class JsltParser {
 				CallParmsArray add = callParms.add();
 				add.setOperation(Operation.NUMBER);
 				add.setNumber(1);
-			} else if (scanner.peek("/") || scanner.peek("\\")) {
+			} else if (first && (scanner.peek("/") || scanner.peek("\\"))) {
 				boolean desc = scanner.matches("\\");
 				if (!desc)
 					scanner.matches("/");
@@ -573,6 +573,19 @@ public class JsltParser {
 				spot = callParms.add();
 				parseExpr();
 				restore();
+			} else if (first && scanner.matches("?")) {
+				try (ChangeExpr temp = new ChangeExpr(store)) {
+					move(temp, spot);
+					spot.setOperation(Operation.FILTER);
+					spot.setFilter(temp);
+				}
+				try (ChangeExpr data = new ChangeExpr(store)) {
+					remember();
+					spot = data;
+					parseExpr();
+					restore();
+					spot.setFilterExpr(data);
+				}
 			} else {
 				try (ChangeExpr struc = new ChangeExpr(store)) {
 					move(struc, spot);

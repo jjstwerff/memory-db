@@ -260,7 +260,7 @@ public class SortParmsArray implements ChangeOperator, Iterable<SortParmsArray> 
 
 	@Override
 	public String name(int field) {
-		if (field >= 0 && field <= 25)
+		if (field >= 0 && field <= 27)
 			return nameOperator(field - 0);
 		switch (field) {
 		default:
@@ -270,7 +270,7 @@ public class SortParmsArray implements ChangeOperator, Iterable<SortParmsArray> 
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 0 && field <= 25)
+		if (field >= 0 && field <= 27)
 			return typeOperator(field - 0);
 		switch (field) {
 		default:
@@ -280,7 +280,7 @@ public class SortParmsArray implements ChangeOperator, Iterable<SortParmsArray> 
 
 	@Override
 	public Object get(int field) {
-		if (field >= 0 && field <= 25)
+		if (field >= 0 && field <= 27)
 			return getOperator(field - 0);
 		switch (field) {
 		default:
@@ -290,7 +290,7 @@ public class SortParmsArray implements ChangeOperator, Iterable<SortParmsArray> 
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 25)
+		if (field >= 0 && field <= 27)
 			return iterateOperator(field - 0);
 		switch (field) {
 		default:
@@ -300,7 +300,7 @@ public class SortParmsArray implements ChangeOperator, Iterable<SortParmsArray> 
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 0 && field <= 25)
+		if (field >= 0 && field <= 27)
 			return setOperator(field - 0, value);
 		switch (field) {
 		default:
@@ -310,7 +310,7 @@ public class SortParmsArray implements ChangeOperator, Iterable<SortParmsArray> 
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 0 && field <= 25)
+		if (field >= 0 && field <= 27)
 			return addOperator(field - 0);
 		switch (field) {
 		default:

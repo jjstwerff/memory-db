@@ -20,7 +20,6 @@ public class TestJslt extends MemoryTests {
 
 	@Test
 	public void testSimple() {
-		jslt(null, "@.data in [{name:\"Tim\", data:46}, {name:\"Dan\", data:true}][/@.name]", "[true,46]");
 		jslt(null, "0", "0");
 		jslt(null, "-11", "-11");
 		jslt(null, "-0.27", "-0.27");
@@ -59,6 +58,7 @@ public class TestJslt extends MemoryTests {
 		jslt(null, "[1, 0, 3, 2][1::-1]", "[0,1]");
 		jslt(null, "[1, 0, 3, 2][:-3:-1]", "[2,3]");
 		jslt(null, "[1, 0, 3, 2][::2]", "[1,3]");
+		jslt(null, "@ + \"c\" in [\"b\",\"a\"]", "[\"bc\",\"ac\"]");
 		jslt(null, "{\"val\":{first:@.name, val:@.data} in [{name:\"Tim\", data:26 + 20}, {name:\"Dan\", data:3 > 2}]}",
 				"{\"val\":[{\"first\":\"Tim\",\"val\":46},{\"first\":\"Dan\",\"val\":true}]}");
 		jslt(null, "@.data in [{name:\"Tim\", data:46}, {name:\"Dan\", data:true}][/@.name]", "[true,46]");

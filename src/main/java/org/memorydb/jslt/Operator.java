@@ -60,7 +60,7 @@ public interface Operator extends ResultType {
 	}
 
 	public enum Operation {
-		FUNCTION, CONDITION, NUMBER, FLOAT, STRING, ARRAY, OBJECT, BOOLEAN, APPEND, NULL, CALL, FOR, SORT, IF, CURRENT, READ;
+		FUNCTION, CONDITION, NUMBER, FLOAT, STRING, ARRAY, OBJECT, BOOLEAN, APPEND, NULL, CALL, FOR, FILTER, SORT, IF, CURRENT, READ;
 
 		private static Map<String, Operation> map = new HashMap<>();
 
@@ -78,7 +78,7 @@ public interface Operator extends ResultType {
 	@FieldData(
 		name = "operation",
 		type = "ENUMERATE",
-		enumerate = {"FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT", "BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "SORT", "IF", "CURRENT", "READ"},
+		enumerate = {"FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT", "BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "FILTER", "SORT", "IF", "CURRENT", "READ"},
 		condition = true,
 		mandatory = false
 	)
@@ -324,6 +324,28 @@ public interface Operator extends ResultType {
 	}
 
 	@FieldData(
+		name = "filter",
+		type = "OBJECT",
+		related = Expr.class,
+		when = "FILTER",
+		mandatory = false
+	)
+	default Expr getFilter() {
+		return new Expr(getStore(), getOperation() != Operation.FILTER ? 0 : getStore().getInt(getRec(), operatorPosition() + 1));
+	}
+
+	@FieldData(
+		name = "filterExpr",
+		type = "OBJECT",
+		related = Expr.class,
+		when = "FILTER",
+		mandatory = false
+	)
+	default Expr getFilterExpr() {
+		return new Expr(getStore(), getOperation() != Operation.FILTER ? 0 : getStore().getInt(getRec(), operatorPosition() + 5));
+	}
+
+	@FieldData(
 		name = "sort",
 		type = "OBJECT",
 		related = Expr.class,
@@ -505,6 +527,18 @@ public interface Operator extends ResultType {
 			fldForExpr.output(write, iterate - 1);
 			write.endSub();
 		}
+		Expr fldFilter = getFilter();
+		if (fldFilter != null && fldFilter.getRec() != 0) {
+			write.sub("filter", false);
+			fldFilter.output(write, iterate - 1);
+			write.endSub();
+		}
+		Expr fldFilterExpr = getFilterExpr();
+		if (fldFilterExpr != null && fldFilterExpr.getRec() != 0) {
+			write.sub("filterExpr", false);
+			fldFilterExpr.output(write, iterate - 1);
+			write.endSub();
+		}
 		Expr fldSort = getSort();
 		if (fldSort != null && fldSort.getRec() != 0) {
 			write.sub("sort", false);
@@ -543,8 +577,8 @@ public interface Operator extends ResultType {
 	}
 
 	default Object getOperator(int field) {
-		if (field >= 25 && field <= 27)
-			return getResultType(field - 25);
+		if (field >= 27 && field <= 29)
+			return getResultType(field - 27);
 		switch (field) {
 		case 1:
 			return getOperation();
@@ -575,12 +609,16 @@ public interface Operator extends ResultType {
 		case 18:
 			return getForExpr();
 		case 19:
-			return getSort();
+			return getFilter();
+		case 20:
+			return getFilterExpr();
 		case 21:
+			return getSort();
+		case 23:
 			return getIf();
-		case 24:
+		case 26:
 			return getListenSource();
-		case 25:
+		case 27:
 			return getListemNr();
 		default:
 			return null;
@@ -588,8 +626,8 @@ public interface Operator extends ResultType {
 	}
 
 	default Iterable<? extends RecordInterface> iterateOperator(int field, @SuppressWarnings("unused") Object... key) {
-		if (field >= 25 && field <= 27)
-			return iterateResultType(field - 25);
+		if (field >= 27 && field <= 29)
+			return iterateResultType(field - 27);
 		switch (field) {
 		case 11:
 			return getArray();
@@ -599,11 +637,11 @@ public interface Operator extends ResultType {
 			return getObject();
 		case 16:
 			return getCallParms();
-		case 20:
-			return getSortParms();
 		case 22:
+			return getSortParms();
+		case 24:
 			return getIfTrue();
-		case 23:
+		case 25:
 			return getIfFalse();
 		default:
 			return null;
@@ -611,8 +649,8 @@ public interface Operator extends ResultType {
 	}
 
 	default FieldType typeOperator(int field) {
-		if (field >= 25 && field <= 27)
-			return typeResultType(field - 25);
+		if (field >= 27 && field <= 29)
+			return typeResultType(field - 27);
 		switch (field) {
 		case 1:
 			return FieldType.STRING;
@@ -653,16 +691,20 @@ public interface Operator extends ResultType {
 		case 19:
 			return FieldType.OBJECT;
 		case 20:
-			return FieldType.ITERATE;
+			return FieldType.OBJECT;
 		case 21:
 			return FieldType.OBJECT;
 		case 22:
 			return FieldType.ITERATE;
 		case 23:
-			return FieldType.ITERATE;
+			return FieldType.OBJECT;
 		case 24:
-			return FieldType.STRING;
+			return FieldType.ITERATE;
 		case 25:
+			return FieldType.ITERATE;
+		case 26:
+			return FieldType.STRING;
+		case 27:
 			return FieldType.INTEGER;
 		default:
 			return null;
@@ -670,8 +712,8 @@ public interface Operator extends ResultType {
 	}
 
 	default String nameOperator(int field) {
-		if (field >= 25 && field <= 27)
-			return nameResultType(field - 25);
+		if (field >= 27 && field <= 29)
+			return nameResultType(field - 27);
 		switch (field) {
 		case 1:
 			return "operation";
@@ -710,18 +752,22 @@ public interface Operator extends ResultType {
 		case 18:
 			return "forExpr";
 		case 19:
-			return "sort";
+			return "filter";
 		case 20:
-			return "sortParms";
+			return "filterExpr";
 		case 21:
-			return "if";
+			return "sort";
 		case 22:
-			return "ifTrue";
+			return "sortParms";
 		case 23:
-			return "ifFalse";
+			return "if";
 		case 24:
-			return "listenSource";
+			return "ifTrue";
 		case 25:
+			return "ifFalse";
+		case 26:
+			return "listenSource";
+		case 27:
 			return "listemNr";
 		default:
 			return null;
