@@ -36,14 +36,14 @@ public class JsltInterpreter {
 		return write.toString();
 	}
 
-	private Object inter(Operator code) {
+	public Object inter(Operator code) {
 		if (code.getOperation() == null)
 			return null;
 		switch (code.getOperation()) {
 		case ARRAY:
-			throw new RuntimeException();
+			return new InterArray(this, code.getArray());
 		case OBJECT:
-			throw new RuntimeException();
+			return new InterObject(this, code.getObject());
 		case APPEND:
 			return null;
 		case BOOLEAN:
