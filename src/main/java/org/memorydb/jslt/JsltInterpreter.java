@@ -1,6 +1,7 @@
 package org.memorydb.jslt;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -32,7 +33,7 @@ public class JsltInterpreter {
 		IndexMacros macros = macro.new IndexMacros("main");
 		macro.setRec(macros.search());
 		for (CodeArray code : macro.getAlternatives(0).getCode())
-			inter.inter(write, code);
+			inter.show(write, inter.inter(code));
 		return write.toString();
 	}
 
@@ -185,54 +186,49 @@ public class JsltInterpreter {
 	}
 
 	private void iterate(Writer write, RecordInterface rec) {
-		if (rec.type() == FieldType.OBJECT)
-			iterate(3, write, null, rec);
-		else
-			nonObject(3, write, rec, 0);
+		FieldType type = rec.type();
+		if (type == FieldType.OBJECT)
+			iterateObject(3, write, rec);
+		else if (type == FieldType.ITERATE)
+			iterateArray(3, write, rec);
 	}
 
-	private void iterate(int maxDepth, Writer write, String name, RecordInterface rec) {
+	private void show(Writer write, Object obj) {
+		if (obj instanceof RecordInterface)
+			iterate(write, (RecordInterface) obj);
+		else
+			write.element(obj);
+	}
+
+	private void iterateObject(int maxDepth, Writer write, RecordInterface rec) {
 		if (maxDepth <= 0 || !rec.exists())
 			return;
-		int f = rec.next(-1);
-		if (f == 0) {
-			nonObject(maxDepth, write, rec, 0);
-			return;
-		}
-		if (name != null)
-			write.field(name);
 		write.startObject();
-		for (int field = f; field > 0; field = rec.next(field)) {
-			if (rec.type(field) == FieldType.OBJECT)
-				iterate(maxDepth - 1, write, rec.name(field), (RecordInterface) rec.get(field));
+		for (int field = rec.next(-1); field > 0; field = rec.next(field)) {
+			FieldType type = rec.type(field);
+			write.field(rec.name(field));
+			if (type == FieldType.OBJECT)
+				iterateObject(maxDepth - 1, write, (RecordInterface) rec.get(field));
+			else if (type == FieldType.ITERATE)
+				iterateArray(maxDepth, write, (RecordInterface) rec.get(field));
 			else
-				nonObject(maxDepth, write, rec, field);
+				write.element(rec.get(field));
 		}
 		write.endObject();
 	}
 
-	private void nonObject(int maxDepth, Writer write, RecordInterface rec, int field) {
-		String name = rec.name(field);
-		FieldType type = rec.type(field);
-		if (type == FieldType.ITERATE) {
-			if (name != null)
-				write.field(name);
-			write.startArray();
-			Iterable<? extends RecordInterface> iterate = rec.iterate(field);
-			if (iterate != null) {
-				for (RecordInterface sub : iterate) {
-					if (sub.type() == FieldType.OBJECT)
-						iterate(maxDepth, write, null, sub);
-					else
-						nonObject(maxDepth, write, sub, 0);
-				}
-			}
-			write.endArray();
-		} else {
-			if (name != null)
-				write.field(name);
-			write.element(rec.get(field));
+	private void iterateArray(int maxDepth, Writer write, RecordInterface rec) {
+		write.startArray();
+		for (int field = rec.next(-1); field > 0; field = rec.next(field)) {
+			FieldType type = rec.type(field);
+			if (type == FieldType.OBJECT)
+				iterateObject(maxDepth, write, (RecordInterface) rec.get(field));
+			else if (type == FieldType.ITERATE)
+				iterateArray(maxDepth, write, (RecordInterface) rec.get(field));
+			else
+				write.element(rec.get(field));
 		}
+		write.endArray();
 	}
 
 	@SuppressWarnings("unused")
@@ -294,7 +290,7 @@ public class JsltInterpreter {
 				this.first = firstForValue;
 				this.index = forIndex;
 				this.last = forIndex < elm.getSize();
-				inter(result, code.getForExpr());
+				inter(code.getForExpr());
 				firstForValue = false;
 				forIndex++;
 			}
@@ -305,7 +301,7 @@ public class JsltInterpreter {
 				this.index = forIndex;
 				this.last = false;
 				this.curName = getString(inter(fld.getName()));
-				inter(result, code.getForExpr());
+				inter(code.getForExpr());
 				firstForValue = false;
 				forIndex++;
 			}
@@ -318,7 +314,7 @@ public class JsltInterpreter {
 					this.first = firstForValue;
 					this.index = c;
 					this.last = c == (str.length() - 1);
-					inter(result, code.getForExpr());
+					inter(code.getForExpr());
 					firstForValue = false;
 				}
 			} else if (expr instanceof Long) {
@@ -328,7 +324,7 @@ public class JsltInterpreter {
 					this.first = firstForValue;
 					this.index = c;
 					this.last = c == nr - 1;
-					inter(result, code.getForExpr());
+					inter(code.getForExpr());
 					firstForValue = false;
 				}
 			} else if (expr instanceof List) {
@@ -340,7 +336,7 @@ public class JsltInterpreter {
 					this.first = firstForValue;
 					this.index = c++;
 					this.last = c == elms.size() - 1;
-					inter(result, code.getForExpr());
+					inter(code.getForExpr());
 					firstForValue = false;
 				}
 			}
@@ -454,7 +450,7 @@ public class JsltInterpreter {
 
 	private void sort(Writer result, Operator code) {
 		for (ChangeOperator e : sort(code))
-			inter(result, e);
+			inter(e);
 	}
 
 	private int compare(Object t1, Object t2) {
@@ -485,12 +481,12 @@ public class JsltInterpreter {
 		if (fnParm1.getOperation() == Operation.ARRAY) {
 			result.startArray();
 			for (ArrayArray a : fnParm1.getArray())
-				inter(result, a);
+				inter(a);
 			if (fnParm2.getOperation() == Operation.ARRAY)
 				for (ArrayArray a : fnParm2.getArray())
-					inter(result, a);
+					inter(a);
 			else
-				inter(result, fnParm2);
+				inter(fnParm2);
 			result.endArray();
 			return;
 		}
@@ -506,11 +502,11 @@ public class JsltInterpreter {
 						String oth = inter(o.getName()).toString();
 						if (name.equals(oth)) {
 							found.add(name);
-							inter(result, o);
+							inter(o);
 							continue Field;
 						}
 					}
-					inter(result, a);
+					inter(a);
 				}
 				for (ObjectArray a : obj2) {
 					String name = inter(a.getName()).toString();
@@ -548,7 +544,7 @@ public class JsltInterpreter {
 			} else if (p1 instanceof Double) {
 				return ((Double) p1) + getFloat(p2);
 			} else if (p1 instanceof RecordInterface) {
-				return dataAdd((RecordInterface) p1, p2);
+				return new AddArray(this, (RecordInterface) p1, p2);
 			}
 			return null;
 		case AND:
@@ -589,7 +585,7 @@ public class JsltInterpreter {
 							|| rec.type(1 + (int) s) == null)
 						return null;
 					if (s < 0)
-						s += rec.size();
+						s += rec.getSize();
 					return rec.get(1 + (int) s);
 				} else if (p2 instanceof String) {
 					String name = getString(p2);
@@ -674,7 +670,7 @@ public class JsltInterpreter {
 			if (p1 instanceof String)
 				return ((String) p1).length();
 			if (p1 instanceof RecordInterface)
-				return ((RecordInterface) p1).size();
+				return ((RecordInterface) p1).getSize();
 			return null;
 		case NAME:
 			return curName;
@@ -787,15 +783,6 @@ public class JsltInterpreter {
 		return res;
 	}
 
-	/**
-	 * @param result
-	 * @param a
-	 */
-	private RecordInterface dataAdd(RecordInterface result, Object a) {
-		// TODO implement me
-		return null;
-	}
-
 	private long getNumber(Object val) {
 		if (val instanceof Long)
 			return (Long) val;
@@ -826,5 +813,27 @@ public class JsltInterpreter {
 		if (val instanceof Double)
 			return (Double) val;
 		return Double.NaN;
+	}
+
+	public FieldType type(Object lastField) {
+		if (lastField instanceof Integer)
+			return FieldType.INTEGER;
+		if (lastField instanceof Long)
+			return FieldType.LONG;
+		if (lastField instanceof Double)
+			return FieldType.FLOAT;
+		if (lastField instanceof String)
+			return FieldType.STRING;
+		if (lastField instanceof Date)
+			return FieldType.DATE;
+		if (lastField instanceof Boolean)
+			return FieldType.BOOLEAN;
+		if (lastField instanceof InterArray)
+			return FieldType.ITERATE;
+		return FieldType.OBJECT;
+		// return FieldType.ITERATE; // this field holds a list of records
+		// return FieldType.OBJECT; // this field holds a new object
+		// return FieldType.FILTERS; // the next keys on the iterator can be filters
+		// return FieldType.SCHEMA;
 	}
 }
