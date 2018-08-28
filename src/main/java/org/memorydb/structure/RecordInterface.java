@@ -2,7 +2,8 @@ package org.memorydb.structure;
 
 public interface RecordInterface {
 	public enum FieldType {
-		INTEGER, LONG, FLOAT, STRING, DATE, BOOLEAN, ITERATE, // this field holds a list of records
+		INTEGER, LONG, FLOAT, STRING, DATE, BOOLEAN, // single types
+		ITERATE, // this field holds a list of records
 		OBJECT, // this field holds a new object
 		FILTERS, // the next keys on the iterator can be filters
 		SCHEMA // the filter can be schema filters.. they will not be individually listed
@@ -20,9 +21,7 @@ public interface RecordInterface {
 	 * >0 is a field pointer
 	 */
 	default int next(int field) {
-		if (field < 0)
-			return 1;
-		int res = field + 1;
+		int res = field < 0 ? 1 : field + 1;
 		if (type(res) == null)
 			return -2;
 		return res;
@@ -96,7 +95,7 @@ public interface RecordInterface {
 		return null;
 	}
 
-	default long size() {
+	default int getSize() {
 		return 0;
 	}
 

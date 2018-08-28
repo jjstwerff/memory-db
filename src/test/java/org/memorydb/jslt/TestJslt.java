@@ -37,8 +37,11 @@ public class TestJslt extends MemoryTests {
 		jslt(null, "!(1.0 > 2.1)", "true");
 		jslt(null, "\"a\" + 1", "\"a1\"");
 		jslt(null, "[1] + 3", "[1,3]");
+		jslt(null, "[1] + 3 + 'a'", "[1,3,\"a\"]");
 		jslt(null, "[1, 0] + [3, 2]", "[1,0,3,2]");
+		jslt(null, "[1, 0] + [3, 2] + 'a'", "[1,0,3,2,\"a\"]");
 		jslt(null, "{A:3 * 2 - 5, C:123} + {C:true}", "{\"A\":1,\"C\":true}");
+		jslt(null, "{A:3 * 2 - 5, C:123} + {A:2}", "{\"C\":123,\"A\":2}");
 		jslt(null, "{\"A\":1} + {\"C\":true}", "{\"A\":1,\"C\":true}");
 		jslt(null, "\"a\" != \"aa\"", "true");
 		jslt(null, "\"a\" != \"aa\" or false", "true");

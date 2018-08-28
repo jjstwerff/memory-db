@@ -264,7 +264,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 	@Override
 	default int next(int field) {
 		if (getType() == Type.ARRAY)
-			return field < 0 ? 1 : (field - 1 >= size() ? 0 : field + 1);
+			return field < 0 ? 1 : (field - 1 >= getSize() ? 0 : field + 1);
 		if (getType() != Type.OBJECT)
 			return field == 0 ? -2 : 0;
 		if (field < 0)
@@ -298,7 +298,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	default long size() {
+	default int getSize() {
 		if (getType() != Type.ARRAY)
 			return 0;
 		ArrayArray array = getArray();

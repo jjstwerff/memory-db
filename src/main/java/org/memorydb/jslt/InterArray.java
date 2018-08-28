@@ -3,12 +3,16 @@ package org.memorydb.jslt;
 import org.memorydb.structure.RecordInterface;
 
 public class InterArray implements RecordInterface {
-	private JsltInterpreter interpreter;
-	private ArrayArray data;
+	private final JsltInterpreter interpreter;
+	private final ArrayArray data;
+	private int lastField;
+	private Object lastObject;
 
 	public InterArray(JsltInterpreter interpreter, ArrayArray data) {
 		this.interpreter = interpreter;
 		this.data = data;
+		this.lastField = -1;
+		this.lastObject = null;
 	}
 
 	@Override
@@ -16,23 +20,42 @@ public class InterArray implements RecordInterface {
 		return null;
 	}
 
+	public int getSize() {
+		return data.getSize();
+	}
+
 	@Override
 	public FieldType type(int field) {
-		return null;
+		if (field < 1 || field > data.getSize())
+			return null;
+		if (lastField != field) {
+			lastField = field;
+			lastObject = interpreter.inter(new ArrayArray(data, field - 1));
+		}
+		return interpreter.type(lastObject);
 	}
 
 	@Override
 	public Object get(int field) {
-		return null;
+		if (lastField != field) {
+			lastField = field;
+			lastObject = interpreter.inter(new ArrayArray(data, field - 1));
+		}
+		return lastObject;
 	}
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		return null;
+		return data.iterate(field, key);
 	}
 
 	@Override
 	public boolean exists() {
 		return false;
+	}
+
+	@Override
+	public FieldType type() {
+		return FieldType.ITERATE;
 	}
 }
