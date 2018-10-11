@@ -30,7 +30,7 @@ public class InterObject implements RecordInterface {
 
 	@Override
 	public FieldType type(int field) {
-		if (field > data.getSize())
+		if (field < 1 || field > data.getSize())
 			return null;
 		if (lastField != field) {
 			lastField = field;

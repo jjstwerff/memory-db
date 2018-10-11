@@ -36,6 +36,10 @@ public class JsltInterpreter {
 			inter.show(write, inter.inter(code));
 		return write.toString();
 	}
+	
+	public void setCurrent(Object current) {
+		this.current = current;
+	}
 
 	public Object inter(Operator code) {
 		if (code.getOperation() == null)
@@ -50,13 +54,15 @@ public class JsltInterpreter {
 		case BOOLEAN:
 			return code.isBoolean();
 		case CALL:
+			if (code.getMacro().getName().equals("slice"))
+				return new InterSlice(this, code.getCallParms());
 			return null;
 		case CONDITION:
 			return inter((Boolean) inter(code.getConExpr()) ? code.getConTrue() : code.getConFalse());
 		case FLOAT:
 			return code.getFloat();
 		case FOR:
-			return null;
+			return new InterMap(this, code.getForExpr(), (RecordInterface) inter(code.getFor()));
 		case FUNCTION:
 			return doFunction(code);
 		case IF:
@@ -581,11 +587,12 @@ public class JsltInterpreter {
 				RecordInterface rec = (RecordInterface) p1;
 				if (p2 instanceof Long) {
 					long s = getNumber(p2);
-					if (s == Long.MIN_VALUE || Math.abs(s) > Integer.MAX_VALUE || rec.name(1 + (int) s) != null
-							|| rec.type(1 + (int) s) == null)
+					if (s == Long.MIN_VALUE || Math.abs(s) > Integer.MAX_VALUE)
 						return null;
 					if (s < 0)
 						s += rec.getSize();
+					if (rec.name(1 + (int) s) != null || rec.type(1 + (int) s) == null)
+						return null;
 					return rec.get(1 + (int) s);
 				} else if (p2 instanceof String) {
 					String name = getString(p2);
@@ -783,7 +790,7 @@ public class JsltInterpreter {
 		return res;
 	}
 
-	private long getNumber(Object val) {
+	long getNumber(Object val) {
 		if (val instanceof Long)
 			return (Long) val;
 		return Long.MIN_VALUE;
@@ -816,6 +823,8 @@ public class JsltInterpreter {
 	}
 
 	public FieldType type(Object lastField) {
+		if (lastField == null)
+			return null;
 		if (lastField instanceof Integer)
 			return FieldType.INTEGER;
 		if (lastField instanceof Long)
