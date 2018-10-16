@@ -251,7 +251,7 @@ public class Index implements MemoryRecord, RecordInterface {
 		case 1:
 			return FieldType.STRING;
 		case 2:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 3:
 			return FieldType.INTEGER;
 		case 4:

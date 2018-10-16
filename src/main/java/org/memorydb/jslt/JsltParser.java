@@ -504,16 +504,15 @@ public class JsltParser {
 				} else if (scanner.matches("?")) {
 					try (ChangeExpr struc = new ChangeExpr(store)) {
 						move(struc, spot);
-						spot.setOperation(Operation.FUNCTION);
-						spot.setFunction(Function.FILTER);
-						spot.setFnParm1(struc);
+						spot.setOperation(Operation.FILTER);
+						spot.setFilter(struc);
 					}
 					try (ChangeExpr parm = new ChangeExpr(store)) {
 						remember();
 						spot = parm;
 						parseExpr();
 						restore();
-						spot.setFnParm2(parm);
+						spot.setFilterExpr(parm);
 					}
 				} else {
 					parseElements();
@@ -554,6 +553,7 @@ public class JsltParser {
 				if (!desc)
 					scanner.matches("/");
 				SortParmsArray callParms;
+				boolean extra = false;
 				if (spot.getOperation() != Operation.SORT) {
 					try (ChangeExpr struc = new ChangeExpr(store)) {
 						move(struc, spot);
@@ -562,13 +562,14 @@ public class JsltParser {
 						spot.setSort(struc);
 					}
 				} else {
+					extra = true;
 					callParms = spot.getSortParms();
 				}
 				remember();
-				if (desc) {
+				if (desc || extra) {
 					spot = callParms.add();
 					spot.setOperation(Operation.BOOLEAN);
-					spot.setBoolean(false);
+					spot.setBoolean(desc);
 				}
 				spot = callParms.add();
 				parseExpr();

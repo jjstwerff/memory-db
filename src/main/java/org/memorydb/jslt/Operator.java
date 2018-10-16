@@ -90,7 +90,7 @@ public interface Operator extends ResultType {
 	}
 
 	public enum Function {
-		NEG, ADD, MIN, MUL, DIV, MOD, POW, EQ, NE, LT, GT, LE, GE, AND, OR, NOT, FIRST, LAST, INDEX, LENGTH, NUMBER, FLOAT, FILTER, STRING, BOOLEAN, NAME, TYPE, ELEMENT;
+		NEG, ADD, MIN, MUL, DIV, MOD, POW, EQ, NE, LT, GT, LE, GE, AND, OR, NOT, FIRST, LAST, INDEX, LENGTH, NUMBER, FLOAT, STRING, BOOLEAN, NAME, TYPE, ELEMENT;
 
 		private static Map<String, Function> map = new HashMap<>();
 
@@ -108,7 +108,7 @@ public interface Operator extends ResultType {
 	@FieldData(
 		name = "function",
 		type = "ENUMERATE",
-		enumerate = {"NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT", "LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "FILTER", "STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT"},
+		enumerate = {"NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT", "LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT"},
 		when = "FUNCTION",
 		mandatory = true
 	)
@@ -673,17 +673,17 @@ public interface Operator extends ResultType {
 		case 10:
 			return FieldType.STRING;
 		case 11:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 12:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 13:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 14:
 			return FieldType.BOOLEAN;
 		case 15:
 			return FieldType.OBJECT;
 		case 16:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 17:
 			return FieldType.OBJECT;
 		case 18:
@@ -695,13 +695,13 @@ public interface Operator extends ResultType {
 		case 21:
 			return FieldType.OBJECT;
 		case 22:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 23:
 			return FieldType.OBJECT;
 		case 24:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 25:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 26:
 			return FieldType.STRING;
 		case 27:

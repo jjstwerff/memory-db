@@ -79,7 +79,6 @@ public class StringWriter implements Writer {
 	@Override
 	public void append(boolean start) {
 		append = start;
-		bld.append("\"");
 	}
 
 	@Override
@@ -90,10 +89,6 @@ public class StringWriter implements Writer {
 
 	@Override
 	public String toString() {
-		if (append) {
-			append = false;
-			bld.append("\"");
-		}
 		return bld.toString();
 	}
 }

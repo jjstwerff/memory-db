@@ -261,7 +261,7 @@ public class Listener implements Operator {
 		case 1:
 			return FieldType.INTEGER;
 		case 2:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		default:
 			return null;
 		}

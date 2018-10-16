@@ -335,7 +335,7 @@ public class Field implements MemoryRecord, RecordInterface {
 		case 5:
 			return FieldType.OBJECT;
 		case 6:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 7:
 			return FieldType.BOOLEAN;
 		case 8:

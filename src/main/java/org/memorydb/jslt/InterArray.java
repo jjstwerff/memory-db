@@ -56,6 +56,6 @@ public class InterArray implements RecordInterface {
 
 	@Override
 	public FieldType type() {
-		return FieldType.ITERATE;
+		return FieldType.ARRAY;
 	}
 }

@@ -1,12 +1,15 @@
 package org.memorydb.structure;
 
+import java.util.Iterator;
+
 public interface RecordInterface {
 	public enum FieldType {
 		INTEGER, LONG, FLOAT, STRING, DATE, BOOLEAN, // single types
-		ITERATE, // this field holds a list of records
+		ARRAY, // this field holds a list of records
 		OBJECT, // this field holds a new object
 		FILTERS, // the next keys on the iterator can be filters
-		SCHEMA // the filter can be schema filters.. they will not be individually listed
+		SCHEMA, // the filter can be schema filters.. they will not be individually listed
+		NULL
 	}
 
 	default RecordInterface getUpRecord() {
@@ -89,7 +92,29 @@ public interface RecordInterface {
 		return null;
 	}
 
-	Iterable<? extends RecordInterface> iterate(int field, Object... key);
+	default Iterable<? extends RecordInterface> iterate(int field, Object... key) {
+		return new Iterable<RecordInterface>() {
+			@Override
+			public Iterator<RecordInterface> iterator() {
+				return new Iterator<RecordInterface>() {
+					int field = -1;
+					int next = RecordInterface.this.next(-1);
+
+					@Override
+					public boolean hasNext() {
+						return next > 0;
+					}
+
+					@Override
+					public RecordInterface next() {
+						field = next;
+						next = RecordInterface.this.next(field);
+						return (RecordInterface) get(field);
+					}
+				};
+			}
+		};
+	}
 
 	default ChangeInterface change() {
 		return null;

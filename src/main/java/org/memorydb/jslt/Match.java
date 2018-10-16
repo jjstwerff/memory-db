@@ -31,13 +31,11 @@ public interface Match extends MemoryRecord, RecordInterface {
 			return (ParametersArray) this;
 		if (this instanceof MarrayArray)
 			return (MarrayArray) this;
-		if (this instanceof IterateArray)
-			return (IterateArray) this;
 		return null;
 	}
 
 	public enum Type {
-		ARRAY, BOOLEAN, NULL, VARIABLE, FLOAT, NUMBER, STRING, ITERATE, OBJECT;
+		ARRAY, BOOLEAN, NULL, VARIABLE, FLOAT, NUMBER, STRING, OBJECT;
 
 		private static Map<String, Type> map = new HashMap<>();
 
@@ -55,7 +53,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 	@FieldData(
 		name = "type",
 		type = "ENUMERATE",
-		enumerate = {"ARRAY", "BOOLEAN", "NULL", "VARIABLE", "FLOAT", "NUMBER", "STRING", "ITERATE", "OBJECT"},
+		enumerate = {"ARRAY", "BOOLEAN", "NULL", "VARIABLE", "FLOAT", "NUMBER", "STRING", "OBJECT"},
 		condition = true,
 		mandatory = false
 	)
@@ -137,25 +135,6 @@ public interface Match extends MemoryRecord, RecordInterface {
 	}
 
 	@FieldData(
-		name = "iterate",
-		type = "ARRAY",
-		related = IterateArray.class,
-		when = "ITERATE",
-		mandatory = false
-	)
-	default IterateArray getIterate() {
-		return getType() != Type.ITERATE ? null : new IterateArray(this, -1);
-	}
-
-	default IterateArray getIterate(int index) {
-		return getType() != Type.ITERATE ? new IterateArray(getStore(), 0, -1) : new IterateArray(this, index);
-	}
-
-	default IterateArray addIterate() {
-		return getType() != Type.ITERATE ? new IterateArray(getStore(), 0, -1) : getIterate().add();
-	}
-
-	@FieldData(
 		name = "mobject",
 		type = "ARRAY",
 		related = MobjectArray.class,
@@ -196,13 +175,6 @@ public interface Match extends MemoryRecord, RecordInterface {
 		write.field("float", getFloat(), false);
 		write.field("number", getNumber(), false);
 		write.field("string", getString(), false);
-		IterateArray fldIterate = getIterate();
-		if (fldIterate != null) {
-			write.sub("iterate", false);
-			for (IterateArray sub : fldIterate)
-				sub.output(write, iterate - 1);
-			write.endSub();
-		}
 		MobjectArray fldMobject = getMobject();
 		if (fldMobject != null) {
 			write.sub("mobject", false);
@@ -236,8 +208,6 @@ public interface Match extends MemoryRecord, RecordInterface {
 		case 2:
 			return getMarray();
 		case 8:
-			return getIterate();
-		case 9:
 			return getMobject();
 		default:
 			return null;
@@ -249,7 +219,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 		case 1:
 			return FieldType.STRING;
 		case 2:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 3:
 			return FieldType.OBJECT;
 		case 4:
@@ -261,9 +231,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 		case 7:
 			return FieldType.STRING;
 		case 8:
-			return FieldType.ITERATE;
-		case 9:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		default:
 			return null;
 		}
@@ -286,8 +254,6 @@ public interface Match extends MemoryRecord, RecordInterface {
 		case 7:
 			return "string";
 		case 8:
-			return "iterate";
-		case 9:
 			return "mobject";
 		default:
 			return null;

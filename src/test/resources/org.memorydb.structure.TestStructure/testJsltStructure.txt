@@ -42,7 +42,6 @@ name=Match, size=9, fields=
   name=float, type=FLOAT, pos=8, when=FLOAT
   name=number, type=LONG, pos=8, when=NUMBER
   name=string, type=STRING, pos=8, when=STRING
-  name=iterate, type=ARRAY, related=SubMatch, pos=8, when=ITERATE
   name=mobject, type=ARRAY, related=MatchField, pos=8, when=OBJECT
 name=MatchField, size=13, fields=
   name=name, type=STRING, pos=0

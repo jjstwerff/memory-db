@@ -217,9 +217,9 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		case 1:
 			return FieldType.INTEGER;
 		case 2:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 3:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		default:
 			return null;
 		}

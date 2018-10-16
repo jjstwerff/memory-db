@@ -371,7 +371,7 @@ ${field.arrayFields}<#rt>
 <#if field.name != "upRecord">
 		case ${1 + field?index}:
 <#if field.type == 'SET' || field.type == 'ARRAY'>
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 <#elseif field.type == "RELATION">
 			return FieldType.OBJECT;
 <#elseif field.type == "ENUMERATE">

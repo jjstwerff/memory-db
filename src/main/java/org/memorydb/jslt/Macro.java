@@ -280,7 +280,7 @@ public class Macro implements MemoryRecord, RecordInterface {
 		case 1:
 			return FieldType.STRING;
 		case 2:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		default:
 			return null;
 		}

@@ -38,9 +38,6 @@ public interface ChangeMatch extends ChangeInterface, Match {
 			case STRING:
 				getStore().setInt(getRec(), matchPosition() + 1, 0);
 				break;
-			case ITERATE:
-				getStore().setInt(getRec(), matchPosition() + 1, 0);
-				break;
 			case OBJECT:
 				getStore().setInt(getRec(), matchPosition() + 1, 0);
 				break;
@@ -85,11 +82,6 @@ public interface ChangeMatch extends ChangeInterface, Match {
 		}
 	}
 
-	default void moveIterate(ChangeMatch other) {
-		getStore().setInt(getRec(), matchPosition() + 1, getStore().getInt(other.getRec(), other.matchPosition() + 1));
-		getStore().setInt(other.getRec(), other.matchPosition() + 1, 0);
-	}
-
 	default void moveMobject(ChangeMatch other) {
 		getStore().setInt(getRec(), matchPosition() + 1, getStore().getInt(other.getRec(), other.matchPosition() + 1));
 		getStore().setInt(other.getRec(), other.matchPosition() + 1, 0);
@@ -128,14 +120,6 @@ public interface ChangeMatch extends ChangeInterface, Match {
 		}
 		if (parser.hasField("string")) {
 			setString(parser.getString("string"));
-		}
-		if (parser.hasSub("iterate")) {
-			try (IterateArray sub = new IterateArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
 		}
 		if (parser.hasSub("mobject")) {
 			try (MobjectArray sub = new MobjectArray(this, -1)) {
@@ -188,8 +172,6 @@ public interface ChangeMatch extends ChangeInterface, Match {
 		case 2:
 			return addMarray();
 		case 8:
-			return addIterate();
-		case 9:
 			return addMobject();
 		default:
 			return null;

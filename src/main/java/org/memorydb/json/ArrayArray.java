@@ -62,7 +62,7 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 
 	@Override
 	public int getRec() {
-		return idx < 0 || idx >= size ? 0 : alloc;
+		return alloc;
 	}
 
 	@Override
@@ -203,6 +203,16 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
 		return iteratePart(field, key);
+	}
+
+	@Override
+	public Type getType() {
+		if (idx == -1)
+			return parent.getType();
+		int data = getRec() == 0 ? 0 : getStore().getByte(getRec(), partPosition() + 0) & 31;
+		if (data <= 0)
+			return null;
+		return Type.values()[data - 1];
 	}
 
 	@Override

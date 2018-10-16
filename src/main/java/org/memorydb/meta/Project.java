@@ -388,9 +388,9 @@ public class Project implements MemoryRecord, RecordInterface {
 		case 2:
 			return FieldType.STRING;
 		case 3:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 4:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case 5:
 			return FieldType.STRING;
 		default:

@@ -211,7 +211,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public String name(int field) {
-		if (field >= 1 && field <= 10)
+		if (field >= 1 && field <= 9)
 			return nameMatch(field - 1);
 		switch (field) {
 		case 1:
@@ -223,7 +223,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 1 && field <= 10)
+		if (field >= 1 && field <= 9)
 			return typeMatch(field - 1);
 		switch (field) {
 		case 1:
@@ -235,7 +235,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 1 && field <= 10)
+		if (field >= 1 && field <= 9)
 			return getMatch(field - 1);
 		switch (field) {
 		case 1:
@@ -247,7 +247,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 1 && field <= 10)
+		if (field >= 1 && field <= 9)
 			return iterateMatch(field - 1);
 		switch (field) {
 		default:
@@ -257,7 +257,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 1 && field <= 10)
+		if (field >= 1 && field <= 9)
 			return setMatch(field - 1, value);
 		switch (field) {
 		case 1:
@@ -271,7 +271,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 1 && field <= 10)
+		if (field >= 1 && field <= 9)
 			return addMatch(field - 1);
 		switch (field) {
 		default:

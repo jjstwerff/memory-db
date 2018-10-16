@@ -66,19 +66,19 @@ public class TestJslt extends MemoryTests {
 				"{\"val\":[{\"first\":\"Tim\",\"val\":46},{\"first\":\"Dan\",\"val\":true}]}");
 		jslt(null, "@.data in [{name:\"Tim\", data:46}, {name:\"Dan\", data:true}][/@.name]", "[true,46]");
 		jslt(null, "[{name:\"Tim\", data:46}, {name:\"Dan\", data:true}].length()", "2");
-		jslt(null, "@.name in [{name:\"Tim\", data:46}, {name:\"Dan\", data:true}][?@.data]", "[\"Dan\"]");
+		jslt(null, "@.name in [{name:\"Tim\", data:false}, {name:\"Dan\", data:true}][?@.data]", "[\"Dan\"]");
 		jslt(null, "{name:@} in [\"Tim\", \"Dan\"]", "[{\"name\":\"Tim\"},{\"name\":\"Dan\"}]");
 		jslt(null, "[\"Tim\", \"Dan\"][\\@]", "[\"Tim\",\"Dan\"]");
 		jslt(null, "\"thiș is dätà\".length()", "12");
 		jslt(null, "{is:true, this:2, true:\"ok\"}.length()", "3");
 		jslt(null, "{length:123}.length", "123");
 		jslt(null, "{name:@.name(), length:@.length(), type:@.type(), value:@} in {name:\"Tim\", data:46}",
-				"[{\"length\":null,\"name\":\"data\",\"type\":\"NUMBER\",\"value\":46},{\"length\":3,\"name\":\"name\",\"type\":\"STRING\",\"value\":\"Tim\"}]");
+				"[{\"name\":\"name\",\"length\":3,\"type\":\"STRING\",\"value\":\"Tim\"},{\"name\":\"data\",\"length\":null,\"type\":\"NUMBER\",\"value\":46}]");
 		jslt(null, "[[].type(), {}.type(), null.type(), false.type()]", "[\"ARRAY\",\"OBJECT\",\"NULL\",\"BOOLEAN\"]");
 		jslt(null, "\"123&{2 + 2}5\"", "\"12345\"");
 		jslt(null, "@ in \"123\"", "[\"1\",\"2\",\"3\"]");
 		jslt(null, "@ in 3", "[0,1,2]");
-		jslt(null, "'123'", "\"2\"");
+		jslt(null, "'123'", "\"123\"");
 		jslt(null, "\"123\"[1]", "\"2\"");
 		jslt(null, "\"123\"[-2]", "\"2\"");
 		jslt(null, "\"1234\"[1:-1]", "\"23\"");
@@ -87,13 +87,12 @@ public class TestJslt extends MemoryTests {
 		jslt(null, "\"1234\"[-3:]", "\"234\"");
 		jslt(null, "\"1234\".index(\"23\")", "1");
 		jslt(null, "\"1234\".index(\"231\")", "null");
-		jslt(null, "{value:@, index:@.index(), first:@.first(), last:@.last()} in \"abc\"", "[{\"first\":true,\"index\":0,\"last\":false,\"value\":\"a\"},"
-				+ "{\"first\":false,\"index\":1,\"last\":false,\"value\":\"b\"},{\"first\":false,\"index\":2,\"last\":true,\"value\":\"c\"}]");
-		jslt(null, "\"count &{[@ + 1, @.last()?\"\":\", \"] in 3}\"", "\"count 1, 2, 3\"");
+		jslt(null, "{value:@, index:@.index(), first:@.first(), last:@.last()} in \"abc\"", "[{\"value\":\"a\",\"index\":0,\"first\":true,\"last\":false},"
+				+ "{\"value\":\"b\",\"index\":1,\"first\":false,\"last\":false},{\"value\":\"c\",\"index\":2,\"first\":false,\"last\":true}]");
+		jslt(null, "\"count &{[@ + 1, @.last()?'':', '] in 3}\"", "\"count 1, 2, 3\"");
 		jslt(null, "[pow(2, 4), string(1), boolean(\"true\"), number(\"123\"), float(\"2.1e4\")]", "[16,\"1\",true,123,21000.0]");
-		jslt(null, "[\"aa\",\"bbb\",\"c\",\"\"][@.length() - 2,0:2]", "[\"c\",\"aa\",\"bbb\"]");
-		jslt(null, "[[1,\"aa\"]==[1,\"aaa\"], [2]*2, [2,3] - 3, [2,3,4] - [2,4], {\"this\":1, \"too\":2} - \"too\", [2] > [1]]", "[false,[2,2],[2],[3],{\"this\":1},true]");
 		jslt(null, "[[1,2],[1,3],[0,2],[0,1]][/@]", "[[0,1],[0,2],[1,2],[1,3]]");
+		jslt(null, "[[1,\"aa\"]==[1,\"aaa\"], [1,'aa']==[1,'aa'], [2]*2, {\"this\":1, \"too\":2} - \"too\", [2] > [1]]", "[false,true,[2,2],{\"this\":1},true]");
 		compare("code.txt", bld.toString());
 		bld.setLength(0);
 	}
@@ -108,9 +107,9 @@ public class TestJslt extends MemoryTests {
 		jslt("[1,[2],3]", "$[1 + 1]", "3");
 		jslt("[1,[2],3]", "$[1][0]", "2");
 		jslt("[{\"name\":\"Tim\", \"value\":123}, {\"name\":null, \"value\":true}]", "[$[1],$[1].value,$[0].name,$[0].name]", "[{\"name\":null,\"value\":true},true,\"Tim\",\"Tim\"]");
-		jslt("[{\"name\":\"Tim\", \"value\":123}, [1,{\"data\":[{\"name\":\"Dan\", \"value\":true}]}]]", "$..[?@.value or @.value == 123].name", "[\"Tim\",\"Dan\"]");
 		jslt("[2,5,3,0]", "$[/@]", "[0,2,3,5]");
 		jslt("[2,5,3,0]", "$[\\@]", "[5,3,2,0]");
+		jslt("[{\"name\":\"Tim\", \"value\":123}, [1,{\"data\":[{\"name\":\"Dan\", \"value\":true}]}]]", "$..[?@.value or @.value == 123].name", "[\"Tim\",\"Dan\"]");
 		jslt("[{\"a\":3,\"b\":0},{\"a\":3,\"b\":1},{\"a\":1}]", "$[?@.a, /@.a, \\@.b]", "[{\"a\":1},{\"a\":3,\"b\":1},{\"a\":3,\"b\":0}]");
 		compare("testInput.txt", bld.toString());
 		bld.setLength(0);

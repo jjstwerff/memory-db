@@ -3,8 +3,6 @@ package org.memorydb.jslt;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.memorydb.handler.StringWriter;
 import org.memorydb.handler.Writer;
@@ -36,9 +34,25 @@ public class JsltInterpreter {
 			inter.show(write, inter.inter(code));
 		return write.toString();
 	}
-	
+
 	public void setCurrent(Object current) {
 		this.current = current;
+	}
+
+	public void setCurName(String curName) {
+		this.curName = curName;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	public void setFirst(boolean first) {
+		this.first = first;
+	}
+
+	public void setLast(boolean last) {
+		this.last = last;
 	}
 
 	public Object inter(Operator code) {
@@ -50,29 +64,40 @@ public class JsltInterpreter {
 		case OBJECT:
 			return new InterObject(this, code.getObject());
 		case APPEND:
-			return null;
+			StringBuilder bld = new StringBuilder();
+			for (AppendArray app : code.getAppend())
+				bld.append(getString(inter(app)));
+			return bld.toString();
 		case BOOLEAN:
 			return code.isBoolean();
 		case CALL:
-			if (code.getMacro().getName().equals("slice"))
-				return new InterSlice(this, code.getCallParms());
+			if (code.getMacro().getName().equals("slice")) {
+				Object data = inter(new CallParmsArray(code.getCallParms(), 0));
+				if (data instanceof RecordInterface)
+					return new InterSlice(this, (RecordInterface) data, code.getCallParms());
+				if (data instanceof String)
+					return subString((String) data, code.getCallParms());
+				throw new RuntimeException("Slice not implemented with type " + type(data));
+			}
 			return null;
 		case CONDITION:
 			return inter((Boolean) inter(code.getConExpr()) ? code.getConTrue() : code.getConFalse());
 		case FLOAT:
 			return code.getFloat();
 		case FOR:
-			return new InterMap(this, code.getForExpr(), (RecordInterface) inter(code.getFor()));
+			return new InterMap(this, code.getForExpr(), inter(code.getFor()));
 		case FUNCTION:
 			return doFunction(code);
+		case FILTER:
+			return new InterFilter(this, code.getFilterExpr(), (RecordInterface) inter(code.getFilter()));
 		case IF:
-			return null;
+			return null; // TODO implement me
 		case NULL:
 			return null;
 		case NUMBER:
 			return code.getNumber();
 		case SORT:
-			return sort(code);
+			return new InterSort(this, code.getSortParms(), (RecordInterface) inter(code.getSort()));
 		case STRING:
 			return code.getString();
 		case CURRENT:
@@ -86,116 +111,52 @@ public class JsltInterpreter {
 		}
 	}
 
-	private void inter(Writer result, Operator code) {
-		if (code.getOperation() == null)
-			return;
-		switch (code.getOperation()) {
-		case APPEND:
-			result.append(true);
-			for (AppendArray a : code.getAppend())
-				inter(result, a);
-			result.append(false);
-			break;
-		case BOOLEAN:
-			result.element(code.isBoolean());
-			break;
-		case CALL:
-			if (code.getMacro().getName().equals("slice"))
-				slice(result, code);
-			break;
-		case CONDITION:
-			if ((Boolean) inter(code.getConExpr())) {
-				inter(result, code.getConTrue());
+	private String subString(String str, CallParmsArray callParms) {
+		long[] parms = new long[callParms.getSize() - 1];
+		for (int p = 0; p < callParms.getSize() - 1; p++)
+			parms[p] = getNumber(inter(new CallParmsArray(callParms, p + 1)));
+		StringBuilder res = new StringBuilder();
+		int size = str.length();
+		for (int p = 0; p < parms.length; p += 3) {
+			long start = parms[p];
+			long stop = parms[p + 1];
+			long step = parms[p + 2];
+			if (step == Long.MIN_VALUE)
+				step = 1;
+			if (step < 0) {
+				if (start == Long.MIN_VALUE)
+					start = size - 1;
+				if (start < 0)
+					start += size;
+				if (stop < 0 && stop != Long.MIN_VALUE)
+					stop += size;
+				if (stop == Long.MIN_VALUE)
+					stop = -1;
+				for (int i = (int) start; i > stop; i += step)
+					res.append(str.charAt(i));
 			} else {
-				inter(result, code.getConFalse());
+				if (start == Long.MIN_VALUE)
+					start = 0;
+				else if (start < 0)
+					start += size;
+				if (stop == Long.MAX_VALUE)
+					stop = start + 1;
+				if (stop < 0 && stop != Long.MIN_VALUE)
+					stop += size;
+				if (stop == Long.MIN_VALUE)
+					stop = size;
+				for (int i = (int) start; i < stop; i += step)
+					res.append(str.charAt(i));
 			}
-			break;
-		case FLOAT:
-			result.element(code.getFloat());
-			break;
-		case FOR:
-			doFor(result, code);
-			return;
-		case FUNCTION:
-			if (code.getFunction() == Function.ADD)
-				add(result, code);
-			else if (code.getFunction() == Function.MIN)
-				sub(result, code);
-			else if (code.getFunction() == Function.ELEMENT && code.getFnParm1().getOperation() == Operation.ARRAY) {
-				long number = getNumber(inter(code.getFnParm2()));
-				if (number == Long.MIN_VALUE || Math.abs(number) > Integer.MAX_VALUE)
-					result.element(null);
-				else {
-					ArrayArray array = code.getFnParm1().getArray();
-					if (number < 0)
-						number += array.getSize();
-					array.setIdx((int) number);
-					result.element(inter(array));
-				}
-			} else if (code.getFunction() == Function.ELEMENT && code.getFnParm1().getOperation() == Operation.OBJECT) {
-				String fname = getString(inter(code.getFnParm2()));
-				for (ObjectArray fld : code.getFnParm1().getObject()) {
-					if (getString(inter(fld.getName())).equals(fname))
-						inter(result, fld);
-				}
-			} else if (code.getFunction() == Function.ELEMENT
-					&& code.getFnParm1().getOperation() == Operation.CURRENT) {
-				if (current instanceof Operator && ((Operator) current).getOperation() == Operation.OBJECT) {
-					String fname = getString(inter(code.getFnParm2()));
-					for (ObjectArray fld : ((Operator) current).getObject()) {
-						if (getString(inter(fld.getName())).equals(fname))
-							inter(result, fld);
-					}
-				} else if (current instanceof Operator && ((Operator) current).getOperation() == Operation.ARRAY) {
-					long number = getNumber(inter(code.getFnParm2()));
-					if (number == Long.MIN_VALUE || Math.abs(number) > Integer.MAX_VALUE)
-						result.element(null);
-					else {
-						ArrayArray array = ((Operator) current).getArray();
-						if (number < 0)
-							number += array.getSize();
-						array.setIdx((int) number);
-						result.element(inter(array));
-					}
-				}
-			} else {
-				Object doFunction = doFunction(code);
-				if (doFunction instanceof RecordInterface)
-					iterate(result, (RecordInterface) doFunction);
-				else
-					result.element(doFunction);
-			}
-			break;
-		case IF:
-			break;
-		case NULL:
-			result.element(null);
-			break;
-		case NUMBER:
-			result.element(code.getNumber());
-			break;
-		case SORT:
-			sort(result, code);
-			break;
-		case STRING:
-			result.element(code.getString());
-			break;
-		case CURRENT:
-			result.element(current);
-			break;
-		case READ:
-			iterate(result, data);
-			break;
-		default:
-			break;
 		}
+		return res.toString();
 	}
 
 	private void iterate(Writer write, RecordInterface rec) {
 		FieldType type = rec.type();
 		if (type == FieldType.OBJECT)
 			iterateObject(3, write, rec);
-		else if (type == FieldType.ITERATE)
+		else if (type == FieldType.ARRAY)
 			iterateArray(3, write, rec);
 	}
 
@@ -210,12 +171,12 @@ public class JsltInterpreter {
 		if (maxDepth <= 0 || !rec.exists())
 			return;
 		write.startObject();
-		for (int field = rec.next(-1); field > 0; field = rec.next(field)) {
+		for (int field = rec.next(-1); field >= 0; field = rec.next(field)) {
 			FieldType type = rec.type(field);
 			write.field(rec.name(field));
 			if (type == FieldType.OBJECT)
 				iterateObject(maxDepth - 1, write, (RecordInterface) rec.get(field));
-			else if (type == FieldType.ITERATE)
+			else if (type == FieldType.ARRAY)
 				iterateArray(maxDepth, write, (RecordInterface) rec.get(field));
 			else
 				write.element(rec.get(field));
@@ -225,11 +186,11 @@ public class JsltInterpreter {
 
 	private void iterateArray(int maxDepth, Writer write, RecordInterface rec) {
 		write.startArray();
-		for (int field = rec.next(-1); field > 0; field = rec.next(field)) {
+		for (int field = rec.next(-1); field >= 0; field = rec.next(field)) {
 			FieldType type = rec.type(field);
 			if (type == FieldType.OBJECT)
 				iterateObject(maxDepth, write, (RecordInterface) rec.get(field));
-			else if (type == FieldType.ITERATE)
+			else if (type == FieldType.ARRAY)
 				iterateArray(maxDepth, write, (RecordInterface) rec.get(field));
 			else
 				write.element(rec.get(field));
@@ -272,7 +233,7 @@ public class JsltInterpreter {
 		String name = rec.name(field);
 		if (name != null)
 			write.field(name);
-		if (rec.type(field) == FieldType.ITERATE) {
+		if (rec.type(field) == FieldType.ARRAY) {
 			write.startArray();
 			Iterable<? extends RecordInterface> iterate = rec.iterate(field);
 			if (iterate != null) {
@@ -285,181 +246,7 @@ public class JsltInterpreter {
 		}
 	}
 
-	private void doFor(Writer result, Operator code) {
-		result.startArray();
-		Expr forData = code.getFor();
-		boolean firstForValue = true;
-		int forIndex = 0;
-		if (forData.getOperation() == Operation.ARRAY) {
-			for (ArrayArray elm : forData.getArray()) {
-				this.current = elm;
-				this.first = firstForValue;
-				this.index = forIndex;
-				this.last = forIndex < elm.getSize();
-				inter(code.getForExpr());
-				firstForValue = false;
-				forIndex++;
-			}
-		} else if (forData.getOperation() == Operation.OBJECT) {
-			for (ObjectArray fld : forData.getObject()) {
-				this.current = fld.change();
-				this.first = firstForValue;
-				this.index = forIndex;
-				this.last = false;
-				this.curName = getString(inter(fld.getName()));
-				inter(code.getForExpr());
-				firstForValue = false;
-				forIndex++;
-			}
-		} else {
-			Object expr = inter(forData);
-			if (expr instanceof String) {
-				String str = getString(expr);
-				for (int c = 0; c < str.length(); c++) {
-					current = "" + str.charAt(c);
-					this.first = firstForValue;
-					this.index = c;
-					this.last = c == (str.length() - 1);
-					inter(code.getForExpr());
-					firstForValue = false;
-				}
-			} else if (expr instanceof Long) {
-				long nr = getNumber(expr);
-				for (int c = 0; c < nr; c++) {
-					current = c;
-					this.first = firstForValue;
-					this.index = c;
-					this.last = c == nr - 1;
-					inter(code.getForExpr());
-					firstForValue = false;
-				}
-			} else if (expr instanceof List) {
-				@SuppressWarnings("unchecked")
-				List<ChangeOperator> elms = (List<ChangeOperator>) expr;
-				int c = 0;
-				for (ChangeOperator elm : elms) {
-					current = elm;
-					this.first = firstForValue;
-					this.index = c++;
-					this.last = c == elms.size() - 1;
-					inter(code.getForExpr());
-					firstForValue = false;
-				}
-			}
-		}
-		result.endArray();
-	}
-
-	private void slice(Writer result, Operator code) {
-		// loop per 3 parameters
-		result.startArray();
-		for (int sparm = 1; sparm < code.getCallParms().getSize(); sparm += 3) {
-			CallParmsArray parm = code.getCallParms(0);
-			long start = getNumber(inter(code.getCallParms(sparm)));
-			long stop = getNumber(inter(code.getCallParms(sparm + 1)));
-			long step = getNumber(inter(code.getCallParms(sparm + 2)));
-			if (step == Long.MIN_VALUE)
-				step = 1;
-			if (parm.getOperation() == Operation.ARRAY) {
-				ArrayArray array = parm.getArray();
-				int size = array.getSize();
-				if (step < 0) {
-					if (start == Long.MIN_VALUE)
-						start = size - 1;
-					if (start < 0)
-						start += size;
-					if (stop < 0 && stop != Long.MIN_VALUE)
-						stop += size;
-					if (stop == Long.MIN_VALUE)
-						stop = -1;
-					for (long i = start; i > stop; i += step) {
-						array.setIdx((int) i);
-						result.element(inter(array));
-					}
-				} else {
-					if (start == Long.MIN_VALUE)
-						start = 0;
-					else if (start < 0)
-						start += size;
-					if (stop == Long.MAX_VALUE)
-						stop = start + 1;
-					if (stop < 0 && stop != Long.MIN_VALUE)
-						stop += size;
-					if (stop == Long.MIN_VALUE)
-						stop = size;
-					for (long i = start; i < stop; i += step) {
-						array.setIdx((int) i);
-						result.element(inter(array));
-					}
-				}
-			} else {
-				String str = getString(inter(parm));
-				StringBuilder bld = new StringBuilder();
-				int size = str.length();
-				if (step < 0) {
-					if (start < 0)
-						start += size;
-					if (stop < 0 && stop != Long.MIN_VALUE)
-						stop += size;
-					if (stop == Long.MIN_VALUE)
-						stop = -1;
-					for (long i = start; i > stop; i += step)
-						bld.append(str.charAt((int) i));
-				} else {
-					if (start < 0)
-						start += size;
-					if (stop < 0)
-						stop += size;
-					for (long i = start; i < stop; i += step)
-						bld.append(str.charAt((int) i));
-				}
-				result.element(bld.toString());
-			}
-		}
-		result.endArray();
-	}
-
-	/*
-	 * private Object slice(Operator code) { long start =
-	 * getNumber(inter(code.getCallParms(1))); long stop =
-	 * getNumber(inter(code.getCallParms(2))); long step =
-	 * getNumber(inter(code.getCallParms(3))); String str =
-	 * getString(inter(code.getCallParms(0))); StringBuilder bld = new
-	 * StringBuilder(); int size = str.length(); if (step < 0) { if (start < 0)
-	 * start += size; if (stop < 0 && stop != Long.MIN_VALUE) stop += size; if (stop
-	 * == Long.MIN_VALUE) stop = -1; for (long i = start; i > stop; i += step)
-	 * bld.append(str.charAt((int) i)); } else { if (start < 0) start += size; if
-	 * (stop < 0) stop += size; for (long i = start; i < stop; i += step)
-	 * bld.append(str.charAt((int) i)); } return bld.toString(); }
-	 */
-
-	private List<ChangeOperator> sort(Operator code) {
-		Expr sort = code.getSort();
-		List<ChangeOperator> list = new ArrayList<>();
-		int size = code.getSortParms().getSize();
-		for (ArrayArray a : sort.getArray())
-			list.add(a);
-		list.sort((e1, e2) -> {
-			for (int idx = 0; idx < size; idx++) {
-				current = e1;
-				Object r1 = inter(code.getSortParms(idx));
-				current = e2;
-				Object r2 = inter(code.getSortParms(idx));
-				int r = compare(r1, r2);
-				if (r != 0)
-					return r;
-			}
-			return 0;
-		});
-		return list;
-	}
-
-	private void sort(Writer result, Operator code) {
-		for (ChangeOperator e : sort(code))
-			inter(e);
-	}
-
-	private int compare(Object t1, Object t2) {
+	int compare(Object t1, Object t2) {
 		if (t1 == null && t2 == null)
 			return 0;
 		if (t1 == null)
@@ -477,69 +264,33 @@ public class JsltInterpreter {
 				return 0;
 			return getBoolean(t1) ? 1 : -1;
 		}
-		return 0;
-	}
-
-	private void add(Writer result, Operator code) {
-		code.getType();
-		Expr fnParm1 = code.getFnParm1();
-		Expr fnParm2 = code.getFnParm2();
-		if (fnParm1.getOperation() == Operation.ARRAY) {
-			result.startArray();
-			for (ArrayArray a : fnParm1.getArray())
-				inter(a);
-			if (fnParm2.getOperation() == Operation.ARRAY)
-				for (ArrayArray a : fnParm2.getArray())
-					inter(a);
-			else
-				inter(fnParm2);
-			result.endArray();
-			return;
-		}
-		if (fnParm1.getOperation() == Operation.OBJECT) {
-			result.startObject();
-			if (fnParm2.getOperation() == Operation.OBJECT) {
-				Set<String> found = new TreeSet<>();
-				ObjectArray obj2 = fnParm2.getObject();
-				Field: for (ObjectArray a : fnParm1.getObject()) {
-					String name = inter(a.getName()).toString();
-					result.field(name);
-					for (ObjectArray o : obj2) {
-						String oth = inter(o.getName()).toString();
-						if (name.equals(oth)) {
-							found.add(name);
-							inter(o);
-							continue Field;
-						}
-					}
-					inter(a);
+		if (t1 instanceof RecordInterface && t2 instanceof RecordInterface) {
+			RecordInterface r1 = (RecordInterface) t1;
+			RecordInterface r2 = (RecordInterface) t2;
+			if (r1.type() == FieldType.ARRAY && r2.type() == FieldType.ARRAY) {
+				int f1 = r1.next(-1);
+				int f2 = r2.next(-1);
+				while (f1 >= 0 && f2 >= 0) {
+					int c = compare(r1.get(f1), r2.get(f2));
+					if (c != 0)
+						return c;
+					f1 = r1.next(f1);
+					f2 = r2.next(f2);
+					if (f1 < 0 && f2 >= 0)
+						return -1;
+					if (f2 < 0 && f1 >= 0)
+						return 1;
 				}
-				for (ObjectArray a : obj2) {
-					String name = inter(a.getName()).toString();
-					if (!found.contains(name)) {
-						result.field(inter(a.getName()).toString());
-						result.element(inter(a));
-					}
-				}
-			} else {
-				return;
 			}
-			result.endObject();
-			return;
 		}
-		result.element(doFunction(code));
-	}
-
-	private void sub(Writer result, Operator code) {
-		result.element(doFunction(code));
+		return 0;
 	}
 
 	private Object doFunction(Operator code) {
 		Object p1 = inter(code.getFnParm1());
 		Object p2 = null;
 		Function function = code.getFunction();
-		if (function != Function.FILTER && function != Function.OR && function != Function.AND
-				&& code.getFnParm2().getRec() != 0)
+		if (function != Function.OR && function != Function.AND && code.getFnParm2().getRec() != 0)
 			p2 = inter(code.getFnParm2());
 		switch (function) {
 		case ADD:
@@ -624,16 +375,11 @@ public class JsltInterpreter {
 				return ((String) p1).equals(getString(p2));
 			else if (p1 instanceof Boolean)
 				return ((Boolean) p1) == getBoolean(p2);
+			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
+				return compare((RecordInterface)p1, (RecordInterface)p2) == 0;
 			return false;
 		case FIRST:
 			return first;
-		case FILTER:
-			/*
-			 * if (res == Type.ARRAY) { result.setType(res); for
-			 * (org.memorydb.json.ArrayArray a : p1.getArray()) { current = a; inter(p2,
-			 * code.getFnParm2()); if (p2.isBoolean()) arrayAdd(result, a); } }
-			 */
-			return null;
 		case FLOAT:
 			return getFloat(p1);
 		case GE:
@@ -643,6 +389,8 @@ public class JsltInterpreter {
 				return (Double) p1 >= getFloat(p2);
 			else if (p1 instanceof String)
 				return ((String) p1).compareTo(getString(p2)) >= 0;
+			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
+				return compare((RecordInterface)p1, (RecordInterface)p2) >= 0;
 			return null;
 		case GT:
 			if (p1 instanceof Long)
@@ -651,16 +399,17 @@ public class JsltInterpreter {
 				return (Double) p1 > getFloat(p2);
 			else if (p1 instanceof String)
 				return ((String) p1).compareTo(getString(p2)) > 0;
+			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
+				return compare((RecordInterface)p1, (RecordInterface)p2) > 0;
 			return null;
 		case INDEX:
+			if (p1 instanceof String && p2 != null) {
+				int indexOf = ((String) p1).indexOf(getString(p2));
+				if (indexOf < 0)
+					return null;
+				return indexOf;
+			}
 			return index;
-		/*
-		 * if (res == Type.STRING) { String str = p1.getValue(); int indexOf =
-		 * str.indexOf(getString(p2)); if (indexOf < 0) result.setType(Type.NULL); else
-		 * result.setNumber(indexOf); } else if (res == Type.ARRAY) { int i = 0; for
-		 * (org.memorydb.json.ArrayArray a : p1.getArray()) { if (equal(a, p2)) {
-		 * result.setNumber(i); break; } i++; } }
-		 */
 		case LAST:
 			return last;
 		case LE:
@@ -670,6 +419,8 @@ public class JsltInterpreter {
 				return (Double) p1 <= getFloat(p2);
 			else if (p1 instanceof String)
 				return ((String) p1).compareTo(getString(p2)) <= 0;
+			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
+				return compare((RecordInterface)p1, (RecordInterface)p2) <= 0;
 			return null;
 		case LENGTH:
 			if (p1 == null && code.getFnParm1().getOperation() == Operation.ARRAY)
@@ -693,7 +444,7 @@ public class JsltInterpreter {
 			else if (p1 instanceof Boolean)
 				return "BOOLEAN";
 			else if (p1 instanceof RecordInterface)
-				return "OBJECT"; // TODO implement distinction between array or object
+				return ((RecordInterface) p1).type().toString();
 			return null;
 		case LT:
 			if (p1 instanceof Long)
@@ -702,6 +453,8 @@ public class JsltInterpreter {
 				return (Double) p1 < getFloat(p2);
 			else if (p1 instanceof String)
 				return ((String) p1).compareTo(getString(p2)) < 0;
+			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
+				return compare((RecordInterface)p1, (RecordInterface)p2) <= 0;
 			return null;
 		case MIN:
 			if (p1 instanceof Long) {
@@ -711,6 +464,8 @@ public class JsltInterpreter {
 				return (Long) p1 - number;
 			} else if (p1 instanceof Double)
 				return (Double) p1 - getFloat(p2);
+			else if (p1 instanceof RecordInterface)
+				return new MinArray((RecordInterface) p1, p2);
 			return null;
 		case MOD:
 			if (p1 instanceof Long) {
@@ -738,6 +493,8 @@ public class JsltInterpreter {
 				return (Long) p1 * number;
 			} else if (p1 instanceof Double) {
 				return (Double) p1 * getFloat(p2);
+			} else if (p1 instanceof RecordInterface) {
+				return new InterMult(this, (RecordInterface) p1, getNumber(p2));
 			}
 			return null;
 		case NE:
@@ -749,6 +506,8 @@ public class JsltInterpreter {
 				return !((String) p1).equals(getString(p2));
 			else if (p1 instanceof Boolean)
 				return ((Boolean) p1) != getBoolean(p2);
+			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
+				return compare((RecordInterface)p1, (RecordInterface)p2) != 0;
 			return false;
 		case NEG:
 			if (p1 instanceof Long)
@@ -793,18 +552,33 @@ public class JsltInterpreter {
 	long getNumber(Object val) {
 		if (val instanceof Long)
 			return (Long) val;
+		if (val instanceof String) {
+			try {
+				return Long.parseLong((String) val);
+			} catch (NumberFormatException e) {
+				// nothing.. return Long.MIN_VALUE
+			}
+		}
 		return Long.MIN_VALUE;
 	}
 
 	private String getString(Object val) {
+		if (val == null)
+			return "";
 		if (val instanceof Long)
 			return Long.toString((Long) val);
 		else if (val instanceof Double)
 			return Double.toString((Double) val);
+		else if (val instanceof RecordInterface) {
+			Writer write = new StringWriter();
+			write.append(true);
+			iterate(write, (RecordInterface) val);
+			return write.toString();
+		}
 		return val.toString();
 	}
 
-	private boolean getBoolean(Object val) {
+	boolean getBoolean(Object val) {
 		if (val instanceof Boolean)
 			return (Boolean) val;
 		if (val instanceof Long)
@@ -819,12 +593,19 @@ public class JsltInterpreter {
 			return (Long) val;
 		if (val instanceof Double)
 			return (Double) val;
+		if (val instanceof String) {
+			try {
+				return Double.parseDouble((String) val);
+			} catch (NumberFormatException e) {
+				// nothing.. return Double.NaN
+			}
+		}
 		return Double.NaN;
 	}
 
 	public FieldType type(Object lastField) {
 		if (lastField == null)
-			return null;
+			return FieldType.NULL;
 		if (lastField instanceof Integer)
 			return FieldType.INTEGER;
 		if (lastField instanceof Long)
@@ -837,12 +618,8 @@ public class JsltInterpreter {
 			return FieldType.DATE;
 		if (lastField instanceof Boolean)
 			return FieldType.BOOLEAN;
-		if (lastField instanceof InterArray)
-			return FieldType.ITERATE;
-		return FieldType.OBJECT;
-		// return FieldType.ITERATE; // this field holds a list of records
-		// return FieldType.OBJECT; // this field holds a new object
-		// return FieldType.FILTERS; // the next keys on the iterator can be filters
-		// return FieldType.SCHEMA;
+		if (lastField instanceof RecordInterface)
+			return ((RecordInterface) lastField).type();
+		throw new RuntimeException("Unknown type");
 	}
 }

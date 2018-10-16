@@ -81,11 +81,6 @@ public class AddArray implements RecordInterface {
 	}
 
 	@Override
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		return null;
-	}
-
-	@Override
 	public boolean exists() {
 		return true;
 	}

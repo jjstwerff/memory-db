@@ -90,10 +90,6 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 			store.setByte(alloc, 12, 3);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof IterateArray) {
-			store.setByte(alloc, 12, 4);
-			store.setInt(alloc, 13, record.getArrayIndex());
-		}
 	}
 
 	@Override
@@ -107,8 +103,6 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 			return new ParametersArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
 		case 3:
 			return new MarrayArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
-		case 4:
-			return new IterateArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
 		default:
 			throw new CorruptionException("Unknown upRecord type");
 		}
@@ -237,7 +231,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public String name(int field) {
-		if (field >= 1 && field <= 10)
+		if (field >= 1 && field <= 9)
 			return nameMatch(field - 1);
 		switch (field) {
 		case 1:
@@ -249,7 +243,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 1 && field <= 10)
+		if (field >= 1 && field <= 9)
 			return typeMatch(field - 1);
 		switch (field) {
 		case 1:
@@ -261,7 +255,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 1 && field <= 10)
+		if (field >= 1 && field <= 9)
 			return getMatch(field - 1);
 		switch (field) {
 		case 1:
@@ -273,7 +267,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 1 && field <= 10)
+		if (field >= 1 && field <= 9)
 			return iterateMatch(field - 1);
 		switch (field) {
 		default:
@@ -283,7 +277,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 1 && field <= 10)
+		if (field >= 1 && field <= 9)
 			return setMatch(field - 1, value);
 		switch (field) {
 		case 1:
@@ -297,7 +291,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 1 && field <= 10)
+		if (field >= 1 && field <= 9)
 			return addMatch(field - 1);
 		switch (field) {
 		default:

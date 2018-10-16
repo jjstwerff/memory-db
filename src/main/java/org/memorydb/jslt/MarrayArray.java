@@ -89,10 +89,6 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 			store.setByte(alloc, 12, 3);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof IterateArray) {
-			store.setByte(alloc, 12, 4);
-			store.setInt(alloc, 13, record.getArrayIndex());
-		}
 	}
 
 	@Override
@@ -106,8 +102,6 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 			return new ParametersArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
 		case 3:
 			return new MarrayArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
-		case 4:
-			return new IterateArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
 		default:
 			throw new CorruptionException("Unknown upRecord type");
 		}
@@ -212,7 +206,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public String name(int field) {
-		if (field >= 0 && field <= 9)
+		if (field >= 0 && field <= 8)
 			return nameMatch(field - 0);
 		switch (field) {
 		default:
@@ -222,7 +216,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 0 && field <= 9)
+		if (field >= 0 && field <= 8)
 			return typeMatch(field - 0);
 		switch (field) {
 		default:
@@ -232,7 +226,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 0 && field <= 9)
+		if (field >= 0 && field <= 8)
 			return getMatch(field - 0);
 		switch (field) {
 		default:
@@ -242,7 +236,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 9)
+		if (field >= 0 && field <= 8)
 			return iterateMatch(field - 0);
 		switch (field) {
 		default:
@@ -252,7 +246,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 0 && field <= 9)
+		if (field >= 0 && field <= 8)
 			return setMatch(field - 0, value);
 		switch (field) {
 		default:
@@ -262,7 +256,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 0 && field <= 9)
+		if (field >= 0 && field <= 8)
 			return addMatch(field - 0);
 		switch (field) {
 		default:

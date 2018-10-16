@@ -1,0 +1,1438 @@
+Test:
+0
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=NUMBER, number=0
+  ]
+]
+
+Test:
+-11
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=NUMBER, number=-11
+  ]
+]
+
+Test:
+-0.27
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FLOAT, float=-0.27
+  ]
+]
+
+Test:
+["a", 2]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=ARRAY, array=[
+      operation=STRING, string=a
+      operation=NUMBER, number=2
+    ]
+  ]
+]
+
+Test:
+{a:1, "b":[true]}
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=OBJECT, object=[
+      name=[
+        operation=STRING, string=a
+      ], operation=NUMBER, number=1
+      name=[
+        operation=STRING, string=b
+      ], operation=ARRAY, array=[
+        operation=BOOLEAN, boolean=true
+      ]
+    ]
+  ]
+]
+
+Test:
+1 + 2
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=NUMBER, number=1
+    ], fnParm2=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]
+
+Test:
+15 - 2
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=MIN, fnParm1=[
+      operation=NUMBER, number=15
+    ], fnParm2=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]
+
+Test:
+10 * 2
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=MUL, fnParm1=[
+      operation=NUMBER, number=10
+    ], fnParm2=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]
+
+Test:
+10.1 * 2
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=MUL, fnParm1=[
+      operation=FLOAT, float=10.1
+    ], fnParm2=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]
+
+Test:
+10.1 + 2
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FLOAT, float=10.1
+    ], fnParm2=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]
+
+Test:
+"a" * 2
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=MUL, fnParm1=[
+      operation=STRING, string=a
+    ], fnParm2=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]
+
+Test:
+65 % 10
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=MOD, fnParm1=[
+      operation=NUMBER, number=65
+    ], fnParm2=[
+      operation=NUMBER, number=10
+    ]
+  ]
+]
+
+Test:
+2 == 3
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=EQ, fnParm1=[
+      operation=NUMBER, number=2
+    ], fnParm2=[
+      operation=NUMBER, number=3
+    ]
+  ]
+]
+
+Test:
+1 > 2
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=GT, fnParm1=[
+      operation=NUMBER, number=1
+    ], fnParm2=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]
+
+Test:
+!(1.0 > 2.1)
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=NOT, fnParm1=[
+      operation=FUNCTION, function=GT, fnParm1=[
+        operation=FLOAT, float=1.0
+      ], fnParm2=[
+        operation=FLOAT, float=2.1
+      ]
+    ]
+  ]
+]
+
+Test:
+"a" + 1
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=STRING, string=a
+    ], fnParm2=[
+      operation=NUMBER, number=1
+    ]
+  ]
+]
+
+Test:
+[1] + 3
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+      ]
+    ], fnParm2=[
+      operation=NUMBER, number=3
+    ]
+  ]
+]
+
+Test:
+[1] + 3 + 'a'
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=3
+      ]
+    ], fnParm2=[
+      operation=STRING, string=a
+    ]
+  ]
+]
+
+Test:
+[1, 0] + [3, 2]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+      ]
+    ], fnParm2=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+    ]
+  ]
+]
+
+Test:
+[1, 0] + [3, 2] + 'a'
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+          operation=NUMBER, number=0
+        ]
+      ], fnParm2=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=3
+          operation=NUMBER, number=2
+        ]
+      ]
+    ], fnParm2=[
+      operation=STRING, string=a
+    ]
+  ]
+]
+
+Test:
+{A:3 * 2 - 5, C:123} + {C:true}
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=A
+        ], operation=FUNCTION, function=MIN, fnParm1=[
+          operation=FUNCTION, function=MUL, fnParm1=[
+            operation=NUMBER, number=3
+          ], fnParm2=[
+            operation=NUMBER, number=2
+          ]
+        ], fnParm2=[
+          operation=NUMBER, number=5
+        ]
+        name=[
+          operation=STRING, string=C
+        ], operation=NUMBER, number=123
+      ]
+    ], fnParm2=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=C
+        ], operation=BOOLEAN, boolean=true
+      ]
+    ]
+  ]
+]
+
+Test:
+{A:3 * 2 - 5, C:123} + {A:2}
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=A
+        ], operation=FUNCTION, function=MIN, fnParm1=[
+          operation=FUNCTION, function=MUL, fnParm1=[
+            operation=NUMBER, number=3
+          ], fnParm2=[
+            operation=NUMBER, number=2
+          ]
+        ], fnParm2=[
+          operation=NUMBER, number=5
+        ]
+        name=[
+          operation=STRING, string=C
+        ], operation=NUMBER, number=123
+      ]
+    ], fnParm2=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=A
+        ], operation=NUMBER, number=2
+      ]
+    ]
+  ]
+]
+
+Test:
+{"A":1} + {"C":true}
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=A
+        ], operation=NUMBER, number=1
+      ]
+    ], fnParm2=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=C
+        ], operation=BOOLEAN, boolean=true
+      ]
+    ]
+  ]
+]
+
+Test:
+"a" != "aa"
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=NE, fnParm1=[
+      operation=STRING, string=a
+    ], fnParm2=[
+      operation=STRING, string=aa
+    ]
+  ]
+]
+
+Test:
+"a" != "aa" or false
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=OR, fnParm1=[
+      operation=FUNCTION, function=NE, fnParm1=[
+        operation=STRING, string=a
+      ], fnParm2=[
+        operation=STRING, string=aa
+      ]
+    ], fnParm2=[
+      operation=BOOLEAN, boolean=false
+    ]
+  ]
+]
+
+Test:
+"aa" == "aa" and false
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=AND, fnParm1=[
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=STRING, string=aa
+      ], fnParm2=[
+        operation=STRING, string=aa
+      ]
+    ], fnParm2=[
+      operation=BOOLEAN, boolean=false
+    ]
+  ]
+]
+
+Test:
+"al" < "ao"
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=LT, fnParm1=[
+      operation=STRING, string=al
+    ], fnParm2=[
+      operation=STRING, string=ao
+    ]
+  ]
+]
+
+Test:
+true ? 1 : 2
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CONDITION, conExpr=[
+      operation=BOOLEAN, boolean=true
+    ], conTrue=[
+      operation=NUMBER, number=1
+    ], conFalse=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][2]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+    ], fnParm2=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][-1]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+    ], fnParm2=[
+      operation=NUMBER, number=-1
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][2, 2]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+      operation=NUMBER, number=2
+      operation=NUMBER, number=9223372036854775807
+      operation=NUMBER, number=1
+      operation=NUMBER, number=2
+      operation=NUMBER, number=9223372036854775807
+      operation=NUMBER, number=1
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][2, 1:]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+      operation=NUMBER, number=2
+      operation=NUMBER, number=9223372036854775807
+      operation=NUMBER, number=1
+      operation=NUMBER, number=1
+      operation=NUMBER
+      operation=NUMBER, number=1
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][1:3]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+      operation=NUMBER, number=1
+      operation=NUMBER, number=3
+      operation=NUMBER, number=1
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][-2:]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+      operation=NUMBER, number=-2
+      operation=NUMBER
+      operation=NUMBER, number=1
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][2:]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+      operation=NUMBER, number=2
+      operation=NUMBER
+      operation=NUMBER, number=1
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][2:-1]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+      operation=NUMBER, number=2
+      operation=NUMBER, number=-1
+      operation=NUMBER, number=1
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][:-2]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+      operation=NUMBER
+      operation=NUMBER, number=-2
+      operation=NUMBER, number=1
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][::-1]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+      operation=NUMBER
+      operation=NUMBER
+      operation=NUMBER, number=-1
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][1::-1]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+      operation=NUMBER, number=1
+      operation=NUMBER
+      operation=NUMBER, number=-1
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][:-3:-1]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+      operation=NUMBER
+      operation=NUMBER, number=-3
+      operation=NUMBER, number=-1
+    ]
+  ]
+]
+
+Test:
+[1, 0, 3, 2][::2]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+      operation=NUMBER
+      operation=NUMBER
+      operation=NUMBER, number=2
+    ]
+  ]
+]
+
+Test:
+@ + "c" in ["b","a"]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FOR, for=[
+      operation=ARRAY, array=[
+        operation=STRING, string=b
+        operation=STRING, string=a
+      ]
+    ], forExpr=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=CURRENT
+      ], fnParm2=[
+        operation=STRING, string=c
+      ]
+    ]
+  ]
+]
+
+Test:
+{"val":{first:@.name, val:@.data} in [{name:"Tim", data:26 + 20}, {name:"Dan", data:3 > 2}]}
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=OBJECT, object=[
+      name=[
+        operation=STRING, string=val
+      ], operation=FOR, for=[
+        operation=ARRAY, array=[
+          operation=OBJECT, object=[
+            name=[
+              operation=STRING, string=name
+            ], operation=STRING, string=Tim
+            name=[
+              operation=STRING, string=data
+            ], operation=FUNCTION, function=ADD, fnParm1=[
+              operation=NUMBER, number=26
+            ], fnParm2=[
+              operation=NUMBER, number=20
+            ]
+          ]
+          operation=OBJECT, object=[
+            name=[
+              operation=STRING, string=name
+            ], operation=STRING, string=Dan
+            name=[
+              operation=STRING, string=data
+            ], operation=FUNCTION, function=GT, fnParm1=[
+              operation=NUMBER, number=3
+            ], fnParm2=[
+              operation=NUMBER, number=2
+            ]
+          ]
+        ]
+      ], forExpr=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=first
+          ], operation=FUNCTION, function=ELEMENT, fnParm1=[
+            operation=CURRENT
+          ], fnParm2=[
+            operation=STRING, string=name
+          ]
+          name=[
+            operation=STRING, string=val
+          ], operation=FUNCTION, function=ELEMENT, fnParm1=[
+            operation=CURRENT
+          ], fnParm2=[
+            operation=STRING, string=data
+          ]
+        ]
+      ]
+    ]
+  ]
+]
+
+Test:
+@.data in [{name:"Tim", data:46}, {name:"Dan", data:true}][/@.name]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FOR, for=[
+      operation=SORT, sort=[
+        operation=ARRAY, array=[
+          operation=OBJECT, object=[
+            name=[
+              operation=STRING, string=name
+            ], operation=STRING, string=Tim
+            name=[
+              operation=STRING, string=data
+            ], operation=NUMBER, number=46
+          ]
+          operation=OBJECT, object=[
+            name=[
+              operation=STRING, string=name
+            ], operation=STRING, string=Dan
+            name=[
+              operation=STRING, string=data
+            ], operation=BOOLEAN, boolean=true
+          ]
+        ]
+      ], sortParms=[
+        operation=FUNCTION, function=ELEMENT, fnParm1=[
+          operation=CURRENT
+        ], fnParm2=[
+          operation=STRING, string=name
+        ]
+      ]
+    ], forExpr=[
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=CURRENT
+      ], fnParm2=[
+        operation=STRING, string=data
+      ]
+    ]
+  ]
+]
+
+Test:
+[{name:"Tim", data:46}, {name:"Dan", data:true}].length()
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=LENGTH, fnParm1=[
+      operation=ARRAY, array=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=name
+          ], operation=STRING, string=Tim
+          name=[
+            operation=STRING, string=data
+          ], operation=NUMBER, number=46
+        ]
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=name
+          ], operation=STRING, string=Dan
+          name=[
+            operation=STRING, string=data
+          ], operation=BOOLEAN, boolean=true
+        ]
+      ]
+    ]
+  ]
+]
+
+Test:
+@.name in [{name:"Tim", data:false}, {name:"Dan", data:true}][?@.data]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FOR, for=[
+      operation=FILTER, filter=[
+        operation=ARRAY, array=[
+          operation=OBJECT, object=[
+            name=[
+              operation=STRING, string=name
+            ], operation=STRING, string=Tim
+            name=[
+              operation=STRING, string=data
+            ], operation=BOOLEAN, boolean=false
+          ]
+          operation=OBJECT, object=[
+            name=[
+              operation=STRING, string=name
+            ], operation=STRING, string=Dan
+            name=[
+              operation=STRING, string=data
+            ], operation=BOOLEAN, boolean=true
+          ]
+        ]
+      ], filterExpr=[
+        operation=FUNCTION, function=ELEMENT, fnParm1=[
+          operation=CURRENT
+        ], fnParm2=[
+          operation=STRING, string=data
+        ]
+      ]
+    ], forExpr=[
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=CURRENT
+      ], fnParm2=[
+        operation=STRING, string=name
+      ]
+    ]
+  ]
+]
+
+Test:
+{name:@} in ["Tim", "Dan"]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FOR, for=[
+      operation=ARRAY, array=[
+        operation=STRING, string=Tim
+        operation=STRING, string=Dan
+      ]
+    ], forExpr=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=name
+        ], operation=CURRENT
+      ]
+    ]
+  ]
+]
+
+Test:
+["Tim", "Dan"][\@]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=SORT, sort=[
+      operation=ARRAY, array=[
+        operation=STRING, string=Tim
+        operation=STRING, string=Dan
+      ]
+    ], sortParms=[
+      operation=BOOLEAN, boolean=true
+      operation=CURRENT
+    ]
+  ]
+]
+
+Test:
+"thiș is dätà".length()
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=LENGTH, fnParm1=[
+      operation=STRING, string=thiș is dätà
+    ]
+  ]
+]
+
+Test:
+{is:true, this:2, true:"ok"}.length()
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=LENGTH, fnParm1=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=is
+        ], operation=BOOLEAN, boolean=true
+        name=[
+          operation=STRING, string=this
+        ], operation=NUMBER, number=2
+        name=[
+          operation=STRING, string=true
+        ], operation=STRING, string=ok
+      ]
+    ]
+  ]
+]
+
+Test:
+{length:123}.length
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=length
+        ], operation=NUMBER, number=123
+      ]
+    ], fnParm2=[
+      operation=STRING, string=length
+    ]
+  ]
+]
+
+Test:
+{name:@.name(), length:@.length(), type:@.type(), value:@} in {name:"Tim", data:46}
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FOR, for=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=name
+        ], operation=STRING, string=Tim
+        name=[
+          operation=STRING, string=data
+        ], operation=NUMBER, number=46
+      ]
+    ], forExpr=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=name
+        ], operation=FUNCTION, function=NAME, fnParm1=[
+          operation=CURRENT
+        ]
+        name=[
+          operation=STRING, string=length
+        ], operation=FUNCTION, function=LENGTH, fnParm1=[
+          operation=CURRENT
+        ]
+        name=[
+          operation=STRING, string=type
+        ], operation=FUNCTION, function=TYPE, fnParm1=[
+          operation=CURRENT
+        ]
+        name=[
+          operation=STRING, string=value
+        ], operation=CURRENT
+      ]
+    ]
+  ]
+]
+
+Test:
+[[].type(), {}.type(), null.type(), false.type()]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=ARRAY, array=[
+      operation=FUNCTION, function=TYPE, fnParm1=[
+        operation=ARRAY, array=[
+        ]
+      ]
+      operation=FUNCTION, function=TYPE, fnParm1=[
+        operation=OBJECT, object=[
+        ]
+      ]
+      operation=FUNCTION, function=TYPE, fnParm1=[
+        operation=NULL
+      ]
+      operation=FUNCTION, function=TYPE, fnParm1=[
+        operation=BOOLEAN, boolean=false
+      ]
+    ]
+  ]
+]
+
+Test:
+"123&{2 + 2}5"
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=APPEND, append=[
+      operation=STRING, string=123
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=NUMBER, number=2
+      ], fnParm2=[
+        operation=NUMBER, number=2
+      ]
+      operation=STRING, string=5
+    ]
+  ]
+]
+
+Test:
+@ in "123"
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FOR, for=[
+      operation=STRING, string=123
+    ], forExpr=[
+      operation=CURRENT
+    ]
+  ]
+]
+
+Test:
+@ in 3
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FOR, for=[
+      operation=NUMBER, number=3
+    ], forExpr=[
+      operation=CURRENT
+    ]
+  ]
+]
+
+Test:
+'123'
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=STRING, string=123
+  ]
+]
+
+Test:
+"123"[1]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=STRING, string=123
+    ], fnParm2=[
+      operation=NUMBER, number=1
+    ]
+  ]
+]
+
+Test:
+"123"[-2]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=STRING, string=123
+    ], fnParm2=[
+      operation=NUMBER, number=-2
+    ]
+  ]
+]
+
+Test:
+"1234"[1:-1]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=STRING, string=1234
+      operation=NUMBER, number=1
+      operation=NUMBER, number=-1
+      operation=NUMBER, number=1
+    ]
+  ]
+]
+
+Test:
+"1234"[::-1]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=STRING, string=1234
+      operation=NUMBER
+      operation=NUMBER
+      operation=NUMBER, number=-1
+    ]
+  ]
+]
+
+Test:
+"1234"[::2]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=STRING, string=1234
+      operation=NUMBER
+      operation=NUMBER
+      operation=NUMBER, number=2
+    ]
+  ]
+]
+
+Test:
+"1234"[-3:]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro=\{Name=slice\}, callParms=[
+      operation=STRING, string=1234
+      operation=NUMBER, number=-3
+      operation=NUMBER
+      operation=NUMBER, number=1
+    ]
+  ]
+]
+
+Test:
+"1234".index("23")
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=INDEX, fnParm1=[
+      operation=STRING, string=1234
+    ], fnParm2=[
+      operation=STRING, string=23
+    ]
+  ]
+]
+
+Test:
+"1234".index("231")
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=INDEX, fnParm1=[
+      operation=STRING, string=1234
+    ], fnParm2=[
+      operation=STRING, string=231
+    ]
+  ]
+]
+
+Test:
+{value:@, index:@.index(), first:@.first(), last:@.last()} in "abc"
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FOR, for=[
+      operation=STRING, string=abc
+    ], forExpr=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=value
+        ], operation=CURRENT
+        name=[
+          operation=STRING, string=index
+        ], operation=FUNCTION, function=INDEX, fnParm1=[
+          operation=CURRENT
+        ]
+        name=[
+          operation=STRING, string=first
+        ], operation=FUNCTION, function=FIRST, fnParm1=[
+          operation=CURRENT
+        ]
+        name=[
+          operation=STRING, string=last
+        ], operation=FUNCTION, function=LAST, fnParm1=[
+          operation=CURRENT
+        ]
+      ]
+    ]
+  ]
+]
+
+Test:
+"count &{[@ + 1, @.last()?'':', '] in 3}"
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=APPEND, append=[
+      operation=STRING, string=count 
+      operation=FOR, for=[
+        operation=NUMBER, number=3
+      ], forExpr=[
+        operation=ARRAY, array=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=CURRENT
+          ], fnParm2=[
+            operation=NUMBER, number=1
+          ]
+          operation=CONDITION, conExpr=[
+            operation=FUNCTION, function=LAST, fnParm1=[
+              operation=CURRENT
+            ]
+          ], conTrue=[
+            operation=STRING, string=
+          ], conFalse=[
+            operation=STRING, string=\, 
+          ]
+        ]
+      ]
+      operation=STRING, string=
+    ]
+  ]
+]
+
+Test:
+[pow(2, 4), string(1), boolean("true"), number("123"), float("2.1e4")]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=ARRAY, array=[
+      operation=FUNCTION, function=POW, fnParm1=[
+        operation=NUMBER, number=2
+      ], fnParm2=[
+        operation=NUMBER, number=4
+      ]
+      operation=FUNCTION, function=STRING, fnParm1=[
+        operation=NUMBER, number=1
+      ]
+      operation=FUNCTION, function=BOOLEAN, fnParm1=[
+        operation=STRING, string=true
+      ]
+      operation=FUNCTION, function=NUMBER, fnParm1=[
+        operation=STRING, string=123
+      ]
+      operation=FUNCTION, function=FLOAT, fnParm1=[
+        operation=STRING, string=2.1e4
+      ]
+    ]
+  ]
+]
+
+Test:
+[[1,2],[1,3],[0,2],[0,1]][/@]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=SORT, sort=[
+      operation=ARRAY, array=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+          operation=NUMBER, number=2
+        ]
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+          operation=NUMBER, number=3
+        ]
+        operation=ARRAY, array=[
+          operation=NUMBER, number=0
+          operation=NUMBER, number=2
+        ]
+        operation=ARRAY, array=[
+          operation=NUMBER, number=0
+          operation=NUMBER, number=1
+        ]
+      ]
+    ], sortParms=[
+      operation=CURRENT
+    ]
+  ]
+]
+
+Test:
+[[1,"aa"]==[1,"aaa"], [1,'aa']==[1,'aa'], [2]*2, {"this":1, "too":2} - "too", [2] > [1]]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=ARRAY, array=[
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+          operation=STRING, string=aa
+        ]
+      ], fnParm2=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+          operation=STRING, string=aaa
+        ]
+      ]
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+          operation=STRING, string=aa
+        ]
+      ], fnParm2=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+          operation=STRING, string=aa
+        ]
+      ]
+      operation=FUNCTION, function=MUL, fnParm1=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=2
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=2
+      ]
+      operation=FUNCTION, function=MIN, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=this
+          ], operation=NUMBER, number=1
+          name=[
+            operation=STRING, string=too
+          ], operation=NUMBER, number=2
+        ]
+      ], fnParm2=[
+        operation=STRING, string=too
+      ]
+      operation=FUNCTION, function=GT, fnParm1=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=2
+        ]
+      ], fnParm2=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+        ]
+      ]
+    ]
+  ]
+]
+

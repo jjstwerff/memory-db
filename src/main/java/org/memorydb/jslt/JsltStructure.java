@@ -42,8 +42,8 @@ public class JsltStructure {
 		oper.field("operation", Type.ENUMERATE, "FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT",
 				"BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "FILTER", "SORT", "IF", "CURRENT", "READ").condition();
 		oper.field("function", Type.ENUMERATE, "NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT",
-				"LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "FILTER",
-				"STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT").mandatory().when("FUNCTION");
+				"LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING",
+				"BOOLEAN", "NAME", "TYPE", "ELEMENT").mandatory().when("FUNCTION");
 		oper.field("fnParm1", Type.OBJECT, expr).when("FUNCTION");
 		oper.field("fnParm2", Type.OBJECT, expr).when("FUNCTION");
 		oper.field("conExpr", Type.OBJECT, expr).when("CONDITION");
@@ -90,14 +90,13 @@ public class JsltStructure {
 
 		Record match = project.content("Match");
 		match.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "NULL", "VARIABLE", "FLOAT", "NUMBER", "STRING",
-				"ITERATE", "OBJECT").condition();
+				"OBJECT").condition();
 		match.field("marray", Type.ARRAY, subMatch).when("ARRAY");
 		match.field("variable", Type.OBJECT, variable).when("VARIABLE");
 		match.field("boolean", Type.BOOLEAN).when("BOOLEAN");
 		match.field("float", Type.FLOAT).when("FLOAT");
 		match.field("number", Type.LONG).when("NUMBER");
 		match.field("string", Type.STRING).when("STRING");
-		match.field("iterate", Type.ARRAY, subMatch).when("ITERATE");
 		match.field("mobject", Type.ARRAY, mfield).when("OBJECT");
 
 		mfield.field("name", Type.STRING);

@@ -80,7 +80,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 	}
 
 	default ArrayArray getArray(int index) {
-		return getType() != Type.ARRAY ? new ArrayArray(getStore(), 0, -1) : new ArrayArray(this, index);
+		return getType() != Type.ARRAY ? new ArrayArray(getStore(), 0, -1) : this instanceof ArrayArray ? new ArrayArray((ArrayArray)this, index) : new ArrayArray(this, index);
 	}
 
 	default ArrayArray addArray() {
@@ -243,7 +243,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 			return null;
 		switch (type) {
 		case ARRAY:
-			return null;
+			return this instanceof ArrayArray ? new ArrayArray(this, -1) : this;
 		case BOOLEAN:
 			return isBoolean();
 		case FLOAT:
@@ -264,7 +264,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 	@Override
 	default int next(int field) {
 		if (getType() == Type.ARRAY)
-			return field < 0 ? 1 : (field - 1 >= getSize() ? 0 : field + 1);
+			return field < 0 ? 1 : (field >= getSize() ? -2 : field + 1);
 		if (getType() != Type.OBJECT)
 			return field == 0 ? -2 : 0;
 		if (field < 0)
@@ -279,13 +279,13 @@ public interface Part extends MemoryRecord, RecordInterface {
 			return null;
 		switch (type) {
 		case ARRAY:
-			return FieldType.ITERATE;
+			return FieldType.ARRAY;
 		case BOOLEAN:
 			return FieldType.BOOLEAN;
 		case FLOAT:
 			return FieldType.FLOAT;
 		case NULL:
-			return null;
+			return FieldType.NULL;
 		case NUMBER:
 			return FieldType.LONG;
 		case OBJECT:
@@ -316,7 +316,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 			return null;
 		if (getType() == Type.ARRAY) {
 			if (field == 0)
-				return FieldType.ITERATE;
+				return FieldType.ARRAY;
 			ArrayArray array = getArray(field - 1);
 			return array == null || !array.exists() ? null : array.getFieldType();
 		}
@@ -335,7 +335,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 		if (field < 0)
 			return null;
 		if (getType() == Type.ARRAY)
-			return getArray(field - 1);
+			return getArray(field - 1).getContent();
 		if (getType() != Type.OBJECT)
 			return getContent();
 		return new Field(getStore(), field).getContent();

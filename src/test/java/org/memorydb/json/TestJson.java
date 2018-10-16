@@ -88,7 +88,7 @@ public class TestJson extends NormalCheck {
 	}
 
 	private void nonObject(JsonWriter write, RecordInterface rec, int field) {
-		if (rec.type(field) == FieldType.ITERATE) {
+		if (rec.type(field) == FieldType.ARRAY) {
 			if (field == 0)
 				write.startArray();
 			else
