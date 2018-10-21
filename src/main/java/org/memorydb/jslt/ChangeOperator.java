@@ -61,7 +61,8 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 				break;
 			case FILTER:
 				getStore().setInt(getRec(), operatorPosition() + 1, 0);
-				getStore().setInt(getRec(), operatorPosition() + 5, 0);
+				getStore().setByte(getRec(), operatorPosition() + 5, getStore().getByte(getRec(), operatorPosition() + 5) & 254);
+				getStore().setInt(getRec(), operatorPosition() + 6, 0);
 				break;
 			case SORT:
 				getStore().setInt(getRec(), operatorPosition() + 1, 0);
@@ -188,9 +189,15 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 		}
 	}
 
+	default void setFilterDeep(boolean value) {
+		if (getOperation() == Operation.FILTER) {
+			getStore().setByte(getRec(), operatorPosition() + 5, (getStore().getByte(getRec(), operatorPosition() + 5) & 254) + (value ? 1 : 0));
+		}
+	}
+
 	default void setFilterExpr(Expr value) {
 		if (getOperation() == Operation.FILTER) {
-			getStore().setInt(getRec(), operatorPosition() + 5, value == null ? 0 : value.getRec());
+			getStore().setInt(getRec(), operatorPosition() + 6, value == null ? 0 : value.getRec());
 		}
 	}
 
@@ -327,6 +334,12 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 		if (parser.hasSub("filter")) {
 			setFilter(new Expr(getStore()).parse(parser));
 		}
+		if (parser.hasField("filterDeep")) {
+			Boolean valueFilterDeep = parser.getBoolean("filterDeep");
+			if (valueFilterDeep == null)
+				throw new MutationException("Mandatory 'filterDeep' field");
+			setFilterDeep(valueFilterDeep);
+		}
 		if (parser.hasSub("filterExpr")) {
 			setFilterExpr(new Expr(getStore()).parse(parser));
 		}
@@ -374,8 +387,8 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 	}
 
 	default boolean setOperator(int field, Object value) {
-		if (field >= 27 && field <= 29)
-			return setResultType(field - 27, value);
+		if (field >= 28 && field <= 30)
+			return setResultType(field - 28, value);
 		switch (field) {
 		case 1:
 			if (value instanceof Operation)
@@ -438,22 +451,26 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 				setFilter((Expr) value);
 			return value instanceof Expr;
 		case 20:
+			if (value instanceof Boolean)
+				setFilterDeep((Boolean) value);
+			return value instanceof Boolean;
+		case 21:
 			if (value instanceof Expr)
 				setFilterExpr((Expr) value);
 			return value instanceof Expr;
-		case 21:
+		case 22:
 			if (value instanceof Expr)
 				setSort((Expr) value);
 			return value instanceof Expr;
-		case 23:
+		case 24:
 			if (value instanceof Expr)
 				setIf((Expr) value);
 			return value instanceof Expr;
-		case 26:
+		case 27:
 			if (value instanceof String)
 				setListenSource((String) value);
 			return value instanceof String;
-		case 27:
+		case 28:
 			if (value instanceof Integer)
 				setListemNr((Integer) value);
 			return value instanceof Integer;
@@ -463,8 +480,8 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 	}
 
 	default ChangeInterface addOperator(int field) {
-		if (field >= 27 && field <= 29)
-			return addResultType(field - 27);
+		if (field >= 28 && field <= 30)
+			return addResultType(field - 28);
 		switch (field) {
 		case 11:
 			return addArray();
@@ -474,11 +491,11 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 			return addObject();
 		case 16:
 			return addCallParms();
-		case 22:
+		case 23:
 			return addSortParms();
-		case 24:
-			return addIfTrue();
 		case 25:
+			return addIfTrue();
+		case 26:
 			return addIfFalse();
 		default:
 			return null;

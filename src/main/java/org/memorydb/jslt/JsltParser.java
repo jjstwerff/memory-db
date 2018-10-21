@@ -288,7 +288,7 @@ public class JsltParser {
 			parseAnd();
 			while (true) {
 				Function fn = null;
-				if (scanner.matches("or"))
+				if (scanner.matches("or") || scanner.matches("||"))
 					fn = Function.OR;
 				else
 					return;
@@ -312,7 +312,7 @@ public class JsltParser {
 			parseTest();
 			while (true) {
 				Function fn = null;
-				if (scanner.matches("and"))
+				if (scanner.matches("and") || scanner.matches("&&"))
 					fn = Function.AND;
 				else
 					return;
@@ -426,7 +426,27 @@ public class JsltParser {
 		private void parseSingle() {
 			parseConst();
 			while (scanner.peek("[") || scanner.peek(".")) {
-				if (scanner.matches(".")) {
+				if (scanner.peek("..[")) {
+					scanner.matches("..");
+					try (ChangeExpr struc = new ChangeExpr(store)) {
+						move(struc, spot);
+						spot.setOperation(Operation.FILTER);
+						spot.setFilterDeep(true);
+						spot.setFilter(struc);
+					}
+					try (ChangeExpr data = new ChangeExpr(store)) {
+						spot.setFilterExpr(data);
+						spot = data;
+					}
+				} if (scanner.matches(".")) {
+					if (scanner.matches(".")) {
+						try (ChangeExpr struc = new ChangeExpr(store)) {
+							move(struc, spot);
+							spot.setOperation(Operation.FILTER);
+							spot.setFilterDeep(true);
+							spot.setFilter(struc);
+						}
+					}
 					String id = scanner.parseIdentifier();
 					if (scanner.matches("(")) {
 						if (id.equals("length")) {
@@ -501,22 +521,8 @@ public class JsltParser {
 							spot.setFnParm2(parm);
 						}
 					}
-				} else if (scanner.matches("?")) {
-					try (ChangeExpr struc = new ChangeExpr(store)) {
-						move(struc, spot);
-						spot.setOperation(Operation.FILTER);
-						spot.setFilter(struc);
-					}
-					try (ChangeExpr parm = new ChangeExpr(store)) {
-						remember();
-						spot = parm;
-						parseExpr();
-						restore();
-						spot.setFilterExpr(parm);
-					}
-				} else {
+				} else
 					parseElements();
-				}
 			}
 		}
 
@@ -578,6 +584,7 @@ public class JsltParser {
 				try (ChangeExpr temp = new ChangeExpr(store)) {
 					move(temp, spot);
 					spot.setOperation(Operation.FILTER);
+					spot.setFilterDeep(false);
 					spot.setFilter(temp);
 				}
 				try (ChangeExpr data = new ChangeExpr(store)) {
@@ -689,13 +696,13 @@ public class JsltParser {
 		}
 
 		private void parseConst() {
-			if (scanner.matches("!")) {
+			if (scanner.matches("not") || scanner.matches("!")) {
 				spot.setOperation(Operation.FUNCTION);
 				spot.setFunction(Function.NOT);
 				try (ChangeExpr parm1 = new ChangeExpr(store)) {
 					remember();
 					spot = parm1;
-					parseConst();
+					parseSingle();
 					restore();
 					spot.setFnParm1(parm1);
 				}

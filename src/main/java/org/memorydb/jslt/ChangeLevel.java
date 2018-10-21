@@ -74,7 +74,7 @@ public class ChangeLevel extends Level implements ChangeOperator {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 4 && field <= 31)
+		if (field >= 4 && field <= 32)
 			return ChangeOperator.super.setOperator(field - 4, value);
 		switch (field) {
 		case 1:
@@ -88,7 +88,7 @@ public class ChangeLevel extends Level implements ChangeOperator {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 4 && field <= 31)
+		if (field >= 4 && field <= 32)
 			return ChangeOperator.super.addOperator(field - 4);
 		switch (field) {
 		case 2:

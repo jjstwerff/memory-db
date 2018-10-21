@@ -34,7 +34,7 @@ public class TestJslt extends MemoryTests {
 		jslt(null, "65 % 10", "5");
 		jslt(null, "2 == 3", "false");
 		jslt(null, "1 > 2", "false");
-		jslt(null, "!(1.0 > 2.1)", "true");
+		jslt(null, "not(1.0 > 2.1)", "true");
 		jslt(null, "\"a\" + 1", "\"a1\"");
 		jslt(null, "[1] + 3", "[1,3]");
 		jslt(null, "[1] + 3 + 'a'", "[1,3,\"a\"]");
@@ -109,8 +109,9 @@ public class TestJslt extends MemoryTests {
 		jslt("[{\"name\":\"Tim\", \"value\":123}, {\"name\":null, \"value\":true}]", "[$[1],$[1].value,$[0].name,$[0].name]", "[{\"name\":null,\"value\":true},true,\"Tim\",\"Tim\"]");
 		jslt("[2,5,3,0]", "$[/@]", "[0,2,3,5]");
 		jslt("[2,5,3,0]", "$[\\@]", "[5,3,2,0]");
-		jslt("[{\"name\":\"Tim\", \"value\":123}, [1,{\"data\":[{\"name\":\"Dan\", \"value\":true}]}]]", "$..[?@.value or @.value == 123].name", "[\"Tim\",\"Dan\"]");
-		jslt("[{\"a\":3,\"b\":0},{\"a\":3,\"b\":1},{\"a\":1}]", "$[?@.a, /@.a, \\@.b]", "[{\"a\":1},{\"a\":3,\"b\":1},{\"a\":3,\"b\":0}]");
+		jslt("[{\"name\":\"Tim\", \"value\":123}, {\"name\":\"Dan\"}]", "@.name in $[?not @.value or @.value == 123]", "[\"Tim\",\"Dan\"]");
+		//jslt("[{\"name\":\"Tim\", \"value\":123}, [1,{\"data\":[{\"name\":\"Dan\", \"value\":true}]}]]", "@.name in $..[?@.value]", "[\"Tim\",\"Dan\"]");
+		jslt("[{\"a\":3,\"b\":0},{\"a\":3,\"b\":1},{\"a\":1}]", "$[?@.a][/@.a, \\@.b]", "[{\"a\":1},{\"a\":3,\"b\":1},{\"a\":3,\"b\":0}]");
 		compare("testInput.txt", bld.toString());
 		bld.setLength(0);
 	}

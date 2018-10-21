@@ -27,7 +27,7 @@ public class ChangeExpr extends Expr implements ChangeOperator {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 0 && field <= 27)
+		if (field >= 0 && field <= 28)
 			return ChangeOperator.super.setOperator(field - 0, value);
 		switch (field) {
 		default:
@@ -37,7 +37,7 @@ public class ChangeExpr extends Expr implements ChangeOperator {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 0 && field <= 27)
+		if (field >= 0 && field <= 28)
 			return ChangeOperator.super.addOperator(field - 0);
 		switch (field) {
 		default:

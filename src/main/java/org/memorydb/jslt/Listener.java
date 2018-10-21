@@ -229,7 +229,7 @@ public class Listener implements Operator {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 3 && field <= 30)
+		if (field >= 3 && field <= 31)
 			return Operator.super.getOperator(field - 3);
 		switch (field) {
 		case 1:
@@ -241,7 +241,7 @@ public class Listener implements Operator {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 3 && field <= 30)
+		if (field >= 3 && field <= 31)
 			return Operator.super.iterateOperator(field - 3);
 		switch (field) {
 		case 2:
@@ -255,7 +255,7 @@ public class Listener implements Operator {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 3 && field <= 30)
+		if (field >= 3 && field <= 31)
 			return Operator.super.typeOperator(field - 3);
 		switch (field) {
 		case 1:
@@ -269,7 +269,7 @@ public class Listener implements Operator {
 
 	@Override
 	public String name(int field) {
-		if (field >= 3 && field <= 30)
+		if (field >= 3 && field <= 31)
 			return Operator.super.nameOperator(field - 3);
 		switch (field) {
 		case 1:

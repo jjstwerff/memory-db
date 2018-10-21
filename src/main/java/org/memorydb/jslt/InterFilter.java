@@ -24,7 +24,7 @@ public class InterFilter implements RecordInterface {
 	public int next(int field) {
 		curField = field;
 		boolean found = false;
-		while(!found) {
+		while (!found) {
 			curField = data.next(curField);
 			if (curField < 0)
 				break;

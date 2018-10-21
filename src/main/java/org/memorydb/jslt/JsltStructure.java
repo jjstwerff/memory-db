@@ -61,6 +61,7 @@ public class JsltStructure {
 		oper.field("for", Type.OBJECT, expr).when("FOR");
 		oper.field("forExpr", Type.OBJECT, expr).when("FOR");
 		oper.field("filter", Type.OBJECT, expr).when("FILTER");
+		oper.field("filterDeep", Type.BOOLEAN, expr).when("FILTER");
 		oper.field("filterExpr", Type.OBJECT, expr).when("FILTER");
 		oper.field("sort", Type.OBJECT, expr).when("SORT");
 		oper.field("sortParms", Type.ARRAY, step).when("SORT");

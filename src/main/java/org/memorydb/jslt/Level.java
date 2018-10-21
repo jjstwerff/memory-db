@@ -202,7 +202,7 @@ public class Level implements Operator {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 4 && field <= 31)
+		if (field >= 4 && field <= 32)
 			return Operator.super.getOperator(field - 4);
 		switch (field) {
 		case 1:
@@ -214,7 +214,7 @@ public class Level implements Operator {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 4 && field <= 31)
+		if (field >= 4 && field <= 32)
 			return Operator.super.iterateOperator(field - 4);
 		switch (field) {
 		case 2:
@@ -228,7 +228,7 @@ public class Level implements Operator {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 4 && field <= 31)
+		if (field >= 4 && field <= 32)
 			return Operator.super.typeOperator(field - 4);
 		switch (field) {
 		case 1:
@@ -244,7 +244,7 @@ public class Level implements Operator {
 
 	@Override
 	public String name(int field) {
-		if (field >= 4 && field <= 31)
+		if (field >= 4 && field <= 32)
 			return Operator.super.nameOperator(field - 4);
 		switch (field) {
 		case 1:

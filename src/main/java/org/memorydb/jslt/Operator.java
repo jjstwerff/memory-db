@@ -335,6 +335,17 @@ public interface Operator extends ResultType {
 	}
 
 	@FieldData(
+		name = "filterDeep",
+		type = "BOOLEAN",
+		related = Expr.class,
+		when = "FILTER",
+		mandatory = false
+	)
+	default boolean isFilterDeep() {
+		return getOperation() != Operation.FILTER ? false : (getStore().getByte(getRec(), operatorPosition() + 5) & 1) > 0;
+	}
+
+	@FieldData(
 		name = "filterExpr",
 		type = "OBJECT",
 		related = Expr.class,
@@ -342,7 +353,7 @@ public interface Operator extends ResultType {
 		mandatory = false
 	)
 	default Expr getFilterExpr() {
-		return new Expr(getStore(), getOperation() != Operation.FILTER ? 0 : getStore().getInt(getRec(), operatorPosition() + 5));
+		return new Expr(getStore(), getOperation() != Operation.FILTER ? 0 : getStore().getInt(getRec(), operatorPosition() + 6));
 	}
 
 	@FieldData(
@@ -533,6 +544,8 @@ public interface Operator extends ResultType {
 			fldFilter.output(write, iterate - 1);
 			write.endSub();
 		}
+		if (getOperation() == Operation.FILTER)
+			write.field("filterDeep", isFilterDeep(), false);
 		Expr fldFilterExpr = getFilterExpr();
 		if (fldFilterExpr != null && fldFilterExpr.getRec() != 0) {
 			write.sub("filterExpr", false);
@@ -577,8 +590,8 @@ public interface Operator extends ResultType {
 	}
 
 	default Object getOperator(int field) {
-		if (field >= 27 && field <= 29)
-			return getResultType(field - 27);
+		if (field >= 28 && field <= 30)
+			return getResultType(field - 28);
 		switch (field) {
 		case 1:
 			return getOperation();
@@ -611,14 +624,16 @@ public interface Operator extends ResultType {
 		case 19:
 			return getFilter();
 		case 20:
-			return getFilterExpr();
+			return isFilterDeep();
 		case 21:
+			return getFilterExpr();
+		case 22:
 			return getSort();
-		case 23:
+		case 24:
 			return getIf();
-		case 26:
-			return getListenSource();
 		case 27:
+			return getListenSource();
+		case 28:
 			return getListemNr();
 		default:
 			return null;
@@ -626,8 +641,8 @@ public interface Operator extends ResultType {
 	}
 
 	default Iterable<? extends RecordInterface> iterateOperator(int field, @SuppressWarnings("unused") Object... key) {
-		if (field >= 27 && field <= 29)
-			return iterateResultType(field - 27);
+		if (field >= 28 && field <= 30)
+			return iterateResultType(field - 28);
 		switch (field) {
 		case 11:
 			return getArray();
@@ -637,11 +652,11 @@ public interface Operator extends ResultType {
 			return getObject();
 		case 16:
 			return getCallParms();
-		case 22:
+		case 23:
 			return getSortParms();
-		case 24:
-			return getIfTrue();
 		case 25:
+			return getIfTrue();
+		case 26:
 			return getIfFalse();
 		default:
 			return null;
@@ -649,8 +664,8 @@ public interface Operator extends ResultType {
 	}
 
 	default FieldType typeOperator(int field) {
-		if (field >= 27 && field <= 29)
-			return typeResultType(field - 27);
+		if (field >= 28 && field <= 30)
+			return typeResultType(field - 28);
 		switch (field) {
 		case 1:
 			return FieldType.STRING;
@@ -691,20 +706,22 @@ public interface Operator extends ResultType {
 		case 19:
 			return FieldType.OBJECT;
 		case 20:
-			return FieldType.OBJECT;
+			return FieldType.BOOLEAN;
 		case 21:
 			return FieldType.OBJECT;
 		case 22:
-			return FieldType.ARRAY;
-		case 23:
 			return FieldType.OBJECT;
-		case 24:
+		case 23:
 			return FieldType.ARRAY;
+		case 24:
+			return FieldType.OBJECT;
 		case 25:
 			return FieldType.ARRAY;
 		case 26:
-			return FieldType.STRING;
+			return FieldType.ARRAY;
 		case 27:
+			return FieldType.STRING;
+		case 28:
 			return FieldType.INTEGER;
 		default:
 			return null;
@@ -712,8 +729,8 @@ public interface Operator extends ResultType {
 	}
 
 	default String nameOperator(int field) {
-		if (field >= 27 && field <= 29)
-			return nameResultType(field - 27);
+		if (field >= 28 && field <= 30)
+			return nameResultType(field - 28);
 		switch (field) {
 		case 1:
 			return "operation";
@@ -754,20 +771,22 @@ public interface Operator extends ResultType {
 		case 19:
 			return "filter";
 		case 20:
-			return "filterExpr";
+			return "filterDeep";
 		case 21:
-			return "sort";
+			return "filterExpr";
 		case 22:
-			return "sortParms";
+			return "sort";
 		case 23:
-			return "if";
+			return "sortParms";
 		case 24:
-			return "ifTrue";
+			return "if";
 		case 25:
-			return "ifFalse";
+			return "ifTrue";
 		case 26:
-			return "listenSource";
+			return "ifFalse";
 		case 27:
+			return "listenSource";
+		case 28:
 			return "listemNr";
 		default:
 			return null;
