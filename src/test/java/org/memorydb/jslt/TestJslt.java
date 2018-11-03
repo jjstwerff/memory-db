@@ -5,6 +5,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -122,15 +124,19 @@ public class TestJslt extends MemoryTests {
 
 	@Test
 	public void testJSLT() throws IOException {
+		Set<Path> files = new TreeSet<>();
 		try (DirectoryStream<Path> dir = Files.newDirectoryStream(Paths.get(getClass().getResource("/jslt").getFile()))) {
 			for (Path file : dir) {
 				if (file.getFileName().toString().endsWith(".jslt")) {
-					Store jsltStore = new Store(3);
-					new Parser(new Scanner(file), jsltStore).parse();
-					String into = JsltInterpreter.interpret(jsltStore, null);
-					Assert.assertEquals(file.getFileName().toString(), "\"\"", into);
+					files.add(file);
 				}
 			}
+		}
+		for (Path file: files) {
+			Store jsltStore = new Store(3);
+			new Parser(new Scanner(file), jsltStore).parse();
+			String into = JsltInterpreter.interpret(jsltStore, null);
+			Assert.assertEquals(file.getFileName().toString(), "\"\"", into);
 		}
 	}
 }
