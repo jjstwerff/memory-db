@@ -1,0 +1,296 @@
+Test:
+$
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=READ, listenSource=$, listemNr=0
+  ]
+]
+Source:name=$, listeners=[
+  nr=0, levels=[
+  ], operation=CURRENT
+]
+
+Test:
+$.name
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=READ, listenSource=slice, listemNr=0
+    ], fnParm2=[
+      operation=STRING, string=name
+    ]
+  ]
+]
+Source:name=$, listeners=[
+  nr=0, levels=[
+  ], operation=CURRENT
+]
+
+Test:
+$.a.name
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=READ, listenSource=slice, listemNr=0
+      ], fnParm2=[
+        operation=STRING, string=a
+      ]
+    ], fnParm2=[
+      operation=STRING, string=name
+    ]
+  ]
+]
+Source:name=$, listeners=[
+  nr=0, levels=[
+  ], operation=CURRENT
+]
+
+Test:
+$.a
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=READ, listenSource=slice, listemNr=0
+    ], fnParm2=[
+      operation=STRING, string=a
+    ]
+  ]
+]
+Source:name=$, listeners=[
+  nr=0, levels=[
+  ], operation=CURRENT
+]
+
+Test:
+$[0]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=READ, listenSource=slice, listemNr=0
+    ], fnParm2=[
+      operation=NUMBER, number=0
+    ]
+  ]
+]
+Source:name=$, listeners=[
+  nr=0, levels=[
+  ], operation=CURRENT
+]
+
+Test:
+$[1 + 1]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=READ, listenSource=slice, listemNr=0
+    ], fnParm2=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=NUMBER, number=1
+      ], fnParm2=[
+        operation=NUMBER, number=1
+      ]
+    ]
+  ]
+]
+Source:name=$, listeners=[
+  nr=0, levels=[
+  ], operation=CURRENT
+]
+
+Test:
+$[1][0]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=READ, listenSource=slice, listemNr=0
+      ], fnParm2=[
+        operation=NUMBER, number=1
+      ]
+    ], fnParm2=[
+      operation=NUMBER, number=0
+    ]
+  ]
+]
+Source:name=$, listeners=[
+  nr=0, levels=[
+  ], operation=CURRENT
+]
+
+Test:
+[$[1],$[1].value,$[0].name,$[0].name]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=ARRAY, array=[
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=READ, listenSource=slice, listemNr=0
+      ], fnParm2=[
+        operation=NUMBER, number=1
+      ]
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=FUNCTION, function=ELEMENT, fnParm1=[
+          operation=READ, listenSource=slice, listemNr=0
+        ], fnParm2=[
+          operation=NUMBER, number=1
+        ]
+      ], fnParm2=[
+        operation=STRING, string=value
+      ]
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=FUNCTION, function=ELEMENT, fnParm1=[
+          operation=READ, listenSource=slice, listemNr=0
+        ], fnParm2=[
+          operation=NUMBER, number=0
+        ]
+      ], fnParm2=[
+        operation=STRING, string=name
+      ]
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=FUNCTION, function=ELEMENT, fnParm1=[
+          operation=READ, listenSource=slice, listemNr=0
+        ], fnParm2=[
+          operation=NUMBER, number=0
+        ]
+      ], fnParm2=[
+        operation=STRING, string=name
+      ]
+    ]
+  ]
+]
+Source:name=$, listeners=[
+  nr=0, levels=[
+  ], operation=CURRENT
+  nr=1, levels=[
+  ], operation=CURRENT
+  nr=2, levels=[
+  ], operation=CURRENT
+  nr=3, levels=[
+  ], operation=CURRENT
+]
+
+Test:
+$[/@]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=SORT, sort=[
+      operation=READ, listenSource=slice, listemNr=0
+    ], sortParms=[
+      operation=CURRENT
+    ]
+  ]
+]
+Source:name=$, listeners=[
+  nr=0, levels=[
+  ], operation=CURRENT
+]
+
+Test:
+$[\@]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=SORT, sort=[
+      operation=READ, listenSource=slice, listemNr=0
+    ], sortParms=[
+      operation=BOOLEAN, boolean=true
+      operation=CURRENT
+    ]
+  ]
+]
+Source:name=$, listeners=[
+  nr=0, levels=[
+  ], operation=CURRENT
+]
+
+Test:
+@.name in $[?not @.value or @.value == 123]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FOR, for=[
+      operation=FILTER, filter=[
+        operation=READ, listenSource=slice, listemNr=0
+      ], filterDeep=false, filterExpr=[
+        operation=FUNCTION, function=OR, fnParm1=[
+          operation=FUNCTION, function=NOT, fnParm1=[
+            operation=FUNCTION, function=ELEMENT, fnParm1=[
+              operation=CURRENT
+            ], fnParm2=[
+              operation=STRING, string=value
+            ]
+          ]
+        ], fnParm2=[
+          operation=FUNCTION, function=EQ, fnParm1=[
+            operation=FUNCTION, function=ELEMENT, fnParm1=[
+              operation=CURRENT
+            ], fnParm2=[
+              operation=STRING, string=value
+            ]
+          ], fnParm2=[
+            operation=NUMBER, number=123
+          ]
+        ]
+      ]
+    ], forExpr=[
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=CURRENT
+      ], fnParm2=[
+        operation=STRING, string=name
+      ]
+    ]
+  ]
+]
+Source:name=$, listeners=[
+  nr=0, levels=[
+  ], operation=CURRENT
+]
+
+Test:
+$[/@.a][\@.b]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=SORT, sort=[
+      operation=READ, listenSource=slice, listemNr=0
+    ], sortParms=[
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=CURRENT
+      ], fnParm2=[
+        operation=STRING, string=a
+      ]
+      operation=BOOLEAN, boolean=true
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=CURRENT
+      ], fnParm2=[
+        operation=STRING, string=b
+      ]
+    ]
+  ]
+]
+Source:name=$, listeners=[
+  nr=0, levels=[
+  ], operation=CURRENT
+]
+
