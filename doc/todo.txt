@@ -1,19 +1,16 @@
-Current unit-tests:
-String: Function ADD
-    export String
-    also export next string (possibly calculate)
+Less fall-off on iteration in output code = only on relations not on array/object iteration
+Layout bug on parameters parameters
 
 JSLT:
 - add * to jpath ... only 1 level object
 - add [*] to jpath .. only 1 level array
 - add .. to jpath .. possibly more than 1 level
-- add sorting to jpath
 - allow string align
 - allow numeric layout & align, also via expressions
 - allow date layout & align
 - initial macro support
-- types on macro parameters
-- allow type casting via macro parameters
+	add frame positions to variable names & use these to retrieve the values
+- allow simple type casting via macro parameters (long -> double)
 - write set of files from output
 - imports of other scripts
 - documentation of RecordInterface, ChangeInterface
@@ -26,30 +23,6 @@ JSLT:
 - sync
 - local named definitions
 - global named definitions.. possibly from context
-
-InterObject(jsltObject, interpreter)
-- inter(writer) loop fields and show them
-- next.. position of the next field object
-- get.. calculate the field when needed.. skip child Object/Arrays
-- name.. show field names
-- iterate.. loop fields
-InterArray(ijsltArray, nterpreter)
-- inter(writer) iterate & show all
-- get.. index in the array .. calculate
-- iterate.. index in the array .. iterate
-InterFor(jsltFor, interpreter)
-- inter(writer) calculate object expression for each iteratation
-- next.. position inside data array (can be any RecordInterface object)
-- expect funtions: length, first, last, index
-InterFilter(jsltFilter, interpreter)
-- inter(writer) loop each child and write them here
-- next.. position inside data array (skip objects that do not adhere to the condition)
-- expect funtions: length, first, last, index
-InterSort(jsltSort, interpreter) .. fill internal array
-- inter(writer) loop each child in correct order
-- expect funtions: length, first, last, index
-current -> InterObject / InterArray whichever is appropriate
-
 
 TODO:
 - introduce indexes as RadixTrees.

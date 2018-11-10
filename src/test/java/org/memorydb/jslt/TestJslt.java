@@ -10,7 +10,6 @@ import java.util.TreeSet;
 
 import org.junit.Assert;
 import org.junit.Test;
-
 import org.memorydb.file.Scanner;
 import org.memorydb.jslt.JsltParser.Parser;
 import org.memorydb.json.JsonParser;
@@ -136,7 +135,13 @@ public class TestJslt extends MemoryTests {
 			Store jsltStore = new Store(3);
 			new Parser(new Scanner(file), jsltStore).parse();
 			String into = JsltInterpreter.interpret(jsltStore, null);
-			Assert.assertEquals(file.getFileName().toString(), "\"\"", into);
+			String result = file.getFileName().toString();
+			StringBuilder code = new StringBuilder();
+			if (!result.equals(""))
+				for (Macro m: new Macro(jsltStore).new IndexMacros())
+					code.append(m.toString());
+			compare(result + ".txt", code.toString());
+			Assert.assertEquals(result, "\"\"", into);
 		}
 	}
 }

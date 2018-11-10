@@ -18,7 +18,7 @@ import org.memorydb.structure.Store;
 public class Variable implements ResultType {
 	/* package private */ Store store;
 	protected int rec;
-	/* package private */ static final int RECORD_SIZE = 15;
+	/* package private */ static final int RECORD_SIZE = 19;
 
 	public Variable(Store store) {
 		this.store = store;
@@ -49,7 +49,7 @@ public class Variable implements ResultType {
 
 	@Override
 	public int resulttypePosition() {
-		return 10;
+		return 14;
 	}
 
 	@Override
@@ -67,12 +67,21 @@ public class Variable implements ResultType {
 	}
 
 	@FieldData(
+		name = "nr",
+		type = "INTEGER",
+		mandatory = true
+	)
+	public int getNr() {
+		return rec == 0 ? Integer.MIN_VALUE : store.getInt(rec, 8);
+	}
+
+	@FieldData(
 		name = "eager",
 		type = "BOOLEAN",
 		mandatory = false
 	)
 	public boolean isEager() {
-		return rec == 0 ? false : (store.getByte(rec, 8) & 1) > 0;
+		return rec == 0 ? false : (store.getByte(rec, 12) & 1) > 0;
 	}
 
 	@FieldData(
@@ -81,7 +90,7 @@ public class Variable implements ResultType {
 		mandatory = false
 	)
 	public boolean isExtension() {
-		return rec == 0 ? false : (store.getByte(rec, 9) & 1) > 0;
+		return rec == 0 ? false : (store.getByte(rec, 13) & 1) > 0;
 	}
 
 	@Override
@@ -89,6 +98,7 @@ public class Variable implements ResultType {
 		if (rec == 0 || iterate <= 0)
 			return;
 		write.field("name", getName(), true);
+		write.field("nr", getNr(), false);
 		write.field("eager", isEager(), false);
 		write.field("extension", isExtension(), false);
 		outputResultType(write, iterate, false);
@@ -150,14 +160,16 @@ public class Variable implements ResultType {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 3 && field <= 5)
-			return ResultType.super.getResultType(field - 3);
+		if (field >= 4 && field <= 6)
+			return ResultType.super.getResultType(field - 4);
 		switch (field) {
 		case 1:
 			return getName();
 		case 2:
-			return isEager();
+			return getNr();
 		case 3:
+			return isEager();
+		case 4:
 			return isExtension();
 		default:
 			return null;
@@ -166,8 +178,8 @@ public class Variable implements ResultType {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 3 && field <= 5)
-			return ResultType.super.iterateResultType(field - 3);
+		if (field >= 4 && field <= 6)
+			return ResultType.super.iterateResultType(field - 4);
 		switch (field) {
 		default:
 			return null;
@@ -176,14 +188,16 @@ public class Variable implements ResultType {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 3 && field <= 5)
-			return ResultType.super.typeResultType(field - 3);
+		if (field >= 4 && field <= 6)
+			return ResultType.super.typeResultType(field - 4);
 		switch (field) {
 		case 1:
 			return FieldType.STRING;
 		case 2:
-			return FieldType.BOOLEAN;
+			return FieldType.INTEGER;
 		case 3:
+			return FieldType.BOOLEAN;
+		case 4:
 			return FieldType.BOOLEAN;
 		default:
 			return null;
@@ -192,14 +206,16 @@ public class Variable implements ResultType {
 
 	@Override
 	public String name(int field) {
-		if (field >= 3 && field <= 5)
-			return ResultType.super.nameResultType(field - 3);
+		if (field >= 4 && field <= 6)
+			return ResultType.super.nameResultType(field - 4);
 		switch (field) {
 		case 1:
 			return "name";
 		case 2:
-			return "eager";
+			return "nr";
 		case 3:
+			return "eager";
+		case 4:
 			return "extension";
 		default:
 			return null;

@@ -40,7 +40,8 @@ public class JsltStructure {
 
 		Record oper = project.content("Operator");
 		oper.field("operation", Type.ENUMERATE, "FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT",
-				"BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "FILTER", "SORT", "IF", "CURRENT", "READ").condition();
+				"BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "FILTER", "SORT", "IF", "CURRENT", "READ", "VARIABLE")
+				.condition();
 		oper.field("function", Type.ENUMERATE, "NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT",
 				"LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING",
 				"BOOLEAN", "NAME", "TYPE", "ELEMENT").mandatory().when("FUNCTION");
@@ -70,6 +71,8 @@ public class JsltStructure {
 		oper.field("ifFalse", Type.ARRAY, step).when("IF");
 		oper.field("listenSource", Type.STRING, listener).when("READ");
 		oper.field("listemNr", Type.INTEGER, listener).when("READ");
+		oper.field("varName", Type.STRING, listener).when("VARIABLE");
+		oper.field("varNr", Type.INTEGER, listener).when("VARIABLE");
 		oper.include(type);
 
 		field.field("name", Type.OBJECT, expr);
@@ -82,6 +85,7 @@ public class JsltStructure {
 
 		Record variable = project.table("Variable");
 		variable.field("name", Type.STRING).mandatory();
+		variable.field("nr", Type.INTEGER).mandatory();
 		variable.field("eager", Type.BOOLEAN);
 		variable.field("extension", Type.BOOLEAN);
 		variable.include(type);

@@ -60,7 +60,7 @@ public interface Operator extends ResultType {
 	}
 
 	public enum Operation {
-		FUNCTION, CONDITION, NUMBER, FLOAT, STRING, ARRAY, OBJECT, BOOLEAN, APPEND, NULL, CALL, FOR, FILTER, SORT, IF, CURRENT, READ;
+		FUNCTION, CONDITION, NUMBER, FLOAT, STRING, ARRAY, OBJECT, BOOLEAN, APPEND, NULL, CALL, FOR, FILTER, SORT, IF, CURRENT, READ, VARIABLE;
 
 		private static Map<String, Operation> map = new HashMap<>();
 
@@ -78,7 +78,7 @@ public interface Operator extends ResultType {
 	@FieldData(
 		name = "operation",
 		type = "ENUMERATE",
-		enumerate = {"FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT", "BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "FILTER", "SORT", "IF", "CURRENT", "READ"},
+		enumerate = {"FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT", "BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "FILTER", "SORT", "IF", "CURRENT", "READ", "VARIABLE"},
 		condition = true,
 		mandatory = false
 	)
@@ -457,6 +457,28 @@ public interface Operator extends ResultType {
 		return getOperation() != Operation.READ ? Integer.MIN_VALUE : getStore().getInt(getRec(), operatorPosition() + 5);
 	}
 
+	@FieldData(
+		name = "varName",
+		type = "STRING",
+		related = Listener.class,
+		when = "VARIABLE",
+		mandatory = false
+	)
+	default String getVarName() {
+		return getOperation() != Operation.VARIABLE ? null : getStore().getString(getStore().getInt(getRec(), operatorPosition() + 1));
+	}
+
+	@FieldData(
+		name = "varNr",
+		type = "INTEGER",
+		related = Listener.class,
+		when = "VARIABLE",
+		mandatory = false
+	)
+	default int getVarNr() {
+		return getOperation() != Operation.VARIABLE ? Integer.MIN_VALUE : getStore().getInt(getRec(), operatorPosition() + 5);
+	}
+
 	default void outputOperator(Write write, int iterate, boolean first) throws IOException {
 		if (getRec() == 0 || iterate <= 0)
 			return;
@@ -587,11 +609,13 @@ public interface Operator extends ResultType {
 		}
 		write.field("listenSource", getListenSource(), false);
 		write.field("listemNr", getListemNr(), false);
+		write.field("varName", getVarName(), false);
+		write.field("varNr", getVarNr(), false);
 	}
 
 	default Object getOperator(int field) {
-		if (field >= 28 && field <= 30)
-			return getResultType(field - 28);
+		if (field >= 30 && field <= 32)
+			return getResultType(field - 30);
 		switch (field) {
 		case 1:
 			return getOperation();
@@ -635,14 +659,18 @@ public interface Operator extends ResultType {
 			return getListenSource();
 		case 28:
 			return getListemNr();
+		case 29:
+			return getVarName();
+		case 30:
+			return getVarNr();
 		default:
 			return null;
 		}
 	}
 
 	default Iterable<? extends RecordInterface> iterateOperator(int field, @SuppressWarnings("unused") Object... key) {
-		if (field >= 28 && field <= 30)
-			return iterateResultType(field - 28);
+		if (field >= 30 && field <= 32)
+			return iterateResultType(field - 30);
 		switch (field) {
 		case 11:
 			return getArray();
@@ -664,8 +692,8 @@ public interface Operator extends ResultType {
 	}
 
 	default FieldType typeOperator(int field) {
-		if (field >= 28 && field <= 30)
-			return typeResultType(field - 28);
+		if (field >= 30 && field <= 32)
+			return typeResultType(field - 30);
 		switch (field) {
 		case 1:
 			return FieldType.STRING;
@@ -723,14 +751,18 @@ public interface Operator extends ResultType {
 			return FieldType.STRING;
 		case 28:
 			return FieldType.INTEGER;
+		case 29:
+			return FieldType.STRING;
+		case 30:
+			return FieldType.INTEGER;
 		default:
 			return null;
 		}
 	}
 
 	default String nameOperator(int field) {
-		if (field >= 28 && field <= 30)
-			return nameResultType(field - 28);
+		if (field >= 30 && field <= 32)
+			return nameResultType(field - 30);
 		switch (field) {
 		case 1:
 			return "operation";
@@ -788,6 +820,10 @@ public interface Operator extends ResultType {
 			return "listenSource";
 		case 28:
 			return "listemNr";
+		case 29:
+			return "varName";
+		case 30:
+			return "varNr";
 		default:
 			return null;
 		}

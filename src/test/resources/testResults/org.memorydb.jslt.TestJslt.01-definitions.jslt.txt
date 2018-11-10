@@ -1,0 +1,159 @@
+name=a, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=NUMBER, number=1
+  ]
+]
+name=b, alternatives=[
+  nr=0, parameters=[
+    & type=VARIABLE, variable=[
+      name=val, eager=false, extension=false, type=NUMBER
+    ]
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=VARIABLE, varName=val
+    ], fnParm2=[
+      operation=NUMBER, number=1
+    ]
+  ]
+  nr=1, parameters=[
+    & type=VARIABLE, variable=[
+      name=val, eager=false, extension=false, type=STRING
+    ]
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=VARIABLE, varName=val
+    ], fnParm2=[
+      operation=STRING, string=*
+    ]
+  ]
+  nr=2, parameters=[
+    & type=NUMBER, number=0
+    & type=VARIABLE, variable=[
+      name=val2, eager=false, extension=false, type=NUMBER
+    ]
+  ], code=[
+    operation=FUNCTION, function=MUL, fnParm1=[
+      operation=NUMBER, number=100
+    ], fnParm2=[
+      operation=VARIABLE, varName=val2
+    ]
+  ]
+  nr=3, parameters=[
+    & type=STRING, string=
+    & type=VARIABLE, variable=[
+      name=val2, eager=false, extension=false, type=NUMBER
+    ]
+  ], code=[
+    operation=VARIABLE, varName=val2
+  ]
+  nr=4, parameters=[
+    & type=VARIABLE, variable=[
+      name=val, eager=false, extension=false, type=NUMBER
+    ]
+    & type=VARIABLE, variable=[
+      name=val2, eager=false, extension=false, type=NUMBER
+    ]
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=VARIABLE, varName=val
+    ], fnParm2=[
+      operation=VARIABLE, varName=val2
+    ]
+  ]
+]
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=FUNCTION, function=ADD, fnParm1=[
+              operation=CALL, macro=\{Name=test\}, callParms=[
+                operation=STRING, string=constant
+                operation=NUMBER, number=1
+                operation=CALL, macro=\{Name=a\}, callParms=[
+                ]
+              ]
+            ], fnParm2=[
+              operation=CALL, macro=\{Name=test\}, callParms=[
+                operation=STRING, string=type-match-1
+                operation=STRING, string= *
+                operation=CALL, macro=\{Name=b\}, callParms=[
+                  operation=STRING, string= 
+                ]
+              ]
+            ]
+          ], fnParm2=[
+            operation=CALL, macro=\{Name=test\}, callParms=[
+              operation=STRING, string=type-match-2
+              operation=NUMBER, number=3
+              operation=CALL, macro=\{Name=b\}, callParms=[
+                operation=NUMBER, number=2
+              ]
+            ]
+          ]
+        ], fnParm2=[
+          operation=CALL, macro=\{Name=test\}, callParms=[
+            operation=STRING, string=type-match-3
+            operation=NUMBER, number=3
+            operation=CALL, macro=\{Name=b\}, callParms=[
+              operation=NUMBER, number=5
+              operation=NUMBER, number=-2
+            ]
+          ]
+        ]
+      ], fnParm2=[
+        operation=CALL, macro=\{Name=test\}, callParms=[
+          operation=STRING, string=type-match-4
+          operation=NUMBER, number=200
+          operation=CALL, macro=\{Name=b\}, callParms=[
+            operation=NUMBER, number=0
+            operation=NUMBER, number=2
+          ]
+        ]
+      ]
+    ], fnParm2=[
+      operation=CALL, macro=\{Name=test\}, callParms=[
+        operation=STRING, string=type-match-5
+        operation=NUMBER, number=2
+        operation=CALL, macro=\{Name=b\}, callParms=[
+          operation=STRING, string=
+          operation=NUMBER, number=2
+        ]
+      ]
+    ]
+  ]
+]
+name=slice, alternatives=[
+]
+name=test, alternatives=[
+  nr=0, parameters=[
+    & type=VARIABLE, variable=[
+      name=name, eager=false, extension=false, type=STRING
+    ]
+    & type=VARIABLE, variable=[
+      name=should, eager=false, extension=false, type=NULL
+    ]
+    & type=VARIABLE, variable=[
+      name=was, eager=false, extension=false, type=NULL
+    ]
+  ], code=[
+    operation=CONDITION, conExpr=[
+      operation=FUNCTION, function=NE, fnParm1=[
+        operation=VARIABLE, varName=should
+      ], fnParm2=[
+        operation=VARIABLE, varName=was
+      ]
+    ], conTrue=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=VARIABLE, varName=name
+      ], fnParm2=[
+        operation=STRING, string= 
+      ]
+    ], conFalse=[
+      operation=STRING, string=
+    ]
+  ]
+]

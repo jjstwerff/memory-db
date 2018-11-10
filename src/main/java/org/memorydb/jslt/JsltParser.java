@@ -37,6 +37,7 @@ public class JsltParser {
 		private ChangeOperator spot;
 		private ChangeMatch match;
 		private Macro slice;
+		Alternative curAlt;
 
 		public Parser(Scanner scanner, Store jsltStore) {
 			this.scanner = scanner;
@@ -55,51 +56,54 @@ public class JsltParser {
 				try (ChangeAlternative alt = new ChangeAlternative(macro, 0)) {
 					alt.setNr(0);
 					spot = alt.getCode().add();
+					parseExpr();
 				}
-				parseExpr();
 			}
 		}
 
 		private void parseDef() {
 			String id = scanner.parseIdentifier();
-			Macro search = new Macro(store);
-			Alternative alt;
-			int rec = search.new IndexMacros(id).search();
-			if (rec > 0) {
-				search.setRec(rec);
+			Macro curMacro = new Macro(store);
+			int rec = curMacro.new IndexMacros(id).search();
+			if (rec > 0) { // found a current macro
+				curMacro.setRec(rec);
 				int altNr = 0;
-				for (Alternative a : search.getAlternatives()) {
-					if (a.getNr() > altNr)
-						altNr = a.getNr();
+				for (Alternative a : curMacro.getAlternatives()) {
+					if (a.getNr() >= altNr)
+						altNr = a.getNr() + 1;
 				}
-				try (ChangeAlternative nalt = new ChangeAlternative(search, 0)) {
+				try (ChangeAlternative nalt = new ChangeAlternative(curMacro, 0)) {
 					nalt.setNr(altNr);
 					spot = nalt.getCode().add();
-					alt = nalt;
+					curAlt = nalt;
 				}
-			} else
+			} else { // create new macro
 				try (ChangeMacro macro = new ChangeMacro(store)) {
 					macro.setName(id);
 					try (ChangeAlternative nalt = new ChangeAlternative(macro, 0)) {
 						nalt.setNr(0);
 						spot = nalt.getCode().add();
-						alt = nalt;
+						curAlt = nalt;
 					}
-					search = macro;
 				}
+			}
 			scanner.expect("(");
 			if (!scanner.matches(")")) {
-				parseParameter(alt);
+				parseParameter();
 				while (scanner.matches(","))
-					parseParameter(alt);
+					parseParameter();
 				scanner.expect(")");
 			}
 			scanner.expect(":");
 			parseExpr();
+			scanner.newLine();
+			while (scanner.peek("\n"))
+				scanner.newLine();
+			curAlt = null;
 		}
 
-		private void parseParameter(Alternative alt) {
-			ParametersArray par = alt.getParameters().add();
+		private void parseParameter() {
+			ParametersArray par = curAlt.getParameters().add();
 			match = par;
 			parseMatch();
 			if (scanner.matches("if")) {
@@ -169,6 +173,7 @@ public class JsltParser {
 						var.setType(ResultType.Type.NULL);
 						break;
 					}
+					var.setRecord(null);
 					if (var.getType() != ResultType.Type.NULL) {
 						scanner.expect(":");
 						var.setName(scanner.parseIdentifier());
@@ -438,7 +443,8 @@ public class JsltParser {
 						spot.setFilterExpr(data);
 						spot = data;
 					}
-				} if (scanner.matches(".")) {
+				}
+				if (scanner.matches(".")) {
 					if (scanner.matches(".")) {
 						try (ChangeExpr struc = new ChangeExpr(store)) {
 							move(struc, spot);
@@ -662,7 +668,8 @@ public class JsltParser {
 			}
 			if (scanner.matches(":")) {
 				CallParmsArray callParms;
-				try (ChangeExpr struc = new ChangeExpr(spot.getFnParm1()); ChangeExpr from = new ChangeExpr(spot.getFnParm2())) {
+				try (ChangeExpr struc = new ChangeExpr(spot.getFnParm1());
+						ChangeExpr from = new ChangeExpr(spot.getFnParm2())) {
 					spot.setOperation(Operation.CALL);
 					callParms = spot.getCallParms();
 					spot.setMacro(slice);
@@ -741,8 +748,54 @@ public class JsltParser {
 				parseString(false);
 			else if (scanner.hasNumber() || scanner.peek("-"))
 				parseNumber();
-			else
+			else {
+				parseVariable();
+			}
+		}
+
+		private void parseVariable() {
+			if (!scanner.hasIdentifier()) {
 				scanner.error("Syntax error");
+				return;
+			}
+			while (scanner.peek("\n"))
+				scanner.newLine();
+			String id = scanner.parseIdentifier();
+			if (scanner.matches("(")) { // found macro call
+				Macro curMacro = new Macro(store);
+				int rec = curMacro.new IndexMacros(id).search();
+				if (rec <= 0) {
+					scanner.error("Unknown macro '" + id + "'");
+					return;
+				}
+				spot.setOperation(Operation.CALL);
+				spot.setMacro(curMacro);
+				CallParmsArray callParms = spot.getCallParms();
+				while (!scanner.matches(")")) {
+					CallParmsArray add = callParms.add();
+					remember();
+					spot = add;
+					parseExpr();
+					restore();
+					scanner.matches(",");
+				}
+				return;
+			}
+			if (curAlt != null) {// found possible parameter of current macro
+				int varnr = 0;
+				for (ParametersArray parm : curAlt.getParameters())
+					if (parm.getType() == Type.VARIABLE) {
+						Variable var = parm.getVariable();
+						if (var.getName().equals(id)) {
+							spot.setOperation(Operation.VARIABLE);
+							spot.setVarName(id);
+							spot.setVarNr(varnr);
+							return;
+						}
+						varnr++;
+					}
+			}
+			scanner.error("Unknown identifier '" + id + "'");
 		}
 
 		private void parseListener() {
@@ -994,6 +1047,10 @@ public class JsltParser {
 					break;
 				case STRING:
 					into.setString(from.getString());
+					break;
+				case VARIABLE:
+					into.setVarName(from.getVarName());
+					into.setVarNr(from.getVarNr());
 					break;
 				default:
 					break;

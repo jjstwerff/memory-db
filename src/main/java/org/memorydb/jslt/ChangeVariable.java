@@ -12,6 +12,7 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 	public ChangeVariable(Store store) {
 		super(store, store.allocate(Variable.RECORD_SIZE));
 		setName(null);
+		setNr(0);
 		setEager(false);
 		setExtension(false);
 	}
@@ -24,17 +25,26 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 		store.setInt(rec, 4, store.putString(value));
 	}
 
+	public void setNr(int value) {
+		if (value == Integer.MIN_VALUE)
+			throw new MutationException("Mandatory 'nr' field");
+		store.setInt(rec, 8, value);
+	}
+
 	public void setEager(boolean value) {
-		store.setByte(rec, 8, (store.getByte(rec, 8) & 254) + (value ? 1 : 0));
+		store.setByte(rec, 12, (store.getByte(rec, 12) & 254) + (value ? 1 : 0));
 	}
 
 	public void setExtension(boolean value) {
-		store.setByte(rec, 9, (store.getByte(rec, 9) & 254) + (value ? 1 : 0));
+		store.setByte(rec, 13, (store.getByte(rec, 13) & 254) + (value ? 1 : 0));
 	}
 
 	/* package private */ void parseFields(Parser parser) {
 		if (parser.hasField("name")) {
 			setName(parser.getString("name"));
+		}
+		if (parser.hasField("nr")) {
+			setNr(parser.getInt("nr"));
 		}
 		if (parser.hasField("eager")) {
 			Boolean valueEager = parser.getBoolean("eager");
@@ -58,18 +68,22 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 3 && field <= 5)
-			return ChangeResultType.super.setResultType(field - 3, value);
+		if (field >= 4 && field <= 6)
+			return ChangeResultType.super.setResultType(field - 4, value);
 		switch (field) {
 		case 1:
 			if (value instanceof String)
 				setName((String) value);
 			return value instanceof String;
 		case 2:
+			if (value instanceof Integer)
+				setNr((Integer) value);
+			return value instanceof Integer;
+		case 3:
 			if (value instanceof Boolean)
 				setEager((Boolean) value);
 			return value instanceof Boolean;
-		case 3:
+		case 4:
 			if (value instanceof Boolean)
 				setExtension((Boolean) value);
 			return value instanceof Boolean;
@@ -80,8 +94,8 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 3 && field <= 5)
-			return ChangeResultType.super.addResultType(field - 3);
+		if (field >= 4 && field <= 6)
+			return ChangeResultType.super.addResultType(field - 4);
 		switch (field) {
 		default:
 			return null;

@@ -210,7 +210,7 @@ public class Macro implements MemoryRecord, RecordInterface {
 	public String toString() {
 		Write write = new Write(new StringBuilder());
 		try {
-			output(write, 4);
+			output(write, 40);
 		} catch (IOException e) {
 			return "";
 		}

@@ -182,7 +182,7 @@ public class OrderArray implements ChangeOperator, Iterable<OrderArray> {
 
 	@Override
 	public String name(int field) {
-		if (field >= 0 && field <= 28)
+		if (field >= 0 && field <= 30)
 			return nameOperator(field - 0);
 		switch (field) {
 		default:
@@ -192,7 +192,7 @@ public class OrderArray implements ChangeOperator, Iterable<OrderArray> {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 0 && field <= 28)
+		if (field >= 0 && field <= 30)
 			return typeOperator(field - 0);
 		switch (field) {
 		default:
@@ -202,7 +202,7 @@ public class OrderArray implements ChangeOperator, Iterable<OrderArray> {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 0 && field <= 28)
+		if (field >= 0 && field <= 30)
 			return getOperator(field - 0);
 		switch (field) {
 		default:
@@ -212,7 +212,7 @@ public class OrderArray implements ChangeOperator, Iterable<OrderArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 28)
+		if (field >= 0 && field <= 30)
 			return iterateOperator(field - 0);
 		switch (field) {
 		default:
@@ -222,7 +222,7 @@ public class OrderArray implements ChangeOperator, Iterable<OrderArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 0 && field <= 28)
+		if (field >= 0 && field <= 30)
 			return setOperator(field - 0, value);
 		switch (field) {
 		default:
@@ -232,7 +232,7 @@ public class OrderArray implements ChangeOperator, Iterable<OrderArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 0 && field <= 28)
+		if (field >= 0 && field <= 30)
 			return addOperator(field - 0);
 		switch (field) {
 		default:

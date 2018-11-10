@@ -77,6 +77,10 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 				getStore().setInt(getRec(), operatorPosition() + 1, 0);
 				getStore().setInt(getRec(), operatorPosition() + 5, 0);
 				break;
+			case VARIABLE:
+				getStore().setInt(getRec(), operatorPosition() + 1, 0);
+				getStore().setInt(getRec(), operatorPosition() + 5, 0);
+				break;
 			default:
 				break;
 			}
@@ -240,6 +244,18 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 		}
 	}
 
+	default void setVarName(String value) {
+		if (getOperation() == Operation.VARIABLE) {
+			getStore().setInt(getRec(), operatorPosition() + 1, getStore().putString(value));
+		}
+	}
+
+	default void setVarNr(int value) {
+		if (getOperation() == Operation.VARIABLE) {
+			getStore().setInt(getRec(), operatorPosition() + 5, value);
+		}
+	}
+
 	default void parseOperator(Parser parser) {
 		if (parser.hasField("operation")) {
 			String valueOperation = parser.getString("operation");
@@ -379,6 +395,12 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 		if (parser.hasField("listemNr")) {
 			setListemNr(parser.getInt("listemNr"));
 		}
+		if (parser.hasField("varName")) {
+			setVarName(parser.getString("varName"));
+		}
+		if (parser.hasField("varNr")) {
+			setVarNr(parser.getInt("varNr"));
+		}
 	}
 
 	@Override
@@ -387,8 +409,8 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 	}
 
 	default boolean setOperator(int field, Object value) {
-		if (field >= 28 && field <= 30)
-			return setResultType(field - 28, value);
+		if (field >= 30 && field <= 32)
+			return setResultType(field - 30, value);
 		switch (field) {
 		case 1:
 			if (value instanceof Operation)
@@ -474,14 +496,22 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 			if (value instanceof Integer)
 				setListemNr((Integer) value);
 			return value instanceof Integer;
+		case 29:
+			if (value instanceof String)
+				setVarName((String) value);
+			return value instanceof String;
+		case 30:
+			if (value instanceof Integer)
+				setVarNr((Integer) value);
+			return value instanceof Integer;
 		default:
 			return false;
 		}
 	}
 
 	default ChangeInterface addOperator(int field) {
-		if (field >= 28 && field <= 30)
-			return addResultType(field - 28);
+		if (field >= 30 && field <= 32)
+			return addResultType(field - 30);
 		switch (field) {
 		case 11:
 			return addArray();

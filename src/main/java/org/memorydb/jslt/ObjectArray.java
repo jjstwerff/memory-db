@@ -290,7 +290,7 @@ public class ObjectArray implements ChangeOperator, Iterable<ObjectArray> {
 
 	@Override
 	public String name(int field) {
-		if (field >= 1 && field <= 29)
+		if (field >= 1 && field <= 31)
 			return nameOperator(field - 1);
 		switch (field) {
 		case 1:
@@ -302,7 +302,7 @@ public class ObjectArray implements ChangeOperator, Iterable<ObjectArray> {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 1 && field <= 29)
+		if (field >= 1 && field <= 31)
 			return typeOperator(field - 1);
 		switch (field) {
 		case 1:
@@ -314,7 +314,7 @@ public class ObjectArray implements ChangeOperator, Iterable<ObjectArray> {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 1 && field <= 29)
+		if (field >= 1 && field <= 31)
 			return getOperator(field - 1);
 		switch (field) {
 		case 1:
@@ -326,7 +326,7 @@ public class ObjectArray implements ChangeOperator, Iterable<ObjectArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 1 && field <= 29)
+		if (field >= 1 && field <= 31)
 			return iterateOperator(field - 1);
 		switch (field) {
 		default:
@@ -336,7 +336,7 @@ public class ObjectArray implements ChangeOperator, Iterable<ObjectArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 1 && field <= 29)
+		if (field >= 1 && field <= 31)
 			return setOperator(field - 1, value);
 		switch (field) {
 		case 1:
@@ -350,7 +350,7 @@ public class ObjectArray implements ChangeOperator, Iterable<ObjectArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 1 && field <= 29)
+		if (field >= 1 && field <= 31)
 			return addOperator(field - 1);
 		switch (field) {
 		default:

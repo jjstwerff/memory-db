@@ -141,10 +141,10 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 		try {
 			if (idx == -1)
 				for (CodeArray a : this) {
-					a.output(write, 4);
+					a.output(write, 40);
 				}
 			else
-				output(write, 4);
+				output(write, 40);
 		} catch (IOException e) {
 			throw new InputOutputException(e);
 		}
@@ -182,7 +182,7 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 
 	@Override
 	public String name(int field) {
-		if (field >= 0 && field <= 28)
+		if (field >= 0 && field <= 30)
 			return nameOperator(field - 0);
 		switch (field) {
 		default:
@@ -192,7 +192,7 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 0 && field <= 28)
+		if (field >= 0 && field <= 30)
 			return typeOperator(field - 0);
 		switch (field) {
 		default:
@@ -202,7 +202,7 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 0 && field <= 28)
+		if (field >= 0 && field <= 30)
 			return getOperator(field - 0);
 		switch (field) {
 		default:
@@ -212,7 +212,7 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 28)
+		if (field >= 0 && field <= 30)
 			return iterateOperator(field - 0);
 		switch (field) {
 		default:
@@ -222,7 +222,7 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 0 && field <= 28)
+		if (field >= 0 && field <= 30)
 			return setOperator(field - 0, value);
 		switch (field) {
 		default:
@@ -232,7 +232,7 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 0 && field <= 28)
+		if (field >= 0 && field <= 30)
 			return addOperator(field - 0);
 		switch (field) {
 		default:

@@ -1,10 +1,14 @@
 def a(): 1
 def b(NUMBER:val): val + 1
 def b(STRING:val): val + "*"
+def b(0, NUMBER:val2): 100 * val2
+def b("", NUMBER:val2): val2
 def b(NUMBER:val, NUMBER:val2): val + val2
 def test(STRING:name, should, was): should != was ? name + " " : ""
 
 test("constant", 1, a()) + 
 test("type-match-1", " *", b(" ")) +
 test("type-match-2", 3, b(2)) +
-test("type-match-3", 3, b(5, -2))
+test("type-match-3", 3, b(5, -2)) +
+test("type-match-4", 200, b(0, 2)) +
+test("type-match-5", 2, b("", 2))

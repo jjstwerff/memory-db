@@ -631,7 +631,9 @@ public abstract class RedBlackTree {
 	 * @return A {@link Node} matching the search or <code>null</code> if there is no such node.
 	 */
 	private int searchPos(Key key) {
-		boolean higher = key.oper() == IndexOperation.GT || key.oper() == IndexOperation.LE;
+		IndexOperation oper = key.oper();
+		boolean higher = oper == IndexOperation.GT || oper == IndexOperation.LE;
+		boolean equals = oper == IndexOperation.EQ;
 		if (readTop() == 0)
 			return 0;
 		int current = readTop();
@@ -641,7 +643,7 @@ public abstract class RedBlackTree {
 			int test = key.compareTo(current);
 			if (test == 0)
 				found = current;
-			if ((test < 0 || !higher && test == 0) && readLeft(current) > 0) {
+			if ((test < 0 || !equals && !higher && test == 0) && readLeft(current) > 0) {
 				current = readLeft(current);
 			} else if ((test > 0 || higher && test == 0) && readRight(current) > 0) {
 				current = readRight(current);
