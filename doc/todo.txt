@@ -3,6 +3,7 @@ Layout bug on parameters parameters
 
 JSLT:
 - initial macro support
+	show possible alternatives & what matches or what not on it
 	fill frame position in variable definition
 - write set of files from output
 - imports of other scripts

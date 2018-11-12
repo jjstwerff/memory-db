@@ -7,22 +7,22 @@ name=a, alternatives=[
 name=b, alternatives=[
   nr=0, parameters=[
     & type=VARIABLE, variable=[
-      name=val, eager=false, extension=false, type=NUMBER
+      name=val, nr=0, eager=false, extension=false, type=NUMBER
     ]
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
-      operation=VARIABLE, varName=val
+      operation=VARIABLE, varName=val, varNr=0
     ], fnParm2=[
       operation=NUMBER, number=1
     ]
   ]
   nr=1, parameters=[
     & type=VARIABLE, variable=[
-      name=val, eager=false, extension=false, type=STRING
+      name=val, nr=0, eager=false, extension=false, type=STRING
     ]
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
-      operation=VARIABLE, varName=val
+      operation=VARIABLE, varName=val, varNr=0
     ], fnParm2=[
       operation=STRING, string=*
     ]
@@ -30,35 +30,35 @@ name=b, alternatives=[
   nr=2, parameters=[
     & type=NUMBER, number=0
     & type=VARIABLE, variable=[
-      name=val2, eager=false, extension=false, type=NUMBER
+      name=val2, nr=0, eager=false, extension=false, type=NUMBER
     ]
   ], code=[
     operation=FUNCTION, function=MUL, fnParm1=[
       operation=NUMBER, number=100
     ], fnParm2=[
-      operation=VARIABLE, varName=val2
+      operation=VARIABLE, varName=val2, varNr=0
     ]
   ]
   nr=3, parameters=[
     & type=STRING, string=
     & type=VARIABLE, variable=[
-      name=val2, eager=false, extension=false, type=NUMBER
+      name=val2, nr=0, eager=false, extension=false, type=NUMBER
     ]
   ], code=[
-    operation=VARIABLE, varName=val2
+    operation=VARIABLE, varName=val2, varNr=0
   ]
   nr=4, parameters=[
     & type=VARIABLE, variable=[
-      name=val, eager=false, extension=false, type=NUMBER
+      name=val, nr=0, eager=false, extension=false, type=NUMBER
     ]
     & type=VARIABLE, variable=[
-      name=val2, eager=false, extension=false, type=NUMBER
+      name=val2, nr=0, eager=false, extension=false, type=NUMBER
     ]
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
-      operation=VARIABLE, varName=val
+      operation=VARIABLE, varName=val, varNr=0
     ], fnParm2=[
-      operation=VARIABLE, varName=val2
+      operation=VARIABLE, varName=val2, varNr=1
     ]
   ]
 ]
@@ -131,24 +131,24 @@ name=slice, alternatives=[
 name=test, alternatives=[
   nr=0, parameters=[
     & type=VARIABLE, variable=[
-      name=name, eager=false, extension=false, type=STRING
+      name=name, nr=0, eager=false, extension=false, type=STRING
     ]
     & type=VARIABLE, variable=[
-      name=should, eager=false, extension=false, type=NULL
+      name=should, nr=0, eager=false, extension=false, type=NULL
     ]
     & type=VARIABLE, variable=[
-      name=was, eager=false, extension=false, type=NULL
+      name=was, nr=0, eager=false, extension=false, type=NULL
     ]
   ], code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=NE, fnParm1=[
-        operation=VARIABLE, varName=should
+        operation=VARIABLE, varName=should, varNr=1
       ], fnParm2=[
-        operation=VARIABLE, varName=was
+        operation=VARIABLE, varName=was, varNr=2
       ]
     ], conTrue=[
       operation=FUNCTION, function=ADD, fnParm1=[
-        operation=VARIABLE, varName=name
+        operation=VARIABLE, varName=name, varNr=0
       ], fnParm2=[
         operation=STRING, string= 
       ]

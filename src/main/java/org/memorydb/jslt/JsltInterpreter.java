@@ -122,6 +122,7 @@ public class JsltInterpreter {
 		int parms = code.getCallParms().getSize();
 		for (CallParmsArray parm : code.getCallParms())
 			stack.add(inter(parm));
+		System.out.println("macro:" + macro.getName() + " stack:" + stack);
 		for (Alternative alt : macro.getAlternatives()) {
 			if (alt.getParameters().getSize() != parms)
 				continue;
@@ -176,11 +177,14 @@ public class JsltInterpreter {
 						stack.add(stack.get(stackF + pnr));
 					pnr++;
 				}
-				Object res = inter(alt.getCode());
-				stackFrame = lastFrame;
+				System.out.println("alt:" + macro.getName() + " frameFrame:" + stackFrame + " on stack:" + stack);
+				Object res = inter(alt.getCode().iterator().next());
 				while (stack.size() > stackFrame)
 					stack.remove(stack.size() - 1);
+				stackFrame = lastFrame;
 				return res;
+			} else {
+				throw new RuntimeException("Could not find alternative for " + macro.getName());
 			}
 		}
 		return null;
@@ -195,7 +199,7 @@ public class JsltInterpreter {
 		case FLOAT:
 			return obj instanceof Double || obj instanceof Long;
 		case NULL:
-			return obj == null;
+			return true;
 		case NUMBER:
 			return obj instanceof Long;
 		case OBJECT:
