@@ -2,26 +2,25 @@ Less fall-off on iteration in output code = only on relations not on array/objec
 Layout bug on parameters parameters
 
 JSLT:
+- initial macro support
+	fill frame position in variable definition
+- write set of files from output
+- imports of other scripts
+- allow simple type casting via macro parameters (long -> double)
+- add more type information from expressions
+- array unwinding in macro definitions
+- string unwinding in macro definitions
+
 - add * to jpath ... only 1 level object
 - add [*] to jpath .. only 1 level array
 - add .. to jpath .. possibly more than 1 level
 - allow string align
 - allow numeric layout & align, also via expressions
 - allow date layout & align
-- initial macro support
-	add frame positions to variable names & use these to retrieve the values
-- allow simple type casting via macro parameters (long -> double)
-- write set of files from output
-- imports of other scripts
 - documentation of RecordInterface, ChangeInterface
 - output from a script can define the input of another script
-- add more type information from expressions
-- simple jolt defaults / override / remove
-- constants matching in macro definitions
-- iterator unwinding in macro definitions
-- change content of field
-- sync
-- local named definitions
+- sync back to database
+- introduce local variables
 - global named definitions.. possibly from context
 
 TODO:
