@@ -158,27 +158,48 @@ public class Field implements Part {
 
 	@Override
 	public Object get(int field) {
-		return getPart(field);
+		if (field >= 2 && field <= 9)
+			return Part.super.getPart(field - 2);
+		switch (field) {
+		case 1:
+			return getName();
+		default:
+			return null;
+		}
 	}
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		return iteratePart(field);
-	}
-
-	@Override
-	public FieldType type() {
-		return typePart();
+		if (field >= 2 && field <= 9)
+			return Part.super.iteratePart(field - 2);
+		switch (field) {
+		default:
+			return null;
+		}
 	}
 
 	@Override
 	public FieldType type(int field) {
-		return typePart(field);
+		if (field >= 2 && field <= 9)
+			return Part.super.typePart(field - 2);
+		switch (field) {
+		case 1:
+			return FieldType.STRING;
+		default:
+			return null;
+		}
 	}
 
 	@Override
 	public String name(int field) {
-		return namePart(field);
+		if (field >= 2 && field <= 9)
+			return Part.super.namePart(field - 2);
+		switch (field) {
+		case 1:
+			return "name";
+		default:
+			return null;
+		}
 	}
 
 	@Override

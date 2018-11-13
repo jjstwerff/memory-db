@@ -307,6 +307,7 @@ public class Record implements MemoryRecord, RecordInterface {
 		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 24));
 	}
 
+	@Override
 	@FieldData(
 		name = "size",
 		type = "INTEGER",

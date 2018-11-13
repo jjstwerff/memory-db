@@ -1,3 +1,5 @@
+Prevent overriding sources during code generation unit tests. 
+Add @Override to getSize()
 Less fall-off on iteration in output code = only on relations not on array/object iteration
 Layout bug on parameters parameters
 

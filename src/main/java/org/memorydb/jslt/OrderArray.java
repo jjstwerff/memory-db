@@ -88,6 +88,7 @@ public class OrderArray implements ChangeOperator, Iterable<OrderArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

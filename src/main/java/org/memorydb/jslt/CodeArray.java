@@ -88,6 +88,7 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

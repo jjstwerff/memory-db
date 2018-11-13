@@ -166,6 +166,7 @@ public class ArrayArray implements ChangeOperator, Iterable<ArrayArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

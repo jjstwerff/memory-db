@@ -118,6 +118,7 @@ public class IterateArray implements ChangeMatch, Iterable<IterateArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

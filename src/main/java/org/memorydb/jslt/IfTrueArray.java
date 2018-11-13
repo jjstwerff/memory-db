@@ -166,6 +166,7 @@ public class IfTrueArray implements ChangeOperator, Iterable<IfTrueArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

@@ -20,6 +20,7 @@ public class InterArray implements RecordInterface {
 		return null;
 	}
 
+	@Override
 	public int getSize() {
 		return data.getSize();
 	}

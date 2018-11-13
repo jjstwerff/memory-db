@@ -44,6 +44,7 @@ public class MinArray implements RecordInterface {
 		return array.type(field);
 	}
 
+	@Override
 	public int getSize() {
 		return array.getSize(); // TODO correctly determine size
 	}

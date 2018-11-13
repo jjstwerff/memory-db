@@ -89,6 +89,7 @@ public class FieldsArray implements ChangeInterface, Iterable<FieldsArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

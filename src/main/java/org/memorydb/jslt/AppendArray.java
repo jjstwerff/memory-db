@@ -166,6 +166,7 @@ public class AppendArray implements ChangeOperator, Iterable<AppendArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

@@ -64,6 +64,7 @@ public class AddArray implements RecordInterface {
 		return array.type(field);
 	}
 
+	@Override
 	public int getSize() {
 		return array.getSize() + (elm instanceof RecordInterface ? ((RecordInterface) elm).getSize() : 1);
 	}

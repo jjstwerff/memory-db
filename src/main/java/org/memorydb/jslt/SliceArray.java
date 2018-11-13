@@ -88,6 +88,7 @@ public class SliceArray implements ChangeOperator, Iterable<SliceArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

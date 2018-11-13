@@ -147,6 +147,7 @@ public class ForBlockArray implements ChangeOperator, Iterable<ForBlockArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

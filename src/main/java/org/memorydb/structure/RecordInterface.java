@@ -92,12 +92,15 @@ public interface RecordInterface {
 		return null;
 	}
 
+	/**
+	 * @param field  
+	 * @param key 
+	 */
 	default Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		return new Iterable<RecordInterface>() {
+		return new Iterable<>() {
 			@Override
 			public Iterator<RecordInterface> iterator() {
-				return new Iterator<RecordInterface>() {
-					int field = -1;
+				return new Iterator<>() {
 					int next = RecordInterface.this.next(-1);
 
 					@Override
@@ -107,9 +110,9 @@ public interface RecordInterface {
 
 					@Override
 					public RecordInterface next() {
-						field = next;
-						next = RecordInterface.this.next(field);
-						return (RecordInterface) get(field);
+						int fieldNr = next;
+						next = RecordInterface.this.next(fieldNr);
+						return (RecordInterface) get(fieldNr);
 					}
 				};
 			}

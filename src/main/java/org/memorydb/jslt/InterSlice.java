@@ -62,7 +62,7 @@ public class InterSlice implements RecordInterface {
 					return (int) (start + step * (field - 1));
 			}
 			long skip = (stop - start) / step;
-			field -= skip;;
+			field -= skip;
 		}
 		return -1;
 	}
@@ -73,7 +73,7 @@ public class InterSlice implements RecordInterface {
 		int idx = calc(field, size);
 		if (idx < 0 || idx > size)
 			return null;
-		return ((RecordInterface) data).get(idx + 1);
+		return data.get(idx + 1);
 	}
 
 	@Override

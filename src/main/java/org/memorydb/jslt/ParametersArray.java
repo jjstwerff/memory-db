@@ -89,6 +89,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

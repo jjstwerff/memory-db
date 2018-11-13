@@ -147,6 +147,7 @@ public class SortBlockArray implements ChangeOperator, Iterable<SortBlockArray> 
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

@@ -108,6 +108,7 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

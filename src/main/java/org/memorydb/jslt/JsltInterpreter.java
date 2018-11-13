@@ -111,12 +111,12 @@ public class JsltInterpreter {
 	private Object macro(Operator code) {
 		Macro macro = code.getMacro();
 		if (macro.getName().equals("slice")) {
-			Object data = inter(new CallParmsArray(code.getCallParms(), 0));
-			if (data instanceof RecordInterface)
-				return new InterSlice(this, (RecordInterface) data, code.getCallParms());
-			if (data instanceof String)
-				return subString((String) data, code.getCallParms());
-			throw new RuntimeException("Slice not implemented with type " + type(data));
+			Object parmData = inter(new CallParmsArray(code.getCallParms(), 0));
+			if (parmData instanceof RecordInterface)
+				return new InterSlice(this, (RecordInterface) parmData, code.getCallParms());
+			if (parmData instanceof String)
+				return subString((String) parmData, code.getCallParms());
+			throw new RuntimeException("Slice not implemented with type " + type(parmData));
 		}
 		int stackF = stack.size();
 		int parms = code.getCallParms().getSize();
@@ -156,7 +156,7 @@ public class JsltInterpreter {
 						found = false;
 					break;
 				case STRING:
-					if (!(obj instanceof String) || !parm.getString().equals((String) obj))
+					if (!(obj instanceof String) || !parm.getString().equals(obj))
 						found = false;
 					break;
 				case VARIABLE:
@@ -183,9 +183,8 @@ public class JsltInterpreter {
 					stack.remove(stack.size() - 1);
 				stackFrame = lastFrame;
 				return res;
-			} else {
-				throw new RuntimeException("Could not find alternative for " + macro.getName());
 			}
+			throw new RuntimeException("Could not find alternative for " + macro.getName());
 		}
 		return null;
 	}
@@ -478,7 +477,7 @@ public class JsltInterpreter {
 			else if (p1 instanceof Boolean)
 				return ((Boolean) p1) == getBoolean(p2);
 			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
-				return compare((RecordInterface) p1, (RecordInterface) p2) == 0;
+				return compare(p1, p2) == 0;
 			return false;
 		case FIRST:
 			return first;
@@ -492,7 +491,7 @@ public class JsltInterpreter {
 			else if (p1 instanceof String)
 				return ((String) p1).compareTo(getString(p2)) >= 0;
 			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
-				return compare((RecordInterface) p1, (RecordInterface) p2) >= 0;
+				return compare(p1, p2) >= 0;
 			return null;
 		case GT:
 			if (p1 instanceof Long)
@@ -502,7 +501,7 @@ public class JsltInterpreter {
 			else if (p1 instanceof String)
 				return ((String) p1).compareTo(getString(p2)) > 0;
 			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
-				return compare((RecordInterface) p1, (RecordInterface) p2) > 0;
+				return compare(p1, p2) > 0;
 			return null;
 		case INDEX:
 			if (p1 instanceof String && p2 != null) {
@@ -522,7 +521,7 @@ public class JsltInterpreter {
 			else if (p1 instanceof String)
 				return ((String) p1).compareTo(getString(p2)) <= 0;
 			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
-				return compare((RecordInterface) p1, (RecordInterface) p2) <= 0;
+				return compare(p1, p2) <= 0;
 			return null;
 		case LENGTH:
 			if (p1 == null && code.getFnParm1().getOperation() == Operation.ARRAY)
@@ -556,7 +555,7 @@ public class JsltInterpreter {
 			else if (p1 instanceof String)
 				return ((String) p1).compareTo(getString(p2)) < 0;
 			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
-				return compare((RecordInterface) p1, (RecordInterface) p2) <= 0;
+				return compare(p1, p2) <= 0;
 			return null;
 		case MIN:
 			if (p1 instanceof Long) {
@@ -609,7 +608,7 @@ public class JsltInterpreter {
 			else if (p1 instanceof Boolean)
 				return ((Boolean) p1) != getBoolean(p2);
 			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
-				return compare((RecordInterface) p1, (RecordInterface) p2) != 0;
+				return compare(p1, p2) != 0;
 			return false;
 		case NEG:
 			if (p1 instanceof Long)

@@ -167,6 +167,7 @@ public class ObjectArray implements ChangeOperator, Iterable<ObjectArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

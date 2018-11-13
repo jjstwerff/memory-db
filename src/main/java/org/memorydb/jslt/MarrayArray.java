@@ -112,6 +112,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

@@ -53,6 +53,7 @@ public class FreeBits implements MemoryRecord, RecordInterface {
 		return new ChangeFreeBits(this);
 	}
 
+	@Override
 	@FieldData(
 		name = "size",
 		type = "INTEGER",

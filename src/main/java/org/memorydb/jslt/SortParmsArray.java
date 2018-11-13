@@ -166,6 +166,7 @@ public class SortParmsArray implements ChangeOperator, Iterable<SortParmsArray> 
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

@@ -113,6 +113,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}

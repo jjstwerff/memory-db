@@ -89,6 +89,7 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}
