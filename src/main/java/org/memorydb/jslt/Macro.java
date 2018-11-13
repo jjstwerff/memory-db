@@ -191,7 +191,7 @@ public class Macro implements MemoryRecord, RecordInterface {
 		if (fldAlternatives != null) {
 			write.sub("alternatives", false);
 			for (Alternative sub : fldAlternatives)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		write.endRecord();
@@ -210,7 +210,7 @@ public class Macro implements MemoryRecord, RecordInterface {
 	public String toString() {
 		Write write = new Write(new StringBuilder());
 		try {
-			output(write, 40);
+			output(write, 4);
 		} catch (IOException e) {
 			return "";
 		}

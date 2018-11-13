@@ -233,7 +233,7 @@ public class ObjectArray implements ChangeOperator, Iterable<ObjectArray> {
 		Expr fldName = getName();
 		if (fldName != null && fldName.getRec() != 0) {
 			write.sub("name", true);
-			fldName.output(write, iterate - 1);
+			fldName.output(write, iterate);
 			write.endSub();
 		}
 		outputOperator(write, iterate, false);

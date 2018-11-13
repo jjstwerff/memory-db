@@ -1,12 +1,9 @@
-Prevent overriding sources during code generation unit tests. 
-Add @Override to getSize()
-Less fall-off on iteration in output code = only on relations not on array/object iteration
+Testing:
+- database reading in JSTL .. 
+
 Layout bug on parameters parameters
 
 JSLT:
-- initial macro support
-	show possible alternatives & what matches or what not on it
-	fill frame position in variable definition
 - write set of files from output
 - imports of other scripts
 - allow simple type casting via macro parameters (long -> double)

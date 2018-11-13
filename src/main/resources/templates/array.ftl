@@ -151,6 +151,7 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 		return store;
 	}
 
+	@Override
 	public int getSize() {
 		return size;
 	}
@@ -255,7 +256,7 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 		if (fld${rfld.name?cap_first} != null) {
 			write.sub("${rfld.name}", ${(rfld?index == 0)?c});
 			for (${rfld.related.name} sub : fld${rfld.name?cap_first})
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 <#elseif rfld.type == "ARRAY">
@@ -263,14 +264,14 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 		if (fld${rfld.name?cap_first} != null) {
 			write.sub("${rfld.name}", ${(rfld?index == 0)?c});
 			for (${rfld.name?cap_first}Array sub : fld${rfld.name?cap_first})
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 <#elseif rfld.type == "OBJECT">
 		${rfld.related.name} fld${rfld.name?cap_first} = get${rfld.name?cap_first}();
 		if (fld${rfld.name?cap_first} != null && fld${rfld.name?cap_first}.getRec() != 0) {
 			write.sub("${rfld.name}", ${(rfld?index == 0)?c});
-			fld${rfld.name?cap_first}.output(write, iterate - 1);
+			fld${rfld.name?cap_first}.output(write, iterate);
 			write.endSub();
 		}
 </#if></#list>

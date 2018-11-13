@@ -122,14 +122,14 @@ public class Level implements Operator {
 		if (fldOrder != null) {
 			write.sub("order", false);
 			for (OrderArray sub : fldOrder)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		SliceArray fldSlice = getSlice();
 		if (fldSlice != null) {
 			write.sub("slice", false);
 			for (SliceArray sub : fldSlice)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		outputOperator(write, iterate, false);

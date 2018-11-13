@@ -161,13 +161,13 @@ public interface Match extends MemoryRecord, RecordInterface {
 		if (fldMarray != null) {
 			write.sub("marray", false);
 			for (MarrayArray sub : fldMarray)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		Variable fldVariable = getVariable();
 		if (fldVariable != null && fldVariable.getRec() != 0) {
 			write.sub("variable", false);
-			fldVariable.output(write, iterate - 1);
+			fldVariable.output(write, iterate);
 			write.endSub();
 		}
 		if (getType() == Type.BOOLEAN)
@@ -179,7 +179,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 		if (fldMobject != null) {
 			write.sub("mobject", false);
 			for (MobjectArray sub : fldMobject)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 	}

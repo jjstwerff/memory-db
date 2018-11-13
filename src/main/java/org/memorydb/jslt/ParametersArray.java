@@ -154,7 +154,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 		Expr fldIf = getIf();
 		if (fldIf != null && fldIf.getRec() != 0) {
 			write.sub("if", true);
-			fldIf.output(write, iterate - 1);
+			fldIf.output(write, iterate);
 			write.endSub();
 		}
 		outputMatch(write, iterate, false);

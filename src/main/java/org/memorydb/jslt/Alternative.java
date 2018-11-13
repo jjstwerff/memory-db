@@ -118,14 +118,14 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		if (fldParameters != null) {
 			write.sub("parameters", false);
 			for (ParametersArray sub : fldParameters)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		CodeArray fldCode = getCode();
 		if (fldCode != null) {
 			write.sub("code", false);
 			for (CodeArray sub : fldCode)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		write.endRecord();

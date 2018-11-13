@@ -142,10 +142,10 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 		try {
 			if (idx == -1)
 				for (CodeArray a : this) {
-					a.output(write, 40);
+					a.output(write, 4);
 				}
 			else
-				output(write, 40);
+				output(write, 4);
 		} catch (IOException e) {
 			throw new InputOutputException(e);
 		}

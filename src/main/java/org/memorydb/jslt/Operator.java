@@ -487,31 +487,31 @@ public interface Operator extends ResultType {
 		Expr fldFnParm1 = getFnParm1();
 		if (fldFnParm1 != null && fldFnParm1.getRec() != 0) {
 			write.sub("fnParm1", false);
-			fldFnParm1.output(write, iterate - 1);
+			fldFnParm1.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldFnParm2 = getFnParm2();
 		if (fldFnParm2 != null && fldFnParm2.getRec() != 0) {
 			write.sub("fnParm2", false);
-			fldFnParm2.output(write, iterate - 1);
+			fldFnParm2.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldConExpr = getConExpr();
 		if (fldConExpr != null && fldConExpr.getRec() != 0) {
 			write.sub("conExpr", false);
-			fldConExpr.output(write, iterate - 1);
+			fldConExpr.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldConTrue = getConTrue();
 		if (fldConTrue != null && fldConTrue.getRec() != 0) {
 			write.sub("conTrue", false);
-			fldConTrue.output(write, iterate - 1);
+			fldConTrue.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldConFalse = getConFalse();
 		if (fldConFalse != null && fldConFalse.getRec() != 0) {
 			write.sub("conFalse", false);
-			fldConFalse.output(write, iterate - 1);
+			fldConFalse.output(write, iterate);
 			write.endSub();
 		}
 		write.field("number", getNumber(), false);
@@ -521,21 +521,21 @@ public interface Operator extends ResultType {
 		if (fldArray != null) {
 			write.sub("array", false);
 			for (ArrayArray sub : fldArray)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		AppendArray fldAppend = getAppend();
 		if (fldAppend != null) {
 			write.sub("append", false);
 			for (AppendArray sub : fldAppend)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		ObjectArray fldObject = getObject();
 		if (fldObject != null) {
 			write.sub("object", false);
 			for (ObjectArray sub : fldObject)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		if (getOperation() == Operation.BOOLEAN)
@@ -545,25 +545,25 @@ public interface Operator extends ResultType {
 		if (fldCallParms != null) {
 			write.sub("callParms", false);
 			for (CallParmsArray sub : fldCallParms)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldFor = getFor();
 		if (fldFor != null && fldFor.getRec() != 0) {
 			write.sub("for", false);
-			fldFor.output(write, iterate - 1);
+			fldFor.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldForExpr = getForExpr();
 		if (fldForExpr != null && fldForExpr.getRec() != 0) {
 			write.sub("forExpr", false);
-			fldForExpr.output(write, iterate - 1);
+			fldForExpr.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldFilter = getFilter();
 		if (fldFilter != null && fldFilter.getRec() != 0) {
 			write.sub("filter", false);
-			fldFilter.output(write, iterate - 1);
+			fldFilter.output(write, iterate);
 			write.endSub();
 		}
 		if (getOperation() == Operation.FILTER)
@@ -571,40 +571,40 @@ public interface Operator extends ResultType {
 		Expr fldFilterExpr = getFilterExpr();
 		if (fldFilterExpr != null && fldFilterExpr.getRec() != 0) {
 			write.sub("filterExpr", false);
-			fldFilterExpr.output(write, iterate - 1);
+			fldFilterExpr.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldSort = getSort();
 		if (fldSort != null && fldSort.getRec() != 0) {
 			write.sub("sort", false);
-			fldSort.output(write, iterate - 1);
+			fldSort.output(write, iterate);
 			write.endSub();
 		}
 		SortParmsArray fldSortParms = getSortParms();
 		if (fldSortParms != null) {
 			write.sub("sortParms", false);
 			for (SortParmsArray sub : fldSortParms)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldIf = getIf();
 		if (fldIf != null && fldIf.getRec() != 0) {
 			write.sub("if", false);
-			fldIf.output(write, iterate - 1);
+			fldIf.output(write, iterate);
 			write.endSub();
 		}
 		IfTrueArray fldIfTrue = getIfTrue();
 		if (fldIfTrue != null) {
 			write.sub("ifTrue", false);
 			for (IfTrueArray sub : fldIfTrue)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		IfFalseArray fldIfFalse = getIfFalse();
 		if (fldIfFalse != null) {
 			write.sub("ifFalse", false);
 			for (IfFalseArray sub : fldIfFalse)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		write.field("listenSource", getListenSource(), false);

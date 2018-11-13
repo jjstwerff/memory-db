@@ -122,7 +122,7 @@ public class JsltInterpreter {
 		int parms = code.getCallParms().getSize();
 		for (CallParmsArray parm : code.getCallParms())
 			stack.add(inter(parm));
-		System.out.println("macro:" + macro.getName() + " stack:" + stack);
+		StringBuilder bld = new StringBuilder();
 		for (Alternative alt : macro.getAlternatives()) {
 			if (alt.getParameters().getSize() != parms)
 				continue;
@@ -166,6 +166,8 @@ public class JsltInterpreter {
 				default:
 					break;
 				}
+				bld.append(pnr).append(" ").append(parm.getType()).append(" vs ").append(obj == null ? "null" : obj.getClass().getSimpleName()).append(found ? "" : "!")
+						.append(" ");
 				pnr++;
 			}
 			if (found) {
@@ -177,16 +179,17 @@ public class JsltInterpreter {
 						stack.add(stack.get(stackF + pnr));
 					pnr++;
 				}
-				System.out.println("alt:" + macro.getName() + " frameFrame:" + stackFrame + " on stack:" + stack);
+				//String macroData = "macro:" + macro.getName() + " frameFrame:" + stackFrame + " on stack:" + stack;
 				Object res = inter(alt.getCode().iterator().next());
-				while (stack.size() > stackFrame)
+				//System.out.println(macroData + " result:'" + res + "'");
+				while (stack.size() > stackF)
 					stack.remove(stack.size() - 1);
 				stackFrame = lastFrame;
 				return res;
 			}
-			throw new RuntimeException("Could not find alternative for " + macro.getName());
 		}
-		return null;
+		System.out.println(bld);
+		throw new RuntimeException("Could not find alternative for " + macro.getName());
 	}
 
 	private boolean matches(Object obj, Type type) {

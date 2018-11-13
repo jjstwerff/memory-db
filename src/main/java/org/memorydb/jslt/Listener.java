@@ -161,7 +161,7 @@ public class Listener implements Operator {
 		if (fldLevels != null) {
 			write.sub("levels", false);
 			for (Level sub : fldLevels)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		outputOperator(write, iterate, false);

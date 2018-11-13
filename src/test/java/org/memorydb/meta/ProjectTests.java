@@ -47,10 +47,8 @@ public class ProjectTests extends NormalCheck {
 					Path subpath = f.subpath(temp.getNameCount(), f.getNameCount());
 					String expected = new String(Files.readAllBytes(subpath));
 					String actual = new String(Files.readAllBytes(f));
-					if (!expected.equals(actual)) {
-						FileUtils.write(subpath.toFile(), actual);
+					if (!expected.equals(actual))
 						Assert.assertEquals("File " + f.getFileName(), expected, actual);
-					}
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

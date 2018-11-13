@@ -191,7 +191,7 @@ public class Source implements MemoryRecord, RecordInterface {
 		if (fldListeners != null) {
 			write.sub("listeners", false);
 			for (Listener sub : fldListeners)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		write.endRecord();

@@ -298,7 +298,7 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		if (fld${field.name?cap_first} != null) {
 			write.sub("${field.name}", ${(field?index == 0)?c});
 			for (${field.related.name} sub : fld${field.name?cap_first})
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 <#elseif field.type == "ARRAY">
@@ -306,14 +306,14 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		if (fld${field.name?cap_first} != null) {
 			write.sub("${field.name}", ${(field?index == 0)?c});
 			for (${field.name?cap_first}Array sub : fld${field.name?cap_first})
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 <#elseif field.type == "OBJECT">
 		${field.related.name} fld${field.name?cap_first} = get${field.name?cap_first}();
 		if (fld${field.name?cap_first} != null && fld${field.name?cap_first}.getRec() != 0) {
 			write.sub("${field.name}", ${(field?index == 0)?c});
-			fld${field.name?cap_first}.output(write, iterate - 1);
+			fld${field.name?cap_first}.output(write, iterate);
 			write.endSub();
 		}
 </#if></#list>

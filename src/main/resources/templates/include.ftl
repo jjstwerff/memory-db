@@ -233,7 +233,7 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 		if (fld${field.name?cap_first} != null) {
 			write.sub("${field.name}", <#if field?index == 0>first<#else>false</#if>);
 			for (${field.related.name} sub : fld${field.name?cap_first})
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 <#elseif field.type == "ARRAY">
@@ -241,14 +241,14 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 		if (fld${field.name?cap_first} != null) {
 			write.sub("${field.name}", <#if field?index == 0>first<#else>false</#if>);
 			for (${field.name?cap_first}Array sub : fld${field.name?cap_first})
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 <#elseif field.type == "OBJECT">
 		${field.related.name} fld${field.name?cap_first} = get${field.name?cap_first}();
 		if (fld${field.name?cap_first} != null && fld${field.name?cap_first}.getRec() != 0) {
 			write.sub("${field.name}", <#if field?index == 0>first<#else>false</#if>);
-			fld${field.name?cap_first}.output(write, iterate - 1);
+			fld${field.name?cap_first}.output(write, iterate);
 			write.endSub();
 		}
 </#if></#list>
