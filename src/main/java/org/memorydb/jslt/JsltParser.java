@@ -49,8 +49,14 @@ public class JsltParser {
 				cSlice.setName("slice");
 				this.slice = cSlice;
 			}
-			while (scanner.matches("def"))
-				parseDef();
+			while (true) {
+				if (scanner.matches("def"))
+					parseDef("");
+				else if (scanner.matches("import"))
+					parseImport();
+				else
+					break;
+			}
 			try (ChangeMacro macro = new ChangeMacro(store)) {
 				macro.setName("main");
 				try (ChangeAlternative alt = new ChangeAlternative(macro, 0)) {
@@ -61,7 +67,7 @@ public class JsltParser {
 			}
 		}
 
-		private void parseDef() {
+		private void parseDef(String nameSpace) {
 			String id = scanner.parseIdentifier();
 			Macro curMacro = new Macro(store);
 			int rec = curMacro.new IndexMacros(id).search();
@@ -79,7 +85,7 @@ public class JsltParser {
 				}
 			} else { // create new macro
 				try (ChangeMacro macro = new ChangeMacro(store)) {
-					macro.setName(id);
+					macro.setName(nameSpace + id);
 					try (ChangeAlternative nalt = new ChangeAlternative(macro, 0)) {
 						nalt.setNr(0);
 						spot = nalt.getCode().add();
@@ -100,6 +106,39 @@ public class JsltParser {
 			while (scanner.peek("\n"))
 				scanner.newLine();
 			curAlt = null;
+		}
+
+		private void parseImport() {
+			Path dir = scanner.getFile().getParent();
+			String id = scanner.parseIdentifier();
+			String cumulative = id;
+			String as = id;
+			if (scanner.matches(".")) {
+				dir = dir.resolve(id);
+				if (!Files.isDirectory(dir))
+					throw new RuntimeException("Cannot find directory " + cumulative);
+				id = scanner.parseIdentifier();
+				cumulative += "/" + id;
+			}
+			dir = dir.resolve(id + ".jstl");
+			if (!Files.isReadable(dir))
+				throw new RuntimeException("Cannot read jstl from " + cumulative + ".jstl");
+			if (scanner.matches("as"))
+				as = scanner.parseIdentifier();
+			Scanner temp = scanner;
+			scanner = new Scanner(dir);
+			while (true) {
+				if (scanner.matches("def"))
+					parseDef(as + ".");
+				else if (scanner.matches("include"))
+					parseImport();
+				else
+					break;
+			}
+			scanner = temp;
+			scanner.newLine();
+			while (scanner.peek("\n"))
+				scanner.newLine();
 		}
 
 		private void parseParameter() {
@@ -761,6 +800,8 @@ public class JsltParser {
 			while (scanner.peek("\n"))
 				scanner.newLine();
 			String id = scanner.parseIdentifier();
+			while (scanner.matches("."))
+				id += "." + scanner.parseIdentifier();
 			if (scanner.matches("(")) { // found macro call
 				Macro curMacro = new Macro(store);
 				int rec = curMacro.new IndexMacros(id).search();

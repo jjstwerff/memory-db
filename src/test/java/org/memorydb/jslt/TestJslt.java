@@ -126,7 +126,8 @@ public class TestJslt extends MemoryTests {
 		Set<Path> files = new TreeSet<>();
 		try (DirectoryStream<Path> dir = Files.newDirectoryStream(Paths.get(getClass().getResource("/jslt").getFile()))) {
 			for (Path file : dir) {
-				if (file.getFileName().toString().endsWith(".jslt")) {
+				String fileName = file.getFileName().toString();
+				if (fileName.endsWith(".jslt") && fileName.matches("[0-9]?.*")) {
 					files.add(file);
 				}
 			}

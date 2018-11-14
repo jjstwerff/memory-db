@@ -35,3 +35,5 @@ def fields(w + v if whitespace(w)): fields(v)
 def fields(f): field(f)
 def fields(f + w + "," + n if whitespace(w)): field(f) + fields(n)
 def field("\"" + s + "\"" + w + ":" + v if whitespace(w)): { strConst(s): json(v) }
+
+""

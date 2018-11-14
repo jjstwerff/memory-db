@@ -1,0 +1,1 @@
+def assert(STRING:name, should, was): should != was ? name + " " : ""

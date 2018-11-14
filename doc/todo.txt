@@ -9,8 +9,6 @@ Testing:
 
 JSLT:
 - write set of files from output = [ { path, content, problems? } ]
-- imports of definitions from other scripts
-	for new only with added name space = import {<directory>.}<file> [as <name-space>]
 - allow simple type casting via macro parameters (long -> double)
 - add more type information from expressions
 - object unwinding in macro definitions
