@@ -1,11 +1,67 @@
 Testing:
+- Meta format:
+	always claim main record in Store, no claimed indexes
+	make index to array possible: position in array as data, for now no combination of relation & position possible
 - database reading in JSTL ..
 	database with table definitions? current 3 structures in database format
-	add calculated fields .. including validation fields
+	allow included record
+	add calculated fields:
+		record type (MAIN, SUB, ARRAY)
+		record free room in bits
+		record size in bits
+		field relation (child, deep)
+		array relation
+		size of fields in bits
+		position of fields in record in bits
+		java type of field
+		default expression of field
+		getter name of field (camel case & is for boolean) 
+		setter name of field (camel case)
+		null check expressions
+		null value expressions
+		is byte aligned
+		indexes on the current record:
+			index holding record expression
+			ordering expressions
+	including validation checks:
+		incorrect pack name
+		incorrect directory name
+		not used record (as MAIN, SUB, ARRAY or INCLUDE)
+		double used record (as SUB, not as ARRAY or INCLUDE)
+		sub record without key field
+		key fields with conditions
+		incorrect key fields type (INDEX, INCLUDE, SUB)
+		incorrect mandatory field type (INDEX, INCLUDE)
+		not enumerate condition field (not an ENUMERATE)
+		condition without conditionField
+		invalid condition value
+		incorrect type default value
+		double values in ENUMERATE fields
+		incorrect enumerate value (not upper case, start with number, space, token)
+		incorrect format string
+		incorrect maximum
+		incorrect minimum
+		incorrect decimals
+		relation to array record
+		relation to main record
+		key is already mandatory
+		invalid condition field
+		incorrect order field
+		double order field
+		scattered condition fields
+		incorrect index (not from main record or parent)
+		incorrect name of field (empty, start with number, started with upper case, space, token)
+		incorrect name of record (empty, start with number, started with lower case, space, token)
+		reserved field name (store, upRecord, size, rec, arrayIndex, class)
+		double record name
+		double field name
+		mandatory field with default
+		empty description
 	java code generation via JSTL
-- code generation from JSTL code
+- minimal tests for each validation check and each calculated field
 - separate layer for JSON data to still allow for code generated lower levels
 - better errors on getting fields from array without index
+- remove as many reserved field names as possible
 
 JSLT:
 - write set of files from output = [ { path, content, problems? } ]
