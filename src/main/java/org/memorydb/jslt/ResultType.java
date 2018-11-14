@@ -68,11 +68,11 @@ public interface ResultType extends MemoryRecord, RecordInterface {
 		return getRec() == 0 ? null : getStore().getString(getStore().getInt(getRec(), resulttypePosition() + 1));
 	}
 
-	default void outputResultType(Write write, int iterate, boolean first) throws IOException {
+	default void outputResultType(Write write, int iterate) throws IOException {
 		if (getRec() == 0 || iterate <= 0)
 			return;
-		write.field("type", getType(), first);
-		write.field("record", getRecord(), false);
+		write.field("type", getType());
+		write.field("record", getRecord());
 	}
 
 	default Object getResultType(int field) {

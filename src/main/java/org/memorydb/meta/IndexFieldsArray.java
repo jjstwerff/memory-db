@@ -151,7 +151,7 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		write.field("str", getStr(), true);
+		write.field("str", getStr());
 		write.endRecord();
 	}
 

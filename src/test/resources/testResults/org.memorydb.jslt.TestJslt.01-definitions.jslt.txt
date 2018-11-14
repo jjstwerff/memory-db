@@ -6,7 +6,7 @@ name=a, alternatives=[
 ]
 name=b, alternatives=[
   nr=0, parameters=[
-    & type=VARIABLE, variable=[
+    type=VARIABLE, variable=[
       name=val, nr=0, eager=false, extension=false, type=NUMBER
     ]
   ], code=[
@@ -17,7 +17,7 @@ name=b, alternatives=[
     ]
   ]
   nr=1, parameters=[
-    & type=VARIABLE, variable=[
+    type=VARIABLE, variable=[
       name=val, nr=0, eager=false, extension=false, type=STRING
     ]
   ], code=[
@@ -28,8 +28,8 @@ name=b, alternatives=[
     ]
   ]
   nr=2, parameters=[
-    & type=NUMBER, number=0
-    & type=VARIABLE, variable=[
+    type=NUMBER, number=0
+    type=VARIABLE, variable=[
       name=val2, nr=0, eager=false, extension=false, type=NUMBER
     ]
   ], code=[
@@ -40,18 +40,18 @@ name=b, alternatives=[
     ]
   ]
   nr=3, parameters=[
-    & type=STRING, string=
-    & type=VARIABLE, variable=[
+    type=STRING, string=
+    type=VARIABLE, variable=[
       name=val2, nr=0, eager=false, extension=false, type=NUMBER
     ]
   ], code=[
     operation=VARIABLE, varName=val2, varNr=0
   ]
   nr=4, parameters=[
-    & type=VARIABLE, variable=[
+    type=VARIABLE, variable=[
       name=val, nr=0, eager=false, extension=false, type=NUMBER
     ]
-    & type=VARIABLE, variable=[
+    type=VARIABLE, variable=[
       name=val2, nr=0, eager=false, extension=false, type=NUMBER
     ]
   ], code=[
@@ -130,13 +130,13 @@ name=slice, alternatives=[
 ]
 name=test, alternatives=[
   nr=0, parameters=[
-    & type=VARIABLE, variable=[
+    type=VARIABLE, variable=[
       name=name, nr=0, eager=false, extension=false, type=STRING
     ]
-    & type=VARIABLE, variable=[
+    type=VARIABLE, variable=[
       name=should, nr=0, eager=false, extension=false, type=NULL
     ]
-    & type=VARIABLE, variable=[
+    type=VARIABLE, variable=[
       name=was, nr=0, eager=false, extension=false, type=NULL
     ]
   ], code=[

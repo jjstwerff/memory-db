@@ -156,7 +156,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		outputMatch(write, iterate, true);
+		outputMatch(write, iterate);
 		write.endRecord();
 	}
 

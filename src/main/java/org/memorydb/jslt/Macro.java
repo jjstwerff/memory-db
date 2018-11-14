@@ -186,10 +186,10 @@ public class Macro implements MemoryRecord, RecordInterface {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("name", getName(), true);
+		write.field("name", getName());
 		IndexAlternatives fldAlternatives = getAlternatives();
 		if (fldAlternatives != null) {
-			write.sub("alternatives", false);
+			write.sub("alternatives");
 			for (Alternative sub : fldAlternatives)
 				sub.output(write, iterate);
 			write.endSub();

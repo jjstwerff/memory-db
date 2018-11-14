@@ -151,7 +151,7 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		write.field("str", getStr(), true);
+		write.field("str", getStr());
 		write.endRecord();
 	}
 

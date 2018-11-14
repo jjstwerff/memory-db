@@ -232,11 +232,11 @@ public class ObjectArray implements ChangeOperator, Iterable<ObjectArray> {
 			return;
 		Expr fldName = getName();
 		if (fldName != null && fldName.getRec() != 0) {
-			write.sub("name", true);
+			write.sub("name");
 			fldName.output(write, iterate);
 			write.endSub();
 		}
-		outputOperator(write, iterate, false);
+		outputOperator(write, iterate);
 		write.endRecord();
 	}
 

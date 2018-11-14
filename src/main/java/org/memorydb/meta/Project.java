@@ -275,23 +275,23 @@ public class Project implements MemoryRecord, RecordInterface {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("name", getName(), true);
-		write.field("pack", getPack(), false);
+		write.field("name", getName());
+		write.field("pack", getPack());
 		IndexIndexes fldIndexes = getIndexes();
 		if (fldIndexes != null) {
-			write.sub("indexes", false);
+			write.sub("indexes");
 			for (Index sub : fldIndexes)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		IndexRecords fldRecords = getRecords();
 		if (fldRecords != null) {
-			write.sub("records", false);
+			write.sub("records");
 			for (Record sub : fldRecords)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
-		write.field("dir", getDir(), false);
+		write.field("dir", getDir());
 		write.endRecord();
 	}
 

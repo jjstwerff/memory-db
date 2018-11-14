@@ -248,13 +248,13 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 		if (alloc == 0 || iterate <= 0)
 			return;
 <#list rec.fields as rfld><#if rfld.type == "RELATION"><#if rfld.name != "upRecord">
-		write.strField("${rfld.name}", "{" + get${rfld.name?cap_first}().keys() + "}", ${(rfld?index == 0)?c});
+		write.strField("${rfld.name}", "{" + get${rfld.name?cap_first}().keys() + "}");
 </#if><#elseif rfld.type != "SET" && rfld.type != "ARRAY" && rfld.type != "OBJECT">
-		write.field("${rfld.name}", <#if rfld.type == "BOOLEAN" || rfld.type == "NULL_BOOLEAN">is<#else>get</#if>${rfld.name?cap_first}(), ${(rfld?index == 0)?c});
+		write.field("${rfld.name}", <#if rfld.type == "BOOLEAN" || rfld.type == "NULL_BOOLEAN">is<#else>get</#if>${rfld.name?cap_first}());
 </#if><#if rfld.type == "SET">
 		Index${rfld.name?cap_first} fld${rfld.name?cap_first} = get${rfld.name?cap_first}();
 		if (fld${rfld.name?cap_first} != null) {
-			write.sub("${rfld.name}", ${(rfld?index == 0)?c});
+			write.sub("${rfld.name}");
 			for (${rfld.related.name} sub : fld${rfld.name?cap_first})
 				sub.output(write, iterate);
 			write.endSub();
@@ -262,7 +262,7 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 <#elseif rfld.type == "ARRAY">
 		${rfld.name?cap_first}Array fld${rfld.name?cap_first} = get${rfld.name?cap_first}();
 		if (fld${rfld.name?cap_first} != null) {
-			write.sub("${rfld.name}", ${(rfld?index == 0)?c});
+			write.sub("${rfld.name}");
 			for (${rfld.name?cap_first}Array sub : fld${rfld.name?cap_first})
 				sub.output(write, iterate);
 			write.endSub();
@@ -270,13 +270,13 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 <#elseif rfld.type == "OBJECT">
 		${rfld.related.name} fld${rfld.name?cap_first} = get${rfld.name?cap_first}();
 		if (fld${rfld.name?cap_first} != null && fld${rfld.name?cap_first}.getRec() != 0) {
-			write.sub("${rfld.name}", ${(rfld?index == 0)?c});
+			write.sub("${rfld.name}");
 			fld${rfld.name?cap_first}.output(write, iterate);
 			write.endSub();
 		}
 </#if></#list>
 <#list rec.includes as incl>
-		output${incl.name}(write, iterate, ${(rec.fields?size == 0)?c});
+		output${incl.name}(write, iterate);
 </#list>
 		write.endRecord();
 	}

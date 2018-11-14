@@ -60,7 +60,7 @@ public class Json implements Part {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		outputPart(write, iterate, true);
+		outputPart(write, iterate);
 		write.endRecord();
 	}
 

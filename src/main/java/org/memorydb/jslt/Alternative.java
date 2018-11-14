@@ -113,17 +113,17 @@ public class Alternative implements MemoryRecord, RecordInterface {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("nr", getNr(), true);
+		write.field("nr", getNr());
 		ParametersArray fldParameters = getParameters();
 		if (fldParameters != null) {
-			write.sub("parameters", false);
+			write.sub("parameters");
 			for (ParametersArray sub : fldParameters)
 				sub.output(write, iterate);
 			write.endSub();
 		}
 		CodeArray fldCode = getCode();
 		if (fldCode != null) {
-			write.sub("code", false);
+			write.sub("code");
 			for (CodeArray sub : fldCode)
 				sub.output(write, iterate);
 			write.endSub();

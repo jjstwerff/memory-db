@@ -141,19 +141,19 @@ public class Index implements MemoryRecord, RecordInterface {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("name", getName(), true);
+		write.field("name", getName());
 		IndexFieldsArray fldIndexFields = getIndexFields();
 		if (fldIndexFields != null) {
-			write.sub("indexFields", false);
+			write.sub("indexFields");
 			for (IndexFieldsArray sub : fldIndexFields)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
-		write.field("fieldPos", getFieldPos(), false);
-		write.field("flagPos", getFlagPos(), false);
-		write.field("parentPos", getParentPos(), false);
-		write.field("primary", isPrimary(), false);
-		write.field("record", getRecord(), false);
+		write.field("fieldPos", getFieldPos());
+		write.field("flagPos", getFlagPos());
+		write.field("parentPos", getParentPos());
+		write.field("primary", isPrimary());
+		write.field("record", getRecord());
 		write.endRecord();
 	}
 

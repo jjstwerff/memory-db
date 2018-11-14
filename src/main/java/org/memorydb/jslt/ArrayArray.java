@@ -210,7 +210,7 @@ public class ArrayArray implements ChangeOperator, Iterable<ArrayArray> {
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		outputOperator(write, iterate, true);
+		outputOperator(write, iterate);
 		write.endRecord();
 	}
 

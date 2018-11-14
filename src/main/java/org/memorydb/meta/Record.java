@@ -307,7 +307,6 @@ public class Record implements MemoryRecord, RecordInterface {
 		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 24));
 	}
 
-	@Override
 	@FieldData(
 		name = "size",
 		type = "INTEGER",
@@ -359,40 +358,40 @@ public class Record implements MemoryRecord, RecordInterface {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("name", getName(), true);
+		write.field("name", getName());
 		FieldsArray fldFields = getFields();
 		if (fldFields != null) {
-			write.sub("fields", false);
+			write.sub("fields");
 			for (FieldsArray sub : fldFields)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		IndexFieldOnName fldFieldOnName = getFieldOnName();
 		if (fldFieldOnName != null) {
-			write.sub("fieldOnName", false);
+			write.sub("fieldOnName");
 			for (Field sub : fldFieldOnName)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		IndexSetIndexes fldSetIndexes = getSetIndexes();
 		if (fldSetIndexes != null) {
-			write.sub("setIndexes", false);
+			write.sub("setIndexes");
 			for (SetIndex sub : fldSetIndexes)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		IndexFreeBits fldFreeBits = getFreeBits();
 		if (fldFreeBits != null) {
-			write.sub("freeBits", false);
+			write.sub("freeBits");
 			for (FreeBits sub : fldFreeBits)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
-		write.field("parent", getParent(), false);
-		write.field("size", getSize(), false);
-		write.field("related", isRelated(), false);
-		write.field("full", isFull(), false);
-		write.field("description", getDescription(), false);
+		write.field("parent", getParent());
+		write.field("size", getSize());
+		write.field("related", isRelated());
+		write.field("full", isFull());
+		write.field("description", getDescription());
 		write.endRecord();
 	}
 

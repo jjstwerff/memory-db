@@ -117,22 +117,22 @@ public class Level implements Operator {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("level", getLevel(), true);
+		write.field("level", getLevel());
 		OrderArray fldOrder = getOrder();
 		if (fldOrder != null) {
-			write.sub("order", false);
+			write.sub("order");
 			for (OrderArray sub : fldOrder)
 				sub.output(write, iterate);
 			write.endSub();
 		}
 		SliceArray fldSlice = getSlice();
 		if (fldSlice != null) {
-			write.sub("slice", false);
+			write.sub("slice");
 			for (SliceArray sub : fldSlice)
 				sub.output(write, iterate);
 			write.endSub();
 		}
-		outputOperator(write, iterate, false);
+		outputOperator(write, iterate);
 		write.endRecord();
 	}
 

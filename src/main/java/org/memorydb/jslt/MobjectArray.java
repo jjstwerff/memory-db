@@ -176,8 +176,8 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		write.field("name", getName(), true);
-		outputMatch(write, iterate, false);
+		write.field("name", getName());
+		outputMatch(write, iterate);
 		write.endRecord();
 	}
 

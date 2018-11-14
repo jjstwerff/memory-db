@@ -151,7 +151,7 @@ public class FieldsArray implements ChangeInterface, Iterable<FieldsArray> {
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		write.strField("field", "{" + getField().keys() + "}", true);
+		write.strField("field", "{" + getField().keys() + "}");
 		write.endRecord();
 	}
 

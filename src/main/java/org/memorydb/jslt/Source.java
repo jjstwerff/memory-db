@@ -186,10 +186,10 @@ public class Source implements MemoryRecord, RecordInterface {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("name", getName(), true);
+		write.field("name", getName());
 		IndexListeners fldListeners = getListeners();
 		if (fldListeners != null) {
-			write.sub("listeners", false);
+			write.sub("listeners");
 			for (Listener sub : fldListeners)
 				sub.output(write, iterate);
 			write.endSub();

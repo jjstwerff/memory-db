@@ -162,7 +162,7 @@ public class IterateArray implements ChangeMatch, Iterable<IterateArray> {
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		outputMatch(write, iterate, true);
+		outputMatch(write, iterate);
 		write.endRecord();
 	}
 

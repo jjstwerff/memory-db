@@ -200,23 +200,23 @@ public class Field implements MemoryRecord, RecordInterface {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("name", getName(), true);
-		write.field("type", getType(), false);
-		write.field("auto", isAuto(), false);
-		write.field("pos", getPos(), false);
-		write.field("index", getIndex(), false);
+		write.field("name", getName());
+		write.field("type", getType());
+		write.field("auto", isAuto());
+		write.field("pos", getPos());
+		write.field("index", getIndex());
 		ValuesArray fldValues = getValues();
 		if (fldValues != null) {
-			write.sub("values", false);
+			write.sub("values");
 			for (ValuesArray sub : fldValues)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
-		write.field("key", isKey(), false);
-		write.field("mandatory", isMandatory(), false);
-		write.field("default", getDefault(), false);
-		write.field("description", getDescription(), false);
-		write.field("related", getRelated(), false);
+		write.field("key", isKey());
+		write.field("mandatory", isMandatory());
+		write.field("default", getDefault());
+		write.field("description", getDescription());
+		write.field("related", getRelated());
 		write.endRecord();
 	}
 

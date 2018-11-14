@@ -156,15 +156,15 @@ public class Listener implements Operator {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("nr", getNr(), true);
+		write.field("nr", getNr());
 		IndexLevels fldLevels = getLevels();
 		if (fldLevels != null) {
-			write.sub("levels", false);
+			write.sub("levels");
 			for (Level sub : fldLevels)
 				sub.output(write, iterate);
 			write.endSub();
 		}
-		outputOperator(write, iterate, false);
+		outputOperator(write, iterate);
 		write.endRecord();
 	}
 

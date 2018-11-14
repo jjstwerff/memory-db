@@ -218,20 +218,20 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 	}
 </#if></#list>
 
-	default void output${table.name}(Write write, int iterate, boolean first) throws IOException {
+	default void output${table.name}(Write write, int iterate) throws IOException {
 		if (getRec() == 0 || iterate <= 0)
 			return;
 <#list table.fields as field><#if field.type == "RELATION"><#if field.name != "upRecord">
-		write.field("${field.name}", get${field.name?cap_first}(), <#if field?index == 0>first<#else>false</#if>);
+		write.field("${field.name}", get${field.name?cap_first}());
 </#if><#elseif field.type == "BOOLEAN" && field.getWhen()??>
 		if (get${table.condition.name?cap_first}() == ${table.condition.name?cap_first}.${field.getWhen()})
-			write.field("${field.name}", is${field.name?cap_first}(), <#if field?index == 0>first<#else>false</#if>);
+			write.field("${field.name}", is${field.name?cap_first}());
 <#elseif field.type != "SET" && field.type != "ARRAY" && field.type != "OBJECT">
-		write.field("${field.name}", <#if field.type == "BOOLEAN" || field.type == "NULL_BOOLEAN">is<#else>get</#if>${field.name?cap_first}(), <#if field?index == 0>first<#else>false</#if>);
+		write.field("${field.name}", <#if field.type == "BOOLEAN" || field.type == "NULL_BOOLEAN">is<#else>get</#if>${field.name?cap_first}());
 </#if><#if field.type == "SET">
 		Index${field.name?cap_first} fld${field.name?cap_first} = get${field.name?cap_first}();
 		if (fld${field.name?cap_first} != null) {
-			write.sub("${field.name}", <#if field?index == 0>first<#else>false</#if>);
+			write.sub("${field.name}");
 			for (${field.related.name} sub : fld${field.name?cap_first})
 				sub.output(write, iterate);
 			write.endSub();
@@ -239,7 +239,7 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 <#elseif field.type == "ARRAY">
 		${field.name?cap_first}Array fld${field.name?cap_first} = get${field.name?cap_first}();
 		if (fld${field.name?cap_first} != null) {
-			write.sub("${field.name}", <#if field?index == 0>first<#else>false</#if>);
+			write.sub("${field.name}");
 			for (${field.name?cap_first}Array sub : fld${field.name?cap_first})
 				sub.output(write, iterate);
 			write.endSub();
@@ -247,7 +247,7 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 <#elseif field.type == "OBJECT">
 		${field.related.name} fld${field.name?cap_first} = get${field.name?cap_first}();
 		if (fld${field.name?cap_first} != null && fld${field.name?cap_first}.getRec() != 0) {
-			write.sub("${field.name}", <#if field?index == 0>first<#else>false</#if>);
+			write.sub("${field.name}");
 			fld${field.name?cap_first}.output(write, iterate);
 			write.endSub();
 		}

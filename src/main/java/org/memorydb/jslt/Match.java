@@ -153,31 +153,31 @@ public interface Match extends MemoryRecord, RecordInterface {
 		return getType() != Type.OBJECT ? new MobjectArray(getStore(), 0, -1) : getMobject().add();
 	}
 
-	default void outputMatch(Write write, int iterate, boolean first) throws IOException {
+	default void outputMatch(Write write, int iterate) throws IOException {
 		if (getRec() == 0 || iterate <= 0)
 			return;
-		write.field("type", getType(), first);
+		write.field("type", getType());
 		MarrayArray fldMarray = getMarray();
 		if (fldMarray != null) {
-			write.sub("marray", false);
+			write.sub("marray");
 			for (MarrayArray sub : fldMarray)
 				sub.output(write, iterate);
 			write.endSub();
 		}
 		Variable fldVariable = getVariable();
 		if (fldVariable != null && fldVariable.getRec() != 0) {
-			write.sub("variable", false);
+			write.sub("variable");
 			fldVariable.output(write, iterate);
 			write.endSub();
 		}
 		if (getType() == Type.BOOLEAN)
-			write.field("boolean", isBoolean(), false);
-		write.field("float", getFloat(), false);
-		write.field("number", getNumber(), false);
-		write.field("string", getString(), false);
+			write.field("boolean", isBoolean());
+		write.field("float", getFloat());
+		write.field("number", getNumber());
+		write.field("string", getString());
 		MobjectArray fldMobject = getMobject();
 		if (fldMobject != null) {
-			write.sub("mobject", false);
+			write.sub("mobject");
 			for (MobjectArray sub : fldMobject)
 				sub.output(write, iterate);
 			write.endSub();

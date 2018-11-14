@@ -53,7 +53,6 @@ public class FreeBits implements MemoryRecord, RecordInterface {
 		return new ChangeFreeBits(this);
 	}
 
-	@Override
 	@FieldData(
 		name = "size",
 		type = "INTEGER",
@@ -87,8 +86,8 @@ public class FreeBits implements MemoryRecord, RecordInterface {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("size", getSize(), true);
-		write.field("pos", getPos(), false);
+		write.field("size", getSize());
+		write.field("pos", getPos());
 		write.endRecord();
 	}
 

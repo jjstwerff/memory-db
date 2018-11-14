@@ -153,11 +153,11 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 			return;
 		Expr fldIf = getIf();
 		if (fldIf != null && fldIf.getRec() != 0) {
-			write.sub("if", true);
+			write.sub("if");
 			fldIf.output(write, iterate);
 			write.endSub();
 		}
-		outputMatch(write, iterate, false);
+		outputMatch(write, iterate);
 		write.endRecord();
 	}
 

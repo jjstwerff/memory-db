@@ -78,7 +78,7 @@ public class SetIndex implements MemoryRecord, RecordInterface {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("index", getIndex(), true);
+		write.field("index", getIndex());
 		write.endRecord();
 	}
 

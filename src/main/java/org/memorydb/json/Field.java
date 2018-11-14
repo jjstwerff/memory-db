@@ -92,8 +92,8 @@ public class Field implements Part {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("name", getName(), true);
-		outputPart(write, iterate, false);
+		write.field("name", getName());
+		outputPart(write, iterate);
 		write.endRecord();
 	}
 

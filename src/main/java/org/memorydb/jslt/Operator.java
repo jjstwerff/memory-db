@@ -479,138 +479,138 @@ public interface Operator extends ResultType {
 		return getOperation() != Operation.VARIABLE ? Integer.MIN_VALUE : getStore().getInt(getRec(), operatorPosition() + 5);
 	}
 
-	default void outputOperator(Write write, int iterate, boolean first) throws IOException {
+	default void outputOperator(Write write, int iterate) throws IOException {
 		if (getRec() == 0 || iterate <= 0)
 			return;
-		write.field("operation", getOperation(), first);
-		write.field("function", getFunction(), false);
+		write.field("operation", getOperation());
+		write.field("function", getFunction());
 		Expr fldFnParm1 = getFnParm1();
 		if (fldFnParm1 != null && fldFnParm1.getRec() != 0) {
-			write.sub("fnParm1", false);
+			write.sub("fnParm1");
 			fldFnParm1.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldFnParm2 = getFnParm2();
 		if (fldFnParm2 != null && fldFnParm2.getRec() != 0) {
-			write.sub("fnParm2", false);
+			write.sub("fnParm2");
 			fldFnParm2.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldConExpr = getConExpr();
 		if (fldConExpr != null && fldConExpr.getRec() != 0) {
-			write.sub("conExpr", false);
+			write.sub("conExpr");
 			fldConExpr.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldConTrue = getConTrue();
 		if (fldConTrue != null && fldConTrue.getRec() != 0) {
-			write.sub("conTrue", false);
+			write.sub("conTrue");
 			fldConTrue.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldConFalse = getConFalse();
 		if (fldConFalse != null && fldConFalse.getRec() != 0) {
-			write.sub("conFalse", false);
+			write.sub("conFalse");
 			fldConFalse.output(write, iterate);
 			write.endSub();
 		}
-		write.field("number", getNumber(), false);
-		write.field("float", getFloat(), false);
-		write.field("string", getString(), false);
+		write.field("number", getNumber());
+		write.field("float", getFloat());
+		write.field("string", getString());
 		ArrayArray fldArray = getArray();
 		if (fldArray != null) {
-			write.sub("array", false);
+			write.sub("array");
 			for (ArrayArray sub : fldArray)
 				sub.output(write, iterate);
 			write.endSub();
 		}
 		AppendArray fldAppend = getAppend();
 		if (fldAppend != null) {
-			write.sub("append", false);
+			write.sub("append");
 			for (AppendArray sub : fldAppend)
 				sub.output(write, iterate);
 			write.endSub();
 		}
 		ObjectArray fldObject = getObject();
 		if (fldObject != null) {
-			write.sub("object", false);
+			write.sub("object");
 			for (ObjectArray sub : fldObject)
 				sub.output(write, iterate);
 			write.endSub();
 		}
 		if (getOperation() == Operation.BOOLEAN)
-			write.field("boolean", isBoolean(), false);
-		write.field("macro", getMacro(), false);
+			write.field("boolean", isBoolean());
+		write.field("macro", getMacro());
 		CallParmsArray fldCallParms = getCallParms();
 		if (fldCallParms != null) {
-			write.sub("callParms", false);
+			write.sub("callParms");
 			for (CallParmsArray sub : fldCallParms)
 				sub.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldFor = getFor();
 		if (fldFor != null && fldFor.getRec() != 0) {
-			write.sub("for", false);
+			write.sub("for");
 			fldFor.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldForExpr = getForExpr();
 		if (fldForExpr != null && fldForExpr.getRec() != 0) {
-			write.sub("forExpr", false);
+			write.sub("forExpr");
 			fldForExpr.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldFilter = getFilter();
 		if (fldFilter != null && fldFilter.getRec() != 0) {
-			write.sub("filter", false);
+			write.sub("filter");
 			fldFilter.output(write, iterate);
 			write.endSub();
 		}
 		if (getOperation() == Operation.FILTER)
-			write.field("filterDeep", isFilterDeep(), false);
+			write.field("filterDeep", isFilterDeep());
 		Expr fldFilterExpr = getFilterExpr();
 		if (fldFilterExpr != null && fldFilterExpr.getRec() != 0) {
-			write.sub("filterExpr", false);
+			write.sub("filterExpr");
 			fldFilterExpr.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldSort = getSort();
 		if (fldSort != null && fldSort.getRec() != 0) {
-			write.sub("sort", false);
+			write.sub("sort");
 			fldSort.output(write, iterate);
 			write.endSub();
 		}
 		SortParmsArray fldSortParms = getSortParms();
 		if (fldSortParms != null) {
-			write.sub("sortParms", false);
+			write.sub("sortParms");
 			for (SortParmsArray sub : fldSortParms)
 				sub.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldIf = getIf();
 		if (fldIf != null && fldIf.getRec() != 0) {
-			write.sub("if", false);
+			write.sub("if");
 			fldIf.output(write, iterate);
 			write.endSub();
 		}
 		IfTrueArray fldIfTrue = getIfTrue();
 		if (fldIfTrue != null) {
-			write.sub("ifTrue", false);
+			write.sub("ifTrue");
 			for (IfTrueArray sub : fldIfTrue)
 				sub.output(write, iterate);
 			write.endSub();
 		}
 		IfFalseArray fldIfFalse = getIfFalse();
 		if (fldIfFalse != null) {
-			write.sub("ifFalse", false);
+			write.sub("ifFalse");
 			for (IfFalseArray sub : fldIfFalse)
 				sub.output(write, iterate);
 			write.endSub();
 		}
-		write.field("listenSource", getListenSource(), false);
-		write.field("listemNr", getListemNr(), false);
-		write.field("varName", getVarName(), false);
-		write.field("varNr", getVarNr(), false);
+		write.field("listenSource", getListenSource());
+		write.field("listemNr", getListemNr());
+		write.field("varName", getVarName());
+		write.field("varNr", getVarNr());
 	}
 
 	default Object getOperator(int field) {

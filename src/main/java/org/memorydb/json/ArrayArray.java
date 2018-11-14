@@ -152,7 +152,7 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		outputPart(write, iterate, true);
+		outputPart(write, iterate);
 		write.endRecord();
 	}
 

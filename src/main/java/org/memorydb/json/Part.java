@@ -212,29 +212,29 @@ public interface Part extends MemoryRecord, RecordInterface {
 		return getType() != Type.STRING ? null : getStore().getString(getStore().getInt(getRec(), partPosition() + 1));
 	}
 
-	default void outputPart(Write write, int iterate, boolean first) throws IOException {
+	default void outputPart(Write write, int iterate) throws IOException {
 		if (getRec() == 0 || iterate <= 0)
 			return;
-		write.field("type", getType(), first);
+		write.field("type", getType());
 		ArrayArray fldArray = getArray();
 		if (fldArray != null) {
-			write.sub("array", false);
+			write.sub("array");
 			for (ArrayArray sub : fldArray)
 				sub.output(write, iterate - 1);
 			write.endSub();
 		}
 		if (getType() == Type.BOOLEAN)
-			write.field("boolean", isBoolean(), false);
-		write.field("float", getFloat(), false);
-		write.field("number", getNumber(), false);
+			write.field("boolean", isBoolean());
+		write.field("float", getFloat());
+		write.field("number", getNumber());
 		IndexObject fldObject = getObject();
 		if (fldObject != null) {
-			write.sub("object", false);
+			write.sub("object");
 			for (Field sub : fldObject)
 				sub.output(write, iterate - 1);
 			write.endSub();
 		}
-		write.field("value", getValue(), false);
+		write.field("value", getValue());
 	}
 
 	default Object getContent() {

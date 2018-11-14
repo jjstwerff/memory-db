@@ -210,7 +210,7 @@ public class SortParmsArray implements ChangeOperator, Iterable<SortParmsArray> 
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		outputOperator(write, iterate, true);
+		outputOperator(write, iterate);
 		write.endRecord();
 	}
 

@@ -97,11 +97,11 @@ public class Variable implements ResultType {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("name", getName(), true);
-		write.field("nr", getNr(), false);
-		write.field("eager", isEager(), false);
-		write.field("extension", isExtension(), false);
-		outputResultType(write, iterate, false);
+		write.field("name", getName());
+		write.field("nr", getNr());
+		write.field("eager", isEager());
+		write.field("extension", isExtension());
+		outputResultType(write, iterate);
 		write.endRecord();
 	}
 

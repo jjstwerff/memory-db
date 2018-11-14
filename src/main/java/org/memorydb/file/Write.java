@@ -13,11 +13,13 @@ public class Write {
 	private int len; // length of current row
 	private int indent;
 	private StringBuilder buffer = new StringBuilder();
+	private boolean first;
 
 	public Write(Appendable writer) {
 		this.writer = writer;
 		len = 0;
 		indent = 0;
+		first = true;
 	}
 
 	public void setIndent(int indent) {
@@ -28,46 +30,48 @@ public class Write {
 		return indent;
 	}
 
-	public Write field(String name, int value, boolean first) throws IOException {
+	public Write field(String name, int value) throws IOException {
 		if (value != Integer.MIN_VALUE)
-			strField(name, Integer.toString(value), first);
+			strField(name, Integer.toString(value));
 		return this;
 	}
 
-	public Write field(String name, MemoryRecord value, boolean first) throws IOException {
+	public Write field(String name, MemoryRecord value) throws IOException {
 		if (value != null && value.getRec() != 0)
-			strField(name, "{" + value.keys() + "}", first);
+			strField(name, "{" + value.keys() + "}");
 		return this;
 	}
 
-	public Write field(String name, Object value, boolean first) throws IOException {
+	public Write field(String name, Object value) throws IOException {
 		if (value == null || (value instanceof Double && Double.isNaN((double) value)) || (value instanceof Long && (long) value == Long.MIN_VALUE)) {
 			return this; // skip null fields
 		}
 		if (value instanceof Long || value instanceof Short || value instanceof Double || value instanceof Byte) {
-			strField(name, value.toString(), first);
+			strField(name, value.toString());
 			return this;
 		}
 		buffer.setLength(0);
 		buffer.append(value.toString());
-		return field(name, buffer, first);
+		return field(name, buffer);
 	}
 
-	public Write field(String name, LocalDateTime value, boolean first) throws IOException {
+	public Write field(String name, LocalDateTime value) throws IOException {
 		buffer.setLength(0);
 		DateTime.toString(value, buffer);
-		strField(name, buffer.toString(), first);
+		strField(name, buffer.toString());
 		return this;
 	}
 
-	public void strField(String name, String value, boolean first) throws IOException {
-		lineStart(first);
+	public void strField(String name, String value) throws IOException {
+		lineStart();
+		first = false;
 		int valLength = value == null ? 0 : value.length();
 		singleField(name, value, valLength);
 	}
 
-	public Write field(String name, StringBuilder value, boolean first) throws IOException {
-		lineStart(first);
+	public Write field(String name, StringBuilder value) throws IOException {
+		lineStart();
+		first = false;
 		if (value.length() > MAX_STRING || isMulti(value))
 			multiLine(name, value);
 		else
@@ -75,7 +79,7 @@ public class Write {
 		return this;
 	}
 
-	private void lineStart(boolean first) throws IOException {
+	private void lineStart() throws IOException {
 		if (len == 0) {
 			for (int i = 0; i < indent; i++)
 				writer.append("  ");
@@ -170,6 +174,7 @@ public class Write {
 
 	public void endRecord() throws IOException {
 		writer.append("\n");
+		first = true;
 		len = 0;
 	}
 
@@ -178,9 +183,10 @@ public class Write {
 		return writer.toString();
 	}
 
-	public void sub(String string, boolean first) throws IOException {
-		strField(string, "[\n", first);
+	public void sub(String string) throws IOException {
+		strField(string, "[\n");
 		indent++;
+		first = true;
 		len = 0;
 	}
 

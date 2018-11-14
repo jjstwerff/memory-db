@@ -60,7 +60,7 @@ public class Expr implements Operator {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		outputOperator(write, iterate, true);
+		outputOperator(write, iterate);
 		write.endRecord();
 	}
 
