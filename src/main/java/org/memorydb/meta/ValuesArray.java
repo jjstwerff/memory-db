@@ -17,7 +17,7 @@ import org.memorydb.structure.Store;
  * Automatically generated record class for values
  */
 
-@RecordData(name = "Str")
+@RecordData(name = "Value")
 public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	private final Store store;
 	private final Field parent;
@@ -30,7 +30,7 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 		this.parent = parent;
 		this.idx = idx;
 		if (parent.getRec() != 0) {
-			this.alloc = store.getInt(parent.getRec(), 18);
+			this.alloc = store.getInt(parent.getRec(), 70);
 			if (alloc != 0) {
 				setUpRecord(parent);
 				this.size = store.getInt(alloc, 4);
@@ -99,14 +99,15 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 			return this;
 		idx = size;
 		if (alloc == 0) {
-			alloc = store.allocate(4 + 12);
+			alloc = store.allocate(8 + 12);
 			setUpRecord(parent);
 		} else
-			alloc = store.resize(alloc, (12 + (idx + 1) * 4) / 8);
-		store.setInt(parent.getRec(), 18, alloc);
+			alloc = store.resize(alloc, (12 + (idx + 1) * 8) / 8);
+		store.setInt(parent.getRec(), 70, alloc);
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
-		setStr(null);
+		setValue(null);
+		setDescription(null);
 		return this;
 	}
 
@@ -134,16 +135,35 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 		name = "values",
 		type = "ARRAY",
 		related = ValuesArray.class,
+		when = "ENUMERATE",
 		mandatory = false
 	)
 
-	public String getStr() {
-		return alloc == 0 || idx < 0 || idx >= size ? null : store.getString(store.getInt(alloc, idx * 4 + 12));
+	public String getValue() {
+		return alloc == 0 || idx < 0 || idx >= size ? null : store.getString(store.getInt(alloc, idx * 8 + 12));
 	}
 
-	public void setStr(String value) {
+	public void setValue(String value) {
 		if (alloc != 0 && idx >= 0 && idx < size) {
-			store.setInt(alloc, idx * 4 + 12, store.putString(value));
+			store.setInt(alloc, idx * 8 + 12, store.putString(value));
+		}
+	}
+
+	@FieldData(
+		name = "values",
+		type = "ARRAY",
+		related = ValuesArray.class,
+		when = "ENUMERATE",
+		mandatory = false
+	)
+
+	public String getDescription() {
+		return alloc == 0 || idx < 0 || idx >= size ? null : store.getString(store.getInt(alloc, idx * 8 + 16));
+	}
+
+	public void setDescription(String value) {
+		if (alloc != 0 && idx >= 0 && idx < size) {
+			store.setInt(alloc, idx * 8 + 16, store.putString(value));
 		}
 	}
 
@@ -151,7 +171,8 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		write.field("str", getStr());
+		write.field("value", getValue());
+		write.field("description", getDescription());
 		write.endRecord();
 	}
 
@@ -172,9 +193,13 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	}
 
 	public void parse(Parser parser) {
-		setStr(null);
-		if (parser.hasField("str")) {
-			setStr(parser.getString("str"));
+		setValue(null);
+		setDescription(null);
+		if (parser.hasField("value")) {
+			setValue(parser.getString("value"));
+		}
+		if (parser.hasField("description")) {
+			setDescription(parser.getString("description"));
 		}
 	}
 
@@ -192,7 +217,9 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	public String name(int field) {
 		switch (field) {
 		case 1:
-			return "str";
+			return "value";
+		case 2:
+			return "description";
 		default:
 			return null;
 		}
@@ -203,6 +230,8 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 		switch (field) {
 		case 1:
 			return FieldType.STRING;
+		case 2:
+			return FieldType.STRING;
 		default:
 			return null;
 		}
@@ -212,7 +241,9 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	public Object get(int field) {
 		switch (field) {
 		case 1:
-			return getStr();
+			return getValue();
+		case 2:
+			return getDescription();
 		default:
 			return null;
 		}
@@ -231,7 +262,11 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 		switch (field) {
 		case 1:
 			if (value instanceof String)
-				setStr((String) value);
+				setValue((String) value);
+			return value instanceof String;
+		case 2:
+			if (value instanceof String)
+				setDescription((String) value);
 			return value instanceof String;
 		default:
 			return false;

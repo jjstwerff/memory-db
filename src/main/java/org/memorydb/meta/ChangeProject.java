@@ -3,6 +3,7 @@ package org.memorydb.meta;
 import org.memorydb.file.Parser;
 import org.memorydb.structure.Store;
 import org.memorydb.structure.ChangeInterface;
+import java.util.Iterator;
 
 /**
  * Automatically generated record class for table Project
@@ -10,11 +11,10 @@ import org.memorydb.structure.ChangeInterface;
 public class ChangeProject extends Project implements ChangeInterface {
 	public ChangeProject(Store store) {
 		super(store, store.allocate(Project.RECORD_SIZE));
-		setName(null);
+		store.setInt(rec, 4, 0); // SET records
+		setMain(null);
 		setPack(null);
-		store.setInt(rec, 12, 0); // SET indexes
-		store.setInt(rec, 16, 0); // SET records
-		setDir(null);
+		setDirectory(null);
 	}
 
 	public ChangeProject(Project current) {
@@ -22,30 +22,33 @@ public class ChangeProject extends Project implements ChangeInterface {
 		new IndexMeta().remove(getRec());
 	}
 
-	public void setName(String value) {
-		store.setInt(rec, 4, store.putString(value));
+	public void setMain(Record value) {
+		store.setInt(rec, 8, value == null ? 0 : value.getRec());
 	}
 
 	public void setPack(String value) {
-		store.setInt(rec, 8, store.putString(value));
+		store.setInt(rec, 12, store.putString(value));
 	}
 
-	public void setDir(String value) {
-		store.setInt(rec, 20, store.putString(value));
+	public void setDirectory(String value) {
+		store.setInt(rec, 16, store.putString(value));
 	}
 
 	/* package private */ void parseFields(Parser parser) {
-		if (parser.hasField("pack")) {
-			setPack(parser.getString("pack"));
-		}
-		if (parser.hasSub("indexes")) {
-			new Index(store).parse(parser, this);
-		}
 		if (parser.hasSub("records")) {
 			new Record(store).parse(parser, this);
 		}
-		if (parser.hasField("dir")) {
-			setDir(parser.getString("dir"));
+		if (parser.hasField("main")) {
+			parser.getRelation("main", (int recNr) -> {
+				Iterator<Record> iterator = null;				Record relRec = iterator.hasNext() ? iterator.next() : null;
+				boolean found = relRec != null && relRec.parseKey(parser);
+				setRec(recNr);
+				setMain(relRec);
+				return found;
+			}, getRec());
+		}
+		if (parser.hasField("directory")) {
+			setDirectory(parser.getString("directory"));
 		}
 	}
 
@@ -57,17 +60,17 @@ public class ChangeProject extends Project implements ChangeInterface {
 	@Override
 	public boolean set(int field, Object value) {
 		switch (field) {
-		case 1:
-			if (value instanceof String)
-				setName((String) value);
-			return value instanceof String;
 		case 2:
+			if (value instanceof Record)
+				setMain((Record) value);
+			return value instanceof Record;
+		case 3:
 			if (value instanceof String)
 				setPack((String) value);
 			return value instanceof String;
-		case 5:
+		case 4:
 			if (value instanceof String)
-				setDir((String) value);
+				setDirectory((String) value);
 			return value instanceof String;
 		default:
 			return false;
@@ -77,9 +80,7 @@ public class ChangeProject extends Project implements ChangeInterface {
 	@Override
 	public ChangeInterface add(int field) {
 		switch (field) {
-		case 3:
-			return addIndexes();
-		case 4:
+		case 1:
 			return addRecords();
 		default:
 			return null;

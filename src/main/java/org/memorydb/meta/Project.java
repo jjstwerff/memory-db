@@ -19,11 +19,11 @@ import org.memorydb.structure.TreeIndex;
  */
 @RecordData(
 	name = "Project",
-	keyFields = {"name"})
+	keyFields = {"pack"})
 public class Project implements MemoryRecord, RecordInterface {
 	/* package private */ Store store;
 	protected int rec;
-	/* package private */ static final int RECORD_SIZE = 33;
+	/* package private */ static final int RECORD_SIZE = 29;
 
 	public Project(Store store) {
 		this.store = store;
@@ -58,95 +58,6 @@ public class Project implements MemoryRecord, RecordInterface {
 	}
 
 	@FieldData(
-		name = "name",
-		type = "STRING",
-		mandatory = false
-	)
-	public String getName() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 4));
-	}
-
-	@FieldData(
-		name = "pack",
-		type = "STRING",
-		mandatory = false
-	)
-	public String getPack() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 8));
-	}
-
-	@FieldData(
-		name = "indexes",
-		type = "SET",
-		keyNames = {"name"},
-		keyTypes = {"STRING"},
-		related = Index.class,
-		mandatory = false
-	)
-	public IndexIndexes getIndexes() {
-		return new IndexIndexes(new Index(store));
-	}
-
-	public Index getIndexes(String key1) {
-		Index resultRec = new Index(store);
-		IndexIndexes idx = new IndexIndexes(resultRec, key1);
-		int res = idx.search();
-		if (res == 0)
-			return resultRec;
-		return new Index(store, res);
-	}
-
-	public ChangeIndex addIndexes() {
-		return new ChangeIndex(this, 0);
-	}
-
-	/* package private */ class IndexIndexes extends TreeIndex<Index> {
-
-		public IndexIndexes(Index record) {
-			super(record, null, 232, 30);
-		}
-
-		public IndexIndexes(Index record, String key1) {
-			super(record, new Key() {
-				@Override
-				public int compareTo(int recNr) {
-					if (recNr < 0)
-						return -1;
-					assert store.validate(recNr);
-					record.setRec(recNr);
-					int o = 0;
-					o = RedBlackTree.compare(key1, record.getName());
-					return o;
-				}
-
-				@Override
-				public IndexOperation oper() {
-					return IndexOperation.EQ;
-				}
-			}, 232, 30);
-		}
-
-		@Override
-		protected int readTop() {
-			return store.getInt(rec, 12);
-		}
-
-		@Override
-		protected void changeTop(int value) {
-			store.setInt(rec, 12, value);
-		}
-
-		@Override
-		protected int compareTo(int a, int b) {
-			Index recA = new Index(store, a);
-			Index recB = new Index(store, b);
-			int o = 0;
-			o = compare(recA.getName(), recB.getName());
-			return o;
-		}
-	}
-
-	@FieldData(
 		name = "records",
 		type = "SET",
 		keyNames = {"name"},
@@ -174,7 +85,7 @@ public class Project implements MemoryRecord, RecordInterface {
 	/* package private */ class IndexRecords extends TreeIndex<Record> {
 
 		public IndexRecords(Record record) {
-			super(record, null, 304, 39);
+			super(record, null, 192, 25);
 		}
 
 		public IndexRecords(Record record, String key1) {
@@ -194,17 +105,17 @@ public class Project implements MemoryRecord, RecordInterface {
 				public IndexOperation oper() {
 					return IndexOperation.EQ;
 				}
-			}, 304, 39);
+			}, 192, 25);
 		}
 
 		@Override
 		protected int readTop() {
-			return store.getInt(rec, 16);
+			return store.getInt(rec, 4);
 		}
 
 		@Override
 		protected void changeTop(int value) {
-			store.setInt(rec, 16, value);
+			store.setInt(rec, 4, value);
 		}
 
 		@Override
@@ -218,17 +129,36 @@ public class Project implements MemoryRecord, RecordInterface {
 	}
 
 	@FieldData(
-		name = "dir",
+		name = "main",
+		type = "RELATION",
+		related = Record.class,
+		mandatory = false
+	)
+	public Record getMain() {
+		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 8));
+	}
+
+	@FieldData(
+		name = "pack",
 		type = "STRING",
 		mandatory = false
 	)
-	public String getDir() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 20));
+	public String getPack() {
+		return rec == 0 ? null : store.getString(store.getInt(rec, 12));
+	}
+
+	@FieldData(
+		name = "directory",
+		type = "STRING",
+		mandatory = false
+	)
+	public String getDirectory() {
+		return rec == 0 ? null : store.getString(store.getInt(rec, 16));
 	}
 
 	public class IndexMeta extends TreeIndex<Project> {
 		public IndexMeta() {
-			super(Project.this, null, 192, 25);
+			super(Project.this, null, 160, 21);
 		}
 
 		public IndexMeta(String key1) {
@@ -240,7 +170,7 @@ public class Project implements MemoryRecord, RecordInterface {
 					assert store.validate(recNr);
 					setRec(recNr);
 					int o = 0;
-					o = RedBlackTree.compare(key1, Project.this.getName());
+					o = RedBlackTree.compare(key1, Project.this.getPack());
 					return o;
 				}
 
@@ -248,7 +178,7 @@ public class Project implements MemoryRecord, RecordInterface {
 				public IndexOperation oper() {
 					return IndexOperation.EQ;
 				}
-			}, 192, 25);
+			}, 160, 21);
 		}
 
 		@Override
@@ -266,7 +196,7 @@ public class Project implements MemoryRecord, RecordInterface {
 			Project recA = new Project(store, a);
 			Project recB = new Project(store, b);
 			int o = 0;
-			o = compare(recA.getName(), recB.getName());
+			o = compare(recA.getPack(), recB.getPack());
 			return o;
 		}
 	}
@@ -275,15 +205,6 @@ public class Project implements MemoryRecord, RecordInterface {
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("name", getName());
-		write.field("pack", getPack());
-		IndexIndexes fldIndexes = getIndexes();
-		if (fldIndexes != null) {
-			write.sub("indexes");
-			for (Index sub : fldIndexes)
-				sub.output(write, iterate);
-			write.endSub();
-		}
 		IndexRecords fldRecords = getRecords();
 		if (fldRecords != null) {
 			write.sub("records");
@@ -291,7 +212,9 @@ public class Project implements MemoryRecord, RecordInterface {
 				sub.output(write, iterate);
 			write.endSub();
 		}
-		write.field("dir", getDir());
+		write.field("main", getMain());
+		write.field("pack", getPack());
+		write.field("directory", getDirectory());
 		write.endRecord();
 	}
 
@@ -300,7 +223,7 @@ public class Project implements MemoryRecord, RecordInterface {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
-		res.append("Name").append("=").append(getName());
+		res.append("Pack").append("=").append(getPack());
 		return res.toString();
 	}
 
@@ -317,8 +240,8 @@ public class Project implements MemoryRecord, RecordInterface {
 
 	public Project parse(Parser parser) {
 		while (parser.getSub()) {
-			String name = parser.getString("name");
-			int nextRec = new IndexMeta(name).search();
+			String pack = parser.getString("pack");
+			int nextRec = new IndexMeta(pack).search();
 			if (parser.isDelete(nextRec)) {
 				try (ChangeProject record = new ChangeProject(this)) {
 					store.free(record.getRec());
@@ -328,7 +251,7 @@ public class Project implements MemoryRecord, RecordInterface {
 			}
 			if (nextRec == 0) {
 				try (ChangeProject record = new ChangeProject(store)) {
-					record.setName(name);
+					record.setPack(pack);
 					record.parseFields(parser);
 					rec = record.rec;
 				}
@@ -343,8 +266,8 @@ public class Project implements MemoryRecord, RecordInterface {
 	}
 
 	public boolean parseKey(Parser parser) {
-		String name = parser.getString("name");
-		int nextRec = new IndexMeta(name).search();
+		String pack = parser.getString("pack");
+		int nextRec = new IndexMeta(pack).search();
 		parser.finishRelation();
 		rec = nextRec;
 		return nextRec != 0;
@@ -353,12 +276,12 @@ public class Project implements MemoryRecord, RecordInterface {
 	@Override
 	public Object get(int field) {
 		switch (field) {
-		case 1:
-			return getName();
 		case 2:
+			return getMain();
+		case 3:
 			return getPack();
-		case 5:
-			return getDir();
+		case 4:
+			return getDirectory();
 		default:
 			return null;
 		}
@@ -367,11 +290,7 @@ public class Project implements MemoryRecord, RecordInterface {
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
 		switch (field) {
-		case 3:
-			if (key.length > 0)
-				return new IndexIndexes(new Index(store), (String) key[0]);
-			return getIndexes();
-		case 4:
+		case 1:
 			if (key.length > 0)
 				return new IndexRecords(new Record(store), (String) key[0]);
 			return getRecords();
@@ -384,14 +303,12 @@ public class Project implements MemoryRecord, RecordInterface {
 	public FieldType type(int field) {
 		switch (field) {
 		case 1:
-			return FieldType.STRING;
+			return FieldType.ARRAY;
 		case 2:
-			return FieldType.STRING;
+			return FieldType.OBJECT;
 		case 3:
-			return FieldType.ARRAY;
+			return FieldType.STRING;
 		case 4:
-			return FieldType.ARRAY;
-		case 5:
 			return FieldType.STRING;
 		default:
 			return null;
@@ -402,15 +319,13 @@ public class Project implements MemoryRecord, RecordInterface {
 	public String name(int field) {
 		switch (field) {
 		case 1:
-			return "name";
-		case 2:
-			return "pack";
-		case 3:
-			return "indexes";
-		case 4:
 			return "records";
-		case 5:
-			return "dir";
+		case 2:
+			return "main";
+		case 3:
+			return "pack";
+		case 4:
+			return "directory";
 		default:
 			return null;
 		}

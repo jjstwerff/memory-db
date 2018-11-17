@@ -14,23 +14,23 @@ import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
- * Automatically generated record class for indexFields
+ * Automatically generated record class for order
  */
 
-@RecordData(name = "Str")
-public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsArray> {
+@RecordData(name = "OrderField")
+public class OrderArray implements ChangeInterface, Iterable<OrderArray> {
 	private final Store store;
-	private final Index parent;
+	private final Field parent;
 	private int idx;
 	private int alloc;
 	private int size;
 
-	/* package private */ IndexFieldsArray(Index parent, int idx) {
+	/* package private */ OrderArray(Field parent, int idx) {
 		this.store = parent.getStore();
 		this.parent = parent;
 		this.idx = idx;
 		if (parent.getRec() != 0) {
-			this.alloc = store.getInt(parent.getRec(), 8);
+			this.alloc = store.getInt(parent.getRec(), 94);
 			if (alloc != 0) {
 				setUpRecord(parent);
 				this.size = store.getInt(alloc, 4);
@@ -44,7 +44,7 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 			idx = -1;
 	}
 
-	/* package private */ IndexFieldsArray(IndexFieldsArray other, int idx) {
+	/* package private */ OrderArray(OrderArray other, int idx) {
 		this.store = other.store;
 		this.parent = other.parent;
 		this.idx = idx;
@@ -52,7 +52,7 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 		this.size = other.size;
 	}
 
-	/* package private */ IndexFieldsArray(Store store, int rec, int idx) {
+	/* package private */ OrderArray(Store store, int rec, int idx) {
 		this.store = store;
 		this.alloc = rec;
 		this.idx = idx;
@@ -75,13 +75,13 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 		this.alloc = rec;
 	}
 
-	/* package private */ void setUpRecord(Index record) {
+	/* package private */ void setUpRecord(Field record) {
 		store.setInt(alloc, 8, record.getRec());
 	}
 
 	@Override
-	public Index getUpRecord() {
-		return new Index(store, store.getInt(alloc, 8));
+	public Field getUpRecord() {
+		return new Field(store, store.getInt(alloc, 8));
 	}
 
 	@Override
@@ -94,7 +94,7 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 		return size;
 	}
 
-	/* package private */ IndexFieldsArray add() {
+	/* package private */ OrderArray add() {
 		if (parent.getRec() == 0)
 			return this;
 		idx = size;
@@ -103,15 +103,15 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 			setUpRecord(parent);
 		} else
 			alloc = store.resize(alloc, (12 + (idx + 1) * 4) / 8);
-		store.setInt(parent.getRec(), 8, alloc);
+		store.setInt(parent.getRec(), 94, alloc);
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
-		setStr(null);
+		setField(null);
 		return this;
 	}
 
 	@Override
-	public Iterator<IndexFieldsArray> iterator() {
+	public Iterator<OrderArray> iterator() {
 		return new Iterator<>() {
 			int element = -1;
 
@@ -121,29 +121,30 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 			}
 
 			@Override
-			public IndexFieldsArray next() {
+			public OrderArray next() {
 				if (alloc == 0 || element > size)
 					throw new NoSuchElementException();
 				element++;
-				return new IndexFieldsArray(IndexFieldsArray.this, element);
+				return new OrderArray(OrderArray.this, element);
 			}
 		};
 	}
 
 	@FieldData(
-		name = "indexFields",
+		name = "order",
 		type = "ARRAY",
-		related = IndexFieldsArray.class,
+		related = OrderArray.class,
+		when = "INDEX",
 		mandatory = false
 	)
 
-	public String getStr() {
-		return alloc == 0 || idx < 0 || idx >= size ? null : store.getString(store.getInt(alloc, idx * 4 + 12));
+	public Field getField() {
+		return new Field(store, alloc == 0 || idx < 0 || idx >= size ? 0 : store.getInt(alloc, idx * 4 + 12));
 	}
 
-	public void setStr(String value) {
+	public void setField(Field value) {
 		if (alloc != 0 && idx >= 0 && idx < size) {
-			store.setInt(alloc, idx * 4 + 12, store.putString(value));
+			store.setInt(alloc, idx * 4 + 12, value == null ? 0 : value.getRec());
 		}
 	}
 
@@ -151,7 +152,7 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		write.field("str", getStr());
+		write.strField("field", "{" + getField().keys() + "}");
 		write.endRecord();
 	}
 
@@ -160,7 +161,7 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 		Write write = new Write(new StringBuilder());
 		try {
 			if (idx == -1)
-				for (IndexFieldsArray a : this) {
+				for (OrderArray a : this) {
 					a.output(write, 4);
 				}
 			else
@@ -172,9 +173,14 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 	}
 
 	public void parse(Parser parser) {
-		setStr(null);
-		if (parser.hasField("str")) {
-			setStr(parser.getString("str"));
+		setField(null);
+		if (parser.hasField("field")) {
+			parser.getRelation("field", (int recNr) -> {
+				Iterator<Field> iterator = null;				Field relRec = iterator.hasNext() ? iterator.next() : null;
+				boolean found = relRec != null && relRec.parseKey(parser);
+				setField(relRec);
+				return found;
+			}, idx);
 		}
 	}
 
@@ -192,7 +198,7 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 	public String name(int field) {
 		switch (field) {
 		case 1:
-			return "str";
+			return "field";
 		default:
 			return null;
 		}
@@ -202,7 +208,7 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 	public FieldType type(int field) {
 		switch (field) {
 		case 1:
-			return FieldType.STRING;
+			return FieldType.OBJECT;
 		default:
 			return null;
 		}
@@ -212,7 +218,7 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 	public Object get(int field) {
 		switch (field) {
 		case 1:
-			return getStr();
+			return getField();
 		default:
 			return null;
 		}
@@ -230,9 +236,9 @@ public class IndexFieldsArray implements ChangeInterface, Iterable<IndexFieldsAr
 	public boolean set(int field, Object value) {
 		switch (field) {
 		case 1:
-			if (value instanceof String)
-				setStr((String) value);
-			return value instanceof String;
+			if (value instanceof Field)
+				setField((Field) value);
+			return value instanceof Field;
 		default:
 			return false;
 		}

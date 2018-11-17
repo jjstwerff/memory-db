@@ -1,7 +1,4 @@
 Testing:
-- Meta format:
-	always claim main record in Store, no claimed indexes
-	make index to array possible: position in array as data, for now no combination of relation & position possible
 - database reading in JSTL ..
 	database with table definitions? current 3 structures in database format
 	allow included record
@@ -23,6 +20,7 @@ Testing:
 		indexes on the current record:
 			index holding record expression
 			ordering expressions
+		code in parent/main record to remove relations to deleted array record
 	including validation checks:
 		incorrect pack name
 		incorrect directory name
@@ -50,6 +48,7 @@ Testing:
 		double order field
 		scattered condition fields
 		incorrect index (not from main record or parent)
+		only relation from main or parent record to array element
 		incorrect name of field (empty, start with number, started with upper case, space, token)
 		incorrect name of record (empty, start with number, started with lower case, space, token)
 		reserved field name (store, upRecord, size, rec, arrayIndex, class)
@@ -58,10 +57,16 @@ Testing:
 		mandatory field with default
 		empty description
 	java code generation via JSTL
+- Meta format:
+	always claim main record in Store, no claimed indexes
+	make index to array possible: position in array as data, for now no combination of relation & position possible
+	relation to array value: position of array & register it for removal .. only from parent
 - minimal tests for each validation check and each calculated field
 - separate layer for JSON data to still allow for code generated lower levels
 - better errors on getting fields from array without index
 - remove as many reserved field names as possible
+- algorithm to remove relations on deletes of records
+	more efficient when indexes exist
 
 JSLT:
 - write set of files from output = [ { path, content, problems? } ]

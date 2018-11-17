@@ -23,7 +23,7 @@ import org.memorydb.structure.TreeIndex;
 public class Record implements MemoryRecord, RecordInterface {
 	/* package private */ Store store;
 	protected int rec;
-	/* package private */ static final int RECORD_SIZE = 51;
+	/* package private */ static final int RECORD_SIZE = 37;
 
 	public Record(Store store) {
 		this.store = store;
@@ -67,55 +67,37 @@ public class Record implements MemoryRecord, RecordInterface {
 	}
 
 	@FieldData(
-		name = "fields",
-		type = "ARRAY",
-		related = FieldsArray.class,
-		mandatory = false
-	)
-	public FieldsArray getFields() {
-		return new FieldsArray(this, -1);
-	}
-
-	public FieldsArray getFields(int index) {
-		return new FieldsArray(this, index);
-	}
-
-	public FieldsArray addFields() {
-		return getFields().add();
-	}
-
-	@FieldData(
-		name = "fieldOnName",
+		name = "fieldName",
 		type = "SET",
 		keyNames = {"name"},
 		keyTypes = {"STRING"},
 		related = Field.class,
 		mandatory = false
 	)
-	public IndexFieldOnName getFieldOnName() {
-		return new IndexFieldOnName(new Field(store));
+	public IndexFieldName getFieldName() {
+		return new IndexFieldName(new Field(store));
 	}
 
-	public Field getFieldOnName(String key1) {
+	public Field getFieldName(String key1) {
 		Field resultRec = new Field(store);
-		IndexFieldOnName idx = new IndexFieldOnName(resultRec, key1);
+		IndexFieldName idx = new IndexFieldName(resultRec, key1);
 		int res = idx.search();
 		if (res == 0)
 			return resultRec;
 		return new Field(store, res);
 	}
 
-	public ChangeField addFieldOnName() {
+	public ChangeField addFieldName() {
 		return new ChangeField(this, 0);
 	}
 
-	/* package private */ class IndexFieldOnName extends TreeIndex<Field> {
+	/* package private */ class IndexFieldName extends TreeIndex<Field> {
 
-		public IndexFieldOnName(Field record) {
-			super(record, null, 256, 33);
+		public IndexFieldName(Field record) {
+			super(record, null, 384, 49);
 		}
 
-		public IndexFieldOnName(Field record, String key1) {
+		public IndexFieldName(Field record, String key1) {
 			super(record, new Key() {
 				@Override
 				public int compareTo(int recNr) {
@@ -132,7 +114,78 @@ public class Record implements MemoryRecord, RecordInterface {
 				public IndexOperation oper() {
 					return IndexOperation.EQ;
 				}
-			}, 256, 33);
+			}, 384, 49);
+		}
+
+		@Override
+		protected int readTop() {
+			return store.getInt(rec, 8);
+		}
+
+		@Override
+		protected void changeTop(int value) {
+			store.setInt(rec, 8, value);
+		}
+
+		@Override
+		protected int compareTo(int a, int b) {
+			Field recA = new Field(store, a);
+			Field recB = new Field(store, b);
+			int o = 0;
+			o = compare(recA.getName(), recB.getName());
+			return o;
+		}
+	}
+
+	@FieldData(
+		name = "fields",
+		type = "SET",
+		keyNames = {"nr"},
+		keyTypes = {"INTEGER"},
+		related = Field.class,
+		mandatory = false
+	)
+	public IndexFields getFields() {
+		return new IndexFields(new Field(store));
+	}
+
+	public Field getFields(int key1) {
+		Field resultRec = new Field(store);
+		IndexFields idx = new IndexFields(resultRec, key1);
+		int res = idx.search();
+		if (res == 0)
+			return resultRec;
+		return new Field(store, res);
+	}
+
+	public ChangeField addFields() {
+		return new ChangeField(this, 0);
+	}
+
+	/* package private */ class IndexFields extends TreeIndex<Field> {
+
+		public IndexFields(Field record) {
+			super(record, null, 488, 62);
+		}
+
+		public IndexFields(Field record, int key1) {
+			super(record, new Key() {
+				@Override
+				public int compareTo(int recNr) {
+					if (recNr < 0)
+						return -1;
+					assert store.validate(recNr);
+					record.setRec(recNr);
+					int o = 0;
+					o = RedBlackTree.compare(key1, record.getNr());
+					return o;
+				}
+
+				@Override
+				public IndexOperation oper() {
+					return IndexOperation.EQ;
+				}
+			}, 488, 62);
 		}
 
 		@Override
@@ -150,188 +203,19 @@ public class Record implements MemoryRecord, RecordInterface {
 			Field recA = new Field(store, a);
 			Field recB = new Field(store, b);
 			int o = 0;
-			o = compare(recA.getName(), recB.getName());
+			o = compare(recA.getNr(), recB.getNr());
 			return o;
 		}
 	}
 
 	@FieldData(
-		name = "setIndexes",
-		type = "SET",
-		keyNames = {"index_name"},
-		keyTypes = {"STRING"},
-		related = SetIndex.class,
-		mandatory = false
-	)
-	public IndexSetIndexes getSetIndexes() {
-		return new IndexSetIndexes(new SetIndex(store));
-	}
-
-	public SetIndex getSetIndexes(String key1) {
-		SetIndex resultRec = new SetIndex(store);
-		IndexSetIndexes idx = new IndexSetIndexes(resultRec, key1);
-		int res = idx.search();
-		if (res == 0)
-			return resultRec;
-		return new SetIndex(store, res);
-	}
-
-	public ChangeSetIndex addSetIndexes() {
-		return new ChangeSetIndex(this, 0);
-	}
-
-	/* package private */ class IndexSetIndexes extends TreeIndex<SetIndex> {
-
-		public IndexSetIndexes(SetIndex record) {
-			super(record, null, 64, 9);
-		}
-
-		public IndexSetIndexes(SetIndex record, String key1) {
-			super(record, new Key() {
-				@Override
-				public int compareTo(int recNr) {
-					if (recNr < 0)
-						return -1;
-					assert store.validate(recNr);
-					record.setRec(recNr);
-					int o = 0;
-					o = RedBlackTree.compare(key1, record.getIndex().getName());
-					return o;
-				}
-
-				@Override
-				public IndexOperation oper() {
-					return IndexOperation.EQ;
-				}
-			}, 64, 9);
-		}
-
-		@Override
-		protected int readTop() {
-			return store.getInt(rec, 16);
-		}
-
-		@Override
-		protected void changeTop(int value) {
-			store.setInt(rec, 16, value);
-		}
-
-		@Override
-		protected int compareTo(int a, int b) {
-			SetIndex recA = new SetIndex(store, a);
-			SetIndex recB = new SetIndex(store, b);
-			int o = 0;
-			o = compare(recA.getIndex().getName(), recB.getIndex().getName());
-			return o;
-		}
-	}
-
-	@FieldData(
-		name = "freeBits",
-		type = "SET",
-		keyNames = {"size"},
-		keyTypes = {"INTEGER"},
-		related = FreeBits.class,
-		mandatory = false
-	)
-	public IndexFreeBits getFreeBits() {
-		return new IndexFreeBits(new FreeBits(store));
-	}
-
-	public FreeBits getFreeBits(int key1) {
-		FreeBits resultRec = new FreeBits(store);
-		IndexFreeBits idx = new IndexFreeBits(resultRec, key1);
-		int res = idx.search();
-		if (res == 0)
-			return resultRec;
-		return new FreeBits(store, res);
-	}
-
-	public ChangeFreeBits addFreeBits() {
-		return new ChangeFreeBits(this, 0);
-	}
-
-	/* package private */ class IndexFreeBits extends TreeIndex<FreeBits> {
-
-		public IndexFreeBits(FreeBits record) {
-			super(record, null, 96, 13);
-		}
-
-		public IndexFreeBits(FreeBits record, int key1) {
-			super(record, new Key() {
-				@Override
-				public int compareTo(int recNr) {
-					if (recNr < 0)
-						return -1;
-					assert store.validate(recNr);
-					record.setRec(recNr);
-					int o = 0;
-					o = RedBlackTree.compare(key1, record.getSize());
-					return o;
-				}
-
-				@Override
-				public IndexOperation oper() {
-					return IndexOperation.EQ;
-				}
-			}, 96, 13);
-		}
-
-		@Override
-		protected int readTop() {
-			return store.getInt(rec, 20);
-		}
-
-		@Override
-		protected void changeTop(int value) {
-			store.setInt(rec, 20, value);
-		}
-
-		@Override
-		protected int compareTo(int a, int b) {
-			FreeBits recA = new FreeBits(store, a);
-			FreeBits recB = new FreeBits(store, b);
-			int o = 0;
-			o = compare(recA.getSize(), recB.getSize());
-			return o;
-		}
-	}
-
-	@FieldData(
-		name = "parent",
+		name = "condition",
 		type = "RELATION",
-		related = Record.class,
+		related = Field.class,
 		mandatory = false
 	)
-	public Record getParent() {
-		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 24));
-	}
-
-	@FieldData(
-		name = "size",
-		type = "INTEGER",
-		mandatory = true
-	)
-	public int getSize() {
-		return rec == 0 ? Integer.MIN_VALUE : store.getInt(rec, 28);
-	}
-
-	@FieldData(
-		name = "related",
-		type = "BOOLEAN",
-		mandatory = false
-	)
-	public boolean isRelated() {
-		return rec == 0 ? false : (store.getByte(rec, 32) & 1) > 0;
-	}
-
-	@FieldData(
-		name = "full",
-		type = "BOOLEAN",
-		mandatory = false
-	)
-	public boolean isFull() {
-		return rec == 0 ? false : (store.getByte(rec, 33) & 1) > 0;
+	public Field getCondition() {
+		return new Field(store, rec == 0 ? 0 : store.getInt(rec, 16));
 	}
 
 	@FieldData(
@@ -340,7 +224,7 @@ public class Record implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public String getDescription() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 34));
+		return rec == 0 ? null : store.getString(store.getInt(rec, 20));
 	}
 
 	@Override
@@ -351,7 +235,7 @@ public class Record implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Project getUpRecord() {
-		return new Project(store, rec == 0 ? 0 : store.getInt(rec, 47));
+		return new Project(store, rec == 0 ? 0 : store.getInt(rec, 33));
 	}
 
 	@Override
@@ -359,38 +243,21 @@ public class Record implements MemoryRecord, RecordInterface {
 		if (rec == 0 || iterate <= 0)
 			return;
 		write.field("name", getName());
-		FieldsArray fldFields = getFields();
+		IndexFieldName fldFieldName = getFieldName();
+		if (fldFieldName != null) {
+			write.sub("fieldName");
+			for (Field sub : fldFieldName)
+				sub.output(write, iterate);
+			write.endSub();
+		}
+		IndexFields fldFields = getFields();
 		if (fldFields != null) {
 			write.sub("fields");
-			for (FieldsArray sub : fldFields)
+			for (Field sub : fldFields)
 				sub.output(write, iterate);
 			write.endSub();
 		}
-		IndexFieldOnName fldFieldOnName = getFieldOnName();
-		if (fldFieldOnName != null) {
-			write.sub("fieldOnName");
-			for (Field sub : fldFieldOnName)
-				sub.output(write, iterate);
-			write.endSub();
-		}
-		IndexSetIndexes fldSetIndexes = getSetIndexes();
-		if (fldSetIndexes != null) {
-			write.sub("setIndexes");
-			for (SetIndex sub : fldSetIndexes)
-				sub.output(write, iterate);
-			write.endSub();
-		}
-		IndexFreeBits fldFreeBits = getFreeBits();
-		if (fldFreeBits != null) {
-			write.sub("freeBits");
-			for (FreeBits sub : fldFreeBits)
-				sub.output(write, iterate);
-			write.endSub();
-		}
-		write.field("parent", getParent());
-		write.field("size", getSize());
-		write.field("related", isRelated());
-		write.field("full", isFull());
+		write.field("condition", getCondition());
 		write.field("description", getDescription());
 		write.endRecord();
 	}
@@ -458,15 +325,9 @@ public class Record implements MemoryRecord, RecordInterface {
 		switch (field) {
 		case 1:
 			return getName();
-		case 6:
-			return getParent();
-		case 7:
-			return getSize();
-		case 8:
-			return isRelated();
-		case 9:
-			return isFull();
-		case 10:
+		case 4:
+			return getCondition();
+		case 5:
 			return getDescription();
 		default:
 			return null;
@@ -477,19 +338,13 @@ public class Record implements MemoryRecord, RecordInterface {
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
 		switch (field) {
 		case 2:
-			return getFields();
+			if (key.length > 0)
+				return new IndexFieldName(new Field(store), (String) key[0]);
+			return getFieldName();
 		case 3:
 			if (key.length > 0)
-				return new IndexFieldOnName(new Field(store), (String) key[0]);
-			return getFieldOnName();
-		case 4:
-			if (key.length > 0)
-				return new IndexSetIndexes(new SetIndex(store), (String) key[0]);
-			return getSetIndexes();
-		case 5:
-			if (key.length > 0)
-				return new IndexFreeBits(new FreeBits(store), (int) key[0]);
-			return getFreeBits();
+				return new IndexFields(new Field(store), (int) key[0]);
+			return getFields();
 		default:
 			return null;
 		}
@@ -505,18 +360,8 @@ public class Record implements MemoryRecord, RecordInterface {
 		case 3:
 			return FieldType.ARRAY;
 		case 4:
-			return FieldType.ARRAY;
-		case 5:
-			return FieldType.ARRAY;
-		case 6:
 			return FieldType.OBJECT;
-		case 7:
-			return FieldType.INTEGER;
-		case 8:
-			return FieldType.BOOLEAN;
-		case 9:
-			return FieldType.BOOLEAN;
-		case 10:
+		case 5:
 			return FieldType.STRING;
 		default:
 			return null;
@@ -529,22 +374,12 @@ public class Record implements MemoryRecord, RecordInterface {
 		case 1:
 			return "name";
 		case 2:
-			return "fields";
+			return "fieldName";
 		case 3:
-			return "fieldOnName";
+			return "fields";
 		case 4:
-			return "setIndexes";
+			return "condition";
 		case 5:
-			return "freeBits";
-		case 6:
-			return "parent";
-		case 7:
-			return "size";
-		case 8:
-			return "related";
-		case 9:
-			return "full";
-		case 10:
 			return "description";
 		default:
 			return null;

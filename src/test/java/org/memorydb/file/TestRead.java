@@ -152,13 +152,6 @@ public class TestRead extends ErrorCheck {
 	}
 
 	@Test
-	public void testNumbers() {
-		Assert.assertEquals(0x2fa, parseField("something", "name=something, pos=0x2fa").getPos());
-		Assert.assertEquals(10, parseField("something", "name=something, pos=0o12").getPos());
-		Assert.assertEquals(42, parseField("something", "name=something, pos=0b101010").getPos());
-	}
-
-	@Test
 	public void testNumberNull() {
 		expectMessage("Mandatory 'pos' field in /tmp/problem.txt:3/25");
 		parseField("something", "name=something, pos!");
@@ -284,11 +277,6 @@ public class TestRead extends ErrorCheck {
 	}
 
 	@Test
-	public void testBoolean() {
-		Assert.assertTrue(parse("records=[", "  name=ct__table, related=true", "]").getRecords("ct_table").isRelated());
-	}
-
-	@Test
 	public void testBooleanNull() {
 		expectMessage("Mandatory 'mandatory' field in /tmp/problem.txt:3/39");
 		parse("records=[", //
@@ -334,7 +322,7 @@ public class TestRead extends ErrorCheck {
 
 	private Field parseField(String fieldName, String data) {
 		Project meta = parse("records=[", "  name=ct__table, fieldOnName=[", "    " + data, "  ]", "]");
-		return meta.getRecords("ct__table").getFieldOnName(fieldName);
+		return meta.getRecords("ct__table").getFieldName(fieldName);
 	}
 
 	public static Project parse(String... lines) {

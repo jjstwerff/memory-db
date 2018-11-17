@@ -30,7 +30,7 @@ public class Meta implements AutoCloseable {
 	@FieldData(
 		name = "meta",
 		type = "SET",
-		keyNames = {"name"},
+		keyNames = {"pack"},
 		keyTypes = {"STRING"},
 		related = Project.class
 	)

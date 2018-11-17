@@ -3,7 +3,6 @@ package org.memorydb.meta;
 import org.memorydb.file.Parser;
 import org.memorydb.structure.ChangeInterface;
 import java.util.Iterator;
-import org.memorydb.handler.MutationException;
 
 /**
  * Automatically generated record class for table Record
@@ -15,14 +14,9 @@ public class ChangeRecord extends Record implements ChangeInterface {
 			setRec(getStore().allocate(Record.RECORD_SIZE));
 		}
 		setName(null);
-		store.setInt(getRec(), 8, 0); // ARRAY fields
-		store.setInt(getRec(), 12, 0); // SET fieldOnName
-		store.setInt(getRec(), 16, 0); // SET setIndexes
-		store.setInt(getRec(), 20, 0); // SET freeBits
-		setParent(null);
-		setSize(0);
-		setRelated(false);
-		setFull(false);
+		store.setInt(getRec(), 8, 0); // SET fieldName
+		store.setInt(getRec(), 12, 0); // SET fields
+		setCondition(null);
 		setDescription(null);
 		setUpRecord(parent);
 		if (rec != 0) {
@@ -41,79 +35,33 @@ public class ChangeRecord extends Record implements ChangeInterface {
 		store.setInt(rec, 4, store.putString(value));
 	}
 
-	public void moveFields(ChangeRecord other) {
-		getStore().setInt(getRec(), 8, getStore().getInt(other.getRec(), 8));
-		getStore().setInt(other.getRec(), 8, 0);
-	}
-
-	public void setParent(Record value) {
-		store.setInt(rec, 24, value == null ? 0 : value.getRec());
-	}
-
-	public void setSize(int value) {
-		if (value == Integer.MIN_VALUE)
-			throw new MutationException("Mandatory 'size' field");
-		store.setInt(rec, 28, value);
-	}
-
-	public void setRelated(boolean value) {
-		store.setByte(rec, 32, (store.getByte(rec, 32) & 254) + (value ? 1 : 0));
-	}
-
-	public void setFull(boolean value) {
-		store.setByte(rec, 33, (store.getByte(rec, 33) & 254) + (value ? 1 : 0));
+	public void setCondition(Field value) {
+		store.setInt(rec, 16, value == null ? 0 : value.getRec());
 	}
 
 	public void setDescription(String value) {
-		store.setInt(rec, 34, store.putString(value));
+		store.setInt(rec, 20, store.putString(value));
 	}
 
 	public void setUpRecord(Project value) {
-		store.setInt(rec, 47, value == null ? 0 : value.getRec());
+		store.setInt(rec, 33, value == null ? 0 : value.getRec());
 	}
 
 	/* package private */ void parseFields(Parser parser) {
-		if (parser.hasSub("fields")) {
-			try (FieldsArray sub = new FieldsArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
-		}
-		if (parser.hasSub("fieldOnName")) {
+		if (parser.hasSub("fieldName")) {
 			new Field(store).parse(parser, this);
 		}
-		if (parser.hasSub("setIndexes")) {
-			new SetIndex(store).parse(parser, this);
+		if (parser.hasSub("fields")) {
+			new Field(store).parse(parser, this);
 		}
-		if (parser.hasSub("freeBits")) {
-			new FreeBits(store).parse(parser, this);
-		}
-		if (parser.hasField("parent")) {
-			parser.getRelation("parent", (int recNr) -> {
-				Iterator<Record> iterator = getUpRecord().getRecords().iterator();
-				Record relRec = iterator.hasNext() ? iterator.next() : null;
+		if (parser.hasField("condition")) {
+			parser.getRelation("condition", (int recNr) -> {
+				Iterator<Field> iterator = null;				Field relRec = iterator.hasNext() ? iterator.next() : null;
 				boolean found = relRec != null && relRec.parseKey(parser);
 				setRec(recNr);
-				setParent(relRec);
+				setCondition(relRec);
 				return found;
 			}, getRec());
-		}
-		if (parser.hasField("size")) {
-			setSize(parser.getInt("size"));
-		}
-		if (parser.hasField("related")) {
-			Boolean valueRelated = parser.getBoolean("related");
-			if (valueRelated == null)
-				throw new MutationException("Mandatory 'related' field");
-			setRelated(valueRelated);
-		}
-		if (parser.hasField("full")) {
-			Boolean valueFull = parser.getBoolean("full");
-			if (valueFull == null)
-				throw new MutationException("Mandatory 'full' field");
-			setFull(valueFull);
 		}
 		if (parser.hasField("description")) {
 			setDescription(parser.getString("description"));
@@ -132,23 +80,11 @@ public class ChangeRecord extends Record implements ChangeInterface {
 			if (value instanceof String)
 				setName((String) value);
 			return value instanceof String;
-		case 6:
-			if (value instanceof Record)
-				setParent((Record) value);
-			return value instanceof Record;
-		case 7:
-			if (value instanceof Integer)
-				setSize((Integer) value);
-			return value instanceof Integer;
-		case 8:
-			if (value instanceof Boolean)
-				setRelated((Boolean) value);
-			return value instanceof Boolean;
-		case 9:
-			if (value instanceof Boolean)
-				setFull((Boolean) value);
-			return value instanceof Boolean;
-		case 10:
+		case 4:
+			if (value instanceof Field)
+				setCondition((Field) value);
+			return value instanceof Field;
+		case 5:
 			if (value instanceof String)
 				setDescription((String) value);
 			return value instanceof String;
@@ -161,13 +97,9 @@ public class ChangeRecord extends Record implements ChangeInterface {
 	public ChangeInterface add(int field) {
 		switch (field) {
 		case 2:
-			return addFields();
+			return addFieldName();
 		case 3:
-			return addFieldOnName();
-		case 4:
-			return addSetIndexes();
-		case 5:
-			return addFreeBits();
+			return addFields();
 		default:
 			return null;
 		}

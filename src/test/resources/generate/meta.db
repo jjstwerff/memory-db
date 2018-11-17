@@ -1,23 +1,23 @@
 records=[
   name=Project, fields=[
-    name=records, type=SUB, mandatory=true, child={name=Record}
-    name=main, type=RELATION, mandatory=true, related={name=Record}, description=Also the project name and description.
-    name=pack, type=STRING, description=Package name for java code.
-    name=directory, type=STRING, description=Directory name for the generated code
+    name=records, nr=0, type=SUB, mandatory=true, child={name=Record}
+    name=main, nr=1, type=RELATION, mandatory=true, related={name=Record}, description=Also the project name and description.
+    name=pack, nr=2, type=STRING, description=Package name for java code.
+    name=directory, nr=3, type=STRING, description=Directory name for the generated code
   ], description=Definition of the structure of a database without internal details.
   name=Record, fields=[
-    name=name, type=STRING, key=true
-    name=fields, type=ARRAY, mandatory=true, content={name=Field}
-    name=condition, type=RELATION, related={name=Field}
+    name=name, nr=0, type=STRING, key=true
+    name=fields, nr=1, type=ARRAY, mandatory=true, content={name=Field}
+    name=condition, nr=2, type=RELATION, related={name=Field}
     & description=This enumerate field allows the existence of other fields. 
-    name=description, type=STRING
-    name=fieldName, type=INDEX, to={name=Field}, order=[
+    name=description, nr=3, type=STRING
+    name=fieldName, nr=4, type=INDEX, to={name=Field}, order=[
       field={upRecord={name=Field},name=name}
     ]
   ]
   name=Field, fields=[
-    name=name, type=STRING, key=true
-    name=type, type=ENUMERATE, values=[
+    name=name, nr=0, type=STRING, key=true
+    name=type, nr=1, type=ENUMERATE, values=[
       value=ARRAY
       value=BOOLEAN, description=A variable that cannot be null.
       value=BYTE, description=This value cannot be null.
@@ -32,29 +32,29 @@ records=[
       value=RELATION, description=Only the key fields of this records are used to prevent cyclic definitions.
       value=SUB, description=A set of sub records ordered on their key field.
       value=STRING
-    ], mandatory=true
-    name=key, type=BOOLEAN, description=The order field for SUB type records. Also used for relation notation.
-    name=mandatory, type=BOOLEAN, description=This field is mandatory. All key fields are already mandatory.
-    name=values, type=ARRAY, mandatory=true, content={name=Value}, condition=ENUMERATE
-    name=related, type=RELATION, mandatory=true, related={name=Record}, condition=RELATION
-    name=record, type=RELATION, mandatory=true, related={name=Record}, condition=INCLUDE
-    name=content, type=RELATION, mandatory=true, related={name=Record}, condition=ARRAY
-    name=child, type=RELATION, mandatory=true, related={name=Record}, condition=SUB
-    name=to, type=RELATION, mandatory=true, related={name=Record}, condition=INDEX
-    name=order, type=ARRAY, mandatory=true, content={name=OrderField}, condition=INDEX
-    name=minimum, type=LONG, condition=BYTE|INTEGER|LONG
-    name=maximum, type=LONG, condition=BYTE|INTEGER|LONG|STRING, description=Length on STRING.
-    name=format, type=STRING, condition=FLOAT|DATE
-    name=decimals, type=BYTE, condition=INTEGER|LONG|FLOAT|DATE
-    name=default, type=STRING, description=The default value written into this field.
-    name=condition, type=STRING, description=When does this field exist. Multiple values with | separator possible.
-    name=description, type=STRING
+    ], mandatory=true, default=STRING
+    name=key, nr=2, type=BOOLEAN, description=The order field for SUB type records. Also used for relation notation.
+    name=mandatory, nr=3, type=BOOLEAN, description=This field is mandatory. All key fields are already mandatory.
+    name=values, nr=4, type=ARRAY, mandatory=true, content={name=Value}, condition=ENUMERATE
+    name=related, nr=5, type=RELATION, mandatory=true, related={name=Record}, condition=RELATION
+    name=record, nr=6, type=RELATION, mandatory=true, related={name=Record}, condition=INCLUDE
+    name=content, nr=7, type=RELATION, mandatory=true, related={name=Record}, condition=ARRAY
+    name=child, nr=8, type=RELATION, mandatory=true, related={name=Record}, condition=SUB
+    name=to, nr=9, type=RELATION, mandatory=true, related={name=Record}, condition=INDEX
+    name=order, nr=10, type=ARRAY, mandatory=true, content={name=OrderField}, condition=INDEX
+    name=minimum, nr=11, type=LONG, condition=BYTE|INTEGER|LONG
+    name=maximum, nr=12, type=LONG, condition=BYTE|INTEGER|LONG|STRING, description=Length on STRING.
+    name=format, nr=13, type=STRING, condition=FLOAT|DATE
+    name=decimals, nr=14, type=BYTE, condition=INTEGER|LONG|FLOAT|DATE
+    name=default, nr=15, type=STRING, description=The default value written into this field.
+    name=condition, nr=16, type=STRING, description=When does this field exist. Multiple values with | separator possible.
+    name=description, nr=17, type=STRING
   ], condition={name=type}
   name=Value, fields=[
-    name=value, type=STRING, mandatory=true
-    name=description, type=STRING
+    name=value, nr=0, type=STRING, mandatory=true
+    name=description, nr=1, type=STRING
   ]
   name=OrderField, fields=[
-    name=field, type=RELATION, mandatory=true, related={name=Field}
+    name=field, nr=0, type=RELATION, mandatory=true, related={name=Field}
   ]
 ], main={name=Project}, pack=org.memorydb.meta, directory=src/main/java/org/memorydb/meta

@@ -15,7 +15,7 @@ public class TestInserts extends NormalCheck {
 			for (int i = 0; i < 5000; i++) {
 				try (ChangeRecord rec = new ChangeRecord(project, 0)) {
 					rec.setName(Long.toString(rand.nextLong()));
-					rec.setSize(rand.nextInt());
+					//rec.setSize(rand.nextInt());
 				}
 			}
 		}
@@ -29,7 +29,7 @@ public class TestInserts extends NormalCheck {
 			for (int i = 0; i < 5000; i++) {
 				try (ChangeRecord rec = new ChangeRecord(project, 0)) {
 					rec.setName(Long.toString(rand.nextLong()));
-					rec.setSize(rand.nextInt());
+					//rec.setSize(rand.nextInt());
 				}
 				if (i > 1000) {
 					int nr = rand.nextInt(1000);
