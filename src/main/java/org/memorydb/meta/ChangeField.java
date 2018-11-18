@@ -13,6 +13,7 @@ public class ChangeField extends Field implements ChangeInterface {
 		super(parent.getStore(), rec);
 		if (rec == 0) {
 			setRec(getStore().allocate(Field.RECORD_SIZE));
+			System.out.println("field:" + getRec() + " record:" + parent.getRec());
 		}
 		setName(null);
 		setNr(0);
@@ -38,6 +39,7 @@ public class ChangeField extends Field implements ChangeInterface {
 			getUpRecord().new IndexFieldName(this).remove(rec);
 			getUpRecord().new IndexFields(this).remove(rec);
 		}
+		System.out.println("field " + getRec() + " parent: " + getUpRecord().getRec());
 	}
 
 	/* package private */ ChangeField(Field current) {

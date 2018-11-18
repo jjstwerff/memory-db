@@ -12,7 +12,7 @@ records=[
     & description=This enumerate field allows the existence of other fields. 
     name=description, nr=3, type=STRING
     name=fieldName, nr=4, type=INDEX, to={name=Field}, order=[
-      field={upRecord={name=Field},name=name}
+      field={Record={name=Field},name=name}
     ]
   ]
   name=Field, fields=[

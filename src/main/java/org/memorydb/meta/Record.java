@@ -316,7 +316,8 @@ public class Record implements MemoryRecord, RecordInterface {
 		String name = parser.getString("name");
 		int nextRec = parent.new IndexRecords(this, name).search();
 		parser.finishRelation();
-		rec = nextRec;
+		if (nextRec != 0)
+			rec = nextRec;
 		return nextRec != 0;
 	}
 

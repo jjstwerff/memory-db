@@ -383,7 +383,8 @@ ${table.setKeys}
 	public boolean parseKey(Parser parser) {
 ${table.parseKeys}<#rt>
 		parser.finishRelation();
-		rec = nextRec;
+		if (nextRec != 0)
+			rec = nextRec;
 		return nextRec != 0;
 	}
 

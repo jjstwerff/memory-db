@@ -4,9 +4,10 @@ import org.junit.Test;
 import org.memorydb.file.DBParser;
 import org.memorydb.file.Parser;
 import org.memorydb.meta.Meta;
+import org.memorydb.structure.NormalCheck;
 import org.memorydb.structure.Store;
 
-public class TestGenerate {
+public class TestGenerate extends NormalCheck {
 	@Test
 	public void testGenerate() {
 		Store store = new Store(10);

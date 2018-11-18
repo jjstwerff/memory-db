@@ -12,6 +12,7 @@ public class ChangeRecord extends Record implements ChangeInterface {
 		super(parent.getStore(), rec);
 		if (rec == 0) {
 			setRec(getStore().allocate(Record.RECORD_SIZE));
+			System.out.println("record: " + getRec());
 		}
 		setName(null);
 		store.setInt(getRec(), 8, 0); // SET fieldName
@@ -56,8 +57,8 @@ public class ChangeRecord extends Record implements ChangeInterface {
 		}
 		if (parser.hasField("condition")) {
 			parser.getRelation("condition", (int recNr) -> {
-				Iterator<Field> iterator = null;				Field relRec = iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
+				Field relRec = new Field(store, 0);
+				boolean found = relRec.parseKey(parser);
 				setRec(recNr);
 				setCondition(relRec);
 				return found;
@@ -70,6 +71,7 @@ public class ChangeRecord extends Record implements ChangeInterface {
 
 	@Override
 	public void close() {
+		System.out.println("close record: " + getRec());
 		getUpRecord().new IndexRecords(this).insert(getRec());
 	}
 

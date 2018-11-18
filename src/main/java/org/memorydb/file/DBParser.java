@@ -401,4 +401,9 @@ public class DBParser implements Parser {
 	public StringPointer getStringPointer(String string) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public String toString() {
+		return scanner.toString();
+	}
 }

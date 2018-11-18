@@ -380,8 +380,9 @@ public class Field implements MemoryRecord, RecordInterface {
 		parser.getRelation("Record", (int recNr) -> {
 			parent.setRec(recNr);
 			parent.parseKey(parser);
+			parent.setRec(recNr);
 			return true;
-		}, getRec());
+		}, parent.getRec());
 		String name = parser.getString("name");
 		int nextRec = parent.new IndexFieldName(this, name).search();
 		parser.finishRelation();
