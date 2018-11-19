@@ -3,9 +3,10 @@ Testing:
 	always claim main record in Store, no claimed indexes
 	make index to array possible: position in array as data, for now no combination of relation & position possible
 - database reading in JSTL ..
-	Field.parseKey() ...
-		give the parent
-		define inside the parent
+	define on parent records:
+		routine to find matching parents & what is the best
+		Record:parseField(Parser parse) -> Field   when "Record" is not there: call Project:parseField() internally
+		Project:parseField(Parser parse) -> Field  expect "Record" is there
 	database with table definitions? current 3 structures in database format
 	allow included record
 	add calculated fields:
