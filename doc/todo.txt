@@ -23,6 +23,7 @@ Testing:
 		indexes on the current record:
 			index holding record expression
 			ordering expressions
+		array of places were an array is used
 	including validation checks:
 		incorrect pack name
 		incorrect directory name
