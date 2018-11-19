@@ -279,8 +279,9 @@ public class Record implements Comparable<Record> {
 				bld.append("\t\tparser.getRelation(\"").append(parent.name).append("\", (int recNr) -> {\n");
 				bld.append("\t\t\tparent.setRec(recNr);\n");
 				bld.append("\t\t\tparent.parseKey(parser);\n");
+				bld.append("\t\t\tparent.setRec(recNr);\n");
 				bld.append("\t\t\treturn true;\n");
-				bld.append("\t\t}, getRec());\n");
+				bld.append("\t\t}, parent.getRec());\n");
 			}
 			bld.append(keyFields(2));
 			return bld.toString();

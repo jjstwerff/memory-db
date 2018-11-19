@@ -9,61 +9,49 @@ public class MetaStructure {
 	public static Project getProject() {
 		Project project = new Project("Meta", "org.memorydb.meta", "src/main/java/org/memorydb/meta");
 
-		Record str = project.record("Str");
-		str.field("str", Type.STRING);
-
-		Record index = project.table("Index");
-		index.field("name", Type.STRING);
-		index.field("indexFields", Type.ARRAY, str);
-		index.field("fieldPos", Type.INTEGER);
-		index.field("flagPos", Type.INTEGER);
-		index.field("parentPos", Type.INTEGER);
-		index.field("primary", Type.BOOLEAN);
+		Record value = project.record("Value");
+		value.field("value", Type.STRING);
+		value.field("description", Type.STRING);
 
 		Record field = project.table("Field");
-		field.field("name", Type.STRING);
-		field.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "BYTE", "DATE", "ENUMERATE", "FLOAT", "INTEGER", "LONG", "NULL_BOOLEAN", "RELATION", "SET", "SUB", "STRING")
-				.defaultValue("STRING");
-		field.field("auto", Type.BOOLEAN);
-		field.field("pos", Type.INTEGER).mandatory();
-		field.field("index", Type.RELATION, index);
-		field.field("values", Type.ARRAY, str);
+		field.field("name", Type.STRING).isKey();
+		field.field("nr", Type.INTEGER);
+		field.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "BYTE", "DATE", "ENUMERATE", "FLOAT", "INCLUDE",
+				"INDEX", "INTEGER", "LONG", "NULL_BOOLEAN", "RELATION", "SUB", "STRING").condition().defaultValue("STRING");
 		field.field("key", Type.BOOLEAN);
 		field.field("mandatory", Type.BOOLEAN);
+		field.field("minimum", Type.LONG);
+		field.field("maximum", Type.LONG);
+		field.field("format", Type.STRING);
+		field.field("decimals", Type.BYTE);
 		field.field("default", Type.STRING);
+		field.field("condition", Type.STRING);
 		field.field("description", Type.STRING);
 
-		Record freeBits = project.table("FreeBits");
-		freeBits.field("size", Type.INTEGER);
-		freeBits.field("pos", Type.INTEGER);
-
-		Record recField = project.record("RecField");
-		recField.field("field", Type.RELATION, field);
-
-		Record setIndex = project.table("SetIndex");
-		setIndex.field("index", Type.RELATION, index);
+		Record orderField = project.record("OrderField");
+		orderField.field("field", Type.RELATION, field);
 
 		Record record = project.table("Record");
 		record.field("name", Type.STRING);
-		record.field("fields", Type.ARRAY, recField);
-		record.field("fieldOnName", field, "name");
-		record.field("setIndexes", setIndex, "index.name");
-		record.field("freeBits", freeBits, "size");
-		record.field("parent", Type.RELATION, record);
-		record.field("size", Type.INTEGER).mandatory();
-		record.field("related", Type.BOOLEAN);
-		record.field("full", Type.BOOLEAN);
+		record.field("fieldName", field, "name");
+		record.field("fields", field, "nr");
+		record.field("condition", Type.RELATION, field);
 		record.field("description", Type.STRING);
-		index.field("record", Type.RELATION, record);
-		field.field("related", Type.RELATION, record);
+
+		field.field("values", Type.ARRAY, value).when("ENUMERATE");
+		field.field("related", Type.RELATION, record).when("RELATION");
+		field.field("record", Type.RELATION, record).when("INCLUDE");
+		field.field("content", Type.RELATION, record).when("ARRAY");
+		field.field("child", Type.RELATION, record).when("SUB");
+		field.field("to", Type.RELATION, record).when("INDEX");
+		field.field("order", Type.ARRAY, orderField).when("INDEX");
 
 		Record meta = project.table("Project");
-		meta.field("name", Type.STRING);
-		meta.field("pack", Type.STRING);
-		meta.field("indexes", index, "name");
 		meta.field("records", record, "name");
-		meta.field("dir", Type.STRING);
-		meta.index("meta", "name");
+		meta.field("main", Type.RELATION, record);
+		meta.field("pack", Type.STRING);
+		meta.field("directory", Type.STRING);
+		meta.index("meta", "pack");
 
 		return project;
 	}
