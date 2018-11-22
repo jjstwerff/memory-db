@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
+import org.memorydb.meta.Project.IndexRecords;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.IndexOperation;
 import org.memorydb.structure.Key;
@@ -311,14 +312,13 @@ public class Record implements MemoryRecord, RecordInterface {
 		return this;
 	}
 
-	public boolean parseKey(Parser parser) {
-		Project parent = getUpRecord();
-		String name = parser.getString("name");
-		int nextRec = parent.new IndexRecords(this, name).search();
-		parser.finishRelation();
-		if (nextRec != 0)
-			rec = nextRec;
-		return nextRec != 0;
+	public static int parseKey(Parser parser, Project project) {
+		Record into = new Record(project.getStore(), 0);
+		IndexRecords idx = project.new IndexRecords(into, parser.getString("name"));
+		int recId = idx.search();
+		if (recId == 0)
+			return 0;
+		return recId;
 	}
 
 	@Override

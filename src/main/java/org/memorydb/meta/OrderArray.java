@@ -176,10 +176,13 @@ public class OrderArray implements ChangeInterface, Iterable<OrderArray> {
 		setField(null);
 		if (parser.hasField("field")) {
 			parser.getRelation("field", (int recNr) -> {
-				Field relRec = new Field(store, parent.rec);
-				boolean found = relRec.parseKey(parser);
-				setField(relRec);
-				return found;
+				Record record = getUpRecord().getUpRecord();
+				int nr = Field.parseKey(parser, record.getRec(), record.getUpRecord());
+				if (nr == 0)
+					return false;
+				setRec(recNr);
+				setField(new Field(store, nr));
+				return true;
 			}, idx);
 		}
 	}

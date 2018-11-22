@@ -3,7 +3,6 @@ package org.memorydb.meta;
 import org.memorydb.file.Parser;
 import org.memorydb.structure.Store;
 import org.memorydb.structure.ChangeInterface;
-import java.util.Iterator;
 
 /**
  * Automatically generated record class for table Project
@@ -40,11 +39,12 @@ public class ChangeProject extends Project implements ChangeInterface {
 		}
 		if (parser.hasField("main")) {
 			parser.getRelation("main", (int recNr) -> {
-				Iterator<Record> iterator = null;				Record relRec = iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
+				int nr = Record.parseKey(parser, this);
+				if (nr == 0)
+					return false;
 				setRec(recNr);
-				setMain(relRec);
-				return found;
+				setMain(new Record(store, nr));
+				return true;
 			}, getRec());
 		}
 		if (parser.hasField("directory")) {

@@ -35,11 +35,6 @@ public class Scanner implements AutoCloseable {
 	@Override
 	public void close() {
 		try {
-			if (pos >= 0) {
-				skipRemarks();
-				if (pos < capacity)
-					error("Remaining tokens");
-			}
 			channel.close();
 		} catch (IOException e) {
 			throw new InputOutputException(e);

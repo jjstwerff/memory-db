@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
+import org.memorydb.meta.Project.IndexRecords;
+import org.memorydb.meta.Record.IndexFieldName;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RecordData;
@@ -375,19 +377,28 @@ public class Field implements MemoryRecord, RecordInterface {
 		return this;
 	}
 
-	public boolean parseKey(Parser parser) {
-		Record parent = getUpRecord();
-		parser.getRelation("Record", (int recNr) -> {
-			parent.setRec(recNr);
-			parent.parseKey(parser);
-			parent.setRec(recNr);
-			return true;
-		}, parent.getRec());
-		String name = parser.getString("name");
-		int nextRec = parent.new IndexFieldName(this, name).search();
-		parser.finishRelation();
-		rec = nextRec;
-		return nextRec != 0;
+	public static int parseKey(Parser parser, int recordRecNr, Project project) {
+		Field into = new Field(project.getStore(), 0);
+		Record onRec = new Record(into.getStore());
+		if (parser.hasField("Record")) {
+			parser.getRelation("Record", recNr1 -> {
+				IndexRecords idx = project.new IndexRecords(new Record(project.getStore()), parser.getString("name"));
+				int nr = idx.search();
+				onRec.setRec(nr);
+				return true;
+			}, 0);
+			if (onRec.getRec() == 0)
+				return 0;
+		} else {
+			if (recordRecNr == 0)
+				return 0;
+			onRec.setRec(recordRecNr);
+		}
+		IndexFieldName idx = onRec.new IndexFieldName(into, parser.getString("name"));
+		int recId = idx.search();
+		if (recId == 0)
+			return 0;
+		return recId;
 	}
 
 	@Override

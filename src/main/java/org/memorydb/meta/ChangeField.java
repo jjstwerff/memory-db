@@ -2,7 +2,6 @@ package org.memorydb.meta;
 
 import org.memorydb.file.Parser;
 import org.memorydb.structure.ChangeInterface;
-import java.util.Iterator;
 import org.memorydb.handler.MutationException;
 
 /**
@@ -13,7 +12,6 @@ public class ChangeField extends Field implements ChangeInterface {
 		super(parent.getStore(), rec);
 		if (rec == 0) {
 			setRec(getStore().allocate(Field.RECORD_SIZE));
-			System.out.println("field:" + getRec() + " record:" + parent.getRec());
 		}
 		setName(null);
 		setNr(0);
@@ -39,7 +37,6 @@ public class ChangeField extends Field implements ChangeInterface {
 			getUpRecord().new IndexFieldName(this).remove(rec);
 			getUpRecord().new IndexFields(this).remove(rec);
 		}
-		System.out.println("field " + getRec() + " parent: " + getUpRecord().getRec());
 	}
 
 	/* package private */ ChangeField(Field current) {
@@ -198,52 +195,52 @@ public class ChangeField extends Field implements ChangeInterface {
 		}
 		if (parser.hasField("related")) {
 			parser.getRelation("related", (int recNr) -> {
-				Iterator<Record> iterator = getUpRecord().getUpRecord().getRecords().iterator();
-				Record relRec = iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
+				int nr = Record.parseKey(parser, getUpRecord().getUpRecord());
+				if (nr == 0)
+					return false;
 				setRec(recNr);
-				setRelated(relRec);
-				return found;
+				setRelated(new Record(store, nr));
+				return true;
 			}, getRec());
 		}
 		if (parser.hasField("record")) {
 			parser.getRelation("record", (int recNr) -> {
-				Iterator<Record> iterator = getUpRecord().getUpRecord().getRecords().iterator();
-				Record relRec = iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
+				int nr = Record.parseKey(parser, getUpRecord().getUpRecord());
+				if (nr == 0)
+					return false;
 				setRec(recNr);
-				setRecord(relRec);
-				return found;
+				setRecord(new Record(store, nr));
+				return true;
 			}, getRec());
 		}
 		if (parser.hasField("content")) {
 			parser.getRelation("content", (int recNr) -> {
-				Iterator<Record> iterator = getUpRecord().getUpRecord().getRecords().iterator();
-				Record relRec = iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
+				int nr = Record.parseKey(parser, getUpRecord().getUpRecord());
+				if (nr == 0)
+					return false;
 				setRec(recNr);
-				setContent(relRec);
-				return found;
+				setContent(new Record(store, nr));
+				return true;
 			}, getRec());
 		}
 		if (parser.hasField("child")) {
 			parser.getRelation("child", (int recNr) -> {
-				Iterator<Record> iterator = getUpRecord().getUpRecord().getRecords().iterator();
-				Record relRec = iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
+				int nr = Record.parseKey(parser, getUpRecord().getUpRecord());
+				if (nr == 0)
+					return false;
 				setRec(recNr);
-				setChild(relRec);
-				return found;
+				setChild(new Record(store, nr));
+				return true;
 			}, getRec());
 		}
 		if (parser.hasField("to")) {
 			parser.getRelation("to", (int recNr) -> {
-				Iterator<Record> iterator = getUpRecord().getUpRecord().getRecords().iterator();
-				Record relRec = iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
+				int nr = Record.parseKey(parser, getUpRecord().getUpRecord());
+				if (nr == 0)
+					return false;
 				setRec(recNr);
-				setTo(relRec);
-				return found;
+				setTo(new Record(store, nr));
+				return true;
 			}, getRec());
 		}
 		if (parser.hasSub("order")) {
