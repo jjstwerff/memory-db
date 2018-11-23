@@ -18,8 +18,8 @@ public class ChangeField extends Field implements ChangeInterface {
 		setType(Field.Type.STRING);
 		setKey(false);
 		setMandatory(false);
-		setMinimum(0L);
-		setMaximum(0L);
+		setMinimum(Long.MIN_VALUE);
+		setMaximum(Long.MIN_VALUE);
 		setFormat(null);
 		setDecimals((byte) 0);
 		setDefault(null);

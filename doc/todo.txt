@@ -1,5 +1,7 @@
 Testing:
 - database reading in JSTL ..
+	cleanup output of whole database
+		known fields vs shown fields.
 	define on parent records:
 		routine to find matching parents & what is the best
 		Record:parseField(Parser parse) -> Field   when "Record" is not there: call Project:parseField() internally

@@ -430,9 +430,11 @@ public class Field implements MemoryRecord, RecordInterface {
 		case 5:
 			return isMandatory();
 		case 6:
-			return getMinimum();
+			long min = getMinimum();
+			return min == Long.MIN_VALUE ? null : min;
 		case 7:
-			return getMaximum();
+			long max = getMaximum();
+			return max == Long.MIN_VALUE ? null : max;
 		case 8:
 			return getFormat();
 		case 9:
