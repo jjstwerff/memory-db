@@ -54,7 +54,7 @@ public class ChangeRecord extends Record implements ChangeInterface {
 			new Field(store).parse(parser, this);
 		}
 		if (parser.hasField("condition")) {
-			parser.getRelation("condition", recNr -> {
+			parser.getRelation("condition", (recNr, idx) -> {
 				int nr = Field.parseKey(parser, recNr, getUpRecord());
 				if (nr == 0)
 					return false;

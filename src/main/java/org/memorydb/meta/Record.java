@@ -136,6 +136,11 @@ public class Record implements MemoryRecord, RecordInterface {
 			o = compare(recA.getName(), recB.getName());
 			return o;
 		}
+
+		@Override
+		public Object get(int field) {
+			return new Field(store, field);
+		}
 	}
 
 	@FieldData(
@@ -207,6 +212,11 @@ public class Record implements MemoryRecord, RecordInterface {
 			o = compare(recA.getNr(), recB.getNr());
 			return o;
 		}
+
+		@Override
+		public Object get(int field) {
+			return new Field(store, field);
+		}
 	}
 
 	@FieldData(
@@ -268,9 +278,7 @@ public class Record implements MemoryRecord, RecordInterface {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
-		res.append("Project").append("{").append(getUpRecord().keys()).append("}");
-		res.append(", ");
-		res.append("Name").append("=").append(getName());
+		res.append("name").append("=").append(getName());
 		return res.toString();
 	}
 
@@ -326,6 +334,10 @@ public class Record implements MemoryRecord, RecordInterface {
 		switch (field) {
 		case 1:
 			return getName();
+		case 2:
+			return getFieldName();
+		case 3:
+			return getFields();
 		case 4:
 			return getCondition();
 		case 5:

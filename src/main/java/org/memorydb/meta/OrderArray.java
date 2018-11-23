@@ -152,7 +152,7 @@ public class OrderArray implements ChangeInterface, Iterable<OrderArray> {
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		write.strField("field", "{" + getField().keys() + "}");
+		write.field("field", getField());
 		write.endRecord();
 	}
 
@@ -175,15 +175,16 @@ public class OrderArray implements ChangeInterface, Iterable<OrderArray> {
 	public void parse(Parser parser) {
 		setField(null);
 		if (parser.hasField("field")) {
-			parser.getRelation("field", (int recNr) -> {
+			parser.getRelation("field", (recNr, idx) -> {
 				Record record = getUpRecord().getUpRecord();
 				int nr = Field.parseKey(parser, record.getRec(), record.getUpRecord());
 				if (nr == 0)
 					return false;
-				setRec(recNr);
-				setField(new Field(store, nr));
+				try (OrderArray val = new OrderArray(store, recNr, idx)) {
+					val.setField(new Field(store, nr));
+				}
 				return true;
-			}, idx);
+			}, alloc, idx);
 		}
 	}
 

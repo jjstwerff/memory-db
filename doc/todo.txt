@@ -1,7 +1,4 @@
 Testing:
-- Meta format:
-	always claim main record in Store, no claimed indexes
-	make index to array possible: position in array as data, for now no combination of relation & position possible
 - database reading in JSTL ..
 	define on parent records:
 		routine to find matching parents & what is the best
@@ -65,6 +62,9 @@ Testing:
 		mandatory field with default
 		empty description
 	java code generation via JSTL
+- output:
+	first layout: {keys} and escaping for the proper length .. now inspect strings on multiple-line	
+	layout of keys .. inner keys should also be correctly shown
 - Meta format:
 	always claim main record in Store, no claimed indexes
 	make index to array possible: position in array as data, for now no combination of relation & position possible

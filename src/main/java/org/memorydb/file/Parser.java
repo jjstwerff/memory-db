@@ -19,6 +19,8 @@ public interface Parser extends AutoCloseable {
 
 	void getRelation(String string, ScanRelation scan, int rec);
 
+	void getRelation(String string, ScanRelation scan, int rec, int idx);
+
 	void finishRelation();
 
 	@Override

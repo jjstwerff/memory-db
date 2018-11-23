@@ -19,14 +19,6 @@ public class MetaStructure {
 		field.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "BYTE", "DATE", "ENUMERATE", "FLOAT", "INCLUDE",
 				"INDEX", "INTEGER", "LONG", "NULL_BOOLEAN", "RELATION", "SUB", "STRING").condition().defaultValue("STRING");
 		field.field("key", Type.BOOLEAN);
-		field.field("mandatory", Type.BOOLEAN);
-		field.field("minimum", Type.LONG);
-		field.field("maximum", Type.LONG);
-		field.field("format", Type.STRING);
-		field.field("decimals", Type.BYTE);
-		field.field("default", Type.STRING);
-		field.field("condition", Type.STRING);
-		field.field("description", Type.STRING);
 
 		Record orderField = project.record("OrderField");
 		orderField.field("field", Type.RELATION, field);
@@ -45,6 +37,14 @@ public class MetaStructure {
 		field.field("child", Type.RELATION, record).when("SUB");
 		field.field("to", Type.RELATION, record).when("INDEX");
 		field.field("order", Type.ARRAY, orderField).when("INDEX");
+		field.field("mandatory", Type.BOOLEAN);
+		field.field("minimum", Type.LONG);
+		field.field("maximum", Type.LONG);
+		field.field("format", Type.STRING);
+		field.field("decimals", Type.BYTE);
+		field.field("default", Type.STRING);
+		field.field("condition", Type.STRING);
+		field.field("description", Type.STRING);
 
 		Record meta = project.table("Project");
 		meta.field("records", record, "name");

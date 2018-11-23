@@ -57,6 +57,11 @@ public class Project implements MemoryRecord, RecordInterface {
 		return new ChangeProject(this);
 	}
 
+	@Override
+	public FieldType type() {
+		return FieldType.OBJECT;
+	}
+
 	@FieldData(
 		name = "records",
 		type = "SET",
@@ -125,6 +130,11 @@ public class Project implements MemoryRecord, RecordInterface {
 			int o = 0;
 			o = compare(recA.getName(), recB.getName());
 			return o;
+		}
+
+		@Override
+		public Object get(int field) {
+			return new Record(store, field);
 		}
 	}
 
@@ -199,6 +209,11 @@ public class Project implements MemoryRecord, RecordInterface {
 			o = compare(recA.getPack(), recB.getPack());
 			return o;
 		}
+
+		@Override
+		public Object get(int field) {
+			return new Project(store, field);
+		}
 	}
 
 	@Override
@@ -220,11 +235,7 @@ public class Project implements MemoryRecord, RecordInterface {
 
 	@Override
 	public String keys() throws IOException {
-		StringBuilder res = new StringBuilder();
-		if (rec == 0)
-			return "";
-		res.append("Pack").append("=").append(getPack());
-		return res.toString();
+		return "";
 	}
 
 	@Override
@@ -276,6 +287,8 @@ public class Project implements MemoryRecord, RecordInterface {
 	@Override
 	public Object get(int field) {
 		switch (field) {
+		case 1:
+			return getRecords();
 		case 2:
 			return getMain();
 		case 3:

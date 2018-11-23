@@ -5,18 +5,20 @@ import org.memorydb.file.DBParser;
 import org.memorydb.file.Parser;
 import org.memorydb.meta.ChangeProject;
 import org.memorydb.meta.Meta;
-import org.memorydb.structure.NormalCheck;
 import org.memorydb.structure.Store;
+import org.memorydb.table.MemoryTests;
 
-public class TestGenerate extends NormalCheck {
+public class TestGenerate extends MemoryTests {
 	@Test
 	public void testGenerate() {
 		Store store = new Store(10);
-		try (Meta meta = new Meta(store);
-				Parser parser = new DBParser(getClass().getResource("/generate/meta.db").getFile())) {
+		try (Meta meta = new Meta(store)) {
 			ChangeProject project = meta.addProject();
-			project.parse(parser);
-			System.out.println(project);
+			try (Parser parser = new DBParser(getClass().getResource("/generate/meta.db").getFile())) {
+				project.parse(parser);
+			}
+			StringBuilder code = new StringBuilder();
+			jslt(project, "$", "{}", code);
 		}
 	}
 }

@@ -1,8 +1,8 @@
 package org.memorydb.meta;
 
 import org.memorydb.file.Parser;
-import org.memorydb.structure.ChangeInterface;
 import org.memorydb.handler.MutationException;
+import org.memorydb.structure.ChangeInterface;
 
 /**
  * Automatically generated record class for table Field
@@ -194,7 +194,7 @@ public class ChangeField extends Field implements ChangeInterface {
 			}
 		}
 		if (parser.hasField("related")) {
-			parser.getRelation("related", (int recNr) -> {
+			parser.getRelation("related", (recNr, idx) -> {
 				int nr = Record.parseKey(parser, getUpRecord().getUpRecord());
 				if (nr == 0)
 					return false;
@@ -204,7 +204,7 @@ public class ChangeField extends Field implements ChangeInterface {
 			}, getRec());
 		}
 		if (parser.hasField("record")) {
-			parser.getRelation("record", (int recNr) -> {
+			parser.getRelation("record", (recNr, idx) -> {
 				int nr = Record.parseKey(parser, getUpRecord().getUpRecord());
 				if (nr == 0)
 					return false;
@@ -214,7 +214,7 @@ public class ChangeField extends Field implements ChangeInterface {
 			}, getRec());
 		}
 		if (parser.hasField("content")) {
-			parser.getRelation("content", (int recNr) -> {
+			parser.getRelation("content", (recNr, idx) -> {
 				int nr = Record.parseKey(parser, getUpRecord().getUpRecord());
 				if (nr == 0)
 					return false;
@@ -224,7 +224,7 @@ public class ChangeField extends Field implements ChangeInterface {
 			}, getRec());
 		}
 		if (parser.hasField("child")) {
-			parser.getRelation("child", (int recNr) -> {
+			parser.getRelation("child", (recNr, idx) -> {
 				int nr = Record.parseKey(parser, getUpRecord().getUpRecord());
 				if (nr == 0)
 					return false;
@@ -234,7 +234,7 @@ public class ChangeField extends Field implements ChangeInterface {
 			}, getRec());
 		}
 		if (parser.hasField("to")) {
-			parser.getRelation("to", (int recNr) -> {
+			parser.getRelation("to", (recNr, idx) -> {
 				int nr = Record.parseKey(parser, getUpRecord().getUpRecord());
 				if (nr == 0)
 					return false;

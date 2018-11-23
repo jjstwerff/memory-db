@@ -188,7 +188,7 @@ public class Level implements Operator {
 	@Override
 	public boolean parseKey(Parser parser) {
 		Listener parent = getUpRecord();
-		parser.getRelation("Listener", (int recNr) -> {
+		parser.getRelation("Listener", (recNr, idx) -> {
 			parent.setRec(recNr);
 			parent.parseKey(parser);
 			return true;

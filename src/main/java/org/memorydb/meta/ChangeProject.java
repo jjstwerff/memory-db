@@ -38,7 +38,7 @@ public class ChangeProject extends Project implements ChangeInterface {
 			new Record(store).parse(parser, this);
 		}
 		if (parser.hasField("main")) {
-			parser.getRelation("main", (int recNr) -> {
+			parser.getRelation("main", (recNr, idx) -> {
 				int nr = Record.parseKey(parser, this);
 				if (nr == 0)
 					return false;

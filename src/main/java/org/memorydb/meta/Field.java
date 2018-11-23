@@ -1,6 +1,8 @@
 package org.memorydb.meta;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
@@ -11,8 +13,6 @@ import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RecordData;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Automatically generated record class for table Field
@@ -213,7 +213,9 @@ public class Field implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Record getRelated() {
-		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 74));
+		if (getType() == Type.RELATION)
+			return new Record(store, rec == 0 ? 0 : store.getInt(rec, 74));
+		return null;
 	}
 
 	@FieldData(
@@ -224,7 +226,9 @@ public class Field implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Record getRecord() {
-		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 78));
+		if (getType() == Type.INCLUDE)
+			return new Record(store, rec == 0 ? 0 : store.getInt(rec, 78));
+		return null;
 	}
 
 	@FieldData(
@@ -235,7 +239,9 @@ public class Field implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Record getContent() {
-		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 82));
+		if (getType() == Type.ARRAY)
+			return new Record(store, rec == 0 ? 0 : store.getInt(rec, 82));
+		return null;
 	}
 
 	@FieldData(
@@ -246,7 +252,9 @@ public class Field implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Record getChild() {
-		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 86));
+		if (getType() == Type.SUB)
+			return new Record(store, rec == 0 ? 0 : store.getInt(rec, 86));
+		return null;
 	}
 
 	@FieldData(
@@ -257,7 +265,9 @@ public class Field implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Record getTo() {
-		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 90));
+		if (getType() == Type.INDEX)
+			return new Record(store, rec == 0 ? 0 : store.getInt(rec, 90));
+		return null;
 	}
 
 	@FieldData(
@@ -297,17 +307,10 @@ public class Field implements MemoryRecord, RecordInterface {
 		write.field("name", getName());
 		write.field("nr", getNr());
 		write.field("type", getType());
-		write.field("key", isKey());
-		write.field("mandatory", isMandatory());
-		write.field("minimum", getMinimum());
-		write.field("maximum", getMaximum());
-		write.field("format", getFormat());
-		write.field("decimals", getDecimals());
-		write.field("default", getDefault());
-		write.field("condition", getCondition());
-		write.field("description", getDescription());
+		if (isKey())
+			write.field("key", isKey());
 		ValuesArray fldValues = getValues();
-		if (fldValues != null) {
+		if (fldValues != null && fldValues.getSize() > 0) {
 			write.sub("values");
 			for (ValuesArray sub : fldValues)
 				sub.output(write, iterate);
@@ -319,12 +322,24 @@ public class Field implements MemoryRecord, RecordInterface {
 		write.field("child", getChild());
 		write.field("to", getTo());
 		OrderArray fldOrder = getOrder();
-		if (fldOrder != null) {
+		if (fldOrder != null && fldOrder.getSize() > 0) {
 			write.sub("order");
 			for (OrderArray sub : fldOrder)
 				sub.output(write, iterate);
 			write.endSub();
 		}
+		if (isMandatory())
+			write.field("mandatory", isMandatory());
+		if (getMinimum() != 0)
+			write.field("minimum", getMinimum());
+		if (getMaximum() != 0)
+			write.field("maximum", getMaximum());
+		write.field("format", getFormat());
+		if (getDecimals() != 0)
+			write.field("decimals", getDecimals());
+		write.field("default", getDefault());
+		write.field("condition", getCondition());
+		write.field("description", getDescription());
 		write.endRecord();
 	}
 
@@ -333,9 +348,9 @@ public class Field implements MemoryRecord, RecordInterface {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
-		res.append("Record").append("{").append(getUpRecord().keys()).append("}");
+		res.append("Record=").append("{").append(getUpRecord().keys()).append("}");
 		res.append(", ");
-		res.append("Name").append("=").append(getName());
+		res.append("name").append("=").append(getName());
 		return res.toString();
 	}
 
@@ -381,7 +396,7 @@ public class Field implements MemoryRecord, RecordInterface {
 		Field into = new Field(project.getStore(), 0);
 		Record onRec = new Record(into.getStore());
 		if (parser.hasField("Record")) {
-			parser.getRelation("Record", recNr1 -> {
+			parser.getRelation("Record", (recNr1, idx1) -> {
 				IndexRecords idx = project.new IndexRecords(new Record(project.getStore()), parser.getString("name"));
 				int nr = idx.search();
 				onRec.setRec(nr);
@@ -428,6 +443,8 @@ public class Field implements MemoryRecord, RecordInterface {
 			return getCondition();
 		case 12:
 			return getDescription();
+		case 13:
+			return getValues();
 		case 14:
 			return getRelated();
 		case 15:
@@ -438,6 +455,8 @@ public class Field implements MemoryRecord, RecordInterface {
 			return getChild();
 		case 18:
 			return getTo();
+		case 19:
+			return getOrder();
 		default:
 			return null;
 		}
@@ -485,9 +504,9 @@ public class Field implements MemoryRecord, RecordInterface {
 		case 13:
 			return FieldType.ARRAY;
 		case 14:
-			return FieldType.OBJECT;
+			return getType() == Type.RELATION ? FieldType.OBJECT : null;
 		case 15:
-			return FieldType.OBJECT;
+			return getType() == Type.INCLUDE ? FieldType.OBJECT : null;
 		case 16:
 			return FieldType.OBJECT;
 		case 17:

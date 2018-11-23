@@ -70,11 +70,13 @@ public class DBParser implements Parser {
 		private final State state; // position of the data in the scanner
 		private final ScanRelation scan; // code to scan this data again
 		private final int rec; // record to write to
+		private final int idx; // possible index to write to
 
-		Todo(State state, ScanRelation scan, int rec) {
+		Todo(State state, ScanRelation scan, int rec, int idx) {
 			this.state = state;
 			this.scan = scan;
 			this.rec = rec;
+			this.idx = idx;
 		}
 
 		@Override
@@ -346,6 +348,11 @@ public class DBParser implements Parser {
 
 	@Override
 	public void getRelation(String field, ScanRelation scan, int rec) {
+		getRelation(field, scan, rec, -1);
+	}
+
+	@Override
+	public void getRelation(String field, ScanRelation scan, int rec, int idx) {
 		if (!getField(field))
 			return;
 		scanner.expect("={");
@@ -354,9 +361,9 @@ public class DBParser implements Parser {
 		levels.add(level);
 		scanFields(level);
 		scanner.expect("}");
-		if (!scan.scan(rec)) {
+		if (!scan.scan(rec, idx)) {
 			if (rec != -1)
-				todo.add(new Todo(start, scan, rec));
+				todo.add(new Todo(start, scan, rec, idx));
 			else
 				scanner.error("Could not find corresponding record");
 		}
@@ -390,7 +397,7 @@ public class DBParser implements Parser {
 				Level level = new Level(-1, -1);
 				levels.add(level);
 				scanFields(level);
-				if (!t.scan.scan(t.rec))
+				if (!t.scan.scan(t.rec, t.idx))
 					scanner.error("Could not find corresponding record");
 				levels.remove(levels.size() - 1);
 			}

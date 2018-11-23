@@ -135,6 +135,11 @@ public class Source implements MemoryRecord, RecordInterface {
 			o = compare(recA.getNr(), recB.getNr());
 			return o;
 		}
+
+		@Override
+		public Object get(int field) {
+			return new Listener(store, field);
+		}
 	}
 
 	public class IndexSources extends TreeIndex<Source> {
@@ -179,6 +184,11 @@ public class Source implements MemoryRecord, RecordInterface {
 			int o = 0;
 			o = compare(recA.getName(), recB.getName());
 			return o;
+		}
+
+		@Override
+		public Object get(int field) {
+			return new Source(store, field);
 		}
 	}
 

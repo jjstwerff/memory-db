@@ -3,7 +3,7 @@ package org.memorydb.structure;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public abstract class TreeIndex<T extends MemoryRecord> extends RedBlackTree implements Iterable<T> {
+public abstract class TreeIndex<T extends MemoryRecord> extends RedBlackTree implements Iterable<T>, RecordInterface {
 	private final Key key;
 	private final T record;
 	private final int flag; // position of flag bit inside record
@@ -31,7 +31,7 @@ public abstract class TreeIndex<T extends MemoryRecord> extends RedBlackTree imp
 				if (nextRec == 0)
 					throw new NoSuchElementException();
 				int n = nextRec;
-				nextRec = TreeIndex.this.next(nextRec);
+				nextRec = TreeIndex.super.next(nextRec);
 				if (key != null && key.compareTo(nextRec) != 0)
 					nextRec = 0;
 				record.setRec(n);
@@ -79,5 +79,30 @@ public abstract class TreeIndex<T extends MemoryRecord> extends RedBlackTree imp
 	protected void changeRight(int recNr, int value) {
 		assert record.getStore().validate(recNr);
 		record.getStore().setInt(recNr, field + 4, value);
+	}
+
+	@Override
+	public String name(int field) {
+		return null;
+	}
+
+	@Override
+	public FieldType type(int field) {
+		return FieldType.OBJECT;
+	}
+
+	@Override
+	public boolean exists() {
+		return true;
+	}
+
+	@Override
+	public int next(int field) {
+		int result;
+		if (field < 0)
+			result = first();
+		else
+			result = super.next(field);
+		return result == 0 ? -1 : result;
 	}
 }

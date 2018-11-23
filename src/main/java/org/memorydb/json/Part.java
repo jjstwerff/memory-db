@@ -200,6 +200,11 @@ public interface Part extends MemoryRecord, RecordInterface {
 			o = compare(recA.getName(), recB.getName());
 			return o;
 		}
+
+		@Override
+		public Object get(int field) {
+			return new Field(part.getStore(), field);
+		}
 	}
 
 	@FieldData(

@@ -139,6 +139,11 @@ public class Listener implements Operator {
 			o = compare(recA.getLevel(), recB.getLevel());
 			return o;
 		}
+
+		@Override
+		public Object get(int field) {
+			return new Level(store, field);
+		}
 	}
 
 	@Override

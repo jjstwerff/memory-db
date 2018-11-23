@@ -135,6 +135,11 @@ public class Macro implements MemoryRecord, RecordInterface {
 			o = compare(recA.getNr(), recB.getNr());
 			return o;
 		}
+
+		@Override
+		public Object get(int field) {
+			return new Alternative(store, field);
+		}
 	}
 
 	public class IndexMacros extends TreeIndex<Macro> {
@@ -179,6 +184,11 @@ public class Macro implements MemoryRecord, RecordInterface {
 			int o = 0;
 			o = compare(recA.getName(), recB.getName());
 			return o;
+		}
+
+		@Override
+		public Object get(int field) {
+			return new Macro(store, field);
 		}
 	}
 

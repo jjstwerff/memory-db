@@ -13,13 +13,11 @@ public class Write {
 	private int len; // length of current row
 	private int indent;
 	private StringBuilder buffer = new StringBuilder();
-	private boolean first;
 
 	public Write(Appendable writer) {
 		this.writer = writer;
 		len = 0;
 		indent = 0;
-		first = true;
 	}
 
 	public void setIndent(int indent) {
@@ -37,8 +35,14 @@ public class Write {
 	}
 
 	public Write field(String name, MemoryRecord value) throws IOException {
-		if (value != null && value.getRec() != 0)
-			strField(name, "{" + value.keys() + "}");
+		if (value != null && value.getRec() != 0) {
+			strField(name, "");
+			writer.append("{");
+			String keys = value.keys();
+			for (int i = 0; i < keys.length(); i++)
+				writeChar(keys.charAt(i), true);
+			writer.append("}");
+		}
 		return this;
 	}
 
@@ -62,16 +66,14 @@ public class Write {
 		return this;
 	}
 
-	public void strField(String name, String value) throws IOException {
+	private void strField(String name, String value) throws IOException {
 		lineStart();
-		first = false;
 		int valLength = value == null ? 0 : value.length();
 		singleField(name, value, valLength);
 	}
 
 	public Write field(String name, StringBuilder value) throws IOException {
 		lineStart();
-		first = false;
 		if (value.length() > MAX_STRING || isMulti(value))
 			multiLine(name, value);
 		else
@@ -84,10 +86,6 @@ public class Write {
 			for (int i = 0; i < indent; i++)
 				writer.append("  ");
 			len = indent * 2;
-			if (!first) {
-				writer.append("& ");
-				len += 2;
-			}
 		} else {
 			writer.append(", ");
 			len += 2;
@@ -120,9 +118,11 @@ public class Write {
 	private void singleField(String name, CharSequence value, int valLength) throws IOException {
 		if (len + name.length() + 1 + valLength > MAX_LENGTH) {
 			writer.append("\n");
-			len = 0;
-		}
-		if (len == 0) {
+			for (int i = 0; i < indent; i++)
+				writer.append("  ");
+			writer.append("& ");
+			len = indent * 2 + 2;
+		} else if (len == 0) {
 			for (int i = 0; i < indent; i++)
 				writer.append("  ");
 			len = indent * 2;
@@ -174,7 +174,6 @@ public class Write {
 
 	public void endRecord() throws IOException {
 		writer.append("\n");
-		first = true;
 		len = 0;
 	}
 
@@ -186,7 +185,6 @@ public class Write {
 	public void sub(String string) throws IOException {
 		strField(string, "[\n");
 		indent++;
-		first = true;
 		len = 0;
 	}
 
