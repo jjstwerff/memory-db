@@ -465,6 +465,47 @@ public class Field implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
+	public int next(int field) {
+		if (field < 0)
+			return 1;
+		if (field + 1 == 4 && !isKey())
+			field++;
+		if (field + 1 == 5 && !isMandatory())
+			field++;
+		if (field + 1 == 6 && getMinimum() == Long.MIN_VALUE)
+			field++;
+		if (field + 1 == 7 && getMaximum() == Long.MIN_VALUE)
+			field++;
+		if (field + 1 == 8 && getFormat() == null)
+			field++;
+		if (field + 1 == 9 && getDecimals() == 0)
+			field++;
+		if (field + 1 == 10 && getDefault() == null)
+			field++;
+		if (field + 1 == 11 && getCondition() == null)
+			field++;
+		if (field + 1 == 12 && getDescription() == null)
+			field++;
+		if (field + 1 == 13 && getValues().getSize() == 0)
+			field++;
+		if (field + 1 == 14 && getType() != Type.RELATION)
+			field++;
+		if (field + 1 == 15 && getType() != Type.INCLUDE)
+			field++;
+		if (field + 1 == 16 && getType() != Type.ARRAY)
+			field++;
+		if (field + 1 == 17 && getType() != Type.SUB)
+			field++;
+		if (field + 1 == 18 && getType() != Type.INDEX)
+			field++;
+		if (field + 1 == 19 && getOrder().getSize() == 0)
+			field++;
+		if (field == 19)
+			return -2;
+		return field + 1;
+	}
+
+	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
 		switch (field) {
 		case 13:
@@ -506,9 +547,9 @@ public class Field implements MemoryRecord, RecordInterface {
 		case 13:
 			return FieldType.ARRAY;
 		case 14:
-			return getType() == Type.RELATION ? FieldType.OBJECT : null;
+			return FieldType.OBJECT;
 		case 15:
-			return getType() == Type.INCLUDE ? FieldType.OBJECT : null;
+			return FieldType.OBJECT;
 		case 16:
 			return FieldType.OBJECT;
 		case 17:
