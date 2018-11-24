@@ -18,7 +18,9 @@ public class TestGenerate extends MemoryTests {
 				project.parse(parser);
 			}
 			StringBuilder code = new StringBuilder();
-			jslt(project, "$", "{}", code);
+			jslt(project, "$.pack", "\"org.memorydb.meta\"", code);
+			jslt(project, "@.name in $.records", "[\"Field\",\"OrderField\",\"Project\",\"Record\",\"Value\"]", code);
+			jslt(project, "@.name in $.records[?@.name=='Field'].fields", "[\"name\",\"type\",\"key\",\"mandatory\",\"values\"]", code);
 		}
 	}
 }

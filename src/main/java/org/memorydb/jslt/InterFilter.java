@@ -22,6 +22,8 @@ public class InterFilter implements RecordInterface {
 
 	@Override
 	public int next(int field) {
+		if (data == null)
+			return -2;
 		curField = field;
 		boolean found = false;
 		while (!found) {
