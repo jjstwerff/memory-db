@@ -283,19 +283,23 @@ public class JsltParser {
 		private void parseExpr() {
 			parseCond();
 			while (true) {
-				if (!scanner.matches("in"))
+				boolean in = scanner.matches("in");
+				if (in || scanner.matches("for")) {
+					try (ChangeExpr temp = new ChangeExpr(store)) {
+						move(temp, spot);
+						spot.setOperation(Operation.FUNCTION);
+						spot.setFunction(in ? Function.PER : Function.FOR);
+						spot.setFnParm2(temp);
+					}
+					try (ChangeExpr data = new ChangeExpr(store)) {
+						remember();
+						spot = data;
+						parseCond();
+						restore();
+						spot.setFnParm1(data);
+					}
+				} else {
 					return;
-				try (ChangeExpr temp = new ChangeExpr(store)) {
-					move(temp, spot);
-					spot.setOperation(Operation.FOR);
-					spot.setForExpr(temp);
-				}
-				try (ChangeExpr data = new ChangeExpr(store)) {
-					remember();
-					spot = data;
-					parseCond();
-					restore();
-					spot.setFor(data);
 				}
 			}
 		}
@@ -760,6 +764,8 @@ public class JsltParser {
 				spot.setBoolean(true);
 			} else if (scanner.matches("@")) {
 				spot.setOperation(Operation.CURRENT);
+			} else if (scanner.matches("#")) {
+				spot.setOperation(Operation.RUNNING);
 			} else if (scanner.matches("$")) {
 				parseListener();
 			} else if (scanner.matches("false")) {
@@ -800,6 +806,10 @@ public class JsltParser {
 			while (scanner.peek("\n"))
 				scanner.newLine();
 			String id = scanner.parseIdentifier();
+			if (id.equals("each") && scanner.matches("(")) {
+				parseForEach();
+				return;
+			}
 			while (scanner.matches("."))
 				id += "." + scanner.parseIdentifier();
 			if (scanner.matches("(")) { // found macro call
@@ -837,6 +847,27 @@ public class JsltParser {
 					}
 			}
 			scanner.error("Unknown identifier '" + id + "'");
+		}
+
+		private void parseForEach() {
+			spot.setOperation(Operation.FUNCTION);
+			spot.setFunction(Function.EACH);
+			try (ChangeExpr init = new ChangeExpr(store)) {
+				remember();
+				spot = init;
+				parseExpr();
+				restore();
+				spot.setFnParm1(init);
+			}
+			scanner.expect(",");
+			try (ChangeExpr each = new ChangeExpr(store)) {
+				remember();
+				spot = each;
+				parseExpr();
+				restore();
+				spot.setFnParm2(each);
+			}
+			scanner.expect(")");
 		}
 
 		private void parseListener() {
@@ -1000,6 +1031,9 @@ public class JsltParser {
 					case 'b':
 						ch = 7;
 						break;
+					case 't':
+						ch = 9;
+						break;
 					case 'n':
 						ch = 10;
 						break;
@@ -1066,10 +1100,6 @@ public class JsltParser {
 					break;
 				case FLOAT:
 					into.setFloat(from.getFloat());
-					break;
-				case FOR:
-					into.setFor(from.getFor());
-					into.setForExpr(from.getForExpr());
 					break;
 				case FUNCTION:
 					into.setFunction(from.getFunction());

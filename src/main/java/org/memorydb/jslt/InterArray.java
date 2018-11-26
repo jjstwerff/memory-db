@@ -59,4 +59,19 @@ public class InterArray implements RecordInterface {
 	public FieldType type() {
 		return FieldType.ARRAY;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder bld = new StringBuilder();
+		bld.append("[");
+		int pos = 1;
+		while (type(pos) != null) {
+			if (pos != 1)
+				bld.append(",");
+			bld.append(get(pos));
+			pos = next(pos);
+		}
+		bld.append("]");
+		return bld.toString();
+	}
 }

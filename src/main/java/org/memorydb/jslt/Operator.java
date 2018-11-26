@@ -60,7 +60,7 @@ public interface Operator extends ResultType {
 	}
 
 	public enum Operation {
-		FUNCTION, CONDITION, NUMBER, FLOAT, STRING, ARRAY, OBJECT, BOOLEAN, APPEND, NULL, CALL, FOR, FILTER, SORT, IF, CURRENT, READ, VARIABLE;
+		FUNCTION, CONDITION, NUMBER, FLOAT, STRING, ARRAY, OBJECT, BOOLEAN, APPEND, NULL, CALL, FILTER, SORT, IF, CURRENT, RUNNING, READ, VARIABLE;
 
 		private static Map<String, Operation> map = new HashMap<>();
 
@@ -78,7 +78,7 @@ public interface Operator extends ResultType {
 	@FieldData(
 		name = "operation",
 		type = "ENUMERATE",
-		enumerate = {"FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT", "BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "FILTER", "SORT", "IF", "CURRENT", "READ", "VARIABLE"},
+		enumerate = {"FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT", "BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "FILTER", "SORT", "IF", "CURRENT", "RUNNING", "READ", "VARIABLE"},
 		condition = true,
 		mandatory = false
 	)
@@ -90,7 +90,7 @@ public interface Operator extends ResultType {
 	}
 
 	public enum Function {
-		NEG, ADD, MIN, MUL, DIV, MOD, POW, EQ, NE, LT, GT, LE, GE, AND, OR, NOT, FIRST, LAST, INDEX, LENGTH, NUMBER, FLOAT, STRING, BOOLEAN, NAME, TYPE, ELEMENT;
+		NEG, ADD, MIN, MUL, DIV, MOD, POW, EQ, NE, LT, GT, LE, GE, AND, OR, NOT, FIRST, LAST, INDEX, LENGTH, NUMBER, FLOAT, STRING, BOOLEAN, NAME, TYPE, ELEMENT, PER, FOR, EACH;
 
 		private static Map<String, Function> map = new HashMap<>();
 
@@ -108,7 +108,7 @@ public interface Operator extends ResultType {
 	@FieldData(
 		name = "function",
 		type = "ENUMERATE",
-		enumerate = {"NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT", "LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT"},
+		enumerate = {"NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT", "LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT", "EACH"},
 		when = "FUNCTION",
 		mandatory = true
 	)
@@ -299,28 +299,6 @@ public interface Operator extends ResultType {
 
 	default CallParmsArray addCallParms() {
 		return getOperation() != Operation.CALL ? new CallParmsArray(getStore(), 0, -1) : getCallParms().add();
-	}
-
-	@FieldData(
-		name = "for",
-		type = "OBJECT",
-		related = Expr.class,
-		when = "FOR",
-		mandatory = false
-	)
-	default Expr getFor() {
-		return new Expr(getStore(), getOperation() != Operation.FOR ? 0 : getStore().getInt(getRec(), operatorPosition() + 1));
-	}
-
-	@FieldData(
-		name = "forExpr",
-		type = "OBJECT",
-		related = Expr.class,
-		when = "FOR",
-		mandatory = false
-	)
-	default Expr getForExpr() {
-		return new Expr(getStore(), getOperation() != Operation.FOR ? 0 : getStore().getInt(getRec(), operatorPosition() + 5));
 	}
 
 	@FieldData(
@@ -548,18 +526,6 @@ public interface Operator extends ResultType {
 				sub.output(write, iterate);
 			write.endSub();
 		}
-		Expr fldFor = getFor();
-		if (fldFor != null && fldFor.getRec() != 0) {
-			write.sub("for");
-			fldFor.output(write, iterate);
-			write.endSub();
-		}
-		Expr fldForExpr = getForExpr();
-		if (fldForExpr != null && fldForExpr.getRec() != 0) {
-			write.sub("forExpr");
-			fldForExpr.output(write, iterate);
-			write.endSub();
-		}
 		Expr fldFilter = getFilter();
 		if (fldFilter != null && fldFilter.getRec() != 0) {
 			write.sub("filter");
@@ -642,26 +608,22 @@ public interface Operator extends ResultType {
 		case 15:
 			return getMacro();
 		case 17:
-			return getFor();
-		case 18:
-			return getForExpr();
-		case 19:
 			return getFilter();
-		case 20:
+		case 18:
 			return isFilterDeep();
-		case 21:
+		case 19:
 			return getFilterExpr();
-		case 22:
+		case 20:
 			return getSort();
-		case 24:
+		case 22:
 			return getIf();
-		case 27:
+		case 25:
 			return getListenSource();
-		case 28:
+		case 26:
 			return getListemNr();
-		case 29:
+		case 27:
 			return getVarName();
-		case 30:
+		case 28:
 			return getVarNr();
 		default:
 			return null;
@@ -680,11 +642,11 @@ public interface Operator extends ResultType {
 			return getObject();
 		case 16:
 			return getCallParms();
-		case 23:
+		case 21:
 			return getSortParms();
-		case 25:
+		case 23:
 			return getIfTrue();
-		case 26:
+		case 24:
 			return getIfFalse();
 		default:
 			return null;

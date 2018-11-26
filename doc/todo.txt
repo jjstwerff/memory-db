@@ -1,4 +1,9 @@
 Testing:
+- array analysis
+	logic: main expression & remember list
+	link each expression to the InterFor in array & calculate the values
+		fill array with elements
+	calculate each expressions the same time? 
 - database reading in JSTL ..
 	database with table definitions? current 3 structures in database format
 	allow included record
@@ -71,6 +76,20 @@ Testing:
 - remove as many reserved field names as possible
 - algorithm to remove relations on deletes of records
 	more efficient when indexes exist
+
+Optimizations:
+	introduce lazy evaluation version of FOR when possible
+	rewrite MAP as FOR statement & remove old implementation
+	rewrite FILTER as FOR statement & remove old implementation
+	rewrite LENGTH as FOR statement & internal .size() operation & remove old implementation
+	rewrite SLICE as FOR statement & remove old implementation
+	rewrite object ADD as FOR statement on fields
+	rewrite array operation EQ, NE, LT, GT as FOR statements on arrays
+	rewrite string operation EQ, NE, LT, GT, SLIC, LENGTH as FOR statements on strings
+	introduce SPLIT as FOR statements on strings
+	introduce MAX, MIN, SUM, AVG, STD_DEV as FOR statements
+	try to combine evaluation of these FOR statements .. same identity of iterators
+		possibly implementation in macros
 
 JSLT:
 - write set of files from output = [ { path, content, problems? } ]

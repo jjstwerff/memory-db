@@ -158,14 +158,7 @@ public class Field implements Part {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 2 && field <= 9)
-			return Part.super.getPart(field - 2);
-		switch (field) {
-		case 1:
-			return getName();
-		default:
-			return null;
-		}
+		return Part.super.getPart(field);
 	}
 
 	@Override
@@ -179,27 +172,18 @@ public class Field implements Part {
 	}
 
 	@Override
+	public FieldType type() {
+		return Part.super.getFieldType();
+	}
+
+	@Override
 	public FieldType type(int field) {
-		if (field >= 2 && field <= 9)
-			return Part.super.typePart(field - 2);
-		switch (field) {
-		case 1:
-			return FieldType.STRING;
-		default:
-			return null;
-		}
+		return Part.super.typePart(field);
 	}
 
 	@Override
 	public String name(int field) {
-		if (field >= 2 && field <= 9)
-			return Part.super.namePart(field - 2);
-		switch (field) {
-		case 1:
-			return "name";
-		default:
-			return null;
-		}
+		return Part.super.namePart(field);
 	}
 
 	@Override

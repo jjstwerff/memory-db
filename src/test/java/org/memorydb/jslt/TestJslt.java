@@ -39,6 +39,7 @@ public class TestJslt extends MemoryTests {
 		jslt(null, "\"a\" + 1", "\"a1\"");
 		jslt(null, "[1] + 3", "[1,3]");
 		jslt(null, "[1] + 3 + 'a'", "[1,3,\"a\"]");
+		jslt(null, "[] + 1 + 3 + 6 + 8", "[1,3,6,8]");
 		jslt(null, "[1, 0] + [3, 2]", "[1,0,3,2]");
 		jslt(null, "[1, 0] + [3, 2] + 'a'", "[1,0,3,2,\"a\"]");
 		jslt(null, "{A:3 * 2 - 5, C:123} + {C:true}", "{\"A\":1,\"C\":true}");
@@ -88,31 +89,41 @@ public class TestJslt extends MemoryTests {
 		jslt(null, "\"1234\"[-3:]", "\"234\"");
 		jslt(null, "\"1234\".index(\"23\")", "1");
 		jslt(null, "\"1234\".index(\"231\")", "null");
-		jslt(null, "{value:@, index:@.index(), first:@.first(), last:@.last()} in \"abc\"", "[{\"value\":\"a\",\"index\":0,\"first\":true,\"last\":false},"
-				+ "{\"value\":\"b\",\"index\":1,\"first\":false,\"last\":false},{\"value\":\"c\",\"index\":2,\"first\":false,\"last\":true}]");
+		jslt(null, "{value:@, index:@.index(), first:@.first(), last:@.last()} in \"abc\"",
+				"[{\"value\":\"a\",\"index\":0,\"first\":true,\"last\":false},"
+						+ "{\"value\":\"b\",\"index\":1,\"first\":false,\"last\":false},{\"value\":\"c\",\"index\":2,\"first\":false,\"last\":true}]");
 		jslt(null, "\"count &{[@ + 1, @.last()?'':', '] in 3}\"", "\"count 1, 2, 3\"");
-		jslt(null, "[pow(2, 4), string(1), boolean(\"true\"), number(\"123\"), float(\"2.1e4\")]", "[16,\"1\",true,123,21000.0]");
+		jslt(null, "[pow(2, 4), string(1), boolean(\"true\"), number(\"123\"), float(\"2.1e4\")]",
+				"[16,\"1\",true,123,21000.0]");
 		jslt(null, "[[1,2],[1,3],[0,2],[0,1]][/@]", "[[0,1],[0,2],[1,2],[1,3]]");
-		jslt(null, "[[1,\"aa\"]==[1,\"aaa\"], [1,'aa']==[1,'aa'], [2]*2, {\"this\":1, \"too\":2} - \"too\", [2] > [1]]", "[false,true,[2,2],{\"this\":1},true]");
+		jslt(null, "[[1,\"aa\"]==[1,\"aaa\"], [1,'aa']==[1,'aa'], [2]*2, {\"this\":1, \"too\":2} - \"too\", [2] > [1]]",
+				"[false,true,[2,2],{\"this\":1},true]");
+		jslt(null, "{ sum:each(0, # + @), array:each([], # + @*2), maximum:each(0, @ > # ? @ : #) } for [1, 2, 3]",
+				"{\"sum\":6,\"array\":[2,4,6],\"maximum\":3}");
 		compare("code.txt", bld.toString());
 		bld.setLength(0);
 	}
 
 	@Test
 	public void testInput() {
-		jslt("[{\"name\":\"Tim\", \"value\":[12,[3]]}, {\"name\":null, \"value\":true}]", "$", "[{\"name\":\"Tim\",\"value\":[12,[3]]},{\"name\":null,\"value\":true}]");
+		jslt("[{\"name\":\"Tim\", \"value\":[12,[3]]}, {\"name\":null, \"value\":true}]", "$",
+				"[{\"name\":\"Tim\",\"value\":[12,[3]]},{\"name\":null,\"value\":true}]");
 		jslt("{\"name\":\"Tim\", \"value\":123}", "$.name", "\"Tim\"");
 		jslt("{\"a\":{\"name\":\"Tom\", \"value\":123}}", "$.a.name", "\"Tom\"");
 		jslt("{\"a\":{\"name\":\"Tom\", \"value\":123}}", "$.a", "{\"name\":\"Tom\",\"value\":123}");
 		jslt("[1,[2],3]", "$[0]", "1");
 		jslt("[1,[2],3]", "$[1 + 1]", "3");
 		jslt("[1,[2],3]", "$[1][0]", "2");
-		jslt("[{\"name\":\"Tim\", \"value\":123}, {\"name\":null, \"value\":true}]", "[$[1],$[1].value,$[0].name,$[0].name]", "[{\"name\":null,\"value\":true},true,\"Tim\",\"Tim\"]");
+		jslt("[{\"name\":\"Tim\", \"value\":123}, {\"name\":null, \"value\":true}]",
+				"[$[1],$[1].value,$[0].name,$[0].name]", "[{\"name\":null,\"value\":true},true,\"Tim\",\"Tim\"]");
 		jslt("[2,5,3,0]", "$[/@]", "[0,2,3,5]");
 		jslt("[2,5,3,0]", "$[\\@]", "[5,3,2,0]");
-		jslt("[{\"name\":\"Tim\", \"value\":123}, {\"name\":\"Dan\"}]", "@.name in $[?not @.value or @.value == 123]", "[\"Tim\",\"Dan\"]");
-		//jslt("[{\"name\":\"Tim\", \"value\":123}, [1,{\"data\":[{\"name\":\"Dan\", \"value\":true}]}]]", "@.name in $..[?@.value]", "[\"Tim\",\"Dan\"]");
-		jslt("[{\"a\":3,\"b\":0},{\"a\":3,\"b\":1},{\"a\":1}]", "$[/@.a][\\@.b]", "[{\"a\":1},{\"a\":3,\"b\":1},{\"a\":3,\"b\":0}]");
+		jslt("[{\"name\":\"Tim\", \"value\":123}, {\"name\":\"Dan\"}]", "@.name in $[?not @.value or @.value == 123]",
+				"[\"Tim\",\"Dan\"]");
+		// jslt("[{\"name\":\"Tim\", \"value\":123}, [1,{\"data\":[{\"name\":\"Dan\",
+		// \"value\":true}]}]]", "@.name in $..[?@.value]", "[\"Tim\",\"Dan\"]");
+		jslt("[{\"a\":3,\"b\":0},{\"a\":3,\"b\":1},{\"a\":1}]", "$[/@.a][\\@.b]",
+				"[{\"a\":1},{\"a\":3,\"b\":1},{\"a\":3,\"b\":0}]");
 		compare("testInput.txt", bld.toString());
 		bld.setLength(0);
 	}
@@ -124,7 +135,8 @@ public class TestJslt extends MemoryTests {
 	@Test
 	public void testJSLT() throws IOException {
 		Set<Path> files = new TreeSet<>();
-		try (DirectoryStream<Path> dir = Files.newDirectoryStream(Paths.get(getClass().getResource("/jslt").getFile()))) {
+		try (DirectoryStream<Path> dir = Files
+				.newDirectoryStream(Paths.get(getClass().getResource("/jslt").getFile()))) {
 			for (Path file : dir) {
 				String fileName = file.getFileName().toString();
 				if (fileName.endsWith(".jslt") && fileName.matches("[0-9]?.*")) {
@@ -132,14 +144,14 @@ public class TestJslt extends MemoryTests {
 				}
 			}
 		}
-		for (Path file: files) {
+		for (Path file : files) {
 			Store jsltStore = new Store(3);
 			new Parser(new Scanner(file), jsltStore).parse();
 			String into = JsltInterpreter.interpret(jsltStore, null);
 			String result = file.getFileName().toString();
 			StringBuilder code = new StringBuilder();
 			if (!result.equals(""))
-				for (Macro m: new Macro(jsltStore).new IndexMacros())
+				for (Macro m : new Macro(jsltStore).new IndexMacros())
 					code.append(m.toString());
 			compare(result + ".txt", code.toString());
 			Assert.assertEquals(result, "\"\"", into);

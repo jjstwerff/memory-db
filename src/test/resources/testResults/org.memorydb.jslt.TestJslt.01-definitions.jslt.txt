@@ -70,55 +70,55 @@ name=main, alternatives=[
         operation=FUNCTION, function=ADD, fnParm1=[
           operation=FUNCTION, function=ADD, fnParm1=[
             operation=FUNCTION, function=ADD, fnParm1=[
-              operation=CALL, macro=\{Name=t.assert\}, callParms=[
+              operation=CALL, macro={Name=t.assert}, callParms=[
                 operation=STRING, string=constant
                 operation=NUMBER, number=1
-                operation=CALL, macro=\{Name=a\}, callParms=[
+                operation=CALL, macro={Name=a}, callParms=[
                 ]
               ]
             ], fnParm2=[
-              operation=CALL, macro=\{Name=t.assert\}, callParms=[
+              operation=CALL, macro={Name=t.assert}, callParms=[
                 operation=STRING, string=type-match-1
                 operation=STRING, string= *
-                operation=CALL, macro=\{Name=b\}, callParms=[
+                operation=CALL, macro={Name=b}, callParms=[
                   operation=STRING, string= 
                 ]
               ]
             ]
           ], fnParm2=[
-            operation=CALL, macro=\{Name=t.assert\}, callParms=[
+            operation=CALL, macro={Name=t.assert}, callParms=[
               operation=STRING, string=type-match-2
               operation=NUMBER, number=3
-              operation=CALL, macro=\{Name=b\}, callParms=[
+              operation=CALL, macro={Name=b}, callParms=[
                 operation=NUMBER, number=2
               ]
             ]
           ]
         ], fnParm2=[
-          operation=CALL, macro=\{Name=t.assert\}, callParms=[
+          operation=CALL, macro={Name=t.assert}, callParms=[
             operation=STRING, string=type-match-3
             operation=NUMBER, number=3
-            operation=CALL, macro=\{Name=b\}, callParms=[
+            operation=CALL, macro={Name=b}, callParms=[
               operation=NUMBER, number=5
               operation=NUMBER, number=-2
             ]
           ]
         ]
       ], fnParm2=[
-        operation=CALL, macro=\{Name=t.assert\}, callParms=[
+        operation=CALL, macro={Name=t.assert}, callParms=[
           operation=STRING, string=type-match-4
           operation=NUMBER, number=200
-          operation=CALL, macro=\{Name=b\}, callParms=[
+          operation=CALL, macro={Name=b}, callParms=[
             operation=NUMBER, number=0
             operation=NUMBER, number=2
           ]
         ]
       ]
     ], fnParm2=[
-      operation=CALL, macro=\{Name=t.assert\}, callParms=[
+      operation=CALL, macro={Name=t.assert}, callParms=[
         operation=STRING, string=type-match-5
         operation=NUMBER, number=2
-        operation=CALL, macro=\{Name=b\}, callParms=[
+        operation=CALL, macro={Name=b}, callParms=[
           operation=STRING, string=
           operation=NUMBER, number=2
         ]

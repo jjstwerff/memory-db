@@ -253,6 +253,33 @@ name=main, alternatives=[
 ]
 
 Test:
+[] + 1 + 3 + 6 + 8
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=ARRAY, array=[
+            ]
+          ], fnParm2=[
+            operation=NUMBER, number=1
+          ]
+        ], fnParm2=[
+          operation=NUMBER, number=3
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=6
+      ]
+    ], fnParm2=[
+      operation=NUMBER, number=8
+    ]
+  ]
+]
+
+Test:
 [1, 0] + [3, 2]
 Code:
 name=main, alternatives=[
@@ -508,7 +535,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=ARRAY, array=[
         operation=NUMBER, number=1
         operation=NUMBER, number=0
@@ -531,7 +558,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=ARRAY, array=[
         operation=NUMBER, number=1
         operation=NUMBER, number=0
@@ -554,7 +581,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=ARRAY, array=[
         operation=NUMBER, number=1
         operation=NUMBER, number=0
@@ -574,7 +601,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=ARRAY, array=[
         operation=NUMBER, number=1
         operation=NUMBER, number=0
@@ -594,7 +621,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=ARRAY, array=[
         operation=NUMBER, number=1
         operation=NUMBER, number=0
@@ -614,7 +641,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=ARRAY, array=[
         operation=NUMBER, number=1
         operation=NUMBER, number=0
@@ -634,7 +661,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=ARRAY, array=[
         operation=NUMBER, number=1
         operation=NUMBER, number=0
@@ -654,7 +681,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=ARRAY, array=[
         operation=NUMBER, number=1
         operation=NUMBER, number=0
@@ -674,7 +701,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=ARRAY, array=[
         operation=NUMBER, number=1
         operation=NUMBER, number=0
@@ -694,7 +721,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=ARRAY, array=[
         operation=NUMBER, number=1
         operation=NUMBER, number=0
@@ -714,7 +741,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=ARRAY, array=[
         operation=NUMBER, number=1
         operation=NUMBER, number=0
@@ -734,12 +761,12 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=FOR, for=[
+    operation=FUNCTION, function=PER, fnParm1=[
       operation=ARRAY, array=[
         operation=STRING, string=b
         operation=STRING, string=a
       ]
-    ], forExpr=[
+    ], fnParm2=[
       operation=FUNCTION, function=ADD, fnParm1=[
         operation=CURRENT
       ], fnParm2=[
@@ -758,7 +785,7 @@ name=main, alternatives=[
     operation=OBJECT, object=[
       name=[
         operation=STRING, string=val
-      ], operation=FOR, for=[
+      ], operation=FUNCTION, function=PER, fnParm1=[
         operation=ARRAY, array=[
           operation=OBJECT, object=[
             name=[
@@ -785,7 +812,7 @@ name=main, alternatives=[
             ]
           ]
         ]
-      ], forExpr=[
+      ], fnParm2=[
         operation=OBJECT, object=[
           name=[
             operation=STRING, string=first
@@ -813,7 +840,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=FOR, for=[
+    operation=FUNCTION, function=PER, fnParm1=[
       operation=SORT, sort=[
         operation=ARRAY, array=[
           operation=OBJECT, object=[
@@ -840,7 +867,7 @@ name=main, alternatives=[
           operation=STRING, string=name
         ]
       ]
-    ], forExpr=[
+    ], fnParm2=[
       operation=FUNCTION, function=ELEMENT, fnParm1=[
         operation=CURRENT
       ], fnParm2=[
@@ -885,7 +912,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=FOR, for=[
+    operation=FUNCTION, function=PER, fnParm1=[
       operation=FILTER, filter=[
         operation=ARRAY, array=[
           operation=OBJECT, object=[
@@ -912,7 +939,7 @@ name=main, alternatives=[
           operation=STRING, string=data
         ]
       ]
-    ], forExpr=[
+    ], fnParm2=[
       operation=FUNCTION, function=ELEMENT, fnParm1=[
         operation=CURRENT
       ], fnParm2=[
@@ -928,12 +955,12 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=FOR, for=[
+    operation=FUNCTION, function=PER, fnParm1=[
       operation=ARRAY, array=[
         operation=STRING, string=Tim
         operation=STRING, string=Dan
       ]
-    ], forExpr=[
+    ], fnParm2=[
       operation=OBJECT, object=[
         name=[
           operation=STRING, string=name
@@ -1019,7 +1046,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=FOR, for=[
+    operation=FUNCTION, function=PER, fnParm1=[
       operation=OBJECT, object=[
         name=[
           operation=STRING, string=name
@@ -1028,7 +1055,7 @@ name=main, alternatives=[
           operation=STRING, string=data
         ], operation=NUMBER, number=46
       ]
-    ], forExpr=[
+    ], fnParm2=[
       operation=OBJECT, object=[
         name=[
           operation=STRING, string=name
@@ -1102,9 +1129,9 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=FOR, for=[
+    operation=FUNCTION, function=PER, fnParm1=[
       operation=STRING, string=123
-    ], forExpr=[
+    ], fnParm2=[
       operation=CURRENT
     ]
   ]
@@ -1116,9 +1143,9 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=FOR, for=[
+    operation=FUNCTION, function=PER, fnParm1=[
       operation=NUMBER, number=3
-    ], forExpr=[
+    ], fnParm2=[
       operation=CURRENT
     ]
   ]
@@ -1168,7 +1195,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=STRING, string=1234
       operation=NUMBER, number=1
       operation=NUMBER, number=-1
@@ -1183,7 +1210,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=STRING, string=1234
       operation=NUMBER
       operation=NUMBER
@@ -1198,7 +1225,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=STRING, string=1234
       operation=NUMBER
       operation=NUMBER
@@ -1213,7 +1240,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro=\{Name=slice\}, callParms=[
+    operation=CALL, macro={Name=slice}, callParms=[
       operation=STRING, string=1234
       operation=NUMBER, number=-3
       operation=NUMBER
@@ -1256,9 +1283,9 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=FOR, for=[
+    operation=FUNCTION, function=PER, fnParm1=[
       operation=STRING, string=abc
-    ], forExpr=[
+    ], fnParm2=[
       operation=OBJECT, object=[
         name=[
           operation=STRING, string=value
@@ -1291,9 +1318,9 @@ name=main, alternatives=[
   ], code=[
     operation=APPEND, append=[
       operation=STRING, string=count 
-      operation=FOR, for=[
+      operation=FUNCTION, function=PER, fnParm1=[
         operation=NUMBER, number=3
-      ], forExpr=[
+      ], fnParm2=[
         operation=ARRAY, array=[
           operation=FUNCTION, function=ADD, fnParm1=[
             operation=CURRENT
@@ -1430,6 +1457,69 @@ name=main, alternatives=[
       ], fnParm2=[
         operation=ARRAY, array=[
           operation=NUMBER, number=1
+        ]
+      ]
+    ]
+  ]
+]
+
+Test:
+{ sum:each(0, # + @), array:each([], # + @*2), maximum:each(0, @ > # ? @ : #) } for [1, 2, 3]
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=FOR, fnParm1=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=2
+        operation=NUMBER, number=3
+      ]
+    ], fnParm2=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=sum
+        ], operation=FUNCTION, function=EACH, fnParm1=[
+          operation=NUMBER, number=0
+        ], fnParm2=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=RUNNING
+          ], fnParm2=[
+            operation=CURRENT
+          ]
+        ]
+        name=[
+          operation=STRING, string=array
+        ], operation=FUNCTION, function=EACH, fnParm1=[
+          operation=ARRAY, array=[
+          ]
+        ], fnParm2=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=RUNNING
+          ], fnParm2=[
+            operation=FUNCTION, function=MUL, fnParm1=[
+              operation=CURRENT
+            ], fnParm2=[
+              operation=NUMBER, number=2
+            ]
+          ]
+        ]
+        name=[
+          operation=STRING, string=maximum
+        ], operation=FUNCTION, function=EACH, fnParm1=[
+          operation=NUMBER, number=0
+        ], fnParm2=[
+          operation=CONDITION, conExpr=[
+            operation=FUNCTION, function=GT, fnParm1=[
+              operation=CURRENT
+            ], fnParm2=[
+              operation=RUNNING
+            ]
+          ], conTrue=[
+            operation=CURRENT
+          ], conFalse=[
+            operation=RUNNING
+          ]
         ]
       ]
     ]

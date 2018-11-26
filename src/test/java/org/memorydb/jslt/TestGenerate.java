@@ -20,7 +20,8 @@ public class TestGenerate extends MemoryTests {
 			StringBuilder code = new StringBuilder();
 			jslt(project, "$.pack", "\"org.memorydb.meta\"", code);
 			jslt(project, "@.name in $.records", "[\"Field\",\"OrderField\",\"Project\",\"Record\",\"Value\"]", code);
-			jslt(project, "@.name in $.records[?@.name=='Field'].fields", "[\"name\",\"type\",\"key\",\"mandatory\",\"values\"]", code);
+			jslt(project, "@.name in $.records[?@.name=='Field']", "[\"Field\"]", code);
+			jslt(project, "@.name in @.fields in $.records[?@.name=='Field']", "[[\"name\",\"type\",\"key\",\"mandatory\",\"values\",\"related\",\"record\",\"content\",\"child\",\"to\",\"order\",\"minimum\",\"maximum\",\"format\",\"decimals\",\"default\",\"condition\",\"description\"]]", code);
 		}
 	}
 }

@@ -40,11 +40,11 @@ public class JsltStructure {
 
 		Record oper = project.content("Operator");
 		oper.field("operation", Type.ENUMERATE, "FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT",
-				"BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "FILTER", "SORT", "IF", "CURRENT", "READ", "VARIABLE")
-				.condition();
+				"BOOLEAN", "APPEND", "NULL", "CALL", "FILTER", "SORT", "IF", "CURRENT", "RUNNING", "READ",
+				"VARIABLE").condition();
 		oper.field("function", Type.ENUMERATE, "NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT",
 				"LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING",
-				"BOOLEAN", "NAME", "TYPE", "ELEMENT").mandatory().when("FUNCTION");
+				"BOOLEAN", "NAME", "TYPE", "ELEMENT", "PER", "FOR", "EACH").mandatory().when("FUNCTION");
 		oper.field("fnParm1", Type.OBJECT, expr).when("FUNCTION");
 		oper.field("fnParm2", Type.OBJECT, expr).when("FUNCTION");
 		oper.field("conExpr", Type.OBJECT, expr).when("CONDITION");
@@ -59,8 +59,6 @@ public class JsltStructure {
 		oper.field("boolean", Type.BOOLEAN).when("BOOLEAN");
 		oper.field("macro", Type.RELATION, macro).when("CALL");
 		oper.field("callParms", Type.ARRAY, step).when("CALL");
-		oper.field("for", Type.OBJECT, expr).when("FOR");
-		oper.field("forExpr", Type.OBJECT, expr).when("FOR");
 		oper.field("filter", Type.OBJECT, expr).when("FILTER");
 		oper.field("filterDeep", Type.BOOLEAN, expr).when("FILTER");
 		oper.field("filterExpr", Type.OBJECT, expr).when("FILTER");

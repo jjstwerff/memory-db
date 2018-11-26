@@ -83,7 +83,7 @@ public class StringWriter implements Writer {
 
 	@Override
 	public void endObject() {
-		bld.append("}\n");
+		bld.append("}");
 		depth--;
 	}
 

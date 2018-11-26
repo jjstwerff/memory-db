@@ -25,6 +25,8 @@ public class JsltInterpreter {
 	private List<Pair> pairs = new ArrayList<>();
 	private List<Object> stack = new ArrayList<>(100);
 	private int stackFrame = 0;
+	private RecordInterface curFor = null;
+	private Object running = null;
 
 	public static String interpret(Store jsltStore, RecordInterface data) {
 		JsltInterpreter inter = new JsltInterpreter();
@@ -79,10 +81,10 @@ public class JsltInterpreter {
 			return inter((Boolean) inter(code.getConExpr()) ? code.getConTrue() : code.getConFalse());
 		case FLOAT:
 			return code.getFloat();
-		case FOR:
-			return new InterMap(this, code.getForExpr(), inter(code.getFor()));
 		case FUNCTION:
 			return doFunction(code);
+		case RUNNING:
+			return running;
 		case FILTER:
 			return new InterFilter(this, code.getFilterExpr(), (RecordInterface) inter(code.getFilter()));
 		case IF:
@@ -166,7 +168,8 @@ public class JsltInterpreter {
 				default:
 					break;
 				}
-				bld.append(pnr).append(" ").append(parm.getType()).append(" vs ").append(obj == null ? "null" : obj.getClass().getSimpleName()).append(found ? "" : "!")
+				bld.append(pnr).append(" ").append(parm.getType()).append(" vs ")
+						.append(obj == null ? "null" : obj.getClass().getSimpleName()).append(found ? "" : "!")
 						.append(" ");
 				pnr++;
 			}
@@ -179,9 +182,10 @@ public class JsltInterpreter {
 						stack.add(stack.get(stackF + pnr));
 					pnr++;
 				}
-				//String macroData = "macro:" + macro.getName() + " frameFrame:" + stackFrame + " on stack:" + stack;
+				// String macroData = "macro:" + macro.getName() + " frameFrame:" + stackFrame +
+				// " on stack:" + stack;
 				Object res = inter(alt.getCode().iterator().next());
-				//System.out.println(macroData + " result:'" + res + "'");
+				// System.out.println(macroData + " result:'" + res + "'");
 				while (stack.size() > stackF)
 					stack.remove(stack.size() - 1);
 				stackFrame = lastFrame;
@@ -272,7 +276,7 @@ public class JsltInterpreter {
 	}
 
 	private void iterateObject(int maxDepth, Writer write, RecordInterface rec) {
-		if (maxDepth <= 0 || !rec.exists())
+		if (maxDepth <= 0 || rec == null || !rec.exists())
 			return;
 		write.startObject();
 		for (int field = rec.next(-1); field >= 0; field = rec.next(field)) {
@@ -394,7 +398,8 @@ public class JsltInterpreter {
 		Object p1 = inter(code.getFnParm1());
 		Object p2 = null;
 		Function function = code.getFunction();
-		if (function != Function.OR && function != Function.AND && code.getFnParm2().getRec() != 0)
+		if (function != Function.EACH && function != Function.FOR && function != Function.PER && function != Function.OR && function != Function.AND
+				&& code.getFnParm2().getRec() != 0)
 			p2 = inter(code.getFnParm2());
 		switch (function) {
 		case ADD:
@@ -414,6 +419,23 @@ public class JsltInterpreter {
 			return inter(code.getFnParm2());
 		case BOOLEAN:
 			return getBoolean(p1);
+		case PER:
+			return new InterMap(this, code.getFnParm2(), p1);
+		case FOR:
+			curFor = (RecordInterface) p1;
+			Object resObj = inter(code.getFnParm2());
+			return resObj;
+		case EACH:
+			running = p1;
+			int pos = 1;
+			while (curFor.type(pos) != null) {
+				current = curFor.get(pos);
+				RecordInterface remFor = curFor;
+				running = inter(code.getFnParm2());
+				curFor = remFor;
+				pos = curFor.next(pos);
+			}
+			return running;
 		case DIV:
 			if (p1 instanceof Long) {
 				long d = getNumber(p2);

@@ -228,7 +228,7 @@ Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=FOR, for=[
+    operation=FUNCTION, function=PER, fnParm1=[
       operation=FILTER, filter=[
         operation=READ, listenSource=slice, listemNr=0
       ], filterDeep=false, filterExpr=[
@@ -252,7 +252,7 @@ name=main, alternatives=[
           ]
         ]
       ]
-    ], forExpr=[
+    ], fnParm2=[
       operation=FUNCTION, function=ELEMENT, fnParm1=[
         operation=CURRENT
       ], fnParm2=[

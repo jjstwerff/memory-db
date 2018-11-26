@@ -55,10 +55,6 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 				getStore().setInt(getRec(), operatorPosition() + 1, 0);
 				getStore().setInt(getRec(), operatorPosition() + 5, 0);
 				break;
-			case FOR:
-				getStore().setInt(getRec(), operatorPosition() + 1, 0);
-				getStore().setInt(getRec(), operatorPosition() + 5, 0);
-				break;
 			case FILTER:
 				getStore().setInt(getRec(), operatorPosition() + 1, 0);
 				getStore().setByte(getRec(), operatorPosition() + 5, getStore().getByte(getRec(), operatorPosition() + 5) & 254);
@@ -173,18 +169,6 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 	default void moveCallParms(ChangeOperator other) {
 		getStore().setInt(getRec(), operatorPosition() + 5, getStore().getInt(other.getRec(), other.operatorPosition() + 5));
 		getStore().setInt(other.getRec(), other.operatorPosition() + 5, 0);
-	}
-
-	default void setFor(Expr value) {
-		if (getOperation() == Operation.FOR) {
-			getStore().setInt(getRec(), operatorPosition() + 1, value == null ? 0 : value.getRec());
-		}
-	}
-
-	default void setForExpr(Expr value) {
-		if (getOperation() == Operation.FOR) {
-			getStore().setInt(getRec(), operatorPosition() + 5, value == null ? 0 : value.getRec());
-		}
 	}
 
 	default void setFilter(Expr value) {
@@ -341,12 +325,6 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 				}
 			}
 		}
-		if (parser.hasSub("for")) {
-			setFor(new Expr(getStore()).parse(parser));
-		}
-		if (parser.hasSub("forExpr")) {
-			setForExpr(new Expr(getStore()).parse(parser));
-		}
 		if (parser.hasSub("filter")) {
 			setFilter(new Expr(getStore()).parse(parser));
 		}
@@ -462,45 +440,37 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 			return value instanceof Macro;
 		case 17:
 			if (value instanceof Expr)
-				setFor((Expr) value);
-			return value instanceof Expr;
-		case 18:
-			if (value instanceof Expr)
-				setForExpr((Expr) value);
-			return value instanceof Expr;
-		case 19:
-			if (value instanceof Expr)
 				setFilter((Expr) value);
 			return value instanceof Expr;
-		case 20:
+		case 18:
 			if (value instanceof Boolean)
 				setFilterDeep((Boolean) value);
 			return value instanceof Boolean;
-		case 21:
+		case 19:
 			if (value instanceof Expr)
 				setFilterExpr((Expr) value);
 			return value instanceof Expr;
-		case 22:
+		case 20:
 			if (value instanceof Expr)
 				setSort((Expr) value);
 			return value instanceof Expr;
-		case 24:
+		case 22:
 			if (value instanceof Expr)
 				setIf((Expr) value);
 			return value instanceof Expr;
-		case 27:
+		case 25:
 			if (value instanceof String)
 				setListenSource((String) value);
 			return value instanceof String;
-		case 28:
+		case 26:
 			if (value instanceof Integer)
 				setListemNr((Integer) value);
 			return value instanceof Integer;
-		case 29:
+		case 27:
 			if (value instanceof String)
 				setVarName((String) value);
 			return value instanceof String;
-		case 30:
+		case 28:
 			if (value instanceof Integer)
 				setVarNr((Integer) value);
 			return value instanceof Integer;
@@ -521,11 +491,11 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 			return addObject();
 		case 16:
 			return addCallParms();
-		case 23:
+		case 21:
 			return addSortParms();
-		case 25:
+		case 23:
 			return addIfTrue();
-		case 26:
+		case 24:
 			return addIfFalse();
 		default:
 			return null;

@@ -211,7 +211,7 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 		if (idx == -1)
 			return parent.getType();
 		int data = getRec() == 0 ? 0 : getStore().getByte(getRec(), partPosition() + 0) & 31;
-		if (data <= 0)
+		if (data <= 0 || data > Type.values().length)
 			return null;
 		return Type.values()[data - 1];
 	}

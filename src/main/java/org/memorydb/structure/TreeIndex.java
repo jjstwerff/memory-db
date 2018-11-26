@@ -97,12 +97,12 @@ public abstract class TreeIndex<T extends MemoryRecord> extends RedBlackTree imp
 	}
 
 	@Override
-	public int next(int field) {
+	public int next(int fieldNr) {
 		int result;
-		if (field < 0)
+		if (fieldNr < 0)
 			result = first();
 		else
-			result = super.next(field);
+			result = super.next(fieldNr);
 		return result == 0 ? -1 : result;
 	}
 }
