@@ -261,7 +261,7 @@ public class AppendArray implements ChangeOperator, Iterable<AppendArray> {
 
 	@Override
 	public String name(int field) {
-		if (field >= 0 && field <= 30)
+		if (field >= 0 && field <= 28)
 			return nameOperator(field - 0);
 		switch (field) {
 		default:
@@ -271,7 +271,7 @@ public class AppendArray implements ChangeOperator, Iterable<AppendArray> {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 0 && field <= 30)
+		if (field >= 0 && field <= 28)
 			return typeOperator(field - 0);
 		switch (field) {
 		default:
@@ -281,7 +281,7 @@ public class AppendArray implements ChangeOperator, Iterable<AppendArray> {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 0 && field <= 30)
+		if (field >= 0 && field <= 28)
 			return getOperator(field - 0);
 		switch (field) {
 		default:
@@ -291,7 +291,7 @@ public class AppendArray implements ChangeOperator, Iterable<AppendArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 30)
+		if (field >= 0 && field <= 28)
 			return iterateOperator(field - 0);
 		switch (field) {
 		default:
@@ -301,7 +301,7 @@ public class AppendArray implements ChangeOperator, Iterable<AppendArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 0 && field <= 30)
+		if (field >= 0 && field <= 28)
 			return setOperator(field - 0, value);
 		switch (field) {
 		default:
@@ -311,7 +311,7 @@ public class AppendArray implements ChangeOperator, Iterable<AppendArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 0 && field <= 30)
+		if (field >= 0 && field <= 28)
 			return addOperator(field - 0);
 		switch (field) {
 		default:

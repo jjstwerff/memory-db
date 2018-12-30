@@ -78,7 +78,7 @@ public interface Operator extends ResultType {
 	@FieldData(
 		name = "operation",
 		type = "ENUMERATE",
-		enumerate = {"FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT", "BOOLEAN", "APPEND", "NULL", "CALL", "FOR", "FILTER", "SORT", "IF", "CURRENT", "RUNNING", "READ", "VARIABLE"},
+		enumerate = {"FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT", "BOOLEAN", "APPEND", "NULL", "CALL", "FILTER", "SORT", "IF", "CURRENT", "RUNNING", "READ", "VARIABLE"},
 		condition = true,
 		mandatory = false
 	)
@@ -108,7 +108,7 @@ public interface Operator extends ResultType {
 	@FieldData(
 		name = "function",
 		type = "ENUMERATE",
-		enumerate = {"NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT", "LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT", "EACH"},
+		enumerate = {"NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT", "LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT", "PER", "FOR", "EACH"},
 		when = "FUNCTION",
 		mandatory = true
 	)
@@ -580,8 +580,8 @@ public interface Operator extends ResultType {
 	}
 
 	default Object getOperator(int field) {
-		if (field >= 30 && field <= 32)
-			return getResultType(field - 30);
+		if (field >= 28 && field <= 30)
+			return getResultType(field - 28);
 		switch (field) {
 		case 1:
 			return getOperation();
@@ -631,8 +631,8 @@ public interface Operator extends ResultType {
 	}
 
 	default Iterable<? extends RecordInterface> iterateOperator(int field, @SuppressWarnings("unused") Object... key) {
-		if (field >= 30 && field <= 32)
-			return iterateResultType(field - 30);
+		if (field >= 28 && field <= 30)
+			return iterateResultType(field - 28);
 		switch (field) {
 		case 11:
 			return getArray();
@@ -654,8 +654,8 @@ public interface Operator extends ResultType {
 	}
 
 	default FieldType typeOperator(int field) {
-		if (field >= 30 && field <= 32)
-			return typeResultType(field - 30);
+		if (field >= 28 && field <= 30)
+			return typeResultType(field - 28);
 		switch (field) {
 		case 1:
 			return FieldType.STRING;
@@ -692,30 +692,26 @@ public interface Operator extends ResultType {
 		case 17:
 			return FieldType.OBJECT;
 		case 18:
-			return FieldType.OBJECT;
+			return FieldType.BOOLEAN;
 		case 19:
 			return FieldType.OBJECT;
 		case 20:
-			return FieldType.BOOLEAN;
-		case 21:
 			return FieldType.OBJECT;
+		case 21:
+			return FieldType.ARRAY;
 		case 22:
 			return FieldType.OBJECT;
 		case 23:
 			return FieldType.ARRAY;
 		case 24:
-			return FieldType.OBJECT;
+			return FieldType.ARRAY;
 		case 25:
-			return FieldType.ARRAY;
+			return FieldType.STRING;
 		case 26:
-			return FieldType.ARRAY;
+			return FieldType.INTEGER;
 		case 27:
 			return FieldType.STRING;
 		case 28:
-			return FieldType.INTEGER;
-		case 29:
-			return FieldType.STRING;
-		case 30:
 			return FieldType.INTEGER;
 		default:
 			return null;
@@ -723,8 +719,8 @@ public interface Operator extends ResultType {
 	}
 
 	default String nameOperator(int field) {
-		if (field >= 30 && field <= 32)
-			return nameResultType(field - 30);
+		if (field >= 28 && field <= 30)
+			return nameResultType(field - 28);
 		switch (field) {
 		case 1:
 			return "operation";
@@ -759,32 +755,28 @@ public interface Operator extends ResultType {
 		case 16:
 			return "callParms";
 		case 17:
-			return "for";
-		case 18:
-			return "forExpr";
-		case 19:
 			return "filter";
-		case 20:
+		case 18:
 			return "filterDeep";
-		case 21:
+		case 19:
 			return "filterExpr";
-		case 22:
+		case 20:
 			return "sort";
-		case 23:
+		case 21:
 			return "sortParms";
-		case 24:
+		case 22:
 			return "if";
-		case 25:
+		case 23:
 			return "ifTrue";
-		case 26:
+		case 24:
 			return "ifFalse";
-		case 27:
+		case 25:
 			return "listenSource";
-		case 28:
+		case 26:
 			return "listemNr";
-		case 29:
+		case 27:
 			return "varName";
-		case 30:
+		case 28:
 			return "varNr";
 		default:
 			return null;

@@ -70,7 +70,7 @@ public class TestJson extends NormalCheck {
 
 	private void iterate(JsonWriter write, String name, RecordInterface rec) {
 		int f = rec.next(-1);
-		if (f == 0) {
+		if (rec.type() != FieldType.OBJECT) {
 			nonObject(write, rec, 0);
 			return;
 		}

@@ -30,7 +30,7 @@ public class OrderArray implements ChangeInterface, Iterable<OrderArray> {
 		this.parent = parent;
 		this.idx = idx;
 		if (parent.getRec() != 0) {
-			this.alloc = store.getInt(parent.getRec(), 94);
+			this.alloc = store.getInt(parent.getRec(), 60);
 			if (alloc != 0) {
 				setUpRecord(parent);
 				this.size = store.getInt(alloc, 4);
@@ -103,7 +103,7 @@ public class OrderArray implements ChangeInterface, Iterable<OrderArray> {
 			setUpRecord(parent);
 		} else
 			alloc = store.resize(alloc, (12 + (idx + 1) * 4) / 8);
-		store.setInt(parent.getRec(), 94, alloc);
+		store.setInt(parent.getRec(), 60, alloc);
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
 		setField(null);
@@ -152,7 +152,7 @@ public class OrderArray implements ChangeInterface, Iterable<OrderArray> {
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		write.field("field", getField());
+		write.strField("field", "{" + getField().keys() + "}");
 		write.endRecord();
 	}
 
@@ -176,15 +176,12 @@ public class OrderArray implements ChangeInterface, Iterable<OrderArray> {
 		setField(null);
 		if (parser.hasField("field")) {
 			parser.getRelation("field", (recNr, idx) -> {
-				Record record = getUpRecord().getUpRecord();
-				int nr = Field.parseKey(parser, record.getRec(), record.getUpRecord());
-				if (nr == 0)
-					return false;
-				try (OrderArray val = new OrderArray(store, recNr, idx)) {
-					val.setField(new Field(store, nr));
-				}
-				return true;
-			}, alloc, idx);
+				Iterator<Field> iterator = null;
+				Field relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
+				boolean found = relRec != null && relRec.parseKey(parser);
+				setField(relRec);
+				return found;
+			}, idx);
 		}
 	}
 

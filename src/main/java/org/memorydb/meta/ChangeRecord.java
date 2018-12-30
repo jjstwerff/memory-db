@@ -2,6 +2,7 @@ package org.memorydb.meta;
 
 import org.memorydb.file.Parser;
 import org.memorydb.structure.ChangeInterface;
+import java.util.Iterator;
 
 /**
  * Automatically generated record class for table Record
@@ -55,12 +56,12 @@ public class ChangeRecord extends Record implements ChangeInterface {
 		}
 		if (parser.hasField("condition")) {
 			parser.getRelation("condition", (recNr, idx) -> {
-				int nr = Field.parseKey(parser, recNr, getUpRecord());
-				if (nr == 0)
-					return false;
+				Iterator<Field> iterator = null;
+				Field relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
+				boolean found = relRec != null && relRec.parseKey(parser);
 				setRec(recNr);
-				setCondition(new Field(store, nr));
-				return true;
+				setCondition(relRec);
+				return found;
 			}, getRec());
 		}
 		if (parser.hasField("description")) {

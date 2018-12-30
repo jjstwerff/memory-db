@@ -258,7 +258,8 @@ public class Source implements MemoryRecord, RecordInterface {
 		String name = parser.getString("name");
 		int nextRec = new IndexSources(name).search();
 		parser.finishRelation();
-		rec = nextRec;
+		if (nextRec != 0)
+			rec = nextRec;
 		return nextRec != 0;
 	}
 

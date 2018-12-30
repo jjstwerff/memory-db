@@ -66,7 +66,7 @@ public class Write {
 		return this;
 	}
 
-	private void strField(String name, String value) throws IOException {
+	public void strField(String name, String value) throws IOException {
 		lineStart();
 		int valLength = value == null ? 0 : value.length();
 		singleField(name, value, valLength);

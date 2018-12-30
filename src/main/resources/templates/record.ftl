@@ -220,6 +220,11 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 </#if></#list>
 			return o;
 		}
+
+		@Override
+		public Object get(int field) {
+			return new ${field.related.name}(store, field);
+		}
 	}
 </#if></#list>
 <#list table.indexes as index><#if !table.parent??>
@@ -278,6 +283,11 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 				return 0;
 </#if></#list> 
 			return o;
+		}
+
+		@Override
+		public Object get(int field) {
+			return new ${table.name}(store, field);
 		}
 	}
 </#if></#list>
@@ -457,6 +467,8 @@ ${table.parseKeys}<#rt>
 			return FieldType.OBJECT;
 <#elseif field.type == "ENUMERATE">
 			return FieldType.STRING;
+<#elseif field.type == "BYTE">
+			return FieldType.INTEGER;
 <#else>
 			return FieldType.${field.type};
 </#if></#if>

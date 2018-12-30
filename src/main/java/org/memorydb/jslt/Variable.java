@@ -154,7 +154,8 @@ public class Variable implements ResultType {
 	public boolean parseKey(Parser parser) {
 		int nextRec = 0;
 		parser.finishRelation();
-		rec = nextRec;
+		if (nextRec != 0)
+			rec = nextRec;
 		return nextRec != 0;
 	}
 

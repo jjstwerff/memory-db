@@ -50,7 +50,7 @@ public class ChangeListener extends Listener implements ChangeOperator {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 3 && field <= 33)
+		if (field >= 3 && field <= 31)
 			return ChangeOperator.super.setOperator(field - 3, value);
 		switch (field) {
 		case 1:
@@ -64,7 +64,7 @@ public class ChangeListener extends Listener implements ChangeOperator {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 3 && field <= 33)
+		if (field >= 3 && field <= 31)
 			return ChangeOperator.super.addOperator(field - 3);
 		switch (field) {
 		case 2:

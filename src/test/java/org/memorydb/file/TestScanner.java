@@ -40,15 +40,6 @@ public class TestScanner extends ErrorCheck {
 	}
 
 	@Test
-	public void testIdentifierError() {
-		StringBuilder str = new StringBuilder();
-		expectMessage("Remaining tokens in /tmp/errors.txt:2/1");
-		try (Scanner scanner = new Scanner(FileSystems.getDefault().getPath(file("errors.txt", " \na line of data")))) {
-			scanner.field(str);
-		}
-	}
-
-	@Test
 	public void testIdentifierError2() {
 		StringBuilder str = new StringBuilder();
 		try (Scanner scanner = new Scanner(FileSystems.getDefault().getPath(file("errors.txt", "# a comment line\n")))) {

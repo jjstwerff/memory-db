@@ -113,13 +113,14 @@ public class Expr implements Operator {
 	public boolean parseKey(Parser parser) {
 		int nextRec = 0;
 		parser.finishRelation();
-		rec = nextRec;
+		if (nextRec != 0)
+			rec = nextRec;
 		return nextRec != 0;
 	}
 
 	@Override
 	public Object get(int field) {
-		if (field >= 0 && field <= 30)
+		if (field >= 0 && field <= 28)
 			return Operator.super.getOperator(field - 0);
 		switch (field) {
 		default:
@@ -129,7 +130,7 @@ public class Expr implements Operator {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 30)
+		if (field >= 0 && field <= 28)
 			return Operator.super.iterateOperator(field - 0);
 		switch (field) {
 		default:
@@ -139,7 +140,7 @@ public class Expr implements Operator {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 0 && field <= 30)
+		if (field >= 0 && field <= 28)
 			return Operator.super.typeOperator(field - 0);
 		switch (field) {
 		default:
@@ -149,7 +150,7 @@ public class Expr implements Operator {
 
 	@Override
 	public String name(int field) {
-		if (field >= 0 && field <= 30)
+		if (field >= 0 && field <= 28)
 			return Operator.super.nameOperator(field - 0);
 		switch (field) {
 		default:

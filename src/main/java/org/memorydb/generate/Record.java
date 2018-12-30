@@ -276,12 +276,11 @@ public class Record implements Comparable<Record> {
 			StringBuilder bld = new StringBuilder();
 			bld.append("\t\t").append(parent.name).append(" parent = getUpRecord();\n");
 			if (parent.parent != null) {
-				bld.append("\t\tparser.getRelation(\"").append(parent.name).append("\", (int recNr) -> {\n");
+				bld.append("\t\tparser.getRelation(\"").append(parent.name).append("\", (recNr, idx) -> {\n");
 				bld.append("\t\t\tparent.setRec(recNr);\n");
 				bld.append("\t\t\tparent.parseKey(parser);\n");
-				bld.append("\t\t\tparent.setRec(recNr);\n");
 				bld.append("\t\t\treturn true;\n");
-				bld.append("\t\t}, parent.getRec());\n");
+				bld.append("\t\t}, getRec());\n");
 			}
 			bld.append(keyFields(2));
 			return bld.toString();
@@ -298,7 +297,7 @@ public class Record implements Comparable<Record> {
 			switch (field.getType()) {
 			case RELATION:
 				bld.append(ind).append(field.getJavaType()).append(" ").append(field.getName()).append(" = new ").append(field.getRelated().getName()).append("(store);\n");
-				bld.append(ind).append("parser.getRelation(\"").append(field.getName()).append("\", (int recNr) -> {\n");
+				bld.append(ind).append("parser.getRelation(\"").append(field.getName()).append("\", (recNr, idx) -> {\n");
 				bld.append(ind).append("\t").append(field.getName()).append(".parseKey(parser);\n");
 				bld.append(ind).append("\treturn true;\n");
 				bld.append(ind).append("}, -1);\n");
@@ -482,7 +481,7 @@ public class Record implements Comparable<Record> {
 
 	private void getRelData(String indent, Record table, StringBuilder bld, Field field) {
 		String store = included.isEmpty() ? "store" : "getStore()";
-		bld.append(indent).append("\tparser.getRelation(\"").append(field.getName()).append("\", (int recNr) -> {\n");
+		bld.append(indent).append("\tparser.getRelation(\"").append(field.getName()).append("\", (recNr, idx) -> {\n");
 		if (field.getRelated().getParent() == null) {
 			bld.append(indent).append("\t\t").append(field.getRelated().getName()).append(" relRec = new ").append(field.getRelated().getName()).append("(").append(store)
 					.append(");\n");
@@ -513,9 +512,9 @@ public class Record implements Comparable<Record> {
 					}
 				}
 			} else { // no common parent possible
-				bld.append(indent).append("\t\tIterator<").append(field.getRelated().getName()).append("> iterator = null;");
+				bld.append(indent).append("\t\tIterator<").append(field.getRelated().getName()).append("> iterator = null;\n");
 			}
-			bld.append(indent).append("\t\t").append(field.getRelated().getName()).append(" relRec = iterator.hasNext() ? iterator.next() : null;\n");
+			bld.append(indent).append("\t\t").append(field.getRelated().getName()).append(" relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;\n");
 			bld.append(indent).append("\t\tboolean found = relRec != null && relRec.parseKey(parser);\n");
 		}
 		if (isFull()) {
@@ -632,12 +631,14 @@ public class Record implements Comparable<Record> {
 			int pos = index.getFlagPos() / 8;
 			sizes.put(pos, 1);
 		}
+		/*
 		int pos = full ? 4 : 0;
 		for (Entry<Integer, Integer> s : sizes.entrySet()) {
 			if (s.getKey() != pos)
 				throw new GenerateException("Missing positions for " + name);
 			pos += s.getValue();
 		}
+		*/
 	}
 
 	public void dump(StringBuilder bld) {

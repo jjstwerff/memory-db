@@ -1,18 +1,16 @@
 package org.memorydb.meta;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
-import org.memorydb.meta.Project.IndexRecords;
-import org.memorydb.meta.Record.IndexFieldName;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RecordData;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Automatically generated record class for table Field
@@ -115,78 +113,6 @@ public class Field implements MemoryRecord, RecordInterface {
 	}
 
 	@FieldData(
-		name = "mandatory",
-		type = "BOOLEAN",
-		mandatory = false
-	)
-	public boolean isMandatory() {
-		return rec == 0 ? false : (store.getByte(rec, 14) & 1) > 0;
-	}
-
-	@FieldData(
-		name = "minimum",
-		type = "LONG",
-		mandatory = false
-	)
-	public long getMinimum() {
-		return rec == 0 ? Long.MIN_VALUE : store.getLong(rec, 15);
-	}
-
-	@FieldData(
-		name = "maximum",
-		type = "LONG",
-		mandatory = false
-	)
-	public long getMaximum() {
-		return rec == 0 ? Long.MIN_VALUE : store.getLong(rec, 23);
-	}
-
-	@FieldData(
-		name = "format",
-		type = "STRING",
-		mandatory = false
-	)
-	public String getFormat() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 31));
-	}
-
-	@FieldData(
-		name = "decimals",
-		type = "BYTE",
-		mandatory = false
-	)
-	public byte getDecimals() {
-		return rec == 0 ? 0 : store.getByte(rec, 35);
-	}
-
-	@FieldData(
-		name = "default",
-		type = "STRING",
-		mandatory = false
-	)
-	public String getDefault() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 36));
-	}
-
-	@FieldData(
-		name = "condition",
-		type = "STRING",
-		mandatory = false
-	)
-	public String getCondition() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 40));
-	}
-
-	@FieldData(
-		name = "description",
-		type = "STRING",
-		mandatory = false
-	)
-	public String getDescription() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 44));
-	}
-
-	@FieldData(
 		name = "values",
 		type = "ARRAY",
 		related = ValuesArray.class,
@@ -213,9 +139,7 @@ public class Field implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Record getRelated() {
-		if (getType() == Type.RELATION)
-			return new Record(store, rec == 0 ? 0 : store.getInt(rec, 74));
-		return null;
+		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 40));
 	}
 
 	@FieldData(
@@ -226,9 +150,7 @@ public class Field implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Record getRecord() {
-		if (getType() == Type.INCLUDE)
-			return new Record(store, rec == 0 ? 0 : store.getInt(rec, 78));
-		return null;
+		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 44));
 	}
 
 	@FieldData(
@@ -239,9 +161,7 @@ public class Field implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Record getContent() {
-		if (getType() == Type.ARRAY)
-			return new Record(store, rec == 0 ? 0 : store.getInt(rec, 82));
-		return null;
+		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 48));
 	}
 
 	@FieldData(
@@ -252,9 +172,7 @@ public class Field implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Record getChild() {
-		if (getType() == Type.SUB)
-			return new Record(store, rec == 0 ? 0 : store.getInt(rec, 86));
-		return null;
+		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 52));
 	}
 
 	@FieldData(
@@ -265,9 +183,7 @@ public class Field implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Record getTo() {
-		if (getType() == Type.INDEX)
-			return new Record(store, rec == 0 ? 0 : store.getInt(rec, 90));
-		return null;
+		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 56));
 	}
 
 	@FieldData(
@@ -297,7 +213,79 @@ public class Field implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Record getUpRecord() {
-		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 57));
+		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 23));
+	}
+
+	@FieldData(
+		name = "mandatory",
+		type = "BOOLEAN",
+		mandatory = false
+	)
+	public boolean isMandatory() {
+		return rec == 0 ? false : (store.getByte(rec, 64) & 1) > 0;
+	}
+
+	@FieldData(
+		name = "minimum",
+		type = "LONG",
+		mandatory = false
+	)
+	public long getMinimum() {
+		return rec == 0 ? Long.MIN_VALUE : store.getLong(rec, 65);
+	}
+
+	@FieldData(
+		name = "maximum",
+		type = "LONG",
+		mandatory = false
+	)
+	public long getMaximum() {
+		return rec == 0 ? Long.MIN_VALUE : store.getLong(rec, 73);
+	}
+
+	@FieldData(
+		name = "format",
+		type = "STRING",
+		mandatory = false
+	)
+	public String getFormat() {
+		return rec == 0 ? null : store.getString(store.getInt(rec, 81));
+	}
+
+	@FieldData(
+		name = "decimals",
+		type = "BYTE",
+		mandatory = false
+	)
+	public byte getDecimals() {
+		return rec == 0 ? 0 : store.getByte(rec, 85);
+	}
+
+	@FieldData(
+		name = "default",
+		type = "STRING",
+		mandatory = false
+	)
+	public String getDefault() {
+		return rec == 0 ? null : store.getString(store.getInt(rec, 86));
+	}
+
+	@FieldData(
+		name = "condition",
+		type = "STRING",
+		mandatory = false
+	)
+	public String getCondition() {
+		return rec == 0 ? null : store.getString(store.getInt(rec, 90));
+	}
+
+	@FieldData(
+		name = "description",
+		type = "STRING",
+		mandatory = false
+	)
+	public String getDescription() {
+		return rec == 0 ? null : store.getString(store.getInt(rec, 94));
 	}
 
 	@Override
@@ -307,10 +295,9 @@ public class Field implements MemoryRecord, RecordInterface {
 		write.field("name", getName());
 		write.field("nr", getNr());
 		write.field("type", getType());
-		if (isKey())
-			write.field("key", isKey());
+		write.field("key", isKey());
 		ValuesArray fldValues = getValues();
-		if (fldValues != null && fldValues.getSize() > 0) {
+		if (fldValues != null) {
 			write.sub("values");
 			for (ValuesArray sub : fldValues)
 				sub.output(write, iterate);
@@ -322,21 +309,17 @@ public class Field implements MemoryRecord, RecordInterface {
 		write.field("child", getChild());
 		write.field("to", getTo());
 		OrderArray fldOrder = getOrder();
-		if (fldOrder != null && fldOrder.getSize() > 0) {
+		if (fldOrder != null) {
 			write.sub("order");
 			for (OrderArray sub : fldOrder)
 				sub.output(write, iterate);
 			write.endSub();
 		}
-		if (isMandatory())
-			write.field("mandatory", isMandatory());
-		if (getMinimum() != 0)
-			write.field("minimum", getMinimum());
-		if (getMaximum() != 0)
-			write.field("maximum", getMaximum());
+		write.field("mandatory", isMandatory());
+		write.field("minimum", getMinimum());
+		write.field("maximum", getMaximum());
 		write.field("format", getFormat());
-		if (getDecimals() != 0)
-			write.field("decimals", getDecimals());
+		write.field("decimals", getDecimals());
 		write.field("default", getDefault());
 		write.field("condition", getCondition());
 		write.field("description", getDescription());
@@ -348,9 +331,9 @@ public class Field implements MemoryRecord, RecordInterface {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
-		res.append("Record=").append("{").append(getUpRecord().keys()).append("}");
+		res.append("Record").append("{").append(getUpRecord().keys()).append("}");
 		res.append(", ");
-		res.append("name").append("=").append(getName());
+		res.append("Name").append("=").append(getName());
 		return res.toString();
 	}
 
@@ -392,28 +375,19 @@ public class Field implements MemoryRecord, RecordInterface {
 		return this;
 	}
 
-	public static int parseKey(Parser parser, int recordRecNr, Project project) {
-		Field into = new Field(project.getStore(), 0);
-		Record onRec = new Record(into.getStore());
-		if (parser.hasField("Record")) {
-			parser.getRelation("Record", (recNr1, idx1) -> {
-				IndexRecords idx = project.new IndexRecords(new Record(project.getStore()), parser.getString("name"));
-				int nr = idx.search();
-				onRec.setRec(nr);
-				return true;
-			}, 0);
-			if (onRec.getRec() == 0)
-				return 0;
-		} else {
-			if (recordRecNr == 0)
-				return 0;
-			onRec.setRec(recordRecNr);
-		}
-		IndexFieldName idx = onRec.new IndexFieldName(into, parser.getString("name"));
-		int recId = idx.search();
-		if (recId == 0)
-			return 0;
-		return recId;
+	public boolean parseKey(Parser parser) {
+		Record parent = getUpRecord();
+		parser.getRelation("Record", (recNr, idx) -> {
+			parent.setRec(recNr);
+			parent.parseKey(parser);
+			return true;
+		}, getRec());
+		String name = parser.getString("name");
+		int nextRec = parent.new IndexFieldName(this, name).search();
+		parser.finishRelation();
+		if (nextRec != 0)
+			rec = nextRec;
+		return nextRec != 0;
 	}
 
 	@Override
@@ -427,90 +401,43 @@ public class Field implements MemoryRecord, RecordInterface {
 			return getType();
 		case 4:
 			return isKey();
-		case 5:
-			return isMandatory();
 		case 6:
-			long min = getMinimum();
-			return min == Long.MIN_VALUE ? null : min;
-		case 7:
-			long max = getMaximum();
-			return max == Long.MIN_VALUE ? null : max;
-		case 8:
-			return getFormat();
-		case 9:
-			return getDecimals();
-		case 10:
-			return getDefault();
-		case 11:
-			return getCondition();
-		case 12:
-			return getDescription();
-		case 13:
-			return getValues();
-		case 14:
 			return getRelated();
-		case 15:
+		case 7:
 			return getRecord();
-		case 16:
+		case 8:
 			return getContent();
-		case 17:
+		case 9:
 			return getChild();
-		case 18:
+		case 10:
 			return getTo();
+		case 13:
+			return isMandatory();
+		case 14:
+			return getMinimum();
+		case 15:
+			return getMaximum();
+		case 16:
+			return getFormat();
+		case 17:
+			return getDecimals();
+		case 18:
+			return getDefault();
 		case 19:
-			return getOrder();
+			return getCondition();
+		case 20:
+			return getDescription();
 		default:
 			return null;
 		}
 	}
 
 	@Override
-	public int next(int field) {
-		if (field < 0)
-			return 1;
-		if (field + 1 == 4 && !isKey())
-			field++;
-		if (field + 1 == 5 && !isMandatory())
-			field++;
-		if (field + 1 == 6 && getMinimum() == Long.MIN_VALUE)
-			field++;
-		if (field + 1 == 7 && getMaximum() == Long.MIN_VALUE)
-			field++;
-		if (field + 1 == 8 && getFormat() == null)
-			field++;
-		if (field + 1 == 9 && getDecimals() == 0)
-			field++;
-		if (field + 1 == 10 && getDefault() == null)
-			field++;
-		if (field + 1 == 11 && getCondition() == null)
-			field++;
-		if (field + 1 == 12 && getDescription() == null)
-			field++;
-		if (field + 1 == 13 && getValues().getSize() == 0)
-			field++;
-		if (field + 1 == 14 && getType() != Type.RELATION)
-			field++;
-		if (field + 1 == 15 && getType() != Type.INCLUDE)
-			field++;
-		if (field + 1 == 16 && getType() != Type.ARRAY)
-			field++;
-		if (field + 1 == 17 && getType() != Type.SUB)
-			field++;
-		if (field + 1 == 18 && getType() != Type.INDEX)
-			field++;
-		if (field + 1 == 19 && getOrder().getSize() == 0)
-			field++;
-		if (field == 19)
-			return -2;
-		return field + 1;
-	}
-
-	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
 		switch (field) {
-		case 13:
+		case 5:
 			return getValues();
-		case 19:
+		case 11:
 			return getOrder();
 		default:
 			return null;
@@ -529,35 +456,35 @@ public class Field implements MemoryRecord, RecordInterface {
 		case 4:
 			return FieldType.BOOLEAN;
 		case 5:
-			return FieldType.BOOLEAN;
+			return FieldType.ARRAY;
 		case 6:
-			return FieldType.LONG;
+			return FieldType.OBJECT;
 		case 7:
-			return FieldType.LONG;
+			return FieldType.OBJECT;
 		case 8:
-			return FieldType.STRING;
+			return FieldType.OBJECT;
 		case 9:
-			return FieldType.INTEGER;
+			return FieldType.OBJECT;
 		case 10:
-			return FieldType.STRING;
+			return FieldType.OBJECT;
 		case 11:
-			return FieldType.STRING;
-		case 12:
-			return FieldType.STRING;
+			return FieldType.ARRAY;
 		case 13:
-			return FieldType.ARRAY;
+			return FieldType.BOOLEAN;
 		case 14:
-			return FieldType.OBJECT;
+			return FieldType.LONG;
 		case 15:
-			return FieldType.OBJECT;
+			return FieldType.LONG;
 		case 16:
-			return FieldType.OBJECT;
+			return FieldType.STRING;
 		case 17:
-			return FieldType.OBJECT;
+			return FieldType.INTEGER;
 		case 18:
-			return FieldType.OBJECT;
+			return FieldType.STRING;
 		case 19:
-			return FieldType.ARRAY;
+			return FieldType.STRING;
+		case 20:
+			return FieldType.STRING;
 		default:
 			return null;
 		}
@@ -575,35 +502,35 @@ public class Field implements MemoryRecord, RecordInterface {
 		case 4:
 			return "key";
 		case 5:
-			return "mandatory";
-		case 6:
-			return "minimum";
-		case 7:
-			return "maximum";
-		case 8:
-			return "format";
-		case 9:
-			return "decimals";
-		case 10:
-			return "default";
-		case 11:
-			return "condition";
-		case 12:
-			return "description";
-		case 13:
 			return "values";
-		case 14:
+		case 6:
 			return "related";
-		case 15:
+		case 7:
 			return "record";
-		case 16:
+		case 8:
 			return "content";
-		case 17:
+		case 9:
 			return "child";
-		case 18:
+		case 10:
 			return "to";
-		case 19:
+		case 11:
 			return "order";
+		case 13:
+			return "mandatory";
+		case 14:
+			return "minimum";
+		case 15:
+			return "maximum";
+		case 16:
+			return "format";
+		case 17:
+			return "decimals";
+		case 18:
+			return "default";
+		case 19:
+			return "condition";
+		case 20:
+			return "description";
 		default:
 			return null;
 		}

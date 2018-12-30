@@ -113,33 +113,34 @@ public class Json implements Part {
 	public boolean parseKey(Parser parser) {
 		int nextRec = 0;
 		parser.finishRelation();
-		rec = nextRec;
+		if (nextRec != 0)
+			rec = nextRec;
 		return nextRec != 0;
 	}
 
 	@Override
 	public Object get(int field) {
-		return getPart(field);
+		return Part.super.getPart(field);
 	}
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		return iteratePart(field, key);
+		return Part.super.iteratePart(field, key);
 	}
 
 	@Override
 	public FieldType type() {
-		return typePart();
+		return Part.super.typePart();
 	}
 
 	@Override
 	public FieldType type(int field) {
-		return typePart(field);
+		return Part.super.typePart(field);
 	}
 
 	@Override
 	public String name(int field) {
-		return namePart(field);
+		return Part.super.namePart(field);
 	}
 
 	@Override

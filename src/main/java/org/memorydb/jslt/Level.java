@@ -196,13 +196,14 @@ public class Level implements Operator {
 		int level = parser.getInt("level");
 		int nextRec = parent.new IndexLevels(this, level).search();
 		parser.finishRelation();
-		rec = nextRec;
+		if (nextRec != 0)
+			rec = nextRec;
 		return nextRec != 0;
 	}
 
 	@Override
 	public Object get(int field) {
-		if (field >= 4 && field <= 34)
+		if (field >= 4 && field <= 32)
 			return Operator.super.getOperator(field - 4);
 		switch (field) {
 		case 1:
@@ -214,7 +215,7 @@ public class Level implements Operator {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 4 && field <= 34)
+		if (field >= 4 && field <= 32)
 			return Operator.super.iterateOperator(field - 4);
 		switch (field) {
 		case 2:
@@ -228,7 +229,7 @@ public class Level implements Operator {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 4 && field <= 34)
+		if (field >= 4 && field <= 32)
 			return Operator.super.typeOperator(field - 4);
 		switch (field) {
 		case 1:
@@ -244,7 +245,7 @@ public class Level implements Operator {
 
 	@Override
 	public String name(int field) {
-		if (field >= 4 && field <= 34)
+		if (field >= 4 && field <= 32)
 			return Operator.super.nameOperator(field - 4);
 		switch (field) {
 		case 1:

@@ -57,11 +57,6 @@ public class Project implements MemoryRecord, RecordInterface {
 		return new ChangeProject(this);
 	}
 
-	@Override
-	public FieldType type() {
-		return FieldType.OBJECT;
-	}
-
 	@FieldData(
 		name = "records",
 		type = "SET",
@@ -235,7 +230,11 @@ public class Project implements MemoryRecord, RecordInterface {
 
 	@Override
 	public String keys() throws IOException {
-		return "";
+		StringBuilder res = new StringBuilder();
+		if (rec == 0)
+			return "";
+		res.append("Pack").append("=").append(getPack());
+		return res.toString();
 	}
 
 	@Override
@@ -280,15 +279,14 @@ public class Project implements MemoryRecord, RecordInterface {
 		String pack = parser.getString("pack");
 		int nextRec = new IndexMeta(pack).search();
 		parser.finishRelation();
-		rec = nextRec;
+		if (nextRec != 0)
+			rec = nextRec;
 		return nextRec != 0;
 	}
 
 	@Override
 	public Object get(int field) {
 		switch (field) {
-		case 1:
-			return getRecords();
 		case 2:
 			return getMain();
 		case 3:

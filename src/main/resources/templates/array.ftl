@@ -377,6 +377,8 @@ ${field.arrayFields}<#rt>
 			return FieldType.OBJECT;
 <#elseif field.type == "ENUMERATE">
 			return FieldType.STRING;
+<#elseif field.type == "BYTE">
+			return FieldType.INTEGER;
 <#else>
 			return FieldType.${field.type};
 </#if></#if>

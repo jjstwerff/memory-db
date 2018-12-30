@@ -320,6 +320,8 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 			return FieldType.OBJECT;
 <#elseif field.type == "ENUMERATE">
 			return FieldType.STRING;
+<#elseif field.type == "BYTE">
+			return FieldType.INTEGER;
 <#else>
 			return FieldType.${field.type};
 </#if></#if>

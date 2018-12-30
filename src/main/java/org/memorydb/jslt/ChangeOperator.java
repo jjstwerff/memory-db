@@ -387,8 +387,8 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 	}
 
 	default boolean setOperator(int field, Object value) {
-		if (field >= 30 && field <= 32)
-			return setResultType(field - 30, value);
+		if (field >= 28 && field <= 30)
+			return setResultType(field - 28, value);
 		switch (field) {
 		case 1:
 			if (value instanceof Operation)
@@ -480,8 +480,8 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 	}
 
 	default ChangeInterface addOperator(int field) {
-		if (field >= 30 && field <= 32)
-			return addResultType(field - 30);
+		if (field >= 28 && field <= 30)
+			return addResultType(field - 28);
 		switch (field) {
 		case 11:
 			return addArray();

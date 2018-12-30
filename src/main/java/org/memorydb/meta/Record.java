@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
-import org.memorydb.meta.Project.IndexRecords;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.IndexOperation;
 import org.memorydb.structure.Key;
@@ -95,7 +94,7 @@ public class Record implements MemoryRecord, RecordInterface {
 	/* package private */ class IndexFieldName extends TreeIndex<Field> {
 
 		public IndexFieldName(Field record) {
-			super(record, null, 384, 49);
+			super(record, null, 112, 15);
 		}
 
 		public IndexFieldName(Field record, String key1) {
@@ -115,7 +114,7 @@ public class Record implements MemoryRecord, RecordInterface {
 				public IndexOperation oper() {
 					return IndexOperation.EQ;
 				}
-			}, 384, 49);
+			}, 112, 15);
 		}
 
 		@Override
@@ -171,7 +170,7 @@ public class Record implements MemoryRecord, RecordInterface {
 	/* package private */ class IndexFields extends TreeIndex<Field> {
 
 		public IndexFields(Field record) {
-			super(record, null, 488, 62);
+			super(record, null, 216, 28);
 		}
 
 		public IndexFields(Field record, int key1) {
@@ -191,7 +190,7 @@ public class Record implements MemoryRecord, RecordInterface {
 				public IndexOperation oper() {
 					return IndexOperation.EQ;
 				}
-			}, 488, 62);
+			}, 216, 28);
 		}
 
 		@Override
@@ -278,7 +277,9 @@ public class Record implements MemoryRecord, RecordInterface {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
-		res.append("name").append("=").append(getName());
+		res.append("Project").append("{").append(getUpRecord().keys()).append("}");
+		res.append(", ");
+		res.append("Name").append("=").append(getName());
 		return res.toString();
 	}
 
@@ -320,13 +321,14 @@ public class Record implements MemoryRecord, RecordInterface {
 		return this;
 	}
 
-	public static int parseKey(Parser parser, Project project) {
-		Record into = new Record(project.getStore(), 0);
-		IndexRecords idx = project.new IndexRecords(into, parser.getString("name"));
-		int recId = idx.search();
-		if (recId == 0)
-			return 0;
-		return recId;
+	public boolean parseKey(Parser parser) {
+		Project parent = getUpRecord();
+		String name = parser.getString("name");
+		int nextRec = parent.new IndexRecords(this, name).search();
+		parser.finishRelation();
+		if (nextRec != 0)
+			rec = nextRec;
+		return nextRec != 0;
 	}
 
 	@Override
@@ -334,10 +336,6 @@ public class Record implements MemoryRecord, RecordInterface {
 		switch (field) {
 		case 1:
 			return getName();
-		case 2:
-			return getFieldName();
-		case 3:
-			return getFields();
 		case 4:
 			return getCondition();
 		case 5:

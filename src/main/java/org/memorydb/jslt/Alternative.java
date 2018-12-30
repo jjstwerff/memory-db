@@ -185,7 +185,8 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		int nr = parser.getInt("nr");
 		int nextRec = parent.new IndexAlternatives(this, nr).search();
 		parser.finishRelation();
-		rec = nextRec;
+		if (nextRec != 0)
+			rec = nextRec;
 		return nextRec != 0;
 	}
 

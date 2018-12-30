@@ -30,7 +30,7 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 		this.parent = parent;
 		this.idx = idx;
 		if (parent.getRec() != 0) {
-			this.alloc = store.getInt(parent.getRec(), 70);
+			this.alloc = store.getInt(parent.getRec(), 36);
 			if (alloc != 0) {
 				setUpRecord(parent);
 				this.size = store.getInt(alloc, 4);
@@ -103,7 +103,7 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 			setUpRecord(parent);
 		} else
 			alloc = store.resize(alloc, (12 + (idx + 1) * 8) / 8);
-		store.setInt(parent.getRec(), 70, alloc);
+		store.setInt(parent.getRec(), 36, alloc);
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
 		setValue(null);
