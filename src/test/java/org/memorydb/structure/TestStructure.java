@@ -17,6 +17,13 @@ public class TestStructure extends ProjectTests {
 	}
 
 	@Test
+	public void testWorldStructure() {
+		Project project = JsonStructure.getProject();
+		assertContent(this, "testJsonStructure.txt", project.toString());
+		validate(project);
+	}
+
+	@Test
 	@Ignore("The generated json code is deliberately different. Allow to override methods in the future.")
 	public void testJsonStructure() {
 		Project project = JsonStructure.getProject();

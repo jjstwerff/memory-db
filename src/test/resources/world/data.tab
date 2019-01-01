@@ -1,0 +1,144 @@
+name	type	dependency	effect	description
+ice	terrain	mountain	move2, food0	Mountain tops
+mountain	terrain	steep3	move4, food2, wood, herb	Mountains with forest
+gem spot	node	mountain	gems	Gems can be found or mined
+iron spot	node	mountain, hill	iron	Iron can be found or mined
+forest	terrain	planes	move8, food4, wood, herb4	Relatively flat forest
+rich forest	terrain	forest	food8, wood2, herb8	Abundant plantlife
+hill	terrain	steep2	move6, food4, herb2	Can still be climbed from each side
+dunes	terrain steep1	move9, food1, herb3	Sandy dunes
+forest hills	terrain	hill	move5, food4, wood, herb3	
+coal spot	node	mountain, hill, forest hill	coal	Coal can be found or mined
+sea	terrain	steep0	food4	Need a boat for fishing
+lake	terrain	steep0	food6	
+swamp	terrain	steep0	move4, food4, herb2	
+water	terrain	sea, river, lake, swamp		
+planes	terrain	steep1	move12, food6, herb	Grass lands with native herd animals, gets overgrown without them
+rich water	terrain	water	food8	Abundant fish
+hill field	node	hill	move6, food10	Fields created along hill slopes
+field	node	planes	move7, food14	Artifically created field, gets overgrown without use
+tracker	person		move6	Simple hunter gatherer, may use traps
+herbalist	person		move4	Gatherer of herbs
+herb	good	tracker, herbalist		
+meat	good	tracker	food8	
+peasant	person	food	move4	Can provide it's own food in a food4 area without contention
+crafter	person	peasant		
+staff	good	crafter, wood		
+wood	good	forest, peasant		
+house	structure	crafter, wood		Simple wooden house
+boat	vehicle	crafter, wood, house, water	move6	
+bow	good	crafter, wood		
+cart	vehicle	crafter, wood, house	move4	
+shield	good	crafter, wood, house		
+spear	good	crafter, wood		
+club	good	crafter, wood		
+leather	good	tracker, forest, ?house		
+saddle	good	crafter, leather, house		
+armor	good	crafter, leather, house		
+mason	person	crafter, house		
+road	structure	mason	move14	
+quarry	structure	mason, hill		
+stone	good	mason, quarry, cart		
+building	structure	mason, stone, wood		
+bowlyer	person	crafter		
+war-bow	good	bowlyer, wood, house		
+black-smith	person	crafter		
+iron	good	black-smith, house		
+kite shield	good	black-smith, iron, building		
+flail	good	black-smith, iron, building		
+pike	good	black-smith, iron, wood, building		
+cuirass	good	black-smith, iron, building		
+iron armor	good	black-smith, iron, building		
+wainwright	person	crafter, clothing		
+wagon	vehicle	wainwright, wood, iron, building, road	move8	
+leader	person	peasant, clothing		
+harbor	structure	mason, stone, water		
+sailor	person	peasant, clothes		
+ship	vehicle	wainwright, wood, iron, building, harbor, water, cloth	move8	
+fighter	person	shield, spear, food	move6	
+camp	structure	fighter, crafter, wood		
+weapon-smith	person	black-smith, fighter, clothing		
+sword	good	weapon-smith, iron, building		
+armourer	person	black-smith, clothing		
+plate	good	armourer, iron, building		
+fisher	person	boat, water		
+farmer	person			
+plough	good	black-smith, iron, building		
+flour	good	farmer, field, ?house, ?building, ?plough	food8	
+cloth	good	farmer, field, house, ?loom		
+clothing	good	crafter, cloth, ?house		
+horse	animal	farmer, field	move11, meat5	
+pig	animal	farmer	move4, meat2	
+chicken	animal	farmer	move6, meat	
+dog	animal	farmer	move9	
+bovine	animal	farmer, field	move9, meat6, dairy	
+dairy	good		food10	
+cavalier	person	horse, saddle, clothing	move10	
+scout	person	tracker, cavalier		
+falconer	person	tracker, building, clothing		
+falcon	animal	falconer	move24, food12	
+carrier-pigeon	animal	falconer	move20	
+archer	person	bow, food, clothing	move7	
+hunter	person	tracker, archer, war-bow		
+horse archer	person	archer, cavalier, war-bow		
+knight	person	fighter, cavalier, building, cuirass, sword, kite shield	move9	
+pikeman	person	figher, pike, cuirass, house	move5	
+town	structure	leader, house		
+bridge	structure	mason, stone, wood, water		
+fortress	structure	knight, builder, stone, happiness		
+castle	structure	knight, builder, stone, town, happiness		
+city wall	structure	builder, stone, city, happiness		
+musician	person	town, food, clothing, happiness	move5	
+druid	person	herbalist, leader, staff, happiness	move6	
+lay	person	house, food	move5	
+monastery	structure	lay, building, happiness		
+healer	person	lay, house, clothing	move4	
+hospital	structure	healer, building, happiness2, herb		
+cleric	person	lay, building, clothing	move4	
+church	structure	cleric, builder, stone, town, happiness		
+trader	person	house, food, clothing		
+market	structure	trader, farmer, wood		
+civil servant	person	building, market, clothing		
+police	person	city, clothing	move5	
+teacher	person	town		
+artist	person	crafter, city		
+city	structure	house, civil servant		
+guards	person	fighter	move4	
+gem	good	gem spot, tracker		
+pearl	good	rich water, sea		
+jeweler	person	black-smith, iron, city		
+ring	good	jeweler, building		
+trinket	good	jeweler, building		
+helmet	good	crafter, leather, ?iron		
+shoes	good	crafter, leather		
+priest	person	cleric, civil servant, city, leader	move3	
+cathedral	structure	priest, builder, stone, city, happiness3, artist		
+paladin	person	knight, lay, plate, sword, castle	move8	
+vendor	person	trader, building		
+merchant	person	vendor, leader, ship/wagon	move3	
+strategist	person	leader, fighter, cavalier	move4	
+alchemist	person	building, food	move3	
+chemistry	good	alchemist, building, iron, herb		
+magician	person	chemistry, jewelry, building, food	move3	
+potion	good	?alchemist, ?magician, ?druid, herb		
+scroll	good	magician		
+balloon	vehicle	alchemist, cloth	move5	
+chariot	vehicle	wainwright, wood, iron, leather	move10	
+player	rule	learned perk (learned person role, education) possibly double for quality1		
+quality	rule	material, specialized building, tools, person		
+shoddy	quality	use-1, move-1		
+normal	quality	use0		
+fine	quality	use1, move+1		
+exceptional	quality	use2, move+2		
+guild	rule	unit, quality1		
+quick	rule	quality-1, duration/2		
+methodical	rule	quality+1, duration*2, material1		
+move	rule	(terrain + person + leader) / 2 - size		
+food	rule	group-size		
+single	size	person1, size0		
+group	size	person4, size1		
+large group	size	person15, size2		
+unit	size	leader, person60, size3		
+large unit	size	leader, person250, size4		
+army	size	strategist, person1000, size5		
+large army	size	strategist, person4000, size6		

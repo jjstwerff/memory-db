@@ -98,6 +98,8 @@ public class TestJslt extends MemoryTests {
 		jslt(null, "[[1,2],[1,3],[0,2],[0,1]][/@]", "[[0,1],[0,2],[1,2],[1,3]]");
 		jslt(null, "[[1,\"aa\"]==[1,\"aaa\"], [1,'aa']==[1,'aa'], [2]*2, {\"this\":1, \"too\":2} - \"too\", [2] > [1]]",
 				"[false,true,[2,2],{\"this\":1},true]");
+		jslt(null, "each([''], @ == '\t' ? # + '' : #[:-1] + (#[-1] + @)) for 'abc\tdef\t\tg\t'", "[\"abc\",\"def\",\"\",\"g\",\"\"]");
+		jslt(null, "each([['']], @ == '\\n' ? # + [] : @ == '\\t' ? # + '' : #[:-1] + (#[-1] + @)) for 'abc\\tdef\\t\\tg\\t\\na\\tb'", "[[\"abc\",\"def\",\"\",\"g\",\"\"],[\"a\",\"b\"]]");
 		jslt(null, "{ sum:each(0, # + @), array:each([], # + @*2), maximum:each(0, @ > # ? @ : #) } for [1, 2, 3]",
 				"{\"sum\":6,\"array\":[2,4,6],\"maximum\":3}");
 		compare("code.txt", bld.toString());

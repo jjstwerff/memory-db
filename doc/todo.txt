@@ -1,4 +1,17 @@
 Testing:
+- iterator matching:
+	define all variables encountered in the matching expression
+	detection of recursion (calls of functions on the same iterators) & array / object result:
+		create a lazy implementation: array + recursion -> internal array with original position & length & expression
+	if no constant is given: iterate for each element on the array... otherwise return sub arrays
+- these next two objects are general implementations of arrays/objects and possibly usable in multiple contexts
+- array (simple)
+    implement with the current context for the next call..
+    object list for old values (next result is the index in this list)
+- object (simple)
+	loop over all keys of the object
+	map per field to value, radix tree with array back-end?
+- in generated code.. skip memory function of above objects when possible (used only in iterator context)
 - array analysis
 	logic: main expression & remember list
 	link each expression to the InterFor in array & calculate the values

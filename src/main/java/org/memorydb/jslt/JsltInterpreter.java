@@ -398,8 +398,8 @@ public class JsltInterpreter {
 		Object p1 = inter(code.getFnParm1());
 		Object p2 = null;
 		Function function = code.getFunction();
-		if (function != Function.EACH && function != Function.FOR && function != Function.PER && function != Function.OR && function != Function.AND
-				&& code.getFnParm2().getRec() != 0)
+		if (function != Function.EACH && function != Function.FOR && function != Function.PER && function != Function.OR
+				&& function != Function.AND && code.getFnParm2().getRec() != 0)
 			p2 = inter(code.getFnParm2());
 		switch (function) {
 		case ADD:
@@ -422,7 +422,10 @@ public class JsltInterpreter {
 		case PER:
 			return new InterMap(this, code.getFnParm2(), p1);
 		case FOR:
-			curFor = (RecordInterface) p1;
+			if (p1 instanceof String)
+				curFor = new StringArray((String) p1);
+			else
+				curFor = (RecordInterface) p1;
 			Object resObj = inter(code.getFnParm2());
 			return resObj;
 		case EACH:

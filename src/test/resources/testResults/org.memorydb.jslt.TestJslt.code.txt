@@ -1464,6 +1464,57 @@ name=main, alternatives=[
 ]
 
 Test:
+each([''], @ == '	' ? # + '' : #[:-1] + (#[-1] + @)) for 'abc	def		g	'
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=FOR, fnParm1=[
+      operation=STRING, string=abc\tdef\t\tg\t
+    ], fnParm2=[
+      operation=FUNCTION, function=EACH, fnParm1=[
+        operation=ARRAY, array=[
+          operation=STRING, string=
+        ]
+      ], fnParm2=[
+        operation=CONDITION, conExpr=[
+          operation=FUNCTION, function=EQ, fnParm1=[
+            operation=CURRENT
+          ], fnParm2=[
+            operation=STRING, string=\t
+          ]
+        ], conTrue=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=RUNNING
+          ], fnParm2=[
+            operation=STRING, string=
+          ]
+        ], conFalse=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=CALL, macro={Name=slice}, callParms=[
+              operation=RUNNING
+              operation=NUMBER
+              operation=NUMBER, number=-1
+              operation=NUMBER, number=1
+            ]
+          ], fnParm2=[
+            operation=FUNCTION, function=ADD, fnParm1=[
+              operation=FUNCTION, function=ELEMENT, fnParm1=[
+                operation=RUNNING
+              ], fnParm2=[
+                operation=NUMBER, number=-1
+              ]
+            ], fnParm2=[
+              operation=CURRENT
+            ]
+          ]
+        ]
+      ]
+    ]
+  ]
+]
+
+Test:
 { sum:each(0, # + @), array:each([], # + @*2), maximum:each(0, @ > # ? @ : #) } for [1, 2, 3]
 Code:
 name=main, alternatives=[

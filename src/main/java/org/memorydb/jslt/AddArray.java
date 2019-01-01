@@ -47,7 +47,7 @@ public class AddArray implements RecordInterface {
 	@Override
 	public String name(int field) {
 		int size = array.getSize();
-		if (size < field)
+		if (size < field && elm instanceof RecordInterface)
 			return ((RecordInterface) elm).name(field - size);
 		return array.name(field);
 	}

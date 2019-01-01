@@ -127,5 +127,7 @@ public interface RecordInterface {
 		return 0;
 	}
 
-	boolean exists();
+	default boolean exists() { // indication the the data is defined
+		return true;
+	}
 }

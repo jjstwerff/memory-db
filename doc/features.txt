@@ -5,3 +5,7 @@ Transactions in local thread:
 	Null value for a delete with the current record as key.
 	When needed create a special 'null' instance of the record.
 	Commit/Rollback support
+
+RecordInterface:
+	Array = lazy.. do not calculate more elements than are reached by 'next()'.. could still read old elements
+	Object = efficient scanName(string) implementation, not specifically lazy
