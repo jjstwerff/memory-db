@@ -96,7 +96,7 @@ public class TestJslt extends MemoryTests {
 		jslt("[[1,\"aa\"]==[1,\"aaa\"], [1,'aa']==[1,'aa'], [2]*2, {\"this\":1, \"too\":2} - \"too\", [2] > [1]]",
 				"[false,true,[2,2],{\"this\":1},true]");
 		jslt("each([''], @ == '\t' ? # + '' : #[:-1] + (#[-1] + @)) for 'abc\tdef\t\tg\t'", "[\"abc\",\"def\",\"\",\"g\",\"\"]");
-		jslt("each([['']], @ == '\\n' ? # + [] : @ == '\\t' ? # + '' : #[:-1] + (#[-1] + @)) for 'abc\\tdef\\t\\tg\\t\\na\\tb'", "[[\"abc\",\"def\",\"\",\"g\",\"\"],[\"a\",\"b\"]]");
+		jslt("1 > 2 ? 1 : 2 > 3 ? 2 : 3", "3");
 		jslt("{ sum:each(0, # + @), array:each([], # + @*2), maximum:each(0, @ > # ? @ : #) } for [1, 2, 3]",
 				"{\"sum\":6,\"array\":[2,4,6],\"maximum\":3}");
 	}
@@ -144,7 +144,7 @@ public class TestJslt extends MemoryTests {
 			if (!result.equals(""))
 				for (Macro m : new Macro(jsltStore).new IndexMacros())
 					code.append(m.toString());
-			compare(result + ".txt", code.toString());
+			compare(result + ".code", code.toString());
 			Assert.assertEquals(result, "\"\"", into);
 		}
 	}

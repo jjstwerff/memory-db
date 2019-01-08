@@ -306,9 +306,7 @@ public class JsltParser {
 
 		private void parseCond() {
 			parseOr();
-			while (true) {
-				if (!scanner.matches("?"))
-					return;
+			if (scanner.matches("?")) {
 				try (ChangeExpr expr = new ChangeExpr(store)) {
 					move(expr, spot);
 					spot.setOperation(Operation.CONDITION);
@@ -317,7 +315,7 @@ public class JsltParser {
 				try (ChangeExpr cTrue = new ChangeExpr(store)) {
 					remember();
 					spot = cTrue;
-					parseOr();
+					parseCond();
 					restore();
 					spot.setConTrue(cTrue);
 				}
@@ -325,7 +323,7 @@ public class JsltParser {
 				try (ChangeExpr cFalse = new ChangeExpr(store)) {
 					remember();
 					spot = cFalse;
-					parseOr();
+					parseCond();
 					restore();
 					spot.setConFalse(cFalse);
 				}

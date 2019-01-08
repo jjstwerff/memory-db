@@ -1,0 +1,63 @@
+Test:
+{ sum:each(0, # + @), array:each([], # + @*2), maximum:each(0, @ > # ? @ : #) } for [1, 2, 3]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=FOR, fnParm1=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=2
+        operation=NUMBER, number=3
+      ]
+    ], fnParm2=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=sum
+        ], operation=FUNCTION, function=EACH, fnParm1=[
+          operation=NUMBER, number=0
+        ], fnParm2=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=RUNNING
+          ], fnParm2=[
+            operation=CURRENT
+          ]
+        ]
+        name=[
+          operation=STRING, string=array
+        ], operation=FUNCTION, function=EACH, fnParm1=[
+          operation=ARRAY, array=[
+          ]
+        ], fnParm2=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=RUNNING
+          ], fnParm2=[
+            operation=FUNCTION, function=MUL, fnParm1=[
+              operation=CURRENT
+            ], fnParm2=[
+              operation=NUMBER, number=2
+            ]
+          ]
+        ]
+        name=[
+          operation=STRING, string=maximum
+        ], operation=FUNCTION, function=EACH, fnParm1=[
+          operation=NUMBER, number=0
+        ], fnParm2=[
+          operation=CONDITION, conExpr=[
+            operation=FUNCTION, function=GT, fnParm1=[
+              operation=CURRENT
+            ], fnParm2=[
+              operation=RUNNING
+            ]
+          ], conTrue=[
+            operation=CURRENT
+          ], conFalse=[
+            operation=RUNNING
+          ]
+        ]
+      ]
+    ]
+  ]
+]

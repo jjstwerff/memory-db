@@ -1,50 +1,29 @@
 Test:
-each([['']], @ == '\n' ? # + [] : @ == '\t' ? # + '' : #[:-1] + (#[-1] + @)) for 'abc\tdef\t\tg\t\na\tb'
+1 > 2 ? 1 : 2 > 3 ? 2 : 3
 
 Code:
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=FUNCTION, function=FOR, fnParm1=[
-      operation=STRING, string=
-        abc\tdef\t\tg\t
-        a\tb
-    ], fnParm2=[
-      operation=FUNCTION, function=EACH, fnParm1=[
-        operation=ARRAY, array=[
-          operation=ARRAY, array=[
-            operation=STRING, string=
-          ]
-        ]
+    operation=CONDITION, conExpr=[
+      operation=FUNCTION, function=GT, fnParm1=[
+        operation=NUMBER, number=1
       ], fnParm2=[
-        operation=CONDITION, conExpr=[
-          operation=CONDITION
-        ], conTrue=[
-          operation=FUNCTION, function=ADD, fnParm1=[
-            operation=RUNNING
-          ], fnParm2=[
-            operation=STRING, string=
-          ]
-        ], conFalse=[
-          operation=FUNCTION, function=ADD, fnParm1=[
-            operation=CALL, macro={Name=slice}, callParms=[
-              operation=RUNNING
-              operation=NUMBER
-              operation=NUMBER, number=-1
-              operation=NUMBER, number=1
-            ]
-          ], fnParm2=[
-            operation=FUNCTION, function=ADD, fnParm1=[
-              operation=FUNCTION, function=ELEMENT, fnParm1=[
-                operation=RUNNING
-              ], fnParm2=[
-                operation=NUMBER, number=-1
-              ]
-            ], fnParm2=[
-              operation=CURRENT
-            ]
-          ]
+        operation=NUMBER, number=2
+      ]
+    ], conTrue=[
+      operation=NUMBER, number=1
+    ], conFalse=[
+      operation=CONDITION, conExpr=[
+        operation=FUNCTION, function=GT, fnParm1=[
+          operation=NUMBER, number=2
+        ], fnParm2=[
+          operation=NUMBER, number=3
         ]
+      ], conTrue=[
+        operation=NUMBER, number=2
+      ], conFalse=[
+        operation=NUMBER, number=3
       ]
     ]
   ]
