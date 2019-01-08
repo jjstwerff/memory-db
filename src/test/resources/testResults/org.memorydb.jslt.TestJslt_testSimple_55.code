@@ -1,0 +1,18 @@
+Test:
+"123&{2 + 2}5"
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=APPEND, append=[
+      operation=STRING, string=123
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=NUMBER, number=2
+      ], fnParm2=[
+        operation=NUMBER, number=2
+      ]
+      operation=STRING, string=5
+    ]
+  ]
+]

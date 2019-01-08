@@ -1,0 +1,20 @@
+Test:
+[1, 0, 3, 2][:-2]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro={Name=slice}, callParms=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+        operation=NUMBER, number=0
+        operation=NUMBER, number=3
+        operation=NUMBER, number=2
+      ]
+      operation=NUMBER
+      operation=NUMBER, number=-2
+      operation=NUMBER, number=1
+    ]
+  ]
+]

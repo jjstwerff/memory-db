@@ -1,0 +1,18 @@
+Test:
+["Tim", "Dan"][\@]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=SORT, sort=[
+      operation=ARRAY, array=[
+        operation=STRING, string=Tim
+        operation=STRING, string=Dan
+      ]
+    ], sortParms=[
+      operation=BOOLEAN, boolean=true
+      operation=CURRENT
+    ]
+  ]
+]

@@ -1,0 +1,28 @@
+Test:
+[pow(2, 4), string(1), boolean("true"), number("123"), float("2.1e4")]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=ARRAY, array=[
+      operation=FUNCTION, function=POW, fnParm1=[
+        operation=NUMBER, number=2
+      ], fnParm2=[
+        operation=NUMBER, number=4
+      ]
+      operation=FUNCTION, function=STRING, fnParm1=[
+        operation=NUMBER, number=1
+      ]
+      operation=FUNCTION, function=BOOLEAN, fnParm1=[
+        operation=STRING, string=true
+      ]
+      operation=FUNCTION, function=NUMBER, fnParm1=[
+        operation=STRING, string=123
+      ]
+      operation=FUNCTION, function=FLOAT, fnParm1=[
+        operation=STRING, string=2.1e4
+      ]
+    ]
+  ]
+]

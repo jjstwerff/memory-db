@@ -1,0 +1,20 @@
+Test:
+$.name
+
+Source:
+type=OBJECT, object=[
+  name=name, type=STRING, value=Tim
+  name=value, type=NUMBER, number=123
+]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=READ, listenSource=slice, listemNr=0
+    ], fnParm2=[
+      operation=STRING, string=name
+    ]
+  ]
+]

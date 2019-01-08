@@ -1,0 +1,26 @@
+Test:
+$
+
+Source:
+type=ARRAY, array=[
+  type=OBJECT, object=[
+    name=name, type=STRING, value=Tim
+    name=value, type=ARRAY, array=[
+      type=NUMBER, number=12
+      type=ARRAY, array=[
+      ]
+    ]
+  ]
+  type=OBJECT, object=[
+    name=name, type=NULL
+    name=value, type=BOOLEAN, boolean=true
+  ]
+]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=READ, listenSource=$, listemNr=0
+  ]
+]

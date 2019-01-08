@@ -1,0 +1,16 @@
+Test:
+true ? 1 : 2
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CONDITION, conExpr=[
+      operation=BOOLEAN, boolean=true
+    ], conTrue=[
+      operation=NUMBER, number=1
+    ], conFalse=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]

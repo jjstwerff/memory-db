@@ -1,0 +1,16 @@
+Test:
+[1] + 3
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=ARRAY, array=[
+        operation=NUMBER, number=1
+      ]
+    ], fnParm2=[
+      operation=NUMBER, number=3
+    ]
+  ]
+]

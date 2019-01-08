@@ -1,0 +1,43 @@
+Test:
+@.data in [{name:"Tim", data:46}, {name:"Dan", data:true}][/@.name]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=PER, fnParm1=[
+      operation=SORT, sort=[
+        operation=ARRAY, array=[
+          operation=OBJECT, object=[
+            name=[
+              operation=STRING, string=name
+            ], operation=STRING, string=Tim
+            name=[
+              operation=STRING, string=data
+            ], operation=NUMBER, number=46
+          ]
+          operation=OBJECT, object=[
+            name=[
+              operation=STRING, string=name
+            ], operation=STRING, string=Dan
+            name=[
+              operation=STRING, string=data
+            ], operation=BOOLEAN, boolean=true
+          ]
+        ]
+      ], sortParms=[
+        operation=FUNCTION, function=ELEMENT, fnParm1=[
+          operation=CURRENT
+        ], fnParm2=[
+          operation=STRING, string=name
+        ]
+      ]
+    ], fnParm2=[
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=CURRENT
+      ], fnParm2=[
+        operation=STRING, string=data
+      ]
+    ]
+  ]
+]

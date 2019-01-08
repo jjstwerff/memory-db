@@ -1,0 +1,14 @@
+Test:
+65 % 10
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=MOD, fnParm1=[
+      operation=NUMBER, number=65
+    ], fnParm2=[
+      operation=NUMBER, number=10
+    ]
+  ]
+]

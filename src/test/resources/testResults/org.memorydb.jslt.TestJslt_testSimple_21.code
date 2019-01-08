@@ -1,0 +1,24 @@
+Test:
+[1, 0] + [3, 2] + 'a'
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+          operation=NUMBER, number=0
+        ]
+      ], fnParm2=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=3
+          operation=NUMBER, number=2
+        ]
+      ]
+    ], fnParm2=[
+      operation=STRING, string=a
+    ]
+  ]
+]

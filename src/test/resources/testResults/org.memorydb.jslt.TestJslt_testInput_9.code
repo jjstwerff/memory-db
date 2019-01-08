@@ -1,0 +1,22 @@
+Test:
+$[/@]
+
+Source:
+type=ARRAY, array=[
+  type=NUMBER, number=2
+  type=NUMBER, number=5
+  type=NUMBER, number=3
+  type=NUMBER, number=0
+]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=SORT, sort=[
+      operation=READ, listenSource=slice, listemNr=0
+    ], sortParms=[
+      operation=CURRENT
+    ]
+  ]
+]

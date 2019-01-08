@@ -1,0 +1,21 @@
+Test:
+{name:@} in ["Tim", "Dan"]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=PER, fnParm1=[
+      operation=ARRAY, array=[
+        operation=STRING, string=Tim
+        operation=STRING, string=Dan
+      ]
+    ], fnParm2=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=name
+        ], operation=CURRENT
+      ]
+    ]
+  ]
+]

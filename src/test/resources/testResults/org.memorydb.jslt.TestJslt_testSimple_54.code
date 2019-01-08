@@ -1,0 +1,25 @@
+Test:
+[[].type(), {}.type(), null.type(), false.type()]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=ARRAY, array=[
+      operation=FUNCTION, function=TYPE, fnParm1=[
+        operation=ARRAY, array=[
+        ]
+      ]
+      operation=FUNCTION, function=TYPE, fnParm1=[
+        operation=OBJECT, object=[
+        ]
+      ]
+      operation=FUNCTION, function=TYPE, fnParm1=[
+        operation=NULL
+      ]
+      operation=FUNCTION, function=TYPE, fnParm1=[
+        operation=BOOLEAN, boolean=false
+      ]
+    ]
+  ]
+]

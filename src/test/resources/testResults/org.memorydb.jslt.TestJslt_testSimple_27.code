@@ -1,0 +1,18 @@
+Test:
+"aa" == "aa" and false
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=AND, fnParm1=[
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=STRING, string=aa
+      ], fnParm2=[
+        operation=STRING, string=aa
+      ]
+    ], fnParm2=[
+      operation=BOOLEAN, boolean=false
+    ]
+  ]
+]

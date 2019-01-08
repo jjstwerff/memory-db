@@ -1,0 +1,58 @@
+Test:
+{"val":{first:@.name, val:@.data} in [{name:"Tim", data:26 + 20}, {name:"Dan", data:3 > 2}]}
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=OBJECT, object=[
+      name=[
+        operation=STRING, string=val
+      ], operation=FUNCTION, function=PER, fnParm1=[
+        operation=ARRAY, array=[
+          operation=OBJECT, object=[
+            name=[
+              operation=STRING, string=name
+            ], operation=STRING, string=Tim
+            name=[
+              operation=STRING, string=data
+            ], operation=FUNCTION, function=ADD, fnParm1=[
+              operation=NUMBER, number=26
+            ], fnParm2=[
+              operation=NUMBER, number=20
+            ]
+          ]
+          operation=OBJECT, object=[
+            name=[
+              operation=STRING, string=name
+            ], operation=STRING, string=Dan
+            name=[
+              operation=STRING, string=data
+            ], operation=FUNCTION, function=GT, fnParm1=[
+              operation=NUMBER, number=3
+            ], fnParm2=[
+              operation=NUMBER, number=2
+            ]
+          ]
+        ]
+      ], fnParm2=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=first
+          ], operation=FUNCTION, function=ELEMENT, fnParm1=[
+            operation=CURRENT
+          ], fnParm2=[
+            operation=STRING, string=name
+          ]
+          name=[
+            operation=STRING, string=val
+          ], operation=FUNCTION, function=ELEMENT, fnParm1=[
+            operation=CURRENT
+          ], fnParm2=[
+            operation=STRING, string=data
+          ]
+        ]
+      ]
+    ]
+  ]
+]

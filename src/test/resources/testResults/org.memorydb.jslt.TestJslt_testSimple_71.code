@@ -1,0 +1,61 @@
+Test:
+[[1,"aa"]==[1,"aaa"], [1,'aa']==[1,'aa'], [2]*2, {"this":1, "too":2} - "too", [2] > [1]]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=ARRAY, array=[
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+          operation=STRING, string=aa
+        ]
+      ], fnParm2=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+          operation=STRING, string=aaa
+        ]
+      ]
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+          operation=STRING, string=aa
+        ]
+      ], fnParm2=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+          operation=STRING, string=aa
+        ]
+      ]
+      operation=FUNCTION, function=MUL, fnParm1=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=2
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=2
+      ]
+      operation=FUNCTION, function=MIN, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=this
+          ], operation=NUMBER, number=1
+          name=[
+            operation=STRING, string=too
+          ], operation=NUMBER, number=2
+        ]
+      ], fnParm2=[
+        operation=STRING, string=too
+      ]
+      operation=FUNCTION, function=GT, fnParm1=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=2
+        ]
+      ], fnParm2=[
+        operation=ARRAY, array=[
+          operation=NUMBER, number=1
+        ]
+      ]
+    ]
+  ]
+]

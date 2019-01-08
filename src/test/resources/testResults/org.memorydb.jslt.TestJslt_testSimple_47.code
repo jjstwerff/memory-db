@@ -1,0 +1,43 @@
+Test:
+@.name in [{name:"Tim", data:false}, {name:"Dan", data:true}][?@.data]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=PER, fnParm1=[
+      operation=FILTER, filter=[
+        operation=ARRAY, array=[
+          operation=OBJECT, object=[
+            name=[
+              operation=STRING, string=name
+            ], operation=STRING, string=Tim
+            name=[
+              operation=STRING, string=data
+            ], operation=BOOLEAN, boolean=false
+          ]
+          operation=OBJECT, object=[
+            name=[
+              operation=STRING, string=name
+            ], operation=STRING, string=Dan
+            name=[
+              operation=STRING, string=data
+            ], operation=BOOLEAN, boolean=true
+          ]
+        ]
+      ], filterDeep=false, filterExpr=[
+        operation=FUNCTION, function=ELEMENT, fnParm1=[
+          operation=CURRENT
+        ], fnParm2=[
+          operation=STRING, string=data
+        ]
+      ]
+    ], fnParm2=[
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=CURRENT
+      ], fnParm2=[
+        operation=STRING, string=name
+      ]
+    ]
+  ]
+]

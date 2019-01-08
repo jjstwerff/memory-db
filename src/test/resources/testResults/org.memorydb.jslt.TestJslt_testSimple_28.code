@@ -1,0 +1,14 @@
+Test:
+"al" < "ao"
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=LT, fnParm1=[
+      operation=STRING, string=al
+    ], fnParm2=[
+      operation=STRING, string=ao
+    ]
+  ]
+]

@@ -1,0 +1,13 @@
+Test:
+["a", 2]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=ARRAY, array=[
+      operation=STRING, string=a
+      operation=NUMBER, number=2
+    ]
+  ]
+]

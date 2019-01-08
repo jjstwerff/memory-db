@@ -1,0 +1,14 @@
+Test:
+@ in 3
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=PER, fnParm1=[
+      operation=NUMBER, number=3
+    ], fnParm2=[
+      operation=CURRENT
+    ]
+  ]
+]

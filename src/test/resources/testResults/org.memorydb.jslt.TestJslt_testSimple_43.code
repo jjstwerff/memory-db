@@ -1,0 +1,21 @@
+Test:
+@ + "c" in ["b","a"]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=PER, fnParm1=[
+      operation=ARRAY, array=[
+        operation=STRING, string=b
+        operation=STRING, string=a
+      ]
+    ], fnParm2=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=CURRENT
+      ], fnParm2=[
+        operation=STRING, string=c
+      ]
+    ]
+  ]
+]

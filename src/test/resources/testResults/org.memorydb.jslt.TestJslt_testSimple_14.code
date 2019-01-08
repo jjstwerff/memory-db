@@ -1,0 +1,14 @@
+Test:
+1 > 2
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=GT, fnParm1=[
+      operation=NUMBER, number=1
+    ], fnParm2=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]

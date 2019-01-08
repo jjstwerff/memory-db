@@ -1,0 +1,14 @@
+Test:
+2 == 3
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=EQ, fnParm1=[
+      operation=NUMBER, number=2
+    ], fnParm2=[
+      operation=NUMBER, number=3
+    ]
+  ]
+]

@@ -1,0 +1,27 @@
+Test:
+[] + 1 + 3 + 6 + 8
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=ARRAY, array=[
+            ]
+          ], fnParm2=[
+            operation=NUMBER, number=1
+          ]
+        ], fnParm2=[
+          operation=NUMBER, number=3
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=6
+      ]
+    ], fnParm2=[
+      operation=NUMBER, number=8
+    ]
+  ]
+]

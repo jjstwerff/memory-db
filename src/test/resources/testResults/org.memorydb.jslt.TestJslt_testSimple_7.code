@@ -1,0 +1,14 @@
+Test:
+15 - 2
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=MIN, fnParm1=[
+      operation=NUMBER, number=15
+    ], fnParm2=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]

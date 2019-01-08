@@ -1,0 +1,19 @@
+Test:
+{a:1, "b":[true]}
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=OBJECT, object=[
+      name=[
+        operation=STRING, string=a
+      ], operation=NUMBER, number=1
+      name=[
+        operation=STRING, string=b
+      ], operation=ARRAY, array=[
+        operation=BOOLEAN, boolean=true
+      ]
+    ]
+  ]
+]

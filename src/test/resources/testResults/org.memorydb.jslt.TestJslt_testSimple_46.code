@@ -1,0 +1,29 @@
+Test:
+[{name:"Tim", data:46}, {name:"Dan", data:true}].length()
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=LENGTH, fnParm1=[
+      operation=ARRAY, array=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=name
+          ], operation=STRING, string=Tim
+          name=[
+            operation=STRING, string=data
+          ], operation=NUMBER, number=46
+        ]
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=name
+          ], operation=STRING, string=Dan
+          name=[
+            operation=STRING, string=data
+          ], operation=BOOLEAN, boolean=true
+        ]
+      ]
+    ]
+  ]
+]

@@ -1,0 +1,12 @@
+Test:
+"thiș is dätà".length()
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=LENGTH, fnParm1=[
+      operation=STRING, string=thiș is dätà
+    ]
+  ]
+]

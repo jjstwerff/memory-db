@@ -1,0 +1,22 @@
+Test:
+{is:true, this:2, true:"ok"}.length()
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=LENGTH, fnParm1=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=is
+        ], operation=BOOLEAN, boolean=true
+        name=[
+          operation=STRING, string=this
+        ], operation=NUMBER, number=2
+        name=[
+          operation=STRING, string=true
+        ], operation=STRING, string=ok
+      ]
+    ]
+  ]
+]

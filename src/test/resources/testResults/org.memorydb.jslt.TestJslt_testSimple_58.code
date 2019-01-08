@@ -1,0 +1,10 @@
+Test:
+'123'
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=STRING, string=123
+  ]
+]

@@ -1,0 +1,22 @@
+Test:
+{"A":1} + {"C":true}
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=A
+        ], operation=NUMBER, number=1
+      ]
+    ], fnParm2=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=C
+        ], operation=BOOLEAN, boolean=true
+      ]
+    ]
+  ]
+]

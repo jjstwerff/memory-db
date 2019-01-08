@@ -1,0 +1,15 @@
+Test:
+"1234"[1:-1]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro={Name=slice}, callParms=[
+      operation=STRING, string=1234
+      operation=NUMBER, number=1
+      operation=NUMBER, number=-1
+      operation=NUMBER, number=1
+    ]
+  ]
+]

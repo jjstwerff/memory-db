@@ -1,0 +1,39 @@
+Test:
+$[/@.a][\@.b]
+
+Source:
+type=ARRAY, array=[
+  type=OBJECT, object=[
+    name=a, type=NUMBER, number=3
+    name=b, type=NUMBER, number=0
+  ]
+  type=OBJECT, object=[
+    name=a, type=NUMBER, number=3
+    name=b, type=NUMBER, number=1
+  ]
+  type=OBJECT, object=[
+    name=a, type=NUMBER, number=1
+  ]
+]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=SORT, sort=[
+      operation=READ, listenSource=slice, listemNr=0
+    ], sortParms=[
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=CURRENT
+      ], fnParm2=[
+        operation=STRING, string=a
+      ]
+      operation=BOOLEAN, boolean=true
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=CURRENT
+      ], fnParm2=[
+        operation=STRING, string=b
+      ]
+    ]
+  ]
+]

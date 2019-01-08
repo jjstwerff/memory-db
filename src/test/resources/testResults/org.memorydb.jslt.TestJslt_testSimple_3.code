@@ -1,0 +1,10 @@
+Test:
+-0.27
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FLOAT, float=-0.27
+  ]
+]

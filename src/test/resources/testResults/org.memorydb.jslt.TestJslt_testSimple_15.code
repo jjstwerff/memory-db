@@ -1,0 +1,16 @@
+Test:
+not(1.0 > 2.1)
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=NOT, fnParm1=[
+      operation=FUNCTION, function=GT, fnParm1=[
+        operation=FLOAT, float=1.0
+      ], fnParm2=[
+        operation=FLOAT, float=2.1
+      ]
+    ]
+  ]
+]

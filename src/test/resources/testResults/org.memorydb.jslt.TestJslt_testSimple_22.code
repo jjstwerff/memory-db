@@ -1,0 +1,33 @@
+Test:
+{A:3 * 2 - 5, C:123} + {C:true}
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=A
+        ], operation=FUNCTION, function=MIN, fnParm1=[
+          operation=FUNCTION, function=MUL, fnParm1=[
+            operation=NUMBER, number=3
+          ], fnParm2=[
+            operation=NUMBER, number=2
+          ]
+        ], fnParm2=[
+          operation=NUMBER, number=5
+        ]
+        name=[
+          operation=STRING, string=C
+        ], operation=NUMBER, number=123
+      ]
+    ], fnParm2=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=C
+        ], operation=BOOLEAN, boolean=true
+      ]
+    ]
+  ]
+]

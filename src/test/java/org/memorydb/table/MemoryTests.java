@@ -7,30 +7,68 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import org.junit.Assert;
-
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.memorydb.file.Write;
 import org.memorydb.jslt.JsltInterpreter;
 import org.memorydb.jslt.JsltParser;
 import org.memorydb.jslt.Macro;
-import org.memorydb.jslt.Source;
-import org.memorydb.jslt.Source.IndexSources;
+import org.memorydb.json.JsonParser;
 import org.memorydb.structure.InputOutputException;
 import org.memorydb.structure.NormalCheck;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 public class MemoryTests extends NormalCheck {
+	private int testNr;
+
+	@Before
+	public void before() {
+		testNr = 1;
+	}
+
+	@Rule public TestName curTest = new TestName();
+
+	protected void jslt(String jslt, String result) {
+		jslt((RecordInterface) null, jslt, result);
+	}
+
+	protected void jslt(String source, String jslt, String result) {
+		jslt(source == null ? null : JsonParser.parse(source), jslt, result);
+	}
+
+	protected void jslt(RecordInterface source, String jslt, String result) {
+		Macro macro = parse(jslt);
+		Write write = new Write(new StringBuilder());
+		try {
+			macro.output(write, 20);
+		} catch (IOException e) {
+			throw new InputOutputException(e);
+		}
+		StringBuilder code = new StringBuilder();
+		code.append("Test:\n").append(jslt).append("\n\n");
+		if (source != null)
+			code.append("Source:\n").append(source).append("\n");
+		code.append("Code:\n").append(write);
+		compare(testNr++ + ".code", code.toString());
+		jslt(source, macro, result);
+	}
+
 	protected void compare(String test, String text) {
 		Path basePath = Paths.get(getClass().getResource("/").getFile()).getParent().getParent();
-		Path dpath = basePath.resolve("target/test-classes/testResults/").resolve(getClass().getName() + "." + test);
-		Path apath = basePath.resolve("src/test/resources/testResults/").resolve(getClass().getName() + "." + test);
+		String fileName = getClass().getName() + "_" + curTest.getMethodName() + "_" + test;
+		Path dpath = basePath.resolve("target/test-classes/testResults/").resolve(fileName);
+		Path apath = basePath.resolve("src/test/resources/testResults/").resolve(fileName);
 		try {
 			String should = "";
-			if (Files.exists(apath))
+			if (Files.exists(apath)) {
 				should = new String(Files.readAllBytes(apath));
-			if (!should.equals(text))
+				if (!should.equals(text))
+					write(text, dpath, apath);
+				Assert.assertEquals(should, text);
+			} else
 				write(text, dpath, apath);
-			Assert.assertEquals(should, text);
 		} catch (IOException e) {
 			throw new InputOutputException(e);
 		}
@@ -41,38 +79,18 @@ public class MemoryTests extends NormalCheck {
 		Files.write(apath, text.getBytes(), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 	}
 
-	protected static void jslt(RecordInterface source, String jslt, String result, StringBuilder code) {
+	private static Macro parse(String jslt) {
 		Store jsltStore = new Store(3);
 		JsltParser.parse(jslt, jsltStore);
 		Macro macro = new Macro(jsltStore);
 		macro.setRec(macro.new IndexMacros("main").search());
-		Write write = new Write(new StringBuilder());
-		try {
-			macro.output(write, 20);
-		} catch (IOException e) {
-			throw new InputOutputException(e);
-		}
-		code.append("Test:\n").append(jslt).append("\n");
-		code.append("Code:\n");
-		code.append(write);
-		Source s = new Source(jsltStore);
-		IndexSources indexSources = s.new IndexSources("$");
-		int search = indexSources.search();
-		if (search > 0) {
-			code.append("Source:");
-			try {
-				s.setRec(search);
-				write = new Write(new StringBuilder());
-				s.output(write, 20);
-			} catch (IOException e) {
-				throw new InputOutputException(e);
-			}
-			code.append(write);
-		}
-		code.append("\n");
+		return macro;
+	}
+
+	private static void jslt(RecordInterface source, Macro macro, String result) {
+		Store jsltStore = macro.getStore();
 		String into = JsltInterpreter.interpret(jsltStore, source);
 		if (!into.equals(result)) {
-			System.out.println(code.toString());
 			Assert.assertEquals(result, into);
 		}
 	}

@@ -1,0 +1,33 @@
+Test:
+{value:@, index:@.index(), first:@.first(), last:@.last()} in "abc"
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=PER, fnParm1=[
+      operation=STRING, string=abc
+    ], fnParm2=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=value
+        ], operation=CURRENT
+        name=[
+          operation=STRING, string=index
+        ], operation=FUNCTION, function=INDEX, fnParm1=[
+          operation=CURRENT
+        ]
+        name=[
+          operation=STRING, string=first
+        ], operation=FUNCTION, function=FIRST, fnParm1=[
+          operation=CURRENT
+        ]
+        name=[
+          operation=STRING, string=last
+        ], operation=FUNCTION, function=LAST, fnParm1=[
+          operation=CURRENT
+        ]
+      ]
+    ]
+  ]
+]

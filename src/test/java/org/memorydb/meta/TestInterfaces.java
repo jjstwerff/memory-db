@@ -3,18 +3,13 @@ package org.memorydb.meta;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.memorydb.file.TestRead;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.table.MemoryTests;
 
 public class TestInterfaces extends MemoryTests {
-	private StringBuilder bld;
-
 	@Test
 	@Ignore("Metadata is just too different from this. Rewrite it in the future")
 	public void testWriting() {
-		bld = new StringBuilder();
 		Project parse = TestRead.parse("name=Struct, records=[", //
 				"  name=maintenance,fields=[]", //
 				"  & size=10,description=Maintenance cost", //
@@ -35,9 +30,5 @@ public class TestInterfaces extends MemoryTests {
 				+ "  ], size=10, related=false, full=false, description=Maintenance cost\n" //
 				+ "  name=discount, fields=[\n  ], fieldOnName=[\n  ], setIndexes=[\n  ], freeBits=[\n" //
 				+ "  ], size=13, related=false, full=true, description=Discount table\n" + "]\n", parse.toString());
-	}
-
-	private void jslt(RecordInterface source, String jslt, String result) {
-		jslt(source, jslt, result, bld);
 	}
 }

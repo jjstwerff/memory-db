@@ -1,0 +1,10 @@
+Test:
+-11
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=NUMBER, number=-11
+  ]
+]

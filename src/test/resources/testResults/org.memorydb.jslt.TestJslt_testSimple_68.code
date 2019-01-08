@@ -1,0 +1,33 @@
+Test:
+"count &{[@ + 1, @.last()?'':', '] in 3}"
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=APPEND, append=[
+      operation=STRING, string=count 
+      operation=FUNCTION, function=PER, fnParm1=[
+        operation=NUMBER, number=3
+      ], fnParm2=[
+        operation=ARRAY, array=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=CURRENT
+          ], fnParm2=[
+            operation=NUMBER, number=1
+          ]
+          operation=CONDITION, conExpr=[
+            operation=FUNCTION, function=LAST, fnParm1=[
+              operation=CURRENT
+            ]
+          ], conTrue=[
+            operation=STRING, string=
+          ], conFalse=[
+            operation=STRING, string=\, 
+          ]
+        ]
+      ]
+      operation=STRING, string=
+    ]
+  ]
+]

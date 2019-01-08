@@ -1,0 +1,55 @@
+Test:
+[$[1],$[1].value,$[0].name,$[0].name]
+
+Source:
+type=ARRAY, array=[
+  type=OBJECT, object=[
+    name=name, type=STRING, value=Tim
+    name=value, type=NUMBER, number=123
+  ]
+  type=OBJECT, object=[
+    name=name, type=NULL
+    name=value, type=BOOLEAN, boolean=true
+  ]
+]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=ARRAY, array=[
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=READ, listenSource=slice, listemNr=0
+      ], fnParm2=[
+        operation=NUMBER, number=1
+      ]
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=FUNCTION, function=ELEMENT, fnParm1=[
+          operation=READ, listenSource=slice, listemNr=0
+        ], fnParm2=[
+          operation=NUMBER, number=1
+        ]
+      ], fnParm2=[
+        operation=STRING, string=value
+      ]
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=FUNCTION, function=ELEMENT, fnParm1=[
+          operation=READ, listenSource=slice, listemNr=0
+        ], fnParm2=[
+          operation=NUMBER, number=0
+        ]
+      ], fnParm2=[
+        operation=STRING, string=name
+      ]
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=FUNCTION, function=ELEMENT, fnParm1=[
+          operation=READ, listenSource=slice, listemNr=0
+        ], fnParm2=[
+          operation=NUMBER, number=0
+        ]
+      ], fnParm2=[
+        operation=STRING, string=name
+      ]
+    ]
+  ]
+]

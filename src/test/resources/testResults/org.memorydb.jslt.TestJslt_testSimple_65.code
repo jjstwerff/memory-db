@@ -1,0 +1,14 @@
+Test:
+"1234".index("23")
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=INDEX, fnParm1=[
+      operation=STRING, string=1234
+    ], fnParm2=[
+      operation=STRING, string=23
+    ]
+  ]
+]

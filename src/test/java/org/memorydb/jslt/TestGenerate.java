@@ -17,11 +17,10 @@ public class TestGenerate extends MemoryTests {
 			try (Parser parser = new DBParser(getClass().getResource("/generate/meta.db").getFile())) {
 				project.parse(parser);
 			}
-			StringBuilder code = new StringBuilder();
-			jslt(project, "$.pack", "\"org.memorydb.meta\"", code);
-			jslt(project, "@.name in $.records", "[\"Field\",\"OrderField\",\"Project\",\"Record\",\"Value\"]", code);
-			jslt(project, "@.name in $.records[?@.name=='Field']", "[\"Field\"]", code);
-			jslt(project, "@.name in @.fields in $.records[?@.name=='Field']", "[[\"name\",\"type\",\"key\",\"mandatory\",\"values\",\"related\",\"record\",\"content\",\"child\",\"to\",\"order\",\"minimum\",\"maximum\",\"format\",\"decimals\",\"default\",\"condition\",\"description\"]]", code);
+			jslt(project, "$.pack", "\"org.memorydb.meta\"");
+			jslt(project, "@.name in $.records", "[\"Field\",\"OrderField\",\"Project\",\"Record\",\"Value\"]");
+			jslt(project, "@.name in $.records[?@.name=='Field']", "[\"Field\"]");
+			jslt(project, "@.name in @.fields in $.records[?@.name=='Field']", "[[\"name\",\"type\",\"key\",\"mandatory\",\"values\",\"related\",\"record\",\"content\",\"child\",\"to\",\"order\",\"minimum\",\"maximum\",\"format\",\"decimals\",\"default\",\"condition\",\"description\"]]");
 		}
 	}
 }

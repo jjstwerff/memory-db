@@ -1,0 +1,51 @@
+Test:
+@.name in $[?not @.value or @.value == 123]
+
+Source:
+type=ARRAY, array=[
+  type=OBJECT, object=[
+    name=name, type=STRING, value=Tim
+    name=value, type=NUMBER, number=123
+  ]
+  type=OBJECT, object=[
+    name=name, type=STRING, value=Dan
+  ]
+]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=PER, fnParm1=[
+      operation=FILTER, filter=[
+        operation=READ, listenSource=slice, listemNr=0
+      ], filterDeep=false, filterExpr=[
+        operation=FUNCTION, function=OR, fnParm1=[
+          operation=FUNCTION, function=NOT, fnParm1=[
+            operation=FUNCTION, function=ELEMENT, fnParm1=[
+              operation=CURRENT
+            ], fnParm2=[
+              operation=STRING, string=value
+            ]
+          ]
+        ], fnParm2=[
+          operation=FUNCTION, function=EQ, fnParm1=[
+            operation=FUNCTION, function=ELEMENT, fnParm1=[
+              operation=CURRENT
+            ], fnParm2=[
+              operation=STRING, string=value
+            ]
+          ], fnParm2=[
+            operation=NUMBER, number=123
+          ]
+        ]
+      ]
+    ], fnParm2=[
+      operation=FUNCTION, function=ELEMENT, fnParm1=[
+        operation=CURRENT
+      ], fnParm2=[
+        operation=STRING, string=name
+      ]
+    ]
+  ]
+]

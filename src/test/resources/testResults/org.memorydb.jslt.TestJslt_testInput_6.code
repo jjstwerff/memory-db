@@ -1,0 +1,27 @@
+Test:
+$[1 + 1]
+
+Source:
+type=ARRAY, array=[
+  type=NUMBER, number=1
+  type=ARRAY, array=[
+    type=NUMBER, number=2
+  ]
+  type=NUMBER, number=3
+]
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=READ, listenSource=slice, listemNr=0
+    ], fnParm2=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=NUMBER, number=1
+      ], fnParm2=[
+        operation=NUMBER, number=1
+      ]
+    ]
+  ]
+]

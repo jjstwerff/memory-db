@@ -1,0 +1,14 @@
+Test:
+10.1 * 2
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=MUL, fnParm1=[
+      operation=FLOAT, float=10.1
+    ], fnParm2=[
+      operation=NUMBER, number=2
+    ]
+  ]
+]

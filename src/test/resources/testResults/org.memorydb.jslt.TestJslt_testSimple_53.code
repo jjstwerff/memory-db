@@ -1,0 +1,40 @@
+Test:
+{name:@.name(), length:@.length(), type:@.type(), value:@} in {name:"Tim", data:46}
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=PER, fnParm1=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=name
+        ], operation=STRING, string=Tim
+        name=[
+          operation=STRING, string=data
+        ], operation=NUMBER, number=46
+      ]
+    ], fnParm2=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=name
+        ], operation=FUNCTION, function=NAME, fnParm1=[
+          operation=CURRENT
+        ]
+        name=[
+          operation=STRING, string=length
+        ], operation=FUNCTION, function=LENGTH, fnParm1=[
+          operation=CURRENT
+        ]
+        name=[
+          operation=STRING, string=type
+        ], operation=FUNCTION, function=TYPE, fnParm1=[
+          operation=CURRENT
+        ]
+        name=[
+          operation=STRING, string=value
+        ], operation=CURRENT
+      ]
+    ]
+  ]
+]

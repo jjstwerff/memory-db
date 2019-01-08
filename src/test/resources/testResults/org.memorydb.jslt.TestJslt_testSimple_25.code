@@ -1,0 +1,14 @@
+Test:
+"a" != "aa"
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=NE, fnParm1=[
+      operation=STRING, string=a
+    ], fnParm2=[
+      operation=STRING, string=aa
+    ]
+  ]
+]

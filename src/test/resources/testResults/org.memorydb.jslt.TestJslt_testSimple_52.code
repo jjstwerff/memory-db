@@ -1,0 +1,18 @@
+Test:
+{length:123}.length
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ELEMENT, fnParm1=[
+      operation=OBJECT, object=[
+        name=[
+          operation=STRING, string=length
+        ], operation=NUMBER, number=123
+      ]
+    ], fnParm2=[
+      operation=STRING, string=length
+    ]
+  ]
+]
