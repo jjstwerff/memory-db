@@ -120,7 +120,7 @@ public class JsltParser {
 				id = scanner.parseIdentifier();
 				cumulative += "/" + id;
 			}
-			dir = dir.resolve(id + ".jstl");
+			dir = dir.resolve(id + ".jslt");
 			if (!Files.isReadable(dir))
 				throw new RuntimeException("Cannot read jstl from " + cumulative + ".jstl");
 			if (scanner.matches("as"))
@@ -804,13 +804,47 @@ public class JsltParser {
 			while (scanner.peek("\n"))
 				scanner.newLine();
 			String id = scanner.parseIdentifier();
+			int varNr = -1;
+			if (curAlt != null) {
+				int nr = -1;
+				for (ParametersArray par : curAlt.getParameters()) {
+					if (par.getType() != Type.VARIABLE)
+						continue;
+					nr++;
+					if (par.getVariable().getName().equals(id)) {
+						varNr = nr;
+						break;
+					}
+				}
+			}
 			if (id.equals("each") && scanner.matches("(")) {
 				parseForEach();
 				return;
 			}
-			while (scanner.matches("."))
-				id += "." + scanner.parseIdentifier();
+			if (varNr > -1) {
+				spot.setOperation(Operation.VARIABLE);
+				spot.setVarName(id);
+				spot.setVarNr(varNr);
+				id = null;
+			}
+			while (scanner.matches(".")) {
+				if (id == null)
+					id = scanner.parseIdentifier();
+				else
+					id += "." + scanner.parseIdentifier();
+			}
 			if (scanner.matches("(")) { // found macro call
+				if (id.equals("length")) {
+					try (ChangeExpr struc = new ChangeExpr(store)) {
+						move(struc, spot);
+						spot.setOperation(Operation.FUNCTION);
+						spot.setFunction(Function.LENGTH);
+						spot.setType(ResultType.Type.NUMBER);
+						spot.setFnParm1(struc);
+					}
+					scanner.expect(")");
+					return;
+				}
 				Macro curMacro = new Macro(store);
 				int rec = curMacro.new IndexMacros(id).search();
 				if (rec <= 0) {
@@ -830,21 +864,8 @@ public class JsltParser {
 				}
 				return;
 			}
-			if (curAlt != null) {// found possible parameter of current macro
-				int varnr = 0;
-				for (ParametersArray parm : curAlt.getParameters())
-					if (parm.getType() == Type.VARIABLE) {
-						Variable var = parm.getVariable();
-						if (var.getName().equals(id)) {
-							spot.setOperation(Operation.VARIABLE);
-							spot.setVarName(id);
-							spot.setVarNr(varnr);
-							return;
-						}
-						varnr++;
-					}
-			}
-			scanner.error("Unknown identifier '" + id + "'");
+			if (varNr < 0)
+				scanner.error("Unknown identifier '" + id + "'");
 		}
 
 		private void parseForEach() {

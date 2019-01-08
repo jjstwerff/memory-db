@@ -124,7 +124,6 @@ public class JsltInterpreter {
 		int parms = code.getCallParms().getSize();
 		for (CallParmsArray parm : code.getCallParms())
 			stack.add(inter(parm));
-		StringBuilder bld = new StringBuilder();
 		for (Alternative alt : macro.getAlternatives()) {
 			if (alt.getParameters().getSize() != parms)
 				continue;
@@ -168,9 +167,24 @@ public class JsltInterpreter {
 				default:
 					break;
 				}
-				bld.append(pnr).append(" ").append(parm.getType()).append(" vs ")
-						.append(obj == null ? "null" : obj.getClass().getSimpleName()).append(found ? "" : "!")
-						.append(" ");
+				Expr ifExpr = parm.getIf();
+				if (ifExpr.getRec() != 0) {
+					int lastFrame = stackFrame;
+					int empty = stack.size();
+					stackFrame = stack.size();
+					int pNr = 0;
+					for (ParametersArray p : alt.getParameters()) {
+						if (p.getType() == Match.Type.VARIABLE)
+							stack.add(stack.get(stackF + pNr));
+						pNr++;
+					}
+					Object ifResult = inter(ifExpr);
+					if (ifResult instanceof Boolean && (Boolean) ifResult == false)
+						found = false;
+					while (stack.size() > empty)
+						stack.remove(stack.size() - 1);
+					stackFrame = lastFrame;
+				}
 				pnr++;
 			}
 			if (found) {
@@ -182,18 +196,16 @@ public class JsltInterpreter {
 						stack.add(stack.get(stackF + pnr));
 					pnr++;
 				}
-				// String macroData = "macro:" + macro.getName() + " frameFrame:" + stackFrame +
-				// " on stack:" + stack;
 				Object res = inter(alt.getCode().iterator().next());
-				// System.out.println(macroData + " result:'" + res + "'");
 				while (stack.size() > stackF)
 					stack.remove(stack.size() - 1);
 				stackFrame = lastFrame;
 				return res;
 			}
 		}
-		System.out.println(bld);
-		throw new RuntimeException("Could not find alternative for " + macro.getName());
+		while (stack.size() > stackF)
+			stack.remove(stack.size() - 1);
+		return null;
 	}
 
 	private boolean matches(Object obj, Type type) {
@@ -506,6 +518,8 @@ public class JsltInterpreter {
 				return ((Boolean) p1) == getBoolean(p2);
 			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
 				return compare(p1, p2) == 0;
+			else if (p1 == null)
+				return p2 == null;
 			return false;
 		case FIRST:
 			return first;
@@ -536,9 +550,9 @@ public class JsltInterpreter {
 				int indexOf = ((String) p1).indexOf(getString(p2));
 				if (indexOf < 0)
 					return null;
-				return indexOf;
+				return Long.valueOf(indexOf);
 			}
-			return index;
+			return Long.valueOf(index);
 		case LAST:
 			return last;
 		case LE:
@@ -553,11 +567,11 @@ public class JsltInterpreter {
 			return null;
 		case LENGTH:
 			if (p1 == null && code.getFnParm1().getOperation() == Operation.ARRAY)
-				return code.getFnParm1().getArray().getSize();
+				return Long.valueOf(code.getFnParm1().getArray().getSize());
 			if (p1 instanceof String)
-				return ((String) p1).length();
+				return Long.valueOf(((String) p1).length());
 			if (p1 instanceof RecordInterface)
-				return ((RecordInterface) p1).getSize();
+				return Long.valueOf(((RecordInterface) p1).getSize());
 			return null;
 		case NAME:
 			return curName;
@@ -601,7 +615,7 @@ public class JsltInterpreter {
 				long number = getNumber(p2);
 				if (number == 0 || number == Long.MIN_VALUE)
 					return null;
-				return (Long) p1 % number;
+				return ((Long) p1) % number;
 			} else if (p1 instanceof Double) {
 				double fl = getFloat(p2);
 				if (fl == 0)

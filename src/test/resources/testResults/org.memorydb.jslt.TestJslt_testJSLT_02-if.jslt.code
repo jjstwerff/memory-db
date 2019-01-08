@@ -1,0 +1,217 @@
+name=double, alternatives=[
+  nr=0, parameters=[
+    if=[
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=FUNCTION, function=LENGTH, fnParm1=[
+          operation=VARIABLE, varName=elm, varNr=0
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=2
+      ]
+    ], type=VARIABLE, variable=[
+      name=elm, nr=0, eager=false, extension=false, type=NULL
+    ]
+  ], code=[
+    operation=VARIABLE, varName=elm, varNr=0
+  ]
+]
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=FUNCTION, function=ADD, fnParm1=[
+              operation=FUNCTION, function=ADD, fnParm1=[
+                operation=FUNCTION, function=ADD, fnParm1=[
+                  operation=FUNCTION, function=ADD, fnParm1=[
+                    operation=FUNCTION, function=ADD, fnParm1=[
+                      operation=FUNCTION, function=ADD, fnParm1=[
+                        operation=CALL, macro={Name=t.assert}, callParms=[
+                          operation=STRING, string=empty
+                          operation=NULL
+                          operation=CALL, macro={Name=double}, callParms=[
+                            operation=STRING, string=
+                          ]
+                        ]
+                      ], fnParm2=[
+                        operation=CALL, macro={Name=t.assert}, callParms=[
+                          operation=STRING, string=string
+                          operation=STRING, string=12
+                          operation=CALL, macro={Name=double}, callParms=[
+                            operation=STRING, string=12
+                          ]
+                        ]
+                      ]
+                    ], fnParm2=[
+                      operation=CALL, macro={Name=t.assert}, callParms=[
+                        operation=STRING, string=long_string
+                        operation=NULL
+                        operation=CALL, macro={Name=double}, callParms=[
+                          operation=STRING, string=123
+                        ]
+                      ]
+                    ]
+                  ], fnParm2=[
+                    operation=CALL, macro={Name=t.assert}, callParms=[
+                      operation=STRING, string=short_array
+                      operation=NULL
+                      operation=CALL, macro={Name=double}, callParms=[
+                        operation=ARRAY, array=[
+                          operation=BOOLEAN, boolean=true
+                        ]
+                      ]
+                    ]
+                  ]
+                ], fnParm2=[
+                  operation=CALL, macro={Name=t.assert}, callParms=[
+                    operation=STRING, string=array
+                    operation=ARRAY, array=[
+                      operation=NUMBER, number=1
+                      operation=BOOLEAN, boolean=true
+                    ]
+                    operation=CALL, macro={Name=double}, callParms=[
+                      operation=ARRAY, array=[
+                        operation=NUMBER, number=1
+                        operation=BOOLEAN, boolean=true
+                      ]
+                    ]
+                  ]
+                ]
+              ], fnParm2=[
+                operation=CALL, macro={Name=t.assert}, callParms=[
+                  operation=STRING, string=long_array
+                  operation=NULL
+                  operation=CALL, macro={Name=double}, callParms=[
+                    operation=ARRAY, array=[
+                      operation=NUMBER, number=1
+                      operation=BOOLEAN, boolean=true
+                      operation=NULL
+                    ]
+                  ]
+                ]
+              ]
+            ], fnParm2=[
+              operation=CALL, macro={Name=t.assert}, callParms=[
+                operation=STRING, string=short_object
+                operation=NULL
+                operation=CALL, macro={Name=double}, callParms=[
+                  operation=OBJECT, object=[
+                    name=[
+                      operation=STRING, string=a
+                    ], operation=NUMBER, number=1
+                  ]
+                ]
+              ]
+            ]
+          ], fnParm2=[
+            operation=CALL, macro={Name=t.assert}, callParms=[
+              operation=STRING, string=object
+              operation=OBJECT, object=[
+                name=[
+                  operation=STRING, string=a
+                ], operation=NUMBER, number=1
+                name=[
+                  operation=STRING, string=b
+                ], operation=NULL
+              ]
+              operation=CALL, macro={Name=double}, callParms=[
+                operation=OBJECT, object=[
+                  name=[
+                    operation=STRING, string=a
+                  ], operation=NUMBER, number=1
+                  name=[
+                    operation=STRING, string=b
+                  ], operation=NULL
+                ]
+              ]
+            ]
+          ]
+        ], fnParm2=[
+          operation=CALL, macro={Name=t.assert}, callParms=[
+            operation=STRING, string=long_object
+            operation=NULL
+            operation=CALL, macro={Name=double}, callParms=[
+              operation=OBJECT, object=[
+                name=[
+                  operation=STRING, string=a
+                ], operation=NUMBER, number=1
+                name=[
+                  operation=STRING, string=b
+                ], operation=NULL
+                name=[
+                  operation=STRING, string=c
+                ], operation=NULL
+              ]
+            ]
+          ]
+        ]
+      ], fnParm2=[
+        operation=CALL, macro={Name=t.assert}, callParms=[
+          operation=STRING, string=number
+          operation=NULL
+          operation=CALL, macro={Name=double}, callParms=[
+            operation=NUMBER, number=2
+          ]
+        ]
+      ]
+    ], fnParm2=[
+      operation=CALL, macro={Name=t.assert}, callParms=[
+        operation=STRING, string=boolean
+        operation=NULL
+        operation=CALL, macro={Name=double}, callParms=[
+          operation=BOOLEAN, boolean=true
+        ]
+      ]
+    ]
+  ]
+]
+name=slice, alternatives=[
+]
+name=t.assert, alternatives=[
+  nr=0, parameters=[
+    type=VARIABLE, variable=[
+      name=name, nr=0, eager=false, extension=false, type=STRING
+    ]
+    type=VARIABLE, variable=[
+      name=should, nr=0, eager=false, extension=false, type=NULL
+    ]
+    type=VARIABLE, variable=[
+      name=was, nr=0, eager=false, extension=false, type=NULL
+    ]
+  ], code=[
+    operation=CONDITION, conExpr=[
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=VARIABLE, varName=should, varNr=1
+      ], fnParm2=[
+        operation=VARIABLE, varName=was, varNr=2
+      ]
+    ], conTrue=[
+      operation=STRING, string=
+    ], conFalse=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=FUNCTION, function=ADD, fnParm1=[
+              operation=FUNCTION, function=ADD, fnParm1=[
+                operation=VARIABLE, varName=name, varNr=0
+              ], fnParm2=[
+                operation=STRING, string= was '
+              ]
+            ], fnParm2=[
+              operation=VARIABLE, varName=was, varNr=2
+            ]
+          ], fnParm2=[
+            operation=STRING, string=' should '
+          ]
+        ], fnParm2=[
+          operation=VARIABLE, varName=should, varNr=1
+        ]
+      ], fnParm2=[
+        operation=STRING, string=
+          '
+      ]
+    ]
+  ]
+]

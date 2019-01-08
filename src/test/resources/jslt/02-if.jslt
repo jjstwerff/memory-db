@@ -1,0 +1,18 @@
+import testing as t
+
+def double( elm if elm.length() == 2 ): elm
+
+t.assert("empty", null, double("")) +
+t.assert("string", "12", double("12")) +
+t.assert("long_string", null, double("123")) +
+
+t.assert("short_array", null, double([true])) +
+t.assert("array", [1,true], double([1, true])) +
+t.assert("long_array", null, double([1, true, null])) +
+
+t.assert("short_object", null, double({a:1})) +
+t.assert("object", {a:1,b:null}, double({a:1,b:null})) +
+t.assert("long_object", null, double({a:1,b:null,c:null})) +
+
+t.assert("number", null, double(2)) +
+t.assert("boolean", null, double(true))

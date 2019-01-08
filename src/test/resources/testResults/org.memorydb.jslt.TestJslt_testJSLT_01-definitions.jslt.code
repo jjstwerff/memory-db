@@ -141,19 +141,36 @@ name=t.assert, alternatives=[
     ]
   ], code=[
     operation=CONDITION, conExpr=[
-      operation=FUNCTION, function=NE, fnParm1=[
+      operation=FUNCTION, function=EQ, fnParm1=[
         operation=VARIABLE, varName=should, varNr=1
       ], fnParm2=[
         operation=VARIABLE, varName=was, varNr=2
       ]
     ], conTrue=[
-      operation=FUNCTION, function=ADD, fnParm1=[
-        operation=VARIABLE, varName=name, varNr=0
-      ], fnParm2=[
-        operation=STRING, string= 
-      ]
-    ], conFalse=[
       operation=STRING, string=
+    ], conFalse=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=FUNCTION, function=ADD, fnParm1=[
+              operation=FUNCTION, function=ADD, fnParm1=[
+                operation=VARIABLE, varName=name, varNr=0
+              ], fnParm2=[
+                operation=STRING, string= was '
+              ]
+            ], fnParm2=[
+              operation=VARIABLE, varName=was, varNr=2
+            ]
+          ], fnParm2=[
+            operation=STRING, string=' should '
+          ]
+        ], fnParm2=[
+          operation=VARIABLE, varName=should, varNr=1
+        ]
+      ], fnParm2=[
+        operation=STRING, string=
+          '
+      ]
     ]
   ]
 ]

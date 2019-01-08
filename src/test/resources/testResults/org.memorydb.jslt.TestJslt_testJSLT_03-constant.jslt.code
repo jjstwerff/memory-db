@@ -1,0 +1,94 @@
+name=const, alternatives=[
+  nr=0, parameters=[
+    type=NUMBER, number=2
+  ], code=[
+    operation=NUMBER, number=3
+  ]
+  nr=1, parameters=[
+    type=VARIABLE, variable=[
+      name=elm, nr=0, eager=false, extension=false, type=NULL
+    ]
+  ], code=[
+    operation=VARIABLE, varName=elm, varNr=0
+  ]
+]
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=CALL, macro={Name=t.assert}, callParms=[
+          operation=STRING, string=other
+          operation=STRING, string=
+          operation=CALL, macro={Name=const}, callParms=[
+            operation=STRING, string=
+          ]
+        ]
+      ], fnParm2=[
+        operation=CALL, macro={Name=t.assert}, callParms=[
+          operation=STRING, string=hit
+          operation=NUMBER, number=3
+          operation=CALL, macro={Name=const}, callParms=[
+            operation=NUMBER, number=2
+          ]
+        ]
+      ]
+    ], fnParm2=[
+      operation=CALL, macro={Name=t.assert}, callParms=[
+        operation=STRING, string=number
+        operation=NUMBER, number=3
+        operation=CALL, macro={Name=const}, callParms=[
+          operation=NUMBER, number=3
+        ]
+      ]
+    ]
+  ]
+]
+name=slice, alternatives=[
+]
+name=t.assert, alternatives=[
+  nr=0, parameters=[
+    type=VARIABLE, variable=[
+      name=name, nr=0, eager=false, extension=false, type=STRING
+    ]
+    type=VARIABLE, variable=[
+      name=should, nr=0, eager=false, extension=false, type=NULL
+    ]
+    type=VARIABLE, variable=[
+      name=was, nr=0, eager=false, extension=false, type=NULL
+    ]
+  ], code=[
+    operation=CONDITION, conExpr=[
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=VARIABLE, varName=should, varNr=1
+      ], fnParm2=[
+        operation=VARIABLE, varName=was, varNr=2
+      ]
+    ], conTrue=[
+      operation=STRING, string=
+    ], conFalse=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=FUNCTION, function=ADD, fnParm1=[
+              operation=FUNCTION, function=ADD, fnParm1=[
+                operation=VARIABLE, varName=name, varNr=0
+              ], fnParm2=[
+                operation=STRING, string= was '
+              ]
+            ], fnParm2=[
+              operation=VARIABLE, varName=was, varNr=2
+            ]
+          ], fnParm2=[
+            operation=STRING, string=' should '
+          ]
+        ], fnParm2=[
+          operation=VARIABLE, varName=should, varNr=1
+        ]
+      ], fnParm2=[
+        operation=STRING, string=
+          '
+      ]
+    ]
+  ]
+]

@@ -1,0 +1,8 @@
+import testing as t
+
+def const( 2 ): 3
+def const( elm ): elm
+
+t.assert("other", "", const("")) +
+t.assert("hit", 3, const( 2 )) +
+t.assert("number", 3, const( 3 ))
