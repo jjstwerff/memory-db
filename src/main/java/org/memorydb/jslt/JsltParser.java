@@ -1022,15 +1022,7 @@ public class JsltParser {
 					State state = scanner.getState();
 					if (scanner.getChar() == '{') {
 						append = true;
-						AppendArray add = arr.add();
-						add.setOperation(Operation.STRING);
-						add.setString(bld.toString());
-						bld.setLength(0);
-						remember();
-						spot = arr.add();
-						parseExpr();
-						restore();
-						scanner.expect("}");
+						parseFormat(bld, arr);
 						ch = scanner.getChar();
 					} else {
 						bld.append(ch);
@@ -1079,6 +1071,114 @@ public class JsltParser {
 			} else {
 				spot.setOperation(Operation.STRING);
 				spot.setString(bld.toString());
+			}
+		}
+
+		private void parseFormat(StringBuilder bld, AppendArray arr) {
+			AppendArray add = arr.add();
+			add.setOperation(Operation.STRING);
+			add.setString(bld.toString());
+			bld.setLength(0);
+			remember();
+			spot = arr.add();
+			parseExpr();
+			if (scanner.matches(":")) {
+				try (ChangeExpr temp = new ChangeExpr(store)) {
+					move(temp, spot);
+					spot.setOperation(Operation.FUNCTION);
+					spot.setFunction(Function.LAYOUT);
+					spot.setFnParm2(temp);
+				}
+				try (ChangeExpr data = new ChangeExpr(store)) {
+					data.setOperation(Operation.OBJECT);
+					data.setType(ResultType.Type.OBJECT);
+					ObjectArray obj = data.getObject();
+					if (scanner.matches("<"))
+						setObject(obj, "align", "L"); // left
+					else if (scanner.matches(">"))
+						setObject(obj, "align", "R"); // right
+					else if (scanner.matches("^"))
+						setObject(obj, "align", "C"); // center
+					if (scanner.matches("..."))
+						setObject(obj, "align", "T"); // tail
+					if (scanner.matches("+"))
+						setObject(obj, "sign", "+");
+					else if (scanner.matches("-"))
+						setObject(obj, "sign", "-");
+					if (scanner.matches("#"))
+						setObject(obj, "alternative", true);
+					if (scanner.matches("0"))
+						setObject(obj, "leadingZero", true);
+					if (scanner.hasNumber())
+						setObject(obj, "width", scanner.parseSimpleNumber());
+					else if (scanner.matches("{")) {
+						ObjectArray fld = obj.add();
+						setName(fld, "width");
+						remember();
+						spot = fld;
+						parseExpr();
+						restore();
+						scanner.expect("}");
+					}
+					if (scanner.matches(","))
+						setObject(obj, "separator", ",");
+					else if (scanner.matches("_"))
+						setObject(obj, "separator", "_");
+					if (scanner.matches("..."))
+						setObject(obj, "align", "H"); // head
+					if (scanner.matches(".")) {
+						if (scanner.hasNumber())
+							setObject(obj, "precision", scanner.parseSimpleNumber());
+						else if (scanner.matches("{")) {
+							ObjectArray fld = obj.add();
+							setName(fld, "precision");
+							remember();
+							spot = fld;
+							parseExpr();
+							restore();
+							scanner.expect("}");
+						}
+					}
+					if (scanner.peek("b") || scanner.peek("c") || scanner.peek("e") || scanner.peek("E")
+							|| scanner.peek("f") || scanner.peek("F") || scanner.peek("g") || scanner.peek("G")
+							|| scanner.peek("o") || scanner.peek("x") || scanner.peek("X")) {
+						setObject(obj, "type", scanner.getChar());
+					}
+					spot.setFnParm1(data);
+				}
+			}
+			restore();
+			scanner.expect("}");
+		}
+
+		private void setObject(ObjectArray obj, String name, Object value) {
+			ObjectArray fld = obj.add();
+			setName(fld, name);
+			try (ChangeExpr expr = new ChangeExpr(store)) {
+				if (value instanceof Boolean) {
+					fld.setOperation(Operation.BOOLEAN);
+					fld.setBoolean((Boolean) value);
+				} else if (value instanceof String) {
+					fld.setOperation(Operation.STRING);
+					fld.setString((String) value);
+				} else if (value instanceof Character) {
+					fld.setOperation(Operation.STRING);
+					fld.setString("" + value);
+				} else if (value instanceof Long) {
+					fld.setOperation(Operation.NUMBER);
+					fld.setNumber((Long) value);
+				} else if (value instanceof Integer) {
+					fld.setOperation(Operation.NUMBER);
+					fld.setNumber((Integer) value);
+				}
+			}
+		}
+
+		private void setName(ObjectArray fld, String name) {
+			try (ChangeExpr expr = new ChangeExpr(store)) {
+				expr.setOperation(Operation.STRING);
+				expr.setString(name);
+				fld.setName(expr);
 			}
 		}
 

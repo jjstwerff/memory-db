@@ -1,5 +1,8 @@
 package org.memorydb.jslt;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -674,10 +677,182 @@ public class JsltInterpreter {
 			return null;
 		case STRING:
 			return getString(p1);
+		case LAYOUT:
+			return format((RecordInterface) p1, p2);
 		default:
 			break;
 		}
 		return null;
+	}
+
+	private String format(RecordInterface layout, Object obj) {
+		if (obj instanceof Long || obj instanceof Double)
+			return formatNumber(layout, obj);
+		int width = -1;
+		String align = "L";
+		for (int fld = layout.next(-1); layout.type(fld) != null; fld = layout.next(fld)) {
+			switch (layout.name(fld)) {
+			case "width":
+				Object w = layout.get(fld);
+				if (w instanceof Operator)
+					width = ((Long) inter((Operator) w)).intValue();
+				else
+					width = ((Long) w).intValue();
+				break;
+			case "align":
+				align = (String) layout.get(fld);
+				break;
+			}
+		}
+		String res = getString(obj);
+		if (align.equals("H")) {
+			if (res.length() > width)
+				return res.substring(0, width - 3) + "...";
+			return res;
+		} else if (align.equals("T")) {
+			if (res.length() > width)
+				return "..." + res.substring(res.length() - width + 3, res.length());
+			return res;
+		}
+		if (width < 0 || width <= res.length())
+			return res;
+		int l = width - res.length();
+		switch (align) {
+		case "L":
+			return res + multi(l, " ");
+		case "R":
+			return multi(l, " ") + res;
+		case "C":
+			int part = l / 2;
+			return multi(part, " ") + res + multi(l - part, " ");
+		}
+		return null;
+	}
+
+	private String formatNumber(RecordInterface layout, Object obj) {
+		int width = -1;
+		int precision = -1;
+		@SuppressWarnings("unused")
+		String align = "R";
+		String type = "g";
+		String separator = null;
+		boolean alternative = false;
+		boolean leadingZero = false;
+		for (int fld = layout.next(-1); layout.type(fld) != null; fld = layout.next(fld)) {
+			switch (layout.name(fld)) {
+			case "width":
+				Object w = layout.get(fld);
+				if (w instanceof Operator)
+					width = ((Long) inter((Operator) w)).intValue();
+				else
+					width = ((Long) w).intValue();
+				break;
+			case "precision":
+				Object p = layout.get(fld);
+				if (p instanceof Operator)
+					precision = ((Long) inter((Operator) p)).intValue();
+				else
+					precision = ((Long) p).intValue();
+				break;
+			case "align":
+				align = (String) layout.get(fld);
+				break;
+			case "type":
+				type = (String) layout.get(fld);
+				break;
+			case "separator":
+				separator = (String) layout.get(fld);
+				break;
+			case "leadingZero":
+				leadingZero = true;
+				break;
+			case "alternative":
+				alternative = true;
+				break;
+			}
+		}
+		switch (type) {
+		case "b": {
+			String res = Long.toBinaryString(getNumber(obj));
+			if (width > res.length())
+				res = multi(width - res.length(), leadingZero ? "0" : " ") + res;
+			if (separator != null)
+				return (alternative ? "0b" : "") + separate(separator, res, 4);
+			return (alternative ? "0b" : "") + res;
+		}
+		case "x": {
+			String res = Long.toHexString(getNumber(obj));
+			if (width > res.length())
+				res = multi(width - res.length(), leadingZero ? "0" : " ") + res;
+			if (separator != null)
+				return (alternative ? "0x" : "") + separate(separator, res, 4);
+			return (alternative ? "0x" : "") + res;
+		}
+		case "o": {
+			String res = Long.toOctalString(getNumber(obj));
+			if (width > res.length())
+				res = multi(width - res.length(), leadingZero ? "0" : " ") + res;
+			if (separator != null)
+				return (alternative ? "0o" : "") + separate(separator, res, 3);
+			return (alternative ? "0o" : "") + res;
+		}
+		}
+		DecimalFormat formatter = null;;
+		if (type.equals("e"))
+			formatter = (DecimalFormat) new DecimalFormat("0.#E0");
+		else if (type.equals("g")) {
+			if (obj instanceof Double) {
+				int exp = Math.getExponent((Double) obj);
+				if (exp < -6 || exp > 6)
+					formatter = (DecimalFormat) new DecimalFormat("0.#E0");
+			}
+		}
+		if (formatter == null)
+			formatter = (DecimalFormat) NumberFormat.getInstance();
+		DecimalFormatSymbols symbols = formatter.getDecimalFormatSymbols();
+		symbols.setGroupingSeparator(',');
+		symbols.setDecimalSeparator('.');
+		symbols.setExponentSeparator("e");
+		if (separator != null)
+			symbols.setGroupingSeparator(separator.charAt(0));
+		formatter.setDecimalFormatSymbols(symbols);
+		if (obj instanceof Double) {
+			formatter.setDecimalSeparatorAlwaysShown(true);
+			formatter.setMinimumFractionDigits(1);
+		}
+		formatter.setMaximumFractionDigits(9);
+		if (precision > 0) {
+			formatter.setMaximumFractionDigits(precision);
+			formatter.setMinimumFractionDigits(precision);
+		}
+		if (width > 0)
+			formatter.setMinimumIntegerDigits(width);
+		if (separator == null)
+			formatter.setGroupingSize(0);
+		else
+			formatter.setGroupingSize(3);
+		if (obj instanceof Long)
+			return formatter.format((Long) obj);
+		return formatter.format((Double) obj);
+	}
+
+	private String separate(String separator, String res, int spaces) {
+		StringBuilder r = new StringBuilder();
+		int i = res.length() % spaces;
+		int l = 0;
+		if (i == 0)
+			i += 4;
+		for (; i < res.length(); i += spaces) {
+			r.append(res.substring(l, i));
+			r.append(separator);
+			l = i;
+		}
+		r.append(res.substring(l, res.length()));
+		return r.toString();
+	}
+
+	private static String multi(int pos, String token) {
+		return new String(new char[pos]).replace("\0", token);
 	}
 
 	private static long powLong(long number, long power) {
@@ -695,6 +870,8 @@ public class JsltInterpreter {
 	long getNumber(Object val) {
 		if (val instanceof Long)
 			return (Long) val;
+		if (val instanceof Double)
+			return Math.round((Double) val);
 		if (val instanceof String) {
 			try {
 				return Long.parseLong((String) val);

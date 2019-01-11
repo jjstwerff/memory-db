@@ -90,7 +90,7 @@ public interface Operator extends ResultType {
 	}
 
 	public enum Function {
-		NEG, ADD, MIN, MUL, DIV, MOD, POW, EQ, NE, LT, GT, LE, GE, AND, OR, NOT, FIRST, LAST, INDEX, LENGTH, NUMBER, FLOAT, STRING, BOOLEAN, NAME, TYPE, ELEMENT, PER, FOR, EACH;
+		NEG, ADD, MIN, MUL, DIV, MOD, POW, EQ, NE, LT, GT, LE, GE, AND, OR, NOT, FIRST, LAST, INDEX, LENGTH, NUMBER, FLOAT, STRING, BOOLEAN, NAME, TYPE, ELEMENT, PER, FOR, EACH, LAYOUT;
 
 		private static Map<String, Function> map = new HashMap<>();
 
@@ -108,12 +108,12 @@ public interface Operator extends ResultType {
 	@FieldData(
 		name = "function",
 		type = "ENUMERATE",
-		enumerate = {"NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT", "LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT", "PER", "FOR", "EACH"},
+		enumerate = {"NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT", "LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT", "PER", "FOR", "EACH", "LAYOUT"},
 		when = "FUNCTION",
 		mandatory = true
 	)
 	default Function getFunction() {
-		int data = getOperation() != Operation.FUNCTION ? 0 : getStore().getByte(getRec(), operatorPosition() + 1) & 63;
+		int data = getOperation() != Operation.FUNCTION ? 0 : getStore().getByte(getRec(), operatorPosition() + 1) & 127;
 		if (data <= 0)
 			return null;
 		return Function.values()[data - 1];

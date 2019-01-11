@@ -1,0 +1,50 @@
+Test:
+'&{0x1234F:06_x}+&{123:#03x}'
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=APPEND, append=[
+      operation=STRING, string=
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=leadingZero
+          ], operation=BOOLEAN, boolean=true
+          name=[
+            operation=STRING, string=width
+          ], operation=NUMBER, number=6
+          name=[
+            operation=STRING, string=separator
+          ], operation=STRING, string=_
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=x
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=74575
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=alternative
+          ], operation=BOOLEAN, boolean=true
+          name=[
+            operation=STRING, string=leadingZero
+          ], operation=BOOLEAN, boolean=true
+          name=[
+            operation=STRING, string=width
+          ], operation=NUMBER, number=3
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=x
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=123
+      ]
+      operation=STRING, string=
+    ]
+  ]
+]

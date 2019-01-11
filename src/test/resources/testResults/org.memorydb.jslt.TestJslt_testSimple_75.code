@@ -1,0 +1,87 @@
+Test:
+'&{'a':>2}+&{'b':2}+&{'c':^4}+&{'d':^5}+&{'1234567890':5...}+&{'1234567890':...5}'
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=APPEND, append=[
+      operation=STRING, string=
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=align
+          ], operation=STRING, string=R
+          name=[
+            operation=STRING, string=width
+          ], operation=NUMBER, number=2
+        ]
+      ], fnParm2=[
+        operation=STRING, string=a
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=width
+          ], operation=NUMBER, number=2
+        ]
+      ], fnParm2=[
+        operation=STRING, string=b
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=align
+          ], operation=STRING, string=C
+          name=[
+            operation=STRING, string=width
+          ], operation=NUMBER, number=4
+        ]
+      ], fnParm2=[
+        operation=STRING, string=c
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=align
+          ], operation=STRING, string=C
+          name=[
+            operation=STRING, string=width
+          ], operation=NUMBER, number=5
+        ]
+      ], fnParm2=[
+        operation=STRING, string=d
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=width
+          ], operation=NUMBER, number=5
+          name=[
+            operation=STRING, string=align
+          ], operation=STRING, string=H
+        ]
+      ], fnParm2=[
+        operation=STRING, string=1234567890
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=align
+          ], operation=STRING, string=T
+          name=[
+            operation=STRING, string=width
+          ], operation=NUMBER, number=5
+        ]
+      ], fnParm2=[
+        operation=STRING, string=1234567890
+      ]
+      operation=STRING, string=
+    ]
+  ]
+]

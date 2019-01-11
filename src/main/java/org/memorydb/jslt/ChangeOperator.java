@@ -21,7 +21,7 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 			getStore().setByte(getRec(), operatorPosition() + 0, (getStore().getByte(getRec(), operatorPosition() + 0) & 192) + 1 + value.ordinal());
 			switch (value) {
 			case FUNCTION:
-				getStore().setByte(getRec(), operatorPosition() + 1, (getStore().getByte(getRec(), operatorPosition() + 1) & 192) + 1 + Function.NEG.ordinal());
+				getStore().setByte(getRec(), operatorPosition() + 1, (getStore().getByte(getRec(), operatorPosition() + 1) & 128) + 1 + Function.NEG.ordinal());
 				getStore().setInt(getRec(), operatorPosition() + 2, 0);
 				getStore().setInt(getRec(), operatorPosition() + 6, 0);
 				break;
@@ -87,7 +87,7 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 		if (value == null)
 			throw new MutationException("Mandatory 'function' field");
 		if (getOperation() == Operation.FUNCTION) {
-			getStore().setByte(getRec(), operatorPosition() + 1, (getStore().getByte(getRec(), operatorPosition() + 1) & 192) + 1 + value.ordinal());
+			getStore().setByte(getRec(), operatorPosition() + 1, (getStore().getByte(getRec(), operatorPosition() + 1) & 128) + 1 + value.ordinal());
 		}
 	}
 

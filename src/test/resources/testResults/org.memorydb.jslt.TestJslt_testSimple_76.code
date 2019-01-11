@@ -1,0 +1,109 @@
+Test:
+'&{123:b}+&{12:5b}+&{5:05b}+&{123:_b}+&{12:_b}+&{255.3:,b}+&{1:05_b}'
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=APPEND, append=[
+      operation=STRING, string=
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=b
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=123
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=width
+          ], operation=NUMBER, number=5
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=b
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=12
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=leadingZero
+          ], operation=BOOLEAN, boolean=true
+          name=[
+            operation=STRING, string=width
+          ], operation=NUMBER, number=5
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=b
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=5
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=separator
+          ], operation=STRING, string=_
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=b
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=123
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=separator
+          ], operation=STRING, string=_
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=b
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=12
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=separator
+          ], operation=STRING, string=\,
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=b
+        ]
+      ], fnParm2=[
+        operation=FLOAT, float=255.3
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=leadingZero
+          ], operation=BOOLEAN, boolean=true
+          name=[
+            operation=STRING, string=width
+          ], operation=NUMBER, number=5
+          name=[
+            operation=STRING, string=separator
+          ], operation=STRING, string=_
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=b
+        ]
+      ], fnParm2=[
+        operation=NUMBER, number=1
+      ]
+      operation=STRING, string=
+    ]
+  ]
+]

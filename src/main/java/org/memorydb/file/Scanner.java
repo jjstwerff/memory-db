@@ -289,6 +289,19 @@ public class Scanner implements AutoCloseable {
 		return parseLong(10);
 	}
 
+	public int parseSimpleNumber() {
+		int result = 0;
+		int last = pos;
+		char ch = getChar();
+		while ((ch >= '0' && ch <= '9')) {
+			result = result * 10 + Character.digit(ch, 10);
+			last = pos;
+			ch = getChar();
+		}
+		pos = last;
+		return result;
+	}
+
 	public long parseLong(int radix) {
 		long result = 0;
 		boolean negative = false;
@@ -308,7 +321,8 @@ public class Scanner implements AutoCloseable {
 				error("Number formating error");
 		}
 		multmin = limit / radix;
-		while ((ch >= '0' && ch <= '9') || ch == '_') {
+		while (ch >= '0' && ch <= '9' || ch == '_'
+				|| radix == 16 && (ch >= 'a' && ch <= 'f' || ch >= 'A' && ch <= 'F')) {
 			// Accumulating negatively avoids surprises near MAX_VALUE
 			digit = Character.digit(ch, radix);
 			if (digit < 0 || result < multmin)

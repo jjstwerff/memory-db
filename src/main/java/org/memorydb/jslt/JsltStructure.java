@@ -44,7 +44,7 @@ public class JsltStructure {
 				"VARIABLE").condition();
 		oper.field("function", Type.ENUMERATE, "NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT",
 				"LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING",
-				"BOOLEAN", "NAME", "TYPE", "ELEMENT", "PER", "FOR", "EACH").mandatory().when("FUNCTION");
+				"BOOLEAN", "NAME", "TYPE", "ELEMENT", "PER", "FOR", "EACH", "LAYOUT").mandatory().when("FUNCTION");
 		oper.field("fnParm1", Type.OBJECT, expr).when("FUNCTION");
 		oper.field("fnParm2", Type.OBJECT, expr).when("FUNCTION");
 		oper.field("conExpr", Type.OBJECT, expr).when("CONDITION");

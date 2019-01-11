@@ -1,0 +1,77 @@
+Test:
+'&{1234.56:e}+&{0.000000123456:g}+&{2.0/3:.6f}+&{2.0/3:{1+1}.{2*3}f}'
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=APPEND, append=[
+      operation=STRING, string=
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=e
+        ]
+      ], fnParm2=[
+        operation=FLOAT, float=1234.56
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=g
+        ]
+      ], fnParm2=[
+        operation=FLOAT, float=1.23456E-7
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=precision
+          ], operation=NUMBER, number=6
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=f
+        ]
+      ], fnParm2=[
+        operation=FUNCTION, function=DIV, fnParm1=[
+          operation=FLOAT, float=2.0
+        ], fnParm2=[
+          operation=NUMBER, number=3
+        ]
+      ]
+      operation=STRING, string=+
+      operation=FUNCTION, function=LAYOUT, fnParm1=[
+        operation=OBJECT, object=[
+          name=[
+            operation=STRING, string=width
+          ], operation=FUNCTION, function=ADD, fnParm1=[
+            operation=NUMBER, number=1
+          ], fnParm2=[
+            operation=NUMBER, number=1
+          ]
+          name=[
+            operation=STRING, string=precision
+          ], operation=FUNCTION, function=MUL, fnParm1=[
+            operation=NUMBER, number=2
+          ], fnParm2=[
+            operation=NUMBER, number=3
+          ]
+          name=[
+            operation=STRING, string=type
+          ], operation=STRING, string=f
+        ]
+      ], fnParm2=[
+        operation=FUNCTION, function=DIV, fnParm1=[
+          operation=FLOAT, float=2.0
+        ], fnParm2=[
+          operation=NUMBER, number=3
+        ]
+      ]
+      operation=STRING, string=
+    ]
+  ]
+]
