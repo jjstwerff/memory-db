@@ -148,13 +148,13 @@ public class TestJslt extends MemoryTests {
 		for (Path file : files) {
 			Store jsltStore = new Store(3);
 			new Parser(new Scanner(file), jsltStore).parse();
-			String into = JsltInterpreter.interpret(jsltStore, null);
 			String result = file.getFileName().toString();
 			StringBuilder code = new StringBuilder();
 			if (!result.equals(""))
 				for (Macro m : new Macro(jsltStore).new IndexMacros())
 					code.append(m.toString());
 			compare(result + ".code", code.toString());
+			String into = JsltInterpreter.interpret(jsltStore, null);
 			Assert.assertEquals(result, "\"\"", into);
 		}
 	}

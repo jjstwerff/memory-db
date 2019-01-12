@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.memorydb.file.Scanner;
 import org.memorydb.file.Scanner.State;
@@ -30,6 +34,23 @@ public class JsltParser {
 		}
 	}
 
+	static class Parm {
+		final String name;
+		final int position;
+		final Variable var;
+
+		Parm(Variable var, int position) {
+			this.name = var.getName();
+			this.position = position;
+			this.var = var;
+		}
+
+		@Override
+		public String toString() {
+			return var.getType() + ":" + position;
+		}
+	}
+
 	static class Parser {
 		private List<ChangeOperator> stack = new ArrayList<>();
 		private Scanner scanner;
@@ -37,6 +58,7 @@ public class JsltParser {
 		private ChangeOperator spot;
 		private ChangeMatch match;
 		private Macro slice;
+		private Map<String, Parm> parms = new TreeMap<>();
 		Alternative curAlt;
 
 		public Parser(Scanner scanner, Store jsltStore) {
@@ -93,6 +115,7 @@ public class JsltParser {
 					}
 				}
 			}
+			parms.clear();
 			scanner.expect("(");
 			if (!scanner.matches(")")) {
 				parseParameter();
@@ -157,9 +180,30 @@ public class JsltParser {
 		}
 
 		private void parseMatch() {
+			State state = scanner.getState();
+			int v = parms.size();
 			parseMPart();
-			while (scanner.matches("+"))
-				parseMPart();
+			if (scanner.matches("+")) {
+				for (Iterator<Entry<String, Parm>> iterator = parms.entrySet().iterator(); iterator.hasNext();)
+					if (iterator.next().getValue().position >= v)
+						iterator.remove();
+				scanner.setState(state);
+				match.setType(Type.ARRAY);
+				try (ChangeMatch addM = match.addMarray()) {
+					ChangeMatch m = match;
+					match = addM;
+					parseMPart();
+					match = m;
+				}
+				while (scanner.matches("+")) {
+					try (ChangeMatch addM = match.addMarray()) {
+						ChangeMatch m = match;
+						match = addM;
+						parseMPart();
+						match = m;
+					}
+				}
+			}
 		}
 
 		private void parseMPart() {
@@ -218,6 +262,7 @@ public class JsltParser {
 						var.setName(scanner.parseIdentifier());
 					}
 					match.setVariable(var);
+					parms.put(var.getName(), new Parm(var, parms.size()));
 				}
 			} else
 				scanner.error("Syntax error");
@@ -804,26 +849,15 @@ public class JsltParser {
 			while (scanner.peek("\n"))
 				scanner.newLine();
 			String id = scanner.parseIdentifier();
-			int varNr = -1;
-			if (curAlt != null) {
-				int nr = -1;
-				for (ParametersArray par : curAlt.getParameters()) {
-					if (par.getType() != Type.VARIABLE)
-						continue;
-					nr++;
-					if (par.getVariable().getName().equals(id)) {
-						varNr = nr;
-						break;
-					}
-				}
-			}
 			if (id.equals("each") && scanner.matches("(")) {
 				parseForEach();
 				return;
 			}
-			if (varNr > -1) {
+			int varNr = -1;
+			if (curAlt != null && parms.containsKey(id)) {
 				spot.setOperation(Operation.VARIABLE);
 				spot.setVarName(id);
+				varNr = parms.get(id).position;
 				spot.setVarNr(varNr);
 				id = null;
 			}
