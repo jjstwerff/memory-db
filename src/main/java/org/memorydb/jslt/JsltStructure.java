@@ -84,8 +84,6 @@ public class JsltStructure {
 		Record variable = project.table("Variable");
 		variable.field("name", Type.STRING).mandatory();
 		variable.field("nr", Type.INTEGER).mandatory();
-		variable.field("eager", Type.BOOLEAN);
-		variable.field("extension", Type.BOOLEAN);
 		variable.include(type);
 
 		Record subMatch = project.record("SubMatch");
@@ -93,7 +91,7 @@ public class JsltStructure {
 
 		Record match = project.content("Match");
 		match.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "NULL", "VARIABLE", "FLOAT", "NUMBER", "STRING",
-				"OBJECT").condition();
+				"OBJECT", "MACRO").condition();
 		match.field("marray", Type.ARRAY, subMatch).when("ARRAY");
 		match.field("variable", Type.OBJECT, variable).when("VARIABLE");
 		match.field("boolean", Type.BOOLEAN).when("BOOLEAN");
@@ -101,6 +99,10 @@ public class JsltStructure {
 		match.field("number", Type.LONG).when("NUMBER");
 		match.field("string", Type.STRING).when("STRING");
 		match.field("mobject", Type.ARRAY, mfield).when("OBJECT");
+		match.field("ovar", Type.OBJECT, variable).when("OBJECT");
+		match.field("macro", Type.RELATION, macro).when("MACRO");
+		match.field("callParms", Type.ARRAY, step).when("MACRO");
+		match.field("mvar", Type.OBJECT, variable).when("MACRO");
 
 		mfield.field("name", Type.STRING);
 		mfield.include(match);

@@ -132,83 +132,87 @@ public class JsltInterpreter {
 				continue;
 			int pnr = 0;
 			boolean found = true;
+			int newFrame = stack.size();
+			int lastFrame = stackFrame;
+			stackFrame = newFrame;
 			for (ParametersArray parm : alt.getParameters()) {
 				Object obj = stack.get(stackF + pnr);
-				switch (parm.getType()) {
-				case BOOLEAN:
-					if (!(obj instanceof Boolean) || (Boolean) obj != parm.isBoolean())
-						found = false;
-					break;
-				case FLOAT:
-					if (!(obj instanceof Double) || (Double) obj != parm.getFloat())
-						found = false;
-					break;
-				case NULL:
-					if (obj != null)
-						found = false;
-					break;
-				case NUMBER:
-					if (!(obj instanceof Long) || (Long) obj != parm.getNumber())
-						found = false;
-					break;
-				case OBJECT:
-					if (!(obj instanceof RecordInterface) || ((RecordInterface) obj).type() != FieldType.OBJECT)
-						found = false;
-					break;
-				case ARRAY:
-					if (!(obj instanceof RecordInterface) || ((RecordInterface) obj).type() != FieldType.ARRAY)
-						found = false;
-					break;
-				case STRING:
-					if (!(obj instanceof String) || !parm.getString().equals(obj))
-						found = false;
-					break;
-				case VARIABLE:
-					if (!matches(obj, parm.getVariable().getType()))
-						found = false;
-					break;
-				default:
-					break;
-				}
+				found = testParm(parm, obj);
 				Expr ifExpr = parm.getIf();
 				if (ifExpr.getRec() != 0) {
-					int lastFrame = stackFrame;
-					int empty = stack.size();
-					stackFrame = stack.size();
-					int pNr = 0;
-					for (ParametersArray p : alt.getParameters()) {
-						if (p.getType() == Match.Type.VARIABLE)
-							stack.add(stack.get(stackF + pNr));
-						pNr++;
-					}
 					Object ifResult = inter(ifExpr);
 					if (ifResult instanceof Boolean && (Boolean) ifResult == false)
 						found = false;
-					while (stack.size() > empty)
-						stack.remove(stack.size() - 1);
-					stackFrame = lastFrame;
 				}
 				pnr++;
+				if (!found)
+					break;
 			}
 			if (found) {
-				pnr = 0;
-				int lastFrame = stackFrame;
-				stackFrame = stack.size();
-				for (ParametersArray parm : alt.getParameters()) {
-					if (parm.getType() == Match.Type.VARIABLE)
-						stack.add(stack.get(stackF + pnr));
-					pnr++;
-				}
 				Object res = inter(alt.getCode().iterator().next());
+				stackFrame = lastFrame;
 				while (stack.size() > stackF)
 					stack.remove(stack.size() - 1);
-				stackFrame = lastFrame;
 				return res;
 			}
+			while (stack.size() > newFrame)
+				stack.remove(stack.size() - 1);
+			stackFrame = newFrame;
 		}
 		while (stack.size() > stackF)
 			stack.remove(stack.size() - 1);
 		return null;
+	}
+
+	private boolean testParm(ChangeMatch parm, Object obj) {
+		switch (parm.getType()) {
+		case BOOLEAN:
+			if (!(obj instanceof Boolean) || (Boolean) obj != parm.isBoolean())
+				return false;
+			break;
+		case FLOAT:
+			if (!(obj instanceof Double) || (Double) obj != parm.getFloat())
+				return false;
+			break;
+		case NULL:
+			if (obj != null)
+				return false;
+			break;
+		case NUMBER:
+			if (!(obj instanceof Long) || (Long) obj != parm.getNumber())
+				return false;
+			break;
+		case OBJECT:
+			if (!(obj instanceof RecordInterface) || ((RecordInterface) obj).type() != FieldType.OBJECT)
+				return false;
+			break;
+		case ARRAY:
+			if (!(obj instanceof RecordInterface) || ((RecordInterface) obj).type() != FieldType.ARRAY)
+				return false;
+			RecordInterface arr = (RecordInterface) obj;
+			int aElm = arr.next(-1); 
+			for (MarrayArray elm : parm.getMarray()) {
+				// if last array element = potential all remaining elements (when no constant)
+				//   new Object with specific start element and reduced size
+				// potential match other macro to match elements (then not everything needs matching)
+				testParm(elm, arr.get(aElm));
+				aElm = arr.next(aElm);
+			}
+			// not found when more elements are found after a constant (unless inside other match)
+			break;
+		case STRING:
+			if (!(obj instanceof String) || !parm.getString().equals(obj))
+				return false;
+			break;
+		case VARIABLE:
+			if (!matches(obj, parm.getVariable().getType()))
+				return false;
+			stack.add(obj);
+			break;
+		default:
+			break;
+		}
+		return true;
 	}
 
 	private boolean matches(Object obj, Type type) {
@@ -797,7 +801,7 @@ public class JsltInterpreter {
 			return (alternative ? "0o" : "") + res;
 		}
 		}
-		DecimalFormat formatter = null;;
+		DecimalFormat formatter = null;
 		if (type.equals("e"))
 			formatter = (DecimalFormat) new DecimalFormat("0.#E0");
 		else if (type.equals("g")) {

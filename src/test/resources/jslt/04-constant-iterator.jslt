@@ -6,15 +6,15 @@ def second( 2 + a ): a
 def strsec( "2" + a ): a
 
 t.assert("match", 1, numb([ 1, 2 ] )) +
-t.assert("two", [1, true], numb([ 1, true, 2 ] )) +
-t.assert("double", [1, 2], numb([ 1, 2, 2 ] )) +
+t.assert("two", null, numb([ 1, true, 2 ] )) +
 t.assert("remaining", null, numb([ 1, 2, 3 ] )) +
 t.assert("other", null, numb( 2 )) +
 t.assert("string", "a", str( "a2" )) +
-t.assert("two tokens", "ab", str( "ab2" )) +
-t.assert("double tokens", "a2", str( "a22" )) +
+t.assert("two tokens", null, str( "ab2" )) +
+t.assert("double tokens", null, str( "a22" )) +
 t.assert("not full string", null, str( "a2a" )) +
 t.assert("second", [1, 2], second([ 2, 1, 2])) +
 t.assert("strsec", [1, 2], strsec([ "2", 1, 2])) +
 t.assert("exact str", "", strsec("2")) +
+t.assert("exact str", "abc", strsec("2abc")) +
 t.assert("exact array", [], strsec( ["2"]))

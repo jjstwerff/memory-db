@@ -10,6 +10,11 @@ public class StringArray implements RecordInterface {
 	}
 
 	@Override
+	public FieldType type() {
+		return FieldType.ARRAY;
+	}
+
+	@Override
 	public String name(int field) {
 		return null;
 	}

@@ -26,10 +26,7 @@ name=main, alternatives=[
                           ], fnParm2=[
                             operation=CALL, macro={Name=t.assert}, callParms=[
                               operation=STRING, string=two
-                              operation=ARRAY, array=[
-                                operation=NUMBER, number=1
-                                operation=BOOLEAN, boolean=true
-                              ]
+                              operation=NULL
                               operation=CALL, macro={Name=numb}, callParms=[
                                 operation=ARRAY, array=[
                                   operation=NUMBER, number=1
@@ -41,88 +38,88 @@ name=main, alternatives=[
                           ]
                         ], fnParm2=[
                           operation=CALL, macro={Name=t.assert}, callParms=[
-                            operation=STRING, string=double
-                            operation=ARRAY, array=[
-                              operation=NUMBER, number=1
-                              operation=NUMBER, number=2
-                            ]
+                            operation=STRING, string=remaining
+                            operation=NULL
                             operation=CALL, macro={Name=numb}, callParms=[
                               operation=ARRAY, array=[
                                 operation=NUMBER, number=1
                                 operation=NUMBER, number=2
-                                operation=NUMBER, number=2
+                                operation=NUMBER, number=3
                               ]
                             ]
                           ]
                         ]
                       ], fnParm2=[
                         operation=CALL, macro={Name=t.assert}, callParms=[
-                          operation=STRING, string=remaining
+                          operation=STRING, string=other
                           operation=NULL
                           operation=CALL, macro={Name=numb}, callParms=[
-                            operation=ARRAY, array=[
-                              operation=NUMBER, number=1
-                              operation=NUMBER, number=2
-                              operation=NUMBER, number=3
-                            ]
+                            operation=NUMBER, number=2
                           ]
                         ]
                       ]
                     ], fnParm2=[
                       operation=CALL, macro={Name=t.assert}, callParms=[
-                        operation=STRING, string=other
-                        operation=NULL
-                        operation=CALL, macro={Name=numb}, callParms=[
-                          operation=NUMBER, number=2
+                        operation=STRING, string=string
+                        operation=STRING, string=a
+                        operation=CALL, macro={Name=str}, callParms=[
+                          operation=STRING, string=a2
                         ]
                       ]
                     ]
                   ], fnParm2=[
                     operation=CALL, macro={Name=t.assert}, callParms=[
-                      operation=STRING, string=string
-                      operation=STRING, string=a
+                      operation=STRING, string=two tokens
+                      operation=NULL
                       operation=CALL, macro={Name=str}, callParms=[
-                        operation=STRING, string=a2
+                        operation=STRING, string=ab2
                       ]
                     ]
                   ]
                 ], fnParm2=[
                   operation=CALL, macro={Name=t.assert}, callParms=[
-                    operation=STRING, string=two tokens
-                    operation=STRING, string=ab
+                    operation=STRING, string=double tokens
+                    operation=NULL
                     operation=CALL, macro={Name=str}, callParms=[
-                      operation=STRING, string=ab2
+                      operation=STRING, string=a22
                     ]
                   ]
                 ]
               ], fnParm2=[
                 operation=CALL, macro={Name=t.assert}, callParms=[
-                  operation=STRING, string=double tokens
-                  operation=STRING, string=a2
+                  operation=STRING, string=not full string
+                  operation=NULL
                   operation=CALL, macro={Name=str}, callParms=[
-                    operation=STRING, string=a22
+                    operation=STRING, string=a2a
                   ]
                 ]
               ]
             ], fnParm2=[
               operation=CALL, macro={Name=t.assert}, callParms=[
-                operation=STRING, string=not full string
-                operation=NULL
-                operation=CALL, macro={Name=str}, callParms=[
-                  operation=STRING, string=a2a
+                operation=STRING, string=second
+                operation=ARRAY, array=[
+                  operation=NUMBER, number=1
+                  operation=NUMBER, number=2
+                ]
+                operation=CALL, macro={Name=second}, callParms=[
+                  operation=ARRAY, array=[
+                    operation=NUMBER, number=2
+                    operation=NUMBER, number=1
+                    operation=NUMBER, number=2
+                  ]
                 ]
               ]
             ]
           ], fnParm2=[
             operation=CALL, macro={Name=t.assert}, callParms=[
-              operation=STRING, string=second
+              operation=STRING, string=strsec
               operation=ARRAY, array=[
                 operation=NUMBER, number=1
                 operation=NUMBER, number=2
               ]
-              operation=CALL, macro={Name=second}, callParms=[
+              operation=CALL, macro={Name=strsec}, callParms=[
                 operation=ARRAY, array=[
-                  operation=NUMBER, number=2
+                  operation=STRING, string=2
                   operation=NUMBER, number=1
                   operation=NUMBER, number=2
                 ]
@@ -131,26 +128,19 @@ name=main, alternatives=[
           ]
         ], fnParm2=[
           operation=CALL, macro={Name=t.assert}, callParms=[
-            operation=STRING, string=strsec
-            operation=ARRAY, array=[
-              operation=NUMBER, number=1
-              operation=NUMBER, number=2
-            ]
+            operation=STRING, string=exact str
+            operation=STRING, string=
             operation=CALL, macro={Name=strsec}, callParms=[
-              operation=ARRAY, array=[
-                operation=STRING, string=2
-                operation=NUMBER, number=1
-                operation=NUMBER, number=2
-              ]
+              operation=STRING, string=2
             ]
           ]
         ]
       ], fnParm2=[
         operation=CALL, macro={Name=t.assert}, callParms=[
           operation=STRING, string=exact str
-          operation=STRING, string=
+          operation=STRING, string=abc
           operation=CALL, macro={Name=strsec}, callParms=[
-            operation=STRING, string=2
+            operation=STRING, string=2abc
           ]
         ]
       ]
