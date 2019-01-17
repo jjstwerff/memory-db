@@ -5,6 +5,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.memorydb.handler.StringWriter;
@@ -138,15 +139,15 @@ public class JsltInterpreter {
 			for (ParametersArray parm : alt.getParameters()) {
 				Object obj = stack.get(stackF + pnr);
 				found = testParm(parm, obj);
-				Expr ifExpr = parm.getIf();
-				if (ifExpr.getRec() != 0) {
-					Object ifResult = inter(ifExpr);
-					if (ifResult instanceof Boolean && (Boolean) ifResult == false)
-						found = false;
-				}
 				pnr++;
 				if (!found)
 					break;
+			}
+			Expr ifExpr = alt.getIf();
+			if (ifExpr != null) {
+				Object ifResult = inter(ifExpr);
+				if (ifResult instanceof Boolean && (Boolean) ifResult == false)
+					found = false;
 			}
 			if (found) {
 				Object res = inter(alt.getCode().iterator().next());
@@ -187,19 +188,10 @@ public class JsltInterpreter {
 				return false;
 			break;
 		case ARRAY:
-			if (!(obj instanceof RecordInterface) || ((RecordInterface) obj).type() != FieldType.ARRAY)
-				return false;
-			RecordInterface arr = (RecordInterface) obj;
-			int aElm = arr.next(-1); 
-			for (MarrayArray elm : parm.getMarray()) {
-				// if last array element = potential all remaining elements (when no constant)
-				//   new Object with specific start element and reduced size
-				// potential match other macro to match elements (then not everything needs matching)
-				testParm(elm, arr.get(aElm));
-				aElm = arr.next(aElm);
-			}
-			// not found when more elements are found after a constant (unless inside other match)
-			break;
+			if (obj instanceof RecordInterface && ((RecordInterface) obj).type() == FieldType.ARRAY)
+				return arrayMatch(parm, (RecordInterface) obj);
+			else if (obj instanceof String)
+				return stringMatch(parm, (String) obj);
 		case STRING:
 			if (!(obj instanceof String) || !parm.getString().equals(obj))
 				return false;
@@ -209,10 +201,136 @@ public class JsltInterpreter {
 				return false;
 			stack.add(obj);
 			break;
+		case MACRO:
+			throw new RuntimeException("macro");
 		default:
 			break;
 		}
 		return true;
+	}
+
+	private boolean arrayMatch(ChangeMatch parm, RecordInterface arr) {
+		int elms = 0;
+		int aElm = arr.next(-1);
+		Iterator<MarrayArray> iterator = parm.getMarray().iterator();
+		boolean notLast = iterator.hasNext();
+		while (notLast) {
+			if (aElm < 0)
+				return false; // beyond the last array element
+			MarrayArray elm = iterator.next();
+			notLast = iterator.hasNext();
+			if (!notLast) { // last element
+				if (elm.getType() == Match.Type.VARIABLE && (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
+					stack.add(new SubArray(arr, aElm, elms));
+					return true; // match the rest of the array
+				}
+				if (!testParm(elm, arr.get(aElm)))
+					return false; // next element is not of the correct type
+				aElm = arr.next(aElm);
+				elms++;
+				// TODO the end of array test should not be validated on a CALL type variable
+				if (arr.type(aElm) != null)
+					return false; // not at the end of the array yet
+			} else {
+				if (!testParm(elm, arr.get(aElm)))
+					return false; // next element is not of the correct type
+				aElm = arr.next(aElm);
+				elms++;
+			}
+		}
+		return true;
+	}
+
+	private boolean stringMatch(ChangeMatch parm, String obj) {
+		int pos = 0;
+		Iterator<MarrayArray> iterator = parm.getMarray().iterator();
+		boolean notLast = iterator.hasNext();
+		while (notLast) {
+			if (pos < 0)
+				return false; // beyond the last array element
+			MarrayArray elm = iterator.next();
+			notLast = iterator.hasNext();
+			if (!notLast) { // last element
+				if (elm.getType() == Match.Type.VARIABLE && (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
+					stack.add(obj.substring(pos));
+					return true; // match the rest of the array
+				}
+				if (!testParm(elm, obj.substring(pos, pos + 1)))
+					return false; // next element is not of the correct type
+				pos++;
+				// TODO the end of array test should not be validated on a CALL type variable
+				if (pos < obj.length())
+					return false; // not at the end of the array yet
+			} else {
+				if (!testParm(elm, obj.substring(pos, pos + 1)))
+					return false; // next element is not of the correct type
+				pos++;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * An array that represents a sub array starting from a specified position
+	 */
+	class SubArray implements RecordInterface {
+		private final RecordInterface arr;
+		private final int elm;
+		private final int curSize;
+
+		public SubArray(RecordInterface arr, int elm, int curSize) {
+			if (arr instanceof SubArray) {
+				SubArray sub = (SubArray) arr;
+				arr = sub.arr;
+				curSize += sub.curSize;
+			}
+			this.arr = arr;
+			this.elm = elm;
+			this.curSize = curSize;
+		}
+
+		@Override
+		public int getSize() {
+			return arr.getSize() - curSize;
+		}
+
+		@Override
+		public int next(int field) {
+			if (field < 0)
+				return elm; // first element
+			return next(field);
+		}
+
+		@Override
+		public String name(int field) {
+			return arr.name(field);
+		}
+
+		@Override
+		public FieldType type(int field) {
+			return arr.type(field);
+		}
+
+		@Override
+		public Object get(int field) {
+			return arr.get(field);
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder bld = new StringBuilder();
+			bld.append("[");
+			int e = elm;
+			while (type(e) != null) {
+				int n = next(e);
+				bld.append(get(e));
+				if (n >= 0)
+					bld.append(", ");
+				e = n;
+			}
+			bld.append("]");
+			return bld.toString();
+		}
 	}
 
 	private boolean matches(Object obj, Type type) {

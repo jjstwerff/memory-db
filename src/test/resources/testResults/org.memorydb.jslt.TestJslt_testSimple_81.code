@@ -1,0 +1,14 @@
+Test:
+true == null
+
+Code:
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=EQ, fnParm1=[
+      operation=BOOLEAN, boolean=true
+    ], fnParm2=[
+      operation=NULL
+    ]
+  ]
+]

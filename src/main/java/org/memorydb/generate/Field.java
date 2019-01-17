@@ -338,6 +338,7 @@ public class Field {
 			return "return new Index" + getUpperName() + "(new " + related.getName() + "(store));";
 		case STRING:
 			return "return rec == 0 ? null : store.getString(store.getInt(rec, " + (pos >> 3) + "));";
+		case OBJECT:
 		case ELEMENT:
 			return "return new " + related.getName() + "(store, rec == 0 ? 0 : store.getInt(rec, " + (pos >> 3) + "));";
 		case STRING_POINTER:
@@ -484,6 +485,8 @@ public class Field {
 			if (name.equals("upRecord") && !table.getParent().isFull())
 				changeUpRecord(extra);
 			return test + "store.setInt(rec, " + (pos >> 3) + ", value == null ? 0 : value.getRec())" + extra;
+		case OBJECT:
+			return test + "store.setInt(rec, " + (pos >> 3) + ", value == null ? 0 : value.getRec())" + end;
 		case SET:
 			return null;
 		case STRING:

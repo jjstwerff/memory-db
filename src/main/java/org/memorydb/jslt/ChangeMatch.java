@@ -25,6 +25,7 @@ public interface ChangeMatch extends ChangeInterface, Match {
 				break;
 			case VARIABLE:
 				getStore().setInt(getRec(), matchPosition() + 1, 0);
+				getStore().setInt(getRec(), matchPosition() + 5, 0);
 				break;
 			case BOOLEAN:
 				getStore().setByte(getRec(), matchPosition() + 1, getStore().getByte(getRec(), matchPosition() + 1) & 254);
@@ -41,6 +42,16 @@ public interface ChangeMatch extends ChangeInterface, Match {
 			case OBJECT:
 				getStore().setInt(getRec(), matchPosition() + 1, 0);
 				break;
+			case CONSTANT:
+				getStore().setInt(getRec(), matchPosition() + 1, 0);
+				break;
+			case MACRO:
+				getStore().setInt(getRec(), matchPosition() + 1, 0);
+				getStore().setInt(getRec(), matchPosition() + 5, 0);
+				break;
+			case MULTIPLE:
+				getStore().setInt(getRec(), matchPosition() + 1, 0);
+				break;
 			default:
 				break;
 			}
@@ -52,9 +63,15 @@ public interface ChangeMatch extends ChangeInterface, Match {
 		getStore().setInt(other.getRec(), other.matchPosition() + 1, 0);
 	}
 
-	default void setVariable(Variable value) {
+	default void setVmatch(MatchObject value) {
 		if (getType() == Type.VARIABLE) {
 			getStore().setInt(getRec(), matchPosition() + 1, value == null ? 0 : value.getRec());
+		}
+	}
+
+	default void setVariable(Variable value) {
+		if (getType() == Type.VARIABLE) {
+			getStore().setInt(getRec(), matchPosition() + 5, value == null ? 0 : value.getRec());
 		}
 	}
 
@@ -87,6 +104,29 @@ public interface ChangeMatch extends ChangeInterface, Match {
 		getStore().setInt(other.getRec(), other.matchPosition() + 1, 0);
 	}
 
+	default void setConstant(int value) {
+		if (getType() == Type.CONSTANT) {
+			getStore().setInt(getRec(), matchPosition() + 1, value);
+		}
+	}
+
+	default void setMacro(Macro value) {
+		if (getType() == Type.MACRO) {
+			getStore().setInt(getRec(), matchPosition() + 1, value == null ? 0 : value.getRec());
+		}
+	}
+
+	default void moveMparms(ChangeMatch other) {
+		getStore().setInt(getRec(), matchPosition() + 5, getStore().getInt(other.getRec(), other.matchPosition() + 5));
+		getStore().setInt(other.getRec(), other.matchPosition() + 5, 0);
+	}
+
+	default void setMmatch(MatchObject value) {
+		if (getType() == Type.MULTIPLE) {
+			getStore().setInt(getRec(), matchPosition() + 1, value == null ? 0 : value.getRec());
+		}
+	}
+
 	default void parseMatch(Parser parser) {
 		if (parser.hasField("type")) {
 			String valueType = parser.getString("type");
@@ -102,6 +142,9 @@ public interface ChangeMatch extends ChangeInterface, Match {
 					sub.parse(parser);
 				}
 			}
+		}
+		if (parser.hasSub("vmatch")) {
+			setVmatch(new MatchObject(getStore()).parse(parser));
 		}
 		if (parser.hasSub("variable")) {
 			setVariable(new Variable(getStore()).parse(parser));
@@ -129,6 +172,28 @@ public interface ChangeMatch extends ChangeInterface, Match {
 				}
 			}
 		}
+		if (parser.hasField("constant")) {
+			setConstant(parser.getInt("constant"));
+		}
+		if (parser.hasField("macro")) {
+			parser.getRelation("macro", (recNr, idx) -> {
+				Macro relRec = new Macro(getStore());
+				boolean found = relRec.parseKey(parser);
+				setMacro(relRec);
+				return found;
+			}, getRec());
+		}
+		if (parser.hasSub("mparms")) {
+			try (MparmsArray sub = new MparmsArray(this, -1)) {
+				while (parser.getSub()) {
+					sub.add();
+					sub.parse(parser);
+				}
+			}
+		}
+		if (parser.hasSub("mmatch")) {
+			setMmatch(new MatchObject(getStore()).parse(parser));
+		}
 	}
 
 	@Override
@@ -143,25 +208,41 @@ public interface ChangeMatch extends ChangeInterface, Match {
 				setType((Type) value);
 			return value instanceof Type;
 		case 3:
+			if (value instanceof MatchObject)
+				setVmatch((MatchObject) value);
+			return value instanceof MatchObject;
+		case 4:
 			if (value instanceof Variable)
 				setVariable((Variable) value);
 			return value instanceof Variable;
-		case 4:
+		case 5:
 			if (value instanceof Boolean)
 				setBoolean((Boolean) value);
 			return value instanceof Boolean;
-		case 5:
+		case 6:
 			if (value instanceof Double)
 				setFloat((Double) value);
 			return value instanceof Double;
-		case 6:
+		case 7:
 			if (value instanceof Long)
 				setNumber((Long) value);
 			return value instanceof Long;
-		case 7:
+		case 8:
 			if (value instanceof String)
 				setString((String) value);
 			return value instanceof String;
+		case 10:
+			if (value instanceof Integer)
+				setConstant((Integer) value);
+			return value instanceof Integer;
+		case 11:
+			if (value instanceof Macro)
+				setMacro((Macro) value);
+			return value instanceof Macro;
+		case 13:
+			if (value instanceof MatchObject)
+				setMmatch((MatchObject) value);
+			return value instanceof MatchObject;
 		default:
 			return false;
 		}
@@ -171,8 +252,10 @@ public interface ChangeMatch extends ChangeInterface, Match {
 		switch (field) {
 		case 2:
 			return addMarray();
-		case 8:
+		case 9:
 			return addMobject();
+		case 12:
+			return addMparms();
 		default:
 			return null;
 		}

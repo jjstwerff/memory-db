@@ -113,16 +113,20 @@ public class AppendArray implements ChangeOperator, Iterable<AppendArray> {
 			store.setByte(alloc, 12, 9);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof CodeArray) {
+		if (record instanceof MparmsArray) {
 			store.setByte(alloc, 12, 10);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof Expr)
+		if (record instanceof CodeArray) {
 			store.setByte(alloc, 12, 11);
-		if (record instanceof Listener)
+			store.setInt(alloc, 13, record.getArrayIndex());
+		}
+		if (record instanceof Expr)
 			store.setByte(alloc, 12, 12);
-		if (record instanceof Level)
+		if (record instanceof Listener)
 			store.setByte(alloc, 12, 13);
+		if (record instanceof Level)
+			store.setByte(alloc, 12, 14);
 	}
 
 	@Override
@@ -149,12 +153,14 @@ public class AppendArray implements ChangeOperator, Iterable<AppendArray> {
 		case 9:
 			return new IfFalseArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
 		case 10:
-			return new CodeArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
+			return new MparmsArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
 		case 11:
-			return new Expr(store, store.getInt(alloc, 8));
+			return new CodeArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
 		case 12:
-			return new Listener(store, store.getInt(alloc, 8));
+			return new Expr(store, store.getInt(alloc, 8));
 		case 13:
+			return new Listener(store, store.getInt(alloc, 8));
+		case 14:
 			return new Level(store, store.getInt(alloc, 8));
 		default:
 			throw new CorruptionException("Unknown upRecord type");

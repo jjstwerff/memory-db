@@ -48,6 +48,8 @@ public interface Operator extends ResultType {
 			return (IfTrueArray) this;
 		if (this instanceof IfFalseArray)
 			return (IfFalseArray) this;
+		if (this instanceof MparmsArray)
+			return (MparmsArray) this;
 		if (this instanceof CodeArray)
 			return (CodeArray) this;
 		if (this instanceof Expr)

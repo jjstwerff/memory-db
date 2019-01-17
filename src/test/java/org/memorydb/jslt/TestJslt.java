@@ -109,6 +109,10 @@ public class TestJslt extends MemoryTests {
 		jslt("'&{1234:,}+&{12:5}+&{234:4_}'", "\"1,234+00012+0_234\"");
 		jslt("'&{1234.56:e}+&{0.000000123456:g}+&{2.0/3:.6f}+&{2.0/3:{1+1}.{2*3}f}'",
 				"\"1.23456e3+1.23456e-7+0.666667+00.666667\"");
+		jslt("true == null", "false");
+		jslt("null == true", "false");
+		jslt("false == null", "true");
+		jslt("null == false", "false");
 	}
 
 	@Test
@@ -153,7 +157,7 @@ public class TestJslt extends MemoryTests {
 			if (!result.equals(""))
 				for (Macro m : new Macro(jsltStore).new IndexMacros())
 					code.append(m.toString());
-			compare(result + ".code", code.toString());
+			compare(result, code.toString());
 			String into = JsltInterpreter.interpret(jsltStore, null);
 			Assert.assertEquals(result, "\"\"", into);
 		}

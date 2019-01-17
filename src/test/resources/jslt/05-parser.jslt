@@ -1,0 +1,12 @@
+import testing as t
+
+def wstoken(x if x == ' ' or x == '\t' or x == '\r' or x == '\n'): true
+def idfirst(x if x > 'a' and x < 'z' or x > 'A' and x < 'Z' or x == '_'): true
+def idnext(x if x > '0' and x < '9' or idfirst(x)): true
+def id(wstoken* + (idfirst + idnext*):i): i
+def nrtoken(x if x > '0' and x < '9'): true
+def number(wstoken* + (nrtoken + nrtoken)*:n): number(n)
+def token(tok, wstoken* + tok): true
+
+t.assert("whitespace", true, token("(", "  (")) +
+t.assert("token", true, token("(", " (")) + '!'

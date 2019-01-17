@@ -57,7 +57,7 @@ public class MemoryTests extends NormalCheck {
 
 	protected void compare(String test, String text) {
 		Path basePath = Paths.get(getClass().getResource("/").getFile()).getParent().getParent();
-		String fileName = getClass().getName() + "_" + curTest.getMethodName() + "_" + test;
+		String fileName = getClass().getName() + "_" + curTest.getMethodName() + "_" + test + ".code";
 		Path dpath = basePath.resolve("target/test-classes/testResults/").resolve(fileName);
 		Path apath = basePath.resolve("src/test/resources/testResults/").resolve(fileName);
 		try {
@@ -66,7 +66,7 @@ public class MemoryTests extends NormalCheck {
 				should = new String(Files.readAllBytes(apath));
 				if (!should.equals(text))
 					write(text, dpath, apath);
-				Assert.assertEquals(should, text);
+				Assert.assertEquals("Code difference for " + test, should, text);
 			} else
 				write(text, dpath, apath);
 		} catch (IOException e) {

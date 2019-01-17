@@ -1,0 +1,283 @@
+name=id, alternatives=[
+  nr=0, parameters=[
+    type=ARRAY, marray=[
+      type=MULTIPLE, mmatch=[
+        type=MACRO, macro={Name=wstoken}, mparms=[
+        ]
+      ]
+      type=VARIABLE, vmatch=[
+        type=ARRAY, marray=[
+          type=MACRO, macro={Name=idfirst}, mparms=[
+          ]
+          type=MULTIPLE, mmatch=[
+            type=MACRO, macro={Name=idnext}, mparms=[
+            ]
+          ]
+        ]
+      ], variable=[
+        name=i, type=NULL, record=slice
+      ]
+    ]
+  ], code=[
+    operation=VARIABLE, varName=i, varNr=0
+  ]
+]
+name=idfirst, alternatives=[
+  nr=0, parameters=[
+    type=VARIABLE, variable=[
+      name=x, type=NULL
+    ]
+  ], if=[
+    operation=FUNCTION, function=OR, fnParm1=[
+      operation=FUNCTION, function=OR, fnParm1=[
+        operation=FUNCTION, function=AND, fnParm1=[
+          operation=FUNCTION, function=GT, fnParm1=[
+            operation=VARIABLE, varName=x, varNr=0
+          ], fnParm2=[
+            operation=STRING, string=a
+          ]
+        ], fnParm2=[
+          operation=FUNCTION, function=LT, fnParm1=[
+            operation=VARIABLE, varName=x, varNr=0
+          ], fnParm2=[
+            operation=STRING, string=z
+          ]
+        ]
+      ], fnParm2=[
+        operation=FUNCTION, function=AND, fnParm1=[
+          operation=FUNCTION, function=GT, fnParm1=[
+            operation=VARIABLE, varName=x, varNr=0
+          ], fnParm2=[
+            operation=STRING, string=A
+          ]
+        ], fnParm2=[
+          operation=FUNCTION, function=LT, fnParm1=[
+            operation=VARIABLE, varName=x, varNr=0
+          ], fnParm2=[
+            operation=STRING, string=Z
+          ]
+        ]
+      ]
+    ], fnParm2=[
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=VARIABLE, varName=x, varNr=0
+      ], fnParm2=[
+        operation=STRING, string=_
+      ]
+    ]
+  ], code=[
+    operation=BOOLEAN, boolean=true
+  ]
+]
+name=idnext, alternatives=[
+  nr=0, parameters=[
+    type=VARIABLE, variable=[
+      name=x, type=NULL
+    ]
+  ], if=[
+    operation=FUNCTION, function=OR, fnParm1=[
+      operation=FUNCTION, function=AND, fnParm1=[
+        operation=FUNCTION, function=GT, fnParm1=[
+          operation=VARIABLE, varName=x, varNr=0
+        ], fnParm2=[
+          operation=STRING, string=0
+        ]
+      ], fnParm2=[
+        operation=FUNCTION, function=LT, fnParm1=[
+          operation=VARIABLE, varName=x, varNr=0
+        ], fnParm2=[
+          operation=STRING, string=9
+        ]
+      ]
+    ], fnParm2=[
+      operation=CALL, macro={Name=idfirst}, callParms=[
+        operation=VARIABLE, varName=x, varNr=0
+      ]
+    ]
+  ], code=[
+    operation=BOOLEAN, boolean=true
+  ]
+]
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=CALL, macro={Name=t.assert}, callParms=[
+          operation=STRING, string=whitespace
+          operation=BOOLEAN, boolean=true
+          operation=CALL, macro={Name=token}, callParms=[
+            operation=STRING, string=(
+            operation=STRING, string=  (
+          ]
+        ]
+      ], fnParm2=[
+        operation=CALL, macro={Name=t.assert}, callParms=[
+          operation=STRING, string=token
+          operation=BOOLEAN, boolean=true
+          operation=CALL, macro={Name=token}, callParms=[
+            operation=STRING, string=(
+            operation=STRING, string= (
+          ]
+        ]
+      ]
+    ], fnParm2=[
+      operation=STRING, string=!
+    ]
+  ]
+]
+name=nrtoken, alternatives=[
+  nr=0, parameters=[
+    type=VARIABLE, variable=[
+      name=x, type=NULL
+    ]
+  ], if=[
+    operation=FUNCTION, function=AND, fnParm1=[
+      operation=FUNCTION, function=GT, fnParm1=[
+        operation=VARIABLE, varName=x, varNr=0
+      ], fnParm2=[
+        operation=STRING, string=0
+      ]
+    ], fnParm2=[
+      operation=FUNCTION, function=LT, fnParm1=[
+        operation=VARIABLE, varName=x, varNr=0
+      ], fnParm2=[
+        operation=STRING, string=9
+      ]
+    ]
+  ], code=[
+    operation=BOOLEAN, boolean=true
+  ]
+]
+name=number, alternatives=[
+  nr=0, parameters=[
+    type=ARRAY, marray=[
+      type=MULTIPLE, mmatch=[
+        type=MACRO, macro={Name=wstoken}, mparms=[
+        ]
+      ]
+      type=VARIABLE, vmatch=[
+        type=MULTIPLE, mmatch=[
+          type=ARRAY, marray=[
+            type=MACRO, macro={Name=nrtoken}, mparms=[
+            ]
+            type=MACRO, macro={Name=nrtoken}, mparms=[
+            ]
+          ]
+        ]
+      ], variable=[
+        name=n, type=NULL, record=slice
+      ]
+    ]
+  ], code=[
+    operation=FUNCTION, function=NUMBER, fnParm1=[
+      operation=VARIABLE, varName=n, varNr=0
+    ]
+  ]
+]
+name=slice, alternatives=[
+]
+name=t.assert, alternatives=[
+  nr=0, parameters=[
+    type=VARIABLE, variable=[
+      name=name, type=STRING
+    ]
+    type=VARIABLE, variable=[
+      name=should, type=NULL
+    ]
+    type=VARIABLE, variable=[
+      name=was, type=NULL
+    ]
+  ], code=[
+    operation=CONDITION, conExpr=[
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=VARIABLE, varName=should, varNr=1
+      ], fnParm2=[
+        operation=VARIABLE, varName=was, varNr=2
+      ]
+    ], conTrue=[
+      operation=STRING, string=
+    ], conFalse=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=FUNCTION, function=ADD, fnParm1=[
+              operation=FUNCTION, function=ADD, fnParm1=[
+                operation=VARIABLE, varName=name, varNr=0
+              ], fnParm2=[
+                operation=STRING, string= was '
+              ]
+            ], fnParm2=[
+              operation=VARIABLE, varName=was, varNr=2
+            ]
+          ], fnParm2=[
+            operation=STRING, string=' should '
+          ]
+        ], fnParm2=[
+          operation=VARIABLE, varName=should, varNr=1
+        ]
+      ], fnParm2=[
+        operation=STRING, string=
+          '
+      ]
+    ]
+  ]
+]
+name=token, alternatives=[
+  nr=0, parameters=[
+    type=VARIABLE, variable=[
+      name=tok, type=NULL
+    ]
+    type=ARRAY, marray=[
+      type=MULTIPLE, mmatch=[
+        type=MACRO, macro={Name=wstoken}, mparms=[
+        ]
+      ]
+      type=VARIABLE, variable=[
+        name=tok, type=NULL
+      ]
+    ]
+  ], code=[
+    operation=BOOLEAN, boolean=true
+  ]
+]
+name=wstoken, alternatives=[
+  nr=0, parameters=[
+    type=VARIABLE, variable=[
+      name=x, type=NULL
+    ]
+  ], if=[
+    operation=FUNCTION, function=OR, fnParm1=[
+      operation=FUNCTION, function=OR, fnParm1=[
+        operation=FUNCTION, function=OR, fnParm1=[
+          operation=FUNCTION, function=EQ, fnParm1=[
+            operation=VARIABLE, varName=x, varNr=0
+          ], fnParm2=[
+            operation=STRING, string= 
+          ]
+        ], fnParm2=[
+          operation=FUNCTION, function=EQ, fnParm1=[
+            operation=VARIABLE, varName=x, varNr=0
+          ], fnParm2=[
+            operation=STRING, string=\t
+          ]
+        ]
+      ], fnParm2=[
+        operation=FUNCTION, function=EQ, fnParm1=[
+          operation=VARIABLE, varName=x, varNr=0
+        ], fnParm2=[
+          operation=STRING, string=\r
+        ]
+      ]
+    ], fnParm2=[
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=VARIABLE, varName=x, varNr=0
+      ], fnParm2=[
+        operation=STRING, string=
+          
+      ]
+    ]
+  ], code=[
+    operation=BOOLEAN, boolean=true
+  ]
+]

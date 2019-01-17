@@ -83,38 +83,40 @@ public class JsltStructure {
 
 		Record variable = project.table("Variable");
 		variable.field("name", Type.STRING).mandatory();
-		variable.field("nr", Type.INTEGER).mandatory();
 		variable.include(type);
 
 		Record subMatch = project.record("SubMatch");
+		Record mobj = project.table("MatchObject");
 		Record mfield = project.record("MatchField");
 
 		Record match = project.content("Match");
 		match.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "NULL", "VARIABLE", "FLOAT", "NUMBER", "STRING",
-				"OBJECT", "MACRO").condition();
+				"OBJECT", "CONSTANT", "MACRO", "MULTIPLE").condition();
 		match.field("marray", Type.ARRAY, subMatch).when("ARRAY");
+		match.field("vmatch", Type.OBJECT, mobj).when("VARIABLE");
 		match.field("variable", Type.OBJECT, variable).when("VARIABLE");
 		match.field("boolean", Type.BOOLEAN).when("BOOLEAN");
 		match.field("float", Type.FLOAT).when("FLOAT");
 		match.field("number", Type.LONG).when("NUMBER");
 		match.field("string", Type.STRING).when("STRING");
 		match.field("mobject", Type.ARRAY, mfield).when("OBJECT");
-		match.field("ovar", Type.OBJECT, variable).when("OBJECT");
+		match.field("constant", Type.INTEGER).when("CONSTANT");
 		match.field("macro", Type.RELATION, macro).when("MACRO");
-		match.field("callParms", Type.ARRAY, step).when("MACRO");
-		match.field("mvar", Type.OBJECT, variable).when("MACRO");
+		match.field("mparms", Type.ARRAY, step).when("MACRO");
+		match.field("mmatch", Type.OBJECT, mobj).when("MULTIPLE");
 
 		mfield.field("name", Type.STRING);
 		mfield.include(match);
+		mobj.include(match);
 
 		Record parameter = project.record("Parameter");
-		parameter.field("if", Type.OBJECT, expr);
 		parameter.include(match);
 		subMatch.include(match);
 
 		Record alt = project.table("Alternative");
 		alt.field("nr", Type.INTEGER);
 		alt.field("parameters", Type.ARRAY, parameter);
+		alt.field("if", Type.OBJECT, expr);
 		alt.field("code", Type.ARRAY, step);
 
 		macro.field("name", Type.STRING);

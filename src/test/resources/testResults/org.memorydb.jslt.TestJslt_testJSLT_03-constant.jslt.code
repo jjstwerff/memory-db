@@ -6,7 +6,7 @@ name=const, alternatives=[
   ]
   nr=1, parameters=[
     type=VARIABLE, variable=[
-      name=elm, nr=0, eager=false, extension=false, type=NULL
+      name=elm, type=NULL
     ]
   ], code=[
     operation=VARIABLE, varName=elm, varNr=0
@@ -49,13 +49,13 @@ name=slice, alternatives=[
 name=t.assert, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=name, nr=0, eager=false, extension=false, type=STRING
+      name=name, type=STRING
     ]
     type=VARIABLE, variable=[
-      name=should, nr=0, eager=false, extension=false, type=NULL
+      name=should, type=NULL
     ]
     type=VARIABLE, variable=[
-      name=was, nr=0, eager=false, extension=false, type=NULL
+      name=was, type=NULL
     ]
   ], code=[
     operation=CONDITION, conExpr=[

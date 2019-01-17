@@ -4,28 +4,27 @@ import java.io.IOException;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
-import org.memorydb.structure.FieldData;
 import org.memorydb.structure.RecordData;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
- * Automatically generated record class for table Variable
+ * Automatically generated record class for table MatchObject
  */
 @RecordData(
-	name = "Variable",
+	name = "MatchObject",
 	keyFields = {})
-public class Variable implements ResultType {
+public class MatchObject implements Match {
 	/* package private */ Store store;
 	protected int rec;
 	/* package private */ static final int RECORD_SIZE = 13;
 
-	public Variable(Store store) {
+	public MatchObject(Store store) {
 		this.store = store;
 		this.rec = 0;
 	}
 
-	public Variable(Store store, int rec) {
+	public MatchObject(Store store, int rec) {
 		rec = store.correct(rec);
 		this.store = store;
 		this.rec = rec;
@@ -48,30 +47,20 @@ public class Variable implements ResultType {
 	}
 
 	@Override
-	public int resulttypePosition() {
-		return 8;
+	public int matchPosition() {
+		return 4;
 	}
 
 	@Override
-	public ChangeVariable change() {
-		return new ChangeVariable(this);
-	}
-
-	@FieldData(
-		name = "name",
-		type = "STRING",
-		mandatory = true
-	)
-	public String getName() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 4));
+	public ChangeMatchObject change() {
+		return new ChangeMatchObject(this);
 	}
 
 	@Override
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
-		write.field("name", getName());
-		outputResultType(write, iterate);
+		outputMatch(write, iterate);
 		write.endRecord();
 	}
 
@@ -94,25 +83,25 @@ public class Variable implements ResultType {
 		return write.toString();
 	}
 
-	public Variable parse(Parser parser) {
+	public MatchObject parse(Parser parser) {
 		while (parser.getSub()) {
 			int nextRec = 0;
 			if (parser.isDelete(nextRec)) {
-				try (ChangeVariable record = new ChangeVariable(this)) {
+				try (ChangeMatchObject record = new ChangeMatchObject(this)) {
 					store.free(record.getRec());
 					record.setRec(0);
 				}
 				continue;
 			}
 			if (nextRec == 0) {
-				try (ChangeVariable record = new ChangeVariable(store)) {
+				try (ChangeMatchObject record = new ChangeMatchObject(store)) {
 
 					record.parseFields(parser);
 					rec = record.rec;
 				}
 			} else {
 				rec = nextRec;
-				try (ChangeVariable record = new ChangeVariable(this)) {
+				try (ChangeMatchObject record = new ChangeMatchObject(this)) {
 					record.parseFields(parser);
 				}
 			}
@@ -131,11 +120,9 @@ public class Variable implements ResultType {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 1 && field <= 3)
-			return ResultType.super.getResultType(field - 1);
+		if (field >= 0 && field <= 13)
+			return Match.super.getMatch(field - 0);
 		switch (field) {
-		case 1:
-			return getName();
 		default:
 			return null;
 		}
@@ -143,8 +130,8 @@ public class Variable implements ResultType {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 1 && field <= 3)
-			return ResultType.super.iterateResultType(field - 1);
+		if (field >= 0 && field <= 13)
+			return Match.super.iterateMatch(field - 0);
 		switch (field) {
 		default:
 			return null;
@@ -153,11 +140,9 @@ public class Variable implements ResultType {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 1 && field <= 3)
-			return ResultType.super.typeResultType(field - 1);
+		if (field >= 0 && field <= 13)
+			return Match.super.typeMatch(field - 0);
 		switch (field) {
-		case 1:
-			return FieldType.STRING;
 		default:
 			return null;
 		}
@@ -165,11 +150,9 @@ public class Variable implements ResultType {
 
 	@Override
 	public String name(int field) {
-		if (field >= 1 && field <= 3)
-			return ResultType.super.nameResultType(field - 1);
+		if (field >= 0 && field <= 13)
+			return Match.super.nameMatch(field - 0);
 		switch (field) {
-		case 1:
-			return "name";
 		default:
 			return null;
 		}

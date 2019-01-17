@@ -59,7 +59,7 @@ public class JsltParser {
 		private ChangeMatch match;
 		private Macro slice;
 		private Map<String, Parm> parms = new TreeMap<>();
-		Alternative curAlt;
+		ChangeAlternative curAlt;
 
 		public Parser(Scanner scanner, Store jsltStore) {
 			this.scanner = scanner;
@@ -91,10 +91,8 @@ public class JsltParser {
 
 		private void parseDef(String nameSpace) {
 			String id = scanner.parseIdentifier();
-			Macro curMacro = new Macro(store);
-			int rec = curMacro.new IndexMacros(id).search();
-			if (rec > 0) { // found a current macro
-				curMacro.setRec(rec);
+			Macro curMacro = getMacro(id);
+			if (curMacro != null) { // found a current macro
 				int altNr = 0;
 				for (Alternative a : curMacro.getAlternatives()) {
 					if (a.getNr() >= altNr)
@@ -121,6 +119,15 @@ public class JsltParser {
 				parseParameter();
 				while (scanner.matches(","))
 					parseParameter();
+				if (scanner.matches("if")) {
+					try (ChangeExpr data = new ChangeExpr(store)) {
+						remember();
+						spot = data;
+						parseCond();
+						restore();
+						curAlt.setIf(data);
+					}
+				}
 				scanner.expect(")");
 			}
 			scanner.expect(":");
@@ -168,21 +175,12 @@ public class JsltParser {
 			ParametersArray par = curAlt.getParameters().add();
 			match = par;
 			parseMatch();
-			if (scanner.matches("if")) {
-				try (ChangeExpr data = new ChangeExpr(store)) {
-					remember();
-					spot = data;
-					parseExpr();
-					restore();
-					par.setIf(data);
-				}
-			}
 		}
 
 		private void parseMatch() {
 			State state = scanner.getState();
 			int v = parms.size();
-			parseMPart();
+			parseMVar();
 			if (scanner.matches("+")) {
 				for (Iterator<Entry<String, Parm>> iterator = parms.entrySet().iterator(); iterator.hasNext();)
 					if (iterator.next().getValue().position >= v)
@@ -192,21 +190,59 @@ public class JsltParser {
 				try (ChangeMatch addM = match.addMarray()) {
 					ChangeMatch m = match;
 					match = addM;
-					parseMPart();
+					parseMVar();
 					match = m;
 				}
 				while (scanner.matches("+")) {
 					try (ChangeMatch addM = match.addMarray()) {
 						ChangeMatch m = match;
 						match = addM;
-						parseMPart();
+						parseMVar();
 						match = m;
 					}
 				}
 			}
 		}
 
+		private void parseMVar() {
+			parseMMulti();
+			if (scanner.matches(":")) {
+				if (match.getType() == Type.VARIABLE)
+					try (ChangeVariable curVar = match.getVariable().change()) {
+						curVar.setName(scanner.parseIdentifier());
+					}
+				else
+					try (ChangeMatchObject sub = new ChangeMatchObject(store)) {
+						copyMatch(sub);
+						match.setType(Type.VARIABLE);
+						match.setVmatch(sub);
+						try (ChangeVariable var = new ChangeVariable(store)) {
+							var.setName(scanner.parseIdentifier());
+							var.setType(ResultType.Type.NULL);
+							match.setVariable(var);
+							parms.put(var.getName(), new Parm(var, parms.size()));
+						}
+					}
+			}
+		}
+
+		private void parseMMulti() {
+			parseMPart();
+			if (scanner.matches("*")) {
+				try (ChangeMatchObject sub = new ChangeMatchObject(store)) {
+					copyMatch(sub);
+					match.setType(Type.MULTIPLE);
+					match.setMmatch(sub);
+				}
+			}
+		}
+
 		private void parseMPart() {
+			if (scanner.matches("(")) {
+				parseMatch();
+				scanner.expect(")");
+				return;
+			}
 			if (scanner.matches("true")) {
 				match.setType(Type.BOOLEAN);
 				match.setBoolean(true);
@@ -231,41 +267,58 @@ public class JsltParser {
 			} else if (scanner.hasIdentifier()) {
 				try (ChangeVariable var = new ChangeVariable(store)) {
 					String id = scanner.parseIdentifier();
-					match.setType(Type.VARIABLE);
-					switch (id) {
-					case "STRING":
-						var.setType(ResultType.Type.STRING);
-						break;
-					case "NUMBER":
-						var.setType(ResultType.Type.NUMBER);
-						break;
-					case "FLOAT":
-						var.setType(ResultType.Type.FLOAT);
-						break;
-					case "BOOLEAN":
-						var.setType(ResultType.Type.BOOLEAN);
-						break;
-					case "ARRAY":
-						var.setType(ResultType.Type.ARRAY);
-						break;
-					case "OBJECT":
-						var.setType(ResultType.Type.OBJECT);
-						break;
-					default:
-						var.setName(id);
-						var.setType(ResultType.Type.NULL);
-						break;
+					Macro m;
+					if ((m = getMacro(id)) != null) {
+						match.setType(Type.MACRO);
+						match.setMacro(m);
+						// TODO allow parameters
+					} else {
+						match.setType(Type.VARIABLE);
+						switch (id) {
+						case "string":
+							var.setType(ResultType.Type.STRING);
+							break;
+						case "number":
+							var.setType(ResultType.Type.NUMBER);
+							break;
+						case "float":
+							var.setType(ResultType.Type.FLOAT);
+							break;
+						case "boolean":
+							var.setType(ResultType.Type.BOOLEAN);
+							break;
+						case "array":
+							var.setType(ResultType.Type.ARRAY);
+							break;
+						case "object":
+							var.setType(ResultType.Type.OBJECT);
+							break;
+						default:
+							var.setName(id);
+							var.setType(ResultType.Type.NULL);
+							break;
+						}
+						var.setRecord(null);
+						if (var.getType() != ResultType.Type.NULL) {
+							scanner.expect(":");
+							var.setName(scanner.parseIdentifier());
+						}
+						match.setVariable(var);
+						parms.put(var.getName(), new Parm(var, parms.size()));
 					}
-					var.setRecord(null);
-					if (var.getType() != ResultType.Type.NULL) {
-						scanner.expect(":");
-						var.setName(scanner.parseIdentifier());
-					}
-					match.setVariable(var);
-					parms.put(var.getName(), new Parm(var, parms.size()));
 				}
 			} else
 				scanner.error("Syntax error");
+		}
+
+		private Macro getMacro(String id) {
+			Macro curMacro = new Macro(store);
+			int rec = curMacro.new IndexMacros(id).search();
+			if (rec > 0) { // found a current macro
+				curMacro.setRec(rec);
+				return curMacro;
+			}
+			return null;
 		}
 
 		private void parseMArray() {
@@ -304,6 +357,47 @@ public class JsltParser {
 			}
 			match = m;
 			scanner.expect("}");
+		}
+
+		private void copyMatch(ChangeMatchObject sub) {
+			Type type = match.getType();
+			sub.setType(type);
+			if (type != null)
+				switch (type) {
+				case ARRAY:
+					sub.moveMarray(match);
+					return;
+				case BOOLEAN:
+					sub.setBoolean(match.isBoolean());
+					return;
+				case CONSTANT:
+					sub.setConstant(match.getConstant());
+					return;
+				case FLOAT:
+					sub.setFloat(match.getFloat());
+					return;
+				case MACRO:
+					sub.setMacro(match.getMacro());
+					sub.moveMparms(match);
+					return;
+				case MULTIPLE:
+					sub.setMmatch(match.getMmatch());
+					return;
+				case NULL:
+					return;
+				case NUMBER:
+					sub.setNumber(match.getNumber());
+					return;
+				case OBJECT:
+					sub.moveMobject(match);
+					return;
+				case STRING:
+					sub.setString(match.getString());
+					return;
+				case VARIABLE:
+					sub.setVariable(match.getVariable());
+					return;
+				}
 		}
 
 		private void copySpot(ChangeMatch m, ChangeOperator s) {
@@ -754,8 +848,7 @@ public class JsltParser {
 			}
 			if (scanner.matches(":")) {
 				CallParmsArray callParms;
-				try (ChangeExpr struc = new ChangeExpr(spot.getFnParm1());
-						ChangeExpr from = new ChangeExpr(spot.getFnParm2())) {
+				try (ChangeExpr struc = new ChangeExpr(spot.getFnParm1()); ChangeExpr from = new ChangeExpr(spot.getFnParm2())) {
 					spot.setOperation(Operation.CALL);
 					callParms = spot.getCallParms();
 					spot.setMacro(slice);
@@ -879,9 +972,8 @@ public class JsltParser {
 					scanner.expect(")");
 					return;
 				}
-				Macro curMacro = new Macro(store);
-				int rec = curMacro.new IndexMacros(id).search();
-				if (rec <= 0) {
+				Macro curMacro = getMacro(id);
+				if (curMacro == null) {
 					scanner.error("Unknown macro '" + id + "'");
 					return;
 				}
@@ -1173,9 +1265,8 @@ public class JsltParser {
 							scanner.expect("}");
 						}
 					}
-					if (scanner.peek("b") || scanner.peek("c") || scanner.peek("e") || scanner.peek("E")
-							|| scanner.peek("f") || scanner.peek("F") || scanner.peek("g") || scanner.peek("G")
-							|| scanner.peek("o") || scanner.peek("x") || scanner.peek("X")) {
+					if (scanner.peek("b") || scanner.peek("c") || scanner.peek("e") || scanner.peek("E") || scanner.peek("f") || scanner.peek("F") || scanner.peek("g")
+							|| scanner.peek("G") || scanner.peek("o") || scanner.peek("x") || scanner.peek("X")) {
 						setObject(obj, "type", scanner.getChar());
 					}
 					spot.setFnParm1(data);

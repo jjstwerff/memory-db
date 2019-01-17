@@ -29,7 +29,7 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 		this.parent = parent;
 		this.idx = idx;
 		if (parent.getRec() != 0) {
-			this.alloc = store.getInt(parent.getRec(), 12);
+			this.alloc = store.getInt(parent.getRec(), 16);
 			if (alloc != 0) {
 				setUpRecord(parent);
 				this.size = store.getInt(alloc, 4);
@@ -102,7 +102,7 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 			setUpRecord(parent);
 		} else
 			alloc = store.resize(alloc, (12 + (idx + 1) * 18) / 8);
-		store.setInt(parent.getRec(), 12, alloc);
+		store.setInt(parent.getRec(), 16, alloc);
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
 		return this;

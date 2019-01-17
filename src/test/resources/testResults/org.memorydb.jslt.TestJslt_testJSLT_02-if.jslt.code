@@ -1,15 +1,15 @@
 name=double, alternatives=[
   nr=0, parameters=[
-    if=[
-      operation=FUNCTION, function=EQ, fnParm1=[
-        operation=FUNCTION, function=LENGTH, fnParm1=[
-          operation=VARIABLE, varName=elm, varNr=0
-        ]
-      ], fnParm2=[
-        operation=NUMBER, number=2
+    type=VARIABLE, variable=[
+      name=elm, type=NULL
+    ]
+  ], if=[
+    operation=FUNCTION, function=EQ, fnParm1=[
+      operation=FUNCTION, function=LENGTH, fnParm1=[
+        operation=VARIABLE, varName=elm, varNr=0
       ]
-    ], type=VARIABLE, variable=[
-      name=elm, nr=0, eager=false, extension=false, type=NULL
+    ], fnParm2=[
+      operation=NUMBER, number=2
     ]
   ], code=[
     operation=VARIABLE, varName=elm, varNr=0
@@ -172,13 +172,13 @@ name=slice, alternatives=[
 name=t.assert, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=name, nr=0, eager=false, extension=false, type=STRING
+      name=name, type=STRING
     ]
     type=VARIABLE, variable=[
-      name=should, nr=0, eager=false, extension=false, type=NULL
+      name=should, type=NULL
     ]
     type=VARIABLE, variable=[
-      name=was, nr=0, eager=false, extension=false, type=NULL
+      name=was, type=NULL
     ]
   ], code=[
     operation=CONDITION, conExpr=[

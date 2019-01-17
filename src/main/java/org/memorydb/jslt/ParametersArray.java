@@ -7,7 +7,6 @@ import java.util.NoSuchElementException;
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.ChangeInterface;
-import org.memorydb.structure.FieldData;
 import org.memorydb.structure.InputOutputException;
 import org.memorydb.structure.RecordData;
 import org.memorydb.structure.RecordInterface;
@@ -99,14 +98,13 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 			return this;
 		idx = size;
 		if (alloc == 0) {
-			alloc = store.allocate(13 + 12);
+			alloc = store.allocate(9 + 12);
 			setUpRecord(parent);
 		} else
-			alloc = store.resize(alloc, (12 + (idx + 1) * 13) / 8);
+			alloc = store.resize(alloc, (12 + (idx + 1) * 9) / 8);
 		store.setInt(parent.getRec(), 8, alloc);
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
-		setIf(null);
 		return this;
 	}
 
@@ -130,33 +128,10 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 		};
 	}
 
-	@FieldData(
-		name = "parameters",
-		type = "ARRAY",
-		related = ParametersArray.class,
-		mandatory = false
-	)
-
-	public Expr getIf() {
-		return new Expr(store, alloc == 0 || idx < 0 || idx >= size ? 0 : store.getInt(alloc, idx * 13 + 12));
-	}
-
-	public void setIf(Expr value) {
-		if (alloc != 0 && idx >= 0 && idx < size) {
-			store.setInt(alloc, idx * 13 + 12, value == null ? 0 : value.getRec());
-		}
-	}
-
 	@Override
 	public void output(Write write, int iterate) throws IOException {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		Expr fldIf = getIf();
-		if (fldIf != null && fldIf.getRec() != 0) {
-			write.sub("if");
-			fldIf.output(write, iterate);
-			write.endSub();
-		}
 		outputMatch(write, iterate);
 		write.endRecord();
 	}
@@ -178,16 +153,12 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 	}
 
 	public void parse(Parser parser) {
-		setIf(null);
 		parseMatch(parser);
-		if (parser.hasSub("if")) {
-			setIf(new Expr(store).parse(parser));
-		}
 	}
 
 	@Override
 	public int matchPosition() {
-		return idx * 13 + 12 + 4;
+		return idx * 9 + 12;
 	}
 
 	@Override
@@ -212,11 +183,9 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public String name(int field) {
-		if (field >= 1 && field <= 9)
-			return nameMatch(field - 1);
+		if (field >= 0 && field <= 13)
+			return nameMatch(field - 0);
 		switch (field) {
-		case 1:
-			return "if";
 		default:
 			return null;
 		}
@@ -224,11 +193,9 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 1 && field <= 9)
-			return typeMatch(field - 1);
+		if (field >= 0 && field <= 13)
+			return typeMatch(field - 0);
 		switch (field) {
-		case 1:
-			return FieldType.OBJECT;
 		default:
 			return null;
 		}
@@ -236,11 +203,9 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 1 && field <= 9)
-			return getMatch(field - 1);
+		if (field >= 0 && field <= 13)
+			return getMatch(field - 0);
 		switch (field) {
-		case 1:
-			return getIf();
 		default:
 			return null;
 		}
@@ -248,8 +213,8 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 1 && field <= 9)
-			return iterateMatch(field - 1);
+		if (field >= 0 && field <= 13)
+			return iterateMatch(field - 0);
 		switch (field) {
 		default:
 			return null;
@@ -258,13 +223,9 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 1 && field <= 9)
-			return setMatch(field - 1, value);
+		if (field >= 0 && field <= 13)
+			return setMatch(field - 0, value);
 		switch (field) {
-		case 1:
-			if (value instanceof Expr)
-				setIf((Expr) value);
-			return value instanceof Expr;
 		default:
 			return false;
 		}
@@ -272,8 +233,8 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 1 && field <= 9)
-			return addMatch(field - 1);
+		if (field >= 0 && field <= 13)
+			return addMatch(field - 0);
 		switch (field) {
 		default:
 			return null;

@@ -147,8 +147,7 @@ name=main, alternatives=[
     ], fnParm2=[
       operation=CALL, macro={Name=t.assert}, callParms=[
         operation=STRING, string=exact array
-        operation=ARRAY, array=[
-        ]
+        operation=NULL
         operation=CALL, macro={Name=strsec}, callParms=[
           operation=ARRAY, array=[
             operation=STRING, string=2
@@ -162,7 +161,7 @@ name=numb, alternatives=[
   nr=0, parameters=[
     type=ARRAY, marray=[
       type=VARIABLE, variable=[
-        name=a, nr=0, eager=false, extension=false, type=NULL
+        name=a, type=NULL
       ]
       type=NUMBER, number=2
     ]
@@ -175,7 +174,7 @@ name=second, alternatives=[
     type=ARRAY, marray=[
       type=NUMBER, number=2
       type=VARIABLE, variable=[
-        name=a, nr=0, eager=false, extension=false, type=NULL
+        name=a, type=NULL
       ]
     ]
   ], code=[
@@ -188,7 +187,7 @@ name=str, alternatives=[
   nr=0, parameters=[
     type=ARRAY, marray=[
       type=VARIABLE, variable=[
-        name=a, nr=0, eager=false, extension=false, type=NULL
+        name=a, type=NULL
       ]
       type=STRING, string=2
     ]
@@ -201,7 +200,7 @@ name=strsec, alternatives=[
     type=ARRAY, marray=[
       type=STRING, string=2
       type=VARIABLE, variable=[
-        name=a, nr=0, eager=false, extension=false, type=NULL
+        name=a, type=NULL
       ]
     ]
   ], code=[
@@ -211,13 +210,13 @@ name=strsec, alternatives=[
 name=t.assert, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=name, nr=0, eager=false, extension=false, type=STRING
+      name=name, type=STRING
     ]
     type=VARIABLE, variable=[
-      name=should, nr=0, eager=false, extension=false, type=NULL
+      name=should, type=NULL
     ]
     type=VARIABLE, variable=[
-      name=was, nr=0, eager=false, extension=false, type=NULL
+      name=was, type=NULL
     ]
   ], code=[
     operation=CONDITION, conExpr=[

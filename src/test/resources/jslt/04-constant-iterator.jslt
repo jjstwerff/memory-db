@@ -17,4 +17,4 @@ t.assert("second", [1, 2], second([ 2, 1, 2])) +
 t.assert("strsec", [1, 2], strsec([ "2", 1, 2])) +
 t.assert("exact str", "", strsec("2")) +
 t.assert("exact str", "abc", strsec("2abc")) +
-t.assert("exact array", [], strsec( ["2"]))
+t.assert("exact array", null, strsec( ["2"]))

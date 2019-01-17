@@ -1,11 +1,11 @@
 import testing as t
 
 def a(): 1
-def b(NUMBER:val): val + 1
-def b(STRING:val): val + "*"
-def b(0, NUMBER:val2): 100 * val2
-def b("", NUMBER:val2): val2
-def b(NUMBER:val, NUMBER:val2): val + val2
+def b(number:val): val + 1
+def b(string:val): val + "*"
+def b(0, number:val2): 100 * val2
+def b("", number:val2): val2
+def b(number:val, number:val2): val + val2
 
 t.assert("constant", 1, a()) + 
 t.assert("type-match-1", " *", b(" ")) +

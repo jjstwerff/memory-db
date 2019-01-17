@@ -7,7 +7,7 @@ name=a, alternatives=[
 name=b, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=val, nr=0, eager=false, extension=false, type=NUMBER
+      name=val, type=NUMBER
     ]
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
@@ -18,7 +18,7 @@ name=b, alternatives=[
   ]
   nr=1, parameters=[
     type=VARIABLE, variable=[
-      name=val, nr=0, eager=false, extension=false, type=STRING
+      name=val, type=STRING
     ]
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
@@ -30,7 +30,7 @@ name=b, alternatives=[
   nr=2, parameters=[
     type=NUMBER, number=0
     type=VARIABLE, variable=[
-      name=val2, nr=0, eager=false, extension=false, type=NUMBER
+      name=val2, type=NUMBER
     ]
   ], code=[
     operation=FUNCTION, function=MUL, fnParm1=[
@@ -42,17 +42,17 @@ name=b, alternatives=[
   nr=3, parameters=[
     type=STRING, string=
     type=VARIABLE, variable=[
-      name=val2, nr=0, eager=false, extension=false, type=NUMBER
+      name=val2, type=NUMBER
     ]
   ], code=[
     operation=VARIABLE, varName=val2, varNr=0
   ]
   nr=4, parameters=[
     type=VARIABLE, variable=[
-      name=val, nr=0, eager=false, extension=false, type=NUMBER
+      name=val, type=NUMBER
     ]
     type=VARIABLE, variable=[
-      name=val2, nr=0, eager=false, extension=false, type=NUMBER
+      name=val2, type=NUMBER
     ]
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
@@ -131,13 +131,13 @@ name=slice, alternatives=[
 name=t.assert, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=name, nr=0, eager=false, extension=false, type=STRING
+      name=name, type=STRING
     ]
     type=VARIABLE, variable=[
-      name=should, nr=0, eager=false, extension=false, type=NULL
+      name=should, type=NULL
     ]
     type=VARIABLE, variable=[
-      name=was, nr=0, eager=false, extension=false, type=NULL
+      name=was, type=NULL
     ]
   ], code=[
     operation=CONDITION, conExpr=[

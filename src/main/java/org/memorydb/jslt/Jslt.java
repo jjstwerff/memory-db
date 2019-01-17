@@ -67,6 +67,10 @@ public class Jslt implements AutoCloseable {
 		return new ChangeMacro(store);
 	}
 
+	public ChangeMatchObject addMatchObject() {
+		return new ChangeMatchObject(store);
+	}
+
 	public ChangeSource addSource() {
 		return new ChangeSource(store);
 	}

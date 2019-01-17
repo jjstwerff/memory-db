@@ -1,0 +1,217 @@
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=FUNCTION, function=ADD, fnParm1=[
+              operation=CALL, macro={Name=t.assert}, callParms=[
+                operation=STRING, string=tabs
+                operation=ARRAY, array=[
+                  operation=STRING, string=a
+                ]
+                operation=CALL, macro={Name=parts}, callParms=[
+                  operation=STRING, string=a
+                ]
+              ]
+            ], fnParm2=[
+              operation=CALL, macro={Name=t.assert}, callParms=[
+                operation=STRING, string=empty_second
+                operation=ARRAY, array=[
+                  operation=STRING, string=a
+                  operation=STRING, string=
+                ]
+                operation=CALL, macro={Name=parts}, callParms=[
+                  operation=STRING, string=a\t
+                ]
+              ]
+            ]
+          ], fnParm2=[
+            operation=CALL, macro={Name=t.assert}, callParms=[
+              operation=STRING, string=empty_parts
+              operation=ARRAY, array=[
+              ]
+              operation=CALL, macro={Name=parts}, callParms=[
+                operation=STRING, string=
+              ]
+            ]
+          ]
+        ], fnParm2=[
+          operation=CALL, macro={Name=t.assert}, callParms=[
+            operation=STRING, string=three
+            operation=ARRAY, array=[
+              operation=STRING, string=a
+              operation=STRING, string=b
+              operation=STRING, string=c
+            ]
+            operation=CALL, macro={Name=parts}, callParms=[
+              operation=STRING, string=a\tb\tc
+            ]
+          ]
+        ]
+      ], fnParm2=[
+        operation=CALL, macro={Name=t.assert}, callParms=[
+          operation=STRING, string=multi
+          operation=ARRAY, array=[
+            operation=ARRAY, array=[
+            ]
+            operation=ARRAY, array=[
+              operation=STRING, string=a
+              operation=STRING, string=
+            ]
+            operation=ARRAY, array=[
+              operation=STRING, string=a
+              operation=STRING, string=b
+              operation=STRING, string=c
+            ]
+          ]
+          operation=CALL, macro={Name=tabbed}, callParms=[
+            operation=STRING, string=
+              
+              a\t
+              a\tb\tc
+          ]
+        ]
+      ]
+    ], fnParm2=[
+      operation=CALL, macro={Name=t.assert}, callParms=[
+        operation=STRING, string=empty
+        operation=ARRAY, array=[
+        ]
+        operation=CALL, macro={Name=tabbed}, callParms=[
+          operation=STRING, string=
+        ]
+      ]
+    ]
+  ]
+]
+name=parts, alternatives=[
+  nr=0, parameters=[
+    type=STRING, string=
+  ], code=[
+    operation=ARRAY, array=[
+    ]
+  ]
+  nr=1, parameters=[
+    type=ARRAY, marray=[
+      type=VARIABLE, variable=[
+        name=elm, type=NULL
+      ]
+      type=STRING, string=\t
+      type=VARIABLE, variable=[
+        name=rest, type=NULL
+      ]
+    ]
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=ARRAY, array=[
+        operation=VARIABLE, varName=elm, varNr=0
+      ]
+    ], fnParm2=[
+      operation=CALL, macro={Name=parts}, callParms=[
+        operation=VARIABLE, varName=rest, varNr=1
+      ]
+    ]
+  ]
+  nr=2, parameters=[
+    type=VARIABLE, variable=[
+      name=rest, type=NULL
+    ]
+  ], code=[
+    operation=ARRAY, array=[
+      operation=VARIABLE, varName=rest, varNr=0
+    ]
+  ]
+]
+name=slice, alternatives=[
+]
+name=t.assert, alternatives=[
+  nr=0, parameters=[
+    type=VARIABLE, variable=[
+      name=name, type=STRING
+    ]
+    type=VARIABLE, variable=[
+      name=should, type=NULL
+    ]
+    type=VARIABLE, variable=[
+      name=was, type=NULL
+    ]
+  ], code=[
+    operation=CONDITION, conExpr=[
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=VARIABLE, varName=should, varNr=1
+      ], fnParm2=[
+        operation=VARIABLE, varName=was, varNr=2
+      ]
+    ], conTrue=[
+      operation=STRING, string=
+    ], conFalse=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=FUNCTION, function=ADD, fnParm1=[
+              operation=FUNCTION, function=ADD, fnParm1=[
+                operation=VARIABLE, varName=name, varNr=0
+              ], fnParm2=[
+                operation=STRING, string= was '
+              ]
+            ], fnParm2=[
+              operation=VARIABLE, varName=was, varNr=2
+            ]
+          ], fnParm2=[
+            operation=STRING, string=' should '
+          ]
+        ], fnParm2=[
+          operation=VARIABLE, varName=should, varNr=1
+        ]
+      ], fnParm2=[
+        operation=STRING, string=
+          '
+      ]
+    ]
+  ]
+]
+name=tabbed, alternatives=[
+  nr=0, parameters=[
+    type=STRING, string=
+  ], code=[
+    operation=ARRAY, array=[
+    ]
+  ]
+  nr=1, parameters=[
+    type=ARRAY, marray=[
+      type=VARIABLE, variable=[
+        name=line, type=NULL
+      ]
+      type=STRING, string=
+        
+      type=VARIABLE, variable=[
+        name=rest, type=NULL
+      ]
+    ]
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=ARRAY, array=[
+        operation=CALL, macro={Name=parts}, callParms=[
+          operation=VARIABLE, varName=line, varNr=0
+        ]
+      ]
+    ], fnParm2=[
+      operation=CALL, macro={Name=tabbed}, callParms=[
+        operation=VARIABLE, varName=rest, varNr=1
+      ]
+    ]
+  ]
+  nr=2, parameters=[
+    type=VARIABLE, variable=[
+      name=line, type=NULL
+    ]
+  ], code=[
+    operation=ARRAY, array=[
+      operation=CALL, macro={Name=parts}, callParms=[
+        operation=VARIABLE, varName=line, varNr=0
+      ]
+    ]
+  ]
+]
