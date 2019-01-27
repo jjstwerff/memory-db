@@ -51,7 +51,7 @@ public class MemoryTests extends NormalCheck {
 		if (source != null)
 			code.append("Source:\n").append(source).append("\n");
 		code.append("Code:\n").append(write);
-		compare(testNr++ + ".code", code.toString());
+		compare(testNr++ + "", code.toString());
 		jslt(source, macro, result);
 	}
 

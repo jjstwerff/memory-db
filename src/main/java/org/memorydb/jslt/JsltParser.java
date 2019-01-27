@@ -271,7 +271,11 @@ public class JsltParser {
 					if ((m = getMacro(id)) != null) {
 						match.setType(Type.MACRO);
 						match.setMacro(m);
-						// TODO allow parameters
+					} else if (parms.containsKey(id)) {
+						match.setType(Type.CONSTANT);
+						Parm parm = parms.get(id);
+						match.setConstant(parm.position);
+						match.setCparm(parm.name);
 					} else {
 						match.setType(Type.VARIABLE);
 						switch (id) {

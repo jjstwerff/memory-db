@@ -167,13 +167,23 @@ public interface Match extends MemoryRecord, RecordInterface {
 	}
 
 	@FieldData(
+		name = "cparm",
+		type = "STRING",
+		when = "CONSTANT",
+		mandatory = false
+	)
+	default String getCparm() {
+		return getType() != Type.CONSTANT ? null : getStore().getString(getStore().getInt(getRec(), matchPosition() + 1));
+	}
+
+	@FieldData(
 		name = "constant",
 		type = "INTEGER",
 		when = "CONSTANT",
 		mandatory = false
 	)
 	default int getConstant() {
-		return getType() != Type.CONSTANT ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchPosition() + 1);
+		return getType() != Type.CONSTANT ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchPosition() + 5);
 	}
 
 	@FieldData(
@@ -252,6 +262,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 				sub.output(write, iterate);
 			write.endSub();
 		}
+		write.field("cparm", getCparm());
 		write.field("constant", getConstant());
 		write.field("macro", getMacro());
 		MparmsArray fldMparms = getMparms();
@@ -286,10 +297,12 @@ public interface Match extends MemoryRecord, RecordInterface {
 		case 8:
 			return getString();
 		case 10:
-			return getConstant();
+			return getCparm();
 		case 11:
+			return getConstant();
+		case 12:
 			return getMacro();
-		case 13:
+		case 14:
 			return getMmatch();
 		default:
 			return null;
@@ -302,7 +315,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 			return getMarray();
 		case 9:
 			return getMobject();
-		case 12:
+		case 13:
 			return getMparms();
 		default:
 			return null;
@@ -330,12 +343,14 @@ public interface Match extends MemoryRecord, RecordInterface {
 		case 9:
 			return FieldType.ARRAY;
 		case 10:
-			return FieldType.INTEGER;
+			return FieldType.STRING;
 		case 11:
-			return FieldType.OBJECT;
+			return FieldType.INTEGER;
 		case 12:
-			return FieldType.ARRAY;
+			return FieldType.OBJECT;
 		case 13:
+			return FieldType.ARRAY;
+		case 14:
 			return FieldType.OBJECT;
 		default:
 			return null;
@@ -363,12 +378,14 @@ public interface Match extends MemoryRecord, RecordInterface {
 		case 9:
 			return "mobject";
 		case 10:
-			return "constant";
+			return "cparm";
 		case 11:
-			return "macro";
+			return "constant";
 		case 12:
-			return "mparms";
+			return "macro";
 		case 13:
+			return "mparms";
+		case 14:
 			return "mmatch";
 		default:
 			return null;

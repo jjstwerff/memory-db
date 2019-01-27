@@ -100,6 +100,7 @@ public class JsltStructure {
 		match.field("number", Type.LONG).when("NUMBER");
 		match.field("string", Type.STRING).when("STRING");
 		match.field("mobject", Type.ARRAY, mfield).when("OBJECT");
+		match.field("cparm", Type.STRING).when("CONSTANT");
 		match.field("constant", Type.INTEGER).when("CONSTANT");
 		match.field("macro", Type.RELATION, macro).when("MACRO");
 		match.field("mparms", Type.ARRAY, step).when("MACRO");

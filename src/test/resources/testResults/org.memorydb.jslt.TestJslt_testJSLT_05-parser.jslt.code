@@ -102,27 +102,23 @@ name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
-      operation=FUNCTION, function=ADD, fnParm1=[
-        operation=CALL, macro={Name=t.assert}, callParms=[
-          operation=STRING, string=whitespace
-          operation=BOOLEAN, boolean=true
-          operation=CALL, macro={Name=token}, callParms=[
-            operation=STRING, string=(
-            operation=STRING, string=  (
-          ]
-        ]
-      ], fnParm2=[
-        operation=CALL, macro={Name=t.assert}, callParms=[
-          operation=STRING, string=token
-          operation=BOOLEAN, boolean=true
-          operation=CALL, macro={Name=token}, callParms=[
-            operation=STRING, string=(
-            operation=STRING, string= (
-          ]
+      operation=CALL, macro={Name=t.assert}, callParms=[
+        operation=STRING, string=whitespace
+        operation=BOOLEAN, boolean=true
+        operation=CALL, macro={Name=token}, callParms=[
+          operation=STRING, string=(
+          operation=STRING, string=  (
         ]
       ]
     ], fnParm2=[
-      operation=STRING, string=!
+      operation=CALL, macro={Name=t.assert}, callParms=[
+        operation=STRING, string=token
+        operation=BOOLEAN, boolean=true
+        operation=CALL, macro={Name=token}, callParms=[
+          operation=STRING, string=(
+          operation=STRING, string= (
+        ]
+      ]
     ]
   ]
 ]
@@ -233,9 +229,7 @@ name=token, alternatives=[
         type=MACRO, macro={Name=wstoken}, mparms=[
         ]
       ]
-      type=VARIABLE, variable=[
-        name=tok, type=NULL
-      ]
+      type=CONSTANT, cparm=tok, constant=0
     ]
   ], code=[
     operation=BOOLEAN, boolean=true

@@ -44,6 +44,7 @@ public interface ChangeMatch extends ChangeInterface, Match {
 				break;
 			case CONSTANT:
 				getStore().setInt(getRec(), matchPosition() + 1, 0);
+				getStore().setInt(getRec(), matchPosition() + 5, 0);
 				break;
 			case MACRO:
 				getStore().setInt(getRec(), matchPosition() + 1, 0);
@@ -104,9 +105,15 @@ public interface ChangeMatch extends ChangeInterface, Match {
 		getStore().setInt(other.getRec(), other.matchPosition() + 1, 0);
 	}
 
+	default void setCparm(String value) {
+		if (getType() == Type.CONSTANT) {
+			getStore().setInt(getRec(), matchPosition() + 1, getStore().putString(value));
+		}
+	}
+
 	default void setConstant(int value) {
 		if (getType() == Type.CONSTANT) {
-			getStore().setInt(getRec(), matchPosition() + 1, value);
+			getStore().setInt(getRec(), matchPosition() + 5, value);
 		}
 	}
 
@@ -172,6 +179,9 @@ public interface ChangeMatch extends ChangeInterface, Match {
 				}
 			}
 		}
+		if (parser.hasField("cparm")) {
+			setCparm(parser.getString("cparm"));
+		}
 		if (parser.hasField("constant")) {
 			setConstant(parser.getInt("constant"));
 		}
@@ -232,14 +242,18 @@ public interface ChangeMatch extends ChangeInterface, Match {
 				setString((String) value);
 			return value instanceof String;
 		case 10:
+			if (value instanceof String)
+				setCparm((String) value);
+			return value instanceof String;
+		case 11:
 			if (value instanceof Integer)
 				setConstant((Integer) value);
 			return value instanceof Integer;
-		case 11:
+		case 12:
 			if (value instanceof Macro)
 				setMacro((Macro) value);
 			return value instanceof Macro;
-		case 13:
+		case 14:
 			if (value instanceof MatchObject)
 				setMmatch((MatchObject) value);
 			return value instanceof MatchObject;
@@ -254,7 +268,7 @@ public interface ChangeMatch extends ChangeInterface, Match {
 			return addMarray();
 		case 9:
 			return addMobject();
-		case 12:
+		case 13:
 			return addMparms();
 		default:
 			return null;

@@ -128,13 +128,17 @@ public class JsltInterpreter {
 		int parms = code.getCallParms().getSize();
 		for (CallParmsArray parm : code.getCallParms())
 			stack.add(inter(parm));
+		return findAlternative(macro, stackF, parms);
+	}
+
+	private Object findAlternative(Macro macro, int stackF, int parms) {
+		int oldFrame = stackFrame;
 		for (Alternative alt : macro.getAlternatives()) {
 			if (alt.getParameters().getSize() != parms)
 				continue;
 			int pnr = 0;
 			boolean found = true;
 			int newFrame = stack.size();
-			int lastFrame = stackFrame;
 			stackFrame = newFrame;
 			for (ParametersArray parm : alt.getParameters()) {
 				Object obj = stack.get(stackF + pnr);
@@ -151,7 +155,7 @@ public class JsltInterpreter {
 			}
 			if (found) {
 				Object res = inter(alt.getCode().iterator().next());
-				stackFrame = lastFrame;
+				stackFrame = oldFrame;
 				while (stack.size() > stackF)
 					stack.remove(stack.size() - 1);
 				return res;
@@ -162,10 +166,11 @@ public class JsltInterpreter {
 		}
 		while (stack.size() > stackF)
 			stack.remove(stack.size() - 1);
+		stackFrame = oldFrame;
 		return null;
 	}
 
-	private boolean testParm(ChangeMatch parm, Object obj) {
+	private boolean testParm(Match parm, Object obj) {
 		switch (parm.getType()) {
 		case BOOLEAN:
 			if (!(obj instanceof Boolean) || (Boolean) obj != parm.isBoolean())
@@ -191,7 +196,7 @@ public class JsltInterpreter {
 			if (obj instanceof RecordInterface && ((RecordInterface) obj).type() == FieldType.ARRAY)
 				return arrayMatch(parm, (RecordInterface) obj);
 			else if (obj instanceof String)
-				return stringMatch(parm, (String) obj);
+				return stringMatch(parm, (String) obj) >= 0;
 		case STRING:
 			if (!(obj instanceof String) || !parm.getString().equals(obj))
 				return false;
@@ -201,6 +206,14 @@ public class JsltInterpreter {
 				return false;
 			stack.add(obj);
 			break;
+		case CONSTANT:
+			throw new RuntimeException("Constant");
+		case MULTIPLE:
+			// multiple outside or the last element of an array
+			while (testParm(parm.getMmatch(), obj)) {
+				throw new RuntimeException("Not implemented yet");
+			}
+			break;
 		case MACRO:
 			throw new RuntimeException("macro");
 		default:
@@ -209,18 +222,26 @@ public class JsltInterpreter {
 		return true;
 	}
 
-	private boolean arrayMatch(ChangeMatch parm, RecordInterface arr) {
+	private boolean arrayMatch(Match parm, RecordInterface arr) {
 		int elms = 0;
 		int aElm = arr.next(-1);
 		Iterator<MarrayArray> iterator = parm.getMarray().iterator();
+		List<Match> multiple = new ArrayList<>(); // remember multiple match elements
 		boolean notLast = iterator.hasNext();
 		while (notLast) {
 			if (aElm < 0)
 				return false; // beyond the last array element
 			MarrayArray elm = iterator.next();
 			notLast = iterator.hasNext();
-			if (!notLast) { // last element
-				if (elm.getType() == Match.Type.VARIABLE && (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
+			if (notLast && elm.getType() == Match.Type.MULTIPLE) {
+				multiple.add(elm);
+			} else if (!multiple.isEmpty()) {
+				for (int m = multiple.size() - 1; m >= 0; m--) {
+					System.out.println("here");
+				}
+			} else if (!notLast) { // last element
+				if (elm.getType() == Match.Type.VARIABLE
+						&& (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
 					stack.add(new SubArray(arr, aElm, elms));
 					return true; // match the rest of the array
 				}
@@ -234,6 +255,7 @@ public class JsltInterpreter {
 			} else {
 				if (!testParm(elm, arr.get(aElm)))
 					return false; // next element is not of the correct type
+				multiple.clear();
 				aElm = arr.next(aElm);
 				elms++;
 			}
@@ -241,33 +263,109 @@ public class JsltInterpreter {
 		return true;
 	}
 
-	private boolean stringMatch(ChangeMatch parm, String obj) {
+	private int stringMatch(Match parm, String obj) {
 		int pos = 0;
 		Iterator<MarrayArray> iterator = parm.getMarray().iterator();
+		List<Match> multiple = new ArrayList<>(); // remember multiple match elements
 		boolean notLast = iterator.hasNext();
 		while (notLast) {
 			if (pos < 0)
-				return false; // beyond the last array element
+				return -1; // beyond the last array element
 			MarrayArray elm = iterator.next();
 			notLast = iterator.hasNext();
-			if (!notLast) { // last element
-				if (elm.getType() == Match.Type.VARIABLE && (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
-					stack.add(obj.substring(pos));
-					return true; // match the rest of the array
+			if (elm.getType() == Match.Type.MULTIPLE) {
+				multiple.add(elm.getMmatch());
+			} else if (!multiple.isEmpty()) {
+				int m = stringParm(elm, obj, pos);
+				if (m == -1) {
+					for (int i = multiple.size() - 1; i > -1; i--) {
+						m = 0;
+						boolean found = false;
+						while (m >= 0) {
+							m = stringParm(multiple.get(i), obj, pos);
+							if (m >= 0) {
+								found = true;
+								pos = m;
+							}
+						}
+						if (found)
+							break;
+					}
+					pos = stringParm(elm, obj, pos);
+				} else {
+					pos = m;
 				}
-				if (!testParm(elm, obj.substring(pos, pos + 1)))
-					return false; // next element is not of the correct type
-				pos++;
+				if (!notLast && pos < obj.length())
+					return -1; // not at the end of the array yet
+			} else if (!notLast) { // last element
+				if (elm.getType() == Match.Type.VARIABLE
+						&& (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
+					stack.add(obj.substring(pos));
+					return 0; // match the rest of the array
+				}
+				if ((pos = stringParm(elm, obj, pos)) < 0)
+					return -1; // next element is not of the correct type
 				// TODO the end of array test should not be validated on a CALL type variable
 				if (pos < obj.length())
-					return false; // not at the end of the array yet
+					return -1; // not at the end of the array yet
 			} else {
-				if (!testParm(elm, obj.substring(pos, pos + 1)))
-					return false; // next element is not of the correct type
-				pos++;
+				if ((pos = stringParm(elm, obj, pos)) < 0)
+					return -1; // next element is not of the correct type
 			}
 		}
-		return true;
+		return pos;
+	}
+
+	private int stringParm(Match parm, String on, int pos) {
+		switch (parm.getType()) {
+		case BOOLEAN:
+			return stringMatches(on, pos, parm.isBoolean() ? "true" : "false");
+		case NUMBER:
+		case FLOAT:
+		case OBJECT:
+		case ARRAY:
+			throw new RuntimeException("Not implemented yet");
+		case NULL:
+			return stringMatches(on, pos, "null");
+		case STRING:
+			return stringMatches(on, pos, parm.getString());
+		case VARIABLE:
+			if (pos < on.length() - 1) {
+				stack.add(on.substring(pos, pos + 1));
+				return pos + 1;
+			}
+			break;
+		case CONSTANT:
+			Object object = stack.get(stackFrame + parm.getConstant());
+			return stringMatches(on, pos, object == null ? "null" : object.toString());
+		case MULTIPLE:
+			int match;
+			while ((match = stringParm(parm.getMmatch(), on, pos)) > -1)
+				pos = match;
+			return pos;
+		case MACRO:
+			int stackF = stack.size();
+			int parms = parm.getMparms().getSize() + 1;
+			for (MparmsArray p : parm.getMparms()) {
+				Object obj = inter(p);
+				stack.add(obj);
+			}
+			stack.add(on.substring(pos, pos + 1));
+			Object res = findAlternative(parm.getMacro(), stackF, parms);
+			if (res instanceof Boolean && ((Boolean) res))
+				return pos + 1;
+		}
+		return -1;
+	}
+
+	private int stringMatches(String on, int pos, String with) {
+		int withLength = with.length();
+		if (pos + withLength > on.length())
+			return -1;
+		for (int i = 0; i < withLength; i++)
+			if (with.charAt(i) != on.charAt(pos + i))
+				return -1;
+		return pos + withLength;
 	}
 
 	/**
