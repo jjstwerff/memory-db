@@ -101,23 +101,11 @@ name=idnext, alternatives=[
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=FUNCTION, function=ADD, fnParm1=[
-      operation=CALL, macro={Name=t.assert}, callParms=[
-        operation=STRING, string=whitespace
-        operation=BOOLEAN, boolean=true
-        operation=CALL, macro={Name=token}, callParms=[
-          operation=STRING, string=(
-          operation=STRING, string=  (
-        ]
-      ]
-    ], fnParm2=[
-      operation=CALL, macro={Name=t.assert}, callParms=[
-        operation=STRING, string=token
-        operation=BOOLEAN, boolean=true
-        operation=CALL, macro={Name=token}, callParms=[
-          operation=STRING, string=(
-          operation=STRING, string= (
-        ]
+    operation=CALL, macro={Name=t.assert}, callParms=[
+      operation=STRING, string=id
+      operation=STRING, string=hi_ho
+      operation=CALL, macro={Name=id}, callParms=[
+        operation=STRING, string=  hi_ho
       ]
     ]
   ]

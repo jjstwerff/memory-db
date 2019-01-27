@@ -8,7 +8,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.memorydb.handler.StringText;
 import org.memorydb.handler.StringWriter;
+import org.memorydb.handler.Text;
 import org.memorydb.handler.Writer;
 import org.memorydb.jslt.Macro.IndexMacros;
 import org.memorydb.jslt.Operator.Function;
@@ -196,7 +198,10 @@ public class JsltInterpreter {
 			if (obj instanceof RecordInterface && ((RecordInterface) obj).type() == FieldType.ARRAY)
 				return arrayMatch(parm, (RecordInterface) obj);
 			else if (obj instanceof String)
-				return stringMatch(parm, (String) obj) >= 0;
+				return textMatch(parm, new StringText((String) obj));
+			else if (obj instanceof Text)
+				return textMatch(parm, (Text) obj);
+			return false;
 		case STRING:
 			if (!(obj instanceof String) || !parm.getString().equals(obj))
 				return false;
@@ -263,86 +268,96 @@ public class JsltInterpreter {
 		return true;
 	}
 
-	private int stringMatch(Match parm, String obj) {
-		int pos = 0;
+	private boolean textMatch(Match parm, Text obj) {
 		Iterator<MarrayArray> iterator = parm.getMarray().iterator();
 		List<Match> multiple = new ArrayList<>(); // remember multiple match elements
 		boolean notLast = iterator.hasNext();
+		int pos = obj.addPos();
 		while (notLast) {
-			if (pos < 0)
-				return -1; // beyond the last array element
 			MarrayArray elm = iterator.next();
 			notLast = iterator.hasNext();
 			if (elm.getType() == Match.Type.MULTIPLE) {
 				multiple.add(elm.getMmatch());
 			} else if (!multiple.isEmpty()) {
-				int m = stringParm(elm, obj, pos);
-				if (m == -1) {
+				if (!textParm(elm, obj)) {
 					for (int i = multiple.size() - 1; i > -1; i--) {
-						m = 0;
 						boolean found = false;
-						while (m >= 0) {
-							m = stringParm(multiple.get(i), obj, pos);
-							if (m >= 0) {
+						while (true) {
+							if (textParm(multiple.get(i), obj))
 								found = true;
-								pos = m;
-							}
+							else
+								break;
 						}
 						if (found)
 							break;
 					}
-					pos = stringParm(elm, obj, pos);
-				} else {
-					pos = m;
+					textParm(elm, obj);
 				}
-				if (!notLast && pos < obj.length())
-					return -1; // not at the end of the array yet
+				if (!notLast && !obj.end()) {
+					obj.toPos(pos);
+					return false; // not at the end of the array yet
+				}
 			} else if (!notLast) { // last element
 				if (elm.getType() == Match.Type.VARIABLE
 						&& (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
-					stack.add(obj.substring(pos));
-					return 0; // match the rest of the array
+					stack.add(obj.tail());
+					obj.freePos(pos);
+					return true; // match the rest of the array
 				}
-				if ((pos = stringParm(elm, obj, pos)) < 0)
-					return -1; // next element is not of the correct type
+				if (!textParm(elm, obj)) {
+					obj.toPos(pos);
+					return false; // next element is not of the correct type
+				}
 				// TODO the end of array test should not be validated on a CALL type variable
-				if (pos < obj.length())
-					return -1; // not at the end of the array yet
+				if (!obj.end()) {
+					obj.toPos(pos);
+					return false; // not at the end of the array yet
+				}
 			} else {
-				if ((pos = stringParm(elm, obj, pos)) < 0)
-					return -1; // next element is not of the correct type
+				if (!textParm(elm, obj)) {
+					obj.toPos(pos);
+					return false; // next element is not of the correct type
+				}
 			}
 		}
-		return pos;
+		obj.freePos(pos);
+		return true;
 	}
 
-	private int stringParm(Match parm, String on, int pos) {
+	private boolean textParm(Match parm, Text on) {
 		switch (parm.getType()) {
 		case BOOLEAN:
-			return stringMatches(on, pos, parm.isBoolean() ? "true" : "false");
+			return on.match(parm.isBoolean() ? "true" : "false");
 		case NUMBER:
 		case FLOAT:
 		case OBJECT:
 		case ARRAY:
 			throw new RuntimeException("Not implemented yet");
 		case NULL:
-			return stringMatches(on, pos, "null");
+			return on.match("null");
 		case STRING:
-			return stringMatches(on, pos, parm.getString());
+			return on.match(parm.getString());
 		case VARIABLE:
-			if (pos < on.length() - 1) {
-				stack.add(on.substring(pos, pos + 1));
-				return pos + 1;
+			if (on.end())
+				return false;
+			MatchObject vmatch = parm.getVmatch();
+			if (vmatch != null && vmatch.getRec() != 0) {
+				int pos = on.addPos();
+				boolean res = textParm(vmatch, on);
+				stack.add(on.substring(pos));
+				on.freePos(pos);
+				return res;
+			} else {
+				stack.add(on.readChar() + "");
+				return true;
 			}
-			break;
 		case CONSTANT:
 			Object object = stack.get(stackFrame + parm.getConstant());
-			return stringMatches(on, pos, object == null ? "null" : object.toString());
+			return on.match(object == null ? "null" : object.toString());
 		case MULTIPLE:
-			int match;
-			while ((match = stringParm(parm.getMmatch(), on, pos)) > -1)
-				pos = match;
-			return pos;
+			while (textParm(parm.getMmatch(), on))
+				// nothing
+			return true;
 		case MACRO:
 			int stackF = stack.size();
 			int parms = parm.getMparms().getSize() + 1;
@@ -350,22 +365,16 @@ public class JsltInterpreter {
 				Object obj = inter(p);
 				stack.add(obj);
 			}
-			stack.add(on.substring(pos, pos + 1));
+			int pos = on.addPos();
+			stack.add(on.readChar() + "");
 			Object res = findAlternative(parm.getMacro(), stackF, parms);
-			if (res instanceof Boolean && ((Boolean) res))
-				return pos + 1;
+			if (res instanceof Boolean && ((Boolean) res)) {
+				on.freePos(pos);
+				return true;
+			}
+			on.toPos(pos);
 		}
-		return -1;
-	}
-
-	private int stringMatches(String on, int pos, String with) {
-		int withLength = with.length();
-		if (pos + withLength > on.length())
-			return -1;
-		for (int i = 0; i < withLength; i++)
-			if (with.charAt(i) != on.charAt(pos + i))
-				return -1;
-		return pos + withLength;
+		return false;
 	}
 
 	/**

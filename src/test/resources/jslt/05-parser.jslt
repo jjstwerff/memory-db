@@ -8,5 +8,7 @@ def nrtoken(x if x > '0' and x < '9'): true
 def number(wstoken* + (nrtoken + nrtoken)*:n): number(n)
 def token(tok, wstoken* + tok): true
 
-t.assert("whitespace", true, token("(", "  (")) +
-t.assert("token", true, token("(", " ("))
+t.assert("id", "hi_ho", id("  hi_ho"))
+# t.assert("whitespace", true, token("(", "  ("))
+# t.assert("token", true, token("(", " (")) +
+# t.assert("unmatched", null, token("(.", "  (")) +
