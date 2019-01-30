@@ -3,21 +3,21 @@ name=id, alternatives=[
     type=ARRAY, marray=[
       type=MULTIPLE, mmatch=[
         type=MACRO, macro={Name=wstoken}, mparms=[
-        ]
-      ]
+        ], mmin=0, mmax=0
+      ], mmin=0, mmax=-1
       type=VARIABLE, vmatch=[
         type=ARRAY, marray=[
           type=MACRO, macro={Name=idfirst}, mparms=[
-          ]
+          ], mmin=0, mmax=0
           type=MULTIPLE, mmatch=[
             type=MACRO, macro={Name=idnext}, mparms=[
-            ]
-          ]
-        ]
+            ], mmin=0, mmax=0
+          ], mmin=0, mmax=-1
+        ], mmin=0, mmax=0
       ], variable=[
         name=i, type=NULL, record=slice
-      ]
-    ]
+      ], mmin=0, mmax=0
+    ], mmin=0, mmax=0
   ], code=[
     operation=VARIABLE, varName=i, varNr=0
   ]
@@ -26,7 +26,7 @@ name=idfirst, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
       name=x, type=NULL
-    ]
+    ], mmin=0, mmax=0
   ], if=[
     operation=FUNCTION, function=OR, fnParm1=[
       operation=FUNCTION, function=OR, fnParm1=[
@@ -73,21 +73,11 @@ name=idnext, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
       name=x, type=NULL
-    ]
+    ], mmin=0, mmax=0
   ], if=[
     operation=FUNCTION, function=OR, fnParm1=[
-      operation=FUNCTION, function=AND, fnParm1=[
-        operation=FUNCTION, function=GT, fnParm1=[
-          operation=VARIABLE, varName=x, varNr=0
-        ], fnParm2=[
-          operation=STRING, string=0
-        ]
-      ], fnParm2=[
-        operation=FUNCTION, function=LT, fnParm1=[
-          operation=VARIABLE, varName=x, varNr=0
-        ], fnParm2=[
-          operation=STRING, string=9
-        ]
+      operation=CALL, macro={Name=nrtoken}, callParms=[
+        operation=VARIABLE, varName=x, varNr=0
       ]
     ], fnParm2=[
       operation=CALL, macro={Name=idfirst}, callParms=[
@@ -101,11 +91,104 @@ name=idnext, alternatives=[
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro={Name=t.assert}, callParms=[
-      operation=STRING, string=id
-      operation=STRING, string=hi_ho
-      operation=CALL, macro={Name=id}, callParms=[
-        operation=STRING, string=  hi_ho
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=FUNCTION, function=ADD, fnParm1=[
+              operation=FUNCTION, function=ADD, fnParm1=[
+                operation=FUNCTION, function=ADD, fnParm1=[
+                  operation=FUNCTION, function=ADD, fnParm1=[
+                    operation=FUNCTION, function=ADD, fnParm1=[
+                      operation=CALL, macro={Name=t.assert}, callParms=[
+                        operation=STRING, string=whitespace
+                        operation=BOOLEAN, boolean=true
+                        operation=CALL, macro={Name=token}, callParms=[
+                          operation=STRING, string=(
+                          operation=STRING, string=  (
+                        ]
+                      ]
+                    ], fnParm2=[
+                      operation=CALL, macro={Name=t.assert}, callParms=[
+                        operation=STRING, string=token
+                        operation=BOOLEAN, boolean=true
+                        operation=CALL, macro={Name=token}, callParms=[
+                          operation=STRING, string=(
+                          operation=STRING, string= (
+                        ]
+                      ]
+                    ]
+                  ], fnParm2=[
+                    operation=CALL, macro={Name=t.assert}, callParms=[
+                      operation=STRING, string=unmatched
+                      operation=NULL
+                      operation=CALL, macro={Name=token}, callParms=[
+                        operation=STRING, string=(.
+                        operation=STRING, string=  (
+                      ]
+                    ]
+                  ]
+                ], fnParm2=[
+                  operation=CALL, macro={Name=t.assert}, callParms=[
+                    operation=STRING, string=id
+                    operation=STRING, string=hi_ho
+                    operation=CALL, macro={Name=id}, callParms=[
+                      operation=STRING, string=  hi_ho
+                    ]
+                  ]
+                ]
+              ], fnParm2=[
+                operation=CALL, macro={Name=t.assert}, callParms=[
+                  operation=STRING, string=id2
+                  operation=STRING, string=hi2
+                  operation=CALL, macro={Name=id}, callParms=[
+                    operation=STRING, string=hi2
+                  ]
+                ]
+              ]
+            ], fnParm2=[
+              operation=CALL, macro={Name=t.assert}, callParms=[
+                operation=STRING, string=not id
+                operation=NULL
+                operation=CALL, macro={Name=id}, callParms=[
+                  operation=STRING, string=2hi
+                ]
+              ]
+            ]
+          ], fnParm2=[
+            operation=CALL, macro={Name=t.assert}, callParms=[
+              operation=STRING, string=number
+              operation=NUMBER, number=1234
+              operation=CALL, macro={Name=numb}, callParms=[
+                operation=STRING, string= 1234
+              ]
+            ]
+          ]
+        ], fnParm2=[
+          operation=CALL, macro={Name=t.assert}, callParms=[
+            operation=STRING, string=negative
+            operation=NUMBER, number=-1234
+            operation=CALL, macro={Name=numb}, callParms=[
+              operation=STRING, string= -1234
+            ]
+          ]
+        ]
+      ], fnParm2=[
+        operation=CALL, macro={Name=t.assert}, callParms=[
+          operation=STRING, string=not number
+          operation=NULL
+          operation=CALL, macro={Name=numb}, callParms=[
+            operation=STRING, string= 1234 
+          ]
+        ]
+      ]
+    ], fnParm2=[
+      operation=CALL, macro={Name=t.assert}, callParms=[
+        operation=STRING, string=double negative
+        operation=NULL
+        operation=CALL, macro={Name=numb}, callParms=[
+          operation=STRING, string=--1234
+        ]
       ]
     ]
   ]
@@ -114,7 +197,7 @@ name=nrtoken, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
       name=x, type=NULL
-    ]
+    ], mmin=0, mmax=0
   ], if=[
     operation=FUNCTION, function=AND, fnParm1=[
       operation=FUNCTION, function=GT, fnParm1=[
@@ -133,26 +216,29 @@ name=nrtoken, alternatives=[
     operation=BOOLEAN, boolean=true
   ]
 ]
-name=number, alternatives=[
+name=numb, alternatives=[
   nr=0, parameters=[
     type=ARRAY, marray=[
       type=MULTIPLE, mmatch=[
         type=MACRO, macro={Name=wstoken}, mparms=[
-        ]
-      ]
+        ], mmin=0, mmax=0
+      ], mmin=0, mmax=-1
       type=VARIABLE, vmatch=[
-        type=MULTIPLE, mmatch=[
-          type=ARRAY, marray=[
+        type=ARRAY, marray=[
+          type=MULTIPLE, mmatch=[
+            type=STRING, string=-, mmin=0, mmax=0
+          ], mmin=0, mmax=1
+          type=MACRO, macro={Name=nrtoken}, mparms=[
+          ], mmin=0, mmax=0
+          type=MULTIPLE, mmatch=[
             type=MACRO, macro={Name=nrtoken}, mparms=[
-            ]
-            type=MACRO, macro={Name=nrtoken}, mparms=[
-            ]
-          ]
-        ]
+            ], mmin=0, mmax=0
+          ], mmin=0, mmax=-1
+        ], mmin=0, mmax=0
       ], variable=[
         name=n, type=NULL, record=slice
-      ]
-    ]
+      ], mmin=0, mmax=0
+    ], mmin=0, mmax=0
   ], code=[
     operation=FUNCTION, function=NUMBER, fnParm1=[
       operation=VARIABLE, varName=n, varNr=0
@@ -165,13 +251,13 @@ name=t.assert, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
       name=name, type=STRING
-    ]
+    ], mmin=0, mmax=0
     type=VARIABLE, variable=[
       name=should, type=NULL
-    ]
+    ], mmin=0, mmax=0
     type=VARIABLE, variable=[
       name=was, type=NULL
-    ]
+    ], mmin=0, mmax=0
   ], code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[
@@ -211,14 +297,14 @@ name=token, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
       name=tok, type=NULL
-    ]
+    ], mmin=0, mmax=0
     type=ARRAY, marray=[
       type=MULTIPLE, mmatch=[
         type=MACRO, macro={Name=wstoken}, mparms=[
-        ]
-      ]
-      type=CONSTANT, cparm=tok, constant=0
-    ]
+        ], mmin=0, mmax=0
+      ], mmin=0, mmax=-1
+      type=CONSTANT, cparm=tok, constant=0, mmin=0, mmax=0
+    ], mmin=0, mmax=0
   ], code=[
     operation=BOOLEAN, boolean=true
   ]
@@ -227,7 +313,7 @@ name=wstoken, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
       name=x, type=NULL
-    ]
+    ], mmin=0, mmax=0
   ], if=[
     operation=FUNCTION, function=OR, fnParm1=[
       operation=FUNCTION, function=OR, fnParm1=[

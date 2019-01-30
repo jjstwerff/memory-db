@@ -52,6 +52,8 @@ public interface ChangeMatch extends ChangeInterface, Match {
 				break;
 			case MULTIPLE:
 				getStore().setInt(getRec(), matchPosition() + 1, 0);
+				getStore().setByte(getRec(), matchPosition() + 5, (byte) 0);
+				getStore().setByte(getRec(), matchPosition() + 6, (byte) 0);
 				break;
 			default:
 				break;
@@ -134,6 +136,18 @@ public interface ChangeMatch extends ChangeInterface, Match {
 		}
 	}
 
+	default void setMmin(byte value) {
+		if (getType() == Type.MULTIPLE) {
+			getStore().setByte(getRec(), matchPosition() + 5, value);
+		}
+	}
+
+	default void setMmax(byte value) {
+		if (getType() == Type.MULTIPLE) {
+			getStore().setByte(getRec(), matchPosition() + 6, value);
+		}
+	}
+
 	default void parseMatch(Parser parser) {
 		if (parser.hasField("type")) {
 			String valueType = parser.getString("type");
@@ -204,6 +218,12 @@ public interface ChangeMatch extends ChangeInterface, Match {
 		if (parser.hasSub("mmatch")) {
 			setMmatch(new MatchObject(getStore()).parse(parser));
 		}
+		if (parser.hasField("mmin")) {
+			setMmin((byte) parser.getInt("mmin"));
+		}
+		if (parser.hasField("mmax")) {
+			setMmax((byte) parser.getInt("mmax"));
+		}
 	}
 
 	@Override
@@ -257,6 +277,14 @@ public interface ChangeMatch extends ChangeInterface, Match {
 			if (value instanceof MatchObject)
 				setMmatch((MatchObject) value);
 			return value instanceof MatchObject;
+		case 15:
+			if (value instanceof Byte)
+				setMmin((Byte) value);
+			return value instanceof Byte;
+		case 16:
+			if (value instanceof Byte)
+				setMmax((Byte) value);
+			return value instanceof Byte;
 		default:
 			return false;
 		}

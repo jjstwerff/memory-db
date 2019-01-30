@@ -8,7 +8,7 @@ name=b, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
       name=val, type=NUMBER
-    ]
+    ], mmin=0, mmax=0
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=VARIABLE, varName=val, varNr=0
@@ -19,7 +19,7 @@ name=b, alternatives=[
   nr=1, parameters=[
     type=VARIABLE, variable=[
       name=val, type=STRING
-    ]
+    ], mmin=0, mmax=0
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=VARIABLE, varName=val, varNr=0
@@ -28,10 +28,10 @@ name=b, alternatives=[
     ]
   ]
   nr=2, parameters=[
-    type=NUMBER, number=0
+    type=NUMBER, number=0, mmin=0, mmax=0
     type=VARIABLE, variable=[
       name=val2, type=NUMBER
-    ]
+    ], mmin=0, mmax=0
   ], code=[
     operation=FUNCTION, function=MUL, fnParm1=[
       operation=NUMBER, number=100
@@ -40,20 +40,20 @@ name=b, alternatives=[
     ]
   ]
   nr=3, parameters=[
-    type=STRING, string=
+    type=STRING, string=, mmin=0, mmax=0
     type=VARIABLE, variable=[
       name=val2, type=NUMBER
-    ]
+    ], mmin=0, mmax=0
   ], code=[
     operation=VARIABLE, varName=val2, varNr=0
   ]
   nr=4, parameters=[
     type=VARIABLE, variable=[
       name=val, type=NUMBER
-    ]
+    ], mmin=0, mmax=0
     type=VARIABLE, variable=[
       name=val2, type=NUMBER
-    ]
+    ], mmin=0, mmax=0
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=VARIABLE, varName=val, varNr=0
@@ -132,13 +132,13 @@ name=t.assert, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
       name=name, type=STRING
-    ]
+    ], mmin=0, mmax=0
     type=VARIABLE, variable=[
       name=should, type=NULL
-    ]
+    ], mmin=0, mmax=0
     type=VARIABLE, variable=[
       name=was, type=NULL
-    ]
+    ], mmin=0, mmax=0
   ], code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[

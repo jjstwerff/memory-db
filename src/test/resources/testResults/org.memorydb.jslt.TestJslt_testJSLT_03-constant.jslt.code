@@ -1,13 +1,13 @@
 name=const, alternatives=[
   nr=0, parameters=[
-    type=NUMBER, number=2
+    type=NUMBER, number=2, mmin=0, mmax=0
   ], code=[
     operation=NUMBER, number=3
   ]
   nr=1, parameters=[
     type=VARIABLE, variable=[
       name=elm, type=NULL
-    ]
+    ], mmin=0, mmax=0
   ], code=[
     operation=VARIABLE, varName=elm, varNr=0
   ]
@@ -50,13 +50,13 @@ name=t.assert, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
       name=name, type=STRING
-    ]
+    ], mmin=0, mmax=0
     type=VARIABLE, variable=[
       name=should, type=NULL
-    ]
+    ], mmin=0, mmax=0
     type=VARIABLE, variable=[
       name=was, type=NULL
-    ]
+    ], mmin=0, mmax=0
   ], code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[

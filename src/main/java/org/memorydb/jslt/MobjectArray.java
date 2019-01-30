@@ -236,7 +236,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public String name(int field) {
-		if (field >= 1 && field <= 15)
+		if (field >= 1 && field <= 17)
 			return nameMatch(field - 1);
 		switch (field) {
 		case 1:
@@ -248,7 +248,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 1 && field <= 15)
+		if (field >= 1 && field <= 17)
 			return typeMatch(field - 1);
 		switch (field) {
 		case 1:
@@ -260,7 +260,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 1 && field <= 15)
+		if (field >= 1 && field <= 17)
 			return getMatch(field - 1);
 		switch (field) {
 		case 1:
@@ -272,7 +272,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 1 && field <= 15)
+		if (field >= 1 && field <= 17)
 			return iterateMatch(field - 1);
 		switch (field) {
 		default:
@@ -282,7 +282,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 1 && field <= 15)
+		if (field >= 1 && field <= 17)
 			return setMatch(field - 1, value);
 		switch (field) {
 		case 1:
@@ -296,7 +296,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 1 && field <= 15)
+		if (field >= 1 && field <= 17)
 			return addMatch(field - 1);
 		switch (field) {
 		default:

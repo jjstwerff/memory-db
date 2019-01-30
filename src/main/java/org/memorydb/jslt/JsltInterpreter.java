@@ -150,7 +150,7 @@ public class JsltInterpreter {
 					break;
 			}
 			Expr ifExpr = alt.getIf();
-			if (ifExpr != null) {
+			if (ifExpr != null && ifExpr.getRec() != 0) {
 				Object ifResult = inter(ifExpr);
 				if (ifResult instanceof Boolean && (Boolean) ifResult == false)
 					found = false;
@@ -277,13 +277,17 @@ public class JsltInterpreter {
 			MarrayArray elm = iterator.next();
 			notLast = iterator.hasNext();
 			if (elm.getType() == Match.Type.MULTIPLE) {
-				multiple.add(elm.getMmatch());
+				multiple.add(elm);
 			} else if (!multiple.isEmpty()) {
-				if (!textParm(elm, obj)) {
+				if (!textParm(elm, obj)) { // TODO perform this test inside the while loop to possibly stop it
 					for (int i = multiple.size() - 1; i > -1; i--) {
 						boolean found = false;
+						int m = 0;
 						while (true) {
-							if (textParm(multiple.get(i), obj))
+							Match mult = multiple.get(i);
+							if (mult.getMmax() > -1 && m++ >= mult.getMmax())
+								break;
+							if (textParm(mult.getMmatch(), obj))
 								found = true;
 							else
 								break;
@@ -291,7 +295,11 @@ public class JsltInterpreter {
 						if (found)
 							break;
 					}
-					textParm(elm, obj);
+					multiple.clear();
+					if (!textParm(elm, obj)) {
+						obj.toPos(pos);
+						return false;
+					}
 				}
 				if (!notLast && !obj.end()) {
 					obj.toPos(pos);
@@ -320,6 +328,18 @@ public class JsltInterpreter {
 				}
 			}
 		}
+		if (!multiple.isEmpty()) {
+			for (int i = multiple.size() - 1; i > -1; i--) {
+				int m = 0;
+				while (true) {
+					Match mult = multiple.get(i);
+					if (mult.getMmax() > -1 && m++ > mult.getMmax())
+						break;
+					if (!textParm(mult.getMmatch(), obj))
+						break;
+				}
+			}
+		}
 		obj.freePos(pos);
 		return true;
 	}
@@ -331,8 +351,9 @@ public class JsltInterpreter {
 		case NUMBER:
 		case FLOAT:
 		case OBJECT:
-		case ARRAY:
 			throw new RuntimeException("Not implemented yet");
+		case ARRAY:
+			return textMatch(parm, on);
 		case NULL:
 			return on.match("null");
 		case STRING:
@@ -344,7 +365,8 @@ public class JsltInterpreter {
 			if (vmatch != null && vmatch.getRec() != 0) {
 				int pos = on.addPos();
 				boolean res = textParm(vmatch, on);
-				stack.add(on.substring(pos));
+				if (res)
+					stack.add(on.substring(pos));
 				on.freePos(pos);
 				return res;
 			} else {
@@ -355,8 +377,10 @@ public class JsltInterpreter {
 			Object object = stack.get(stackFrame + parm.getConstant());
 			return on.match(object == null ? "null" : object.toString());
 		case MULTIPLE:
+			int m = 0;
 			while (textParm(parm.getMmatch(), on))
-				// nothing
+				if (parm.getMmax() > -1 && m++ > parm.getMmax())
+					return false;
 			return true;
 		case MACRO:
 			int stackF = stack.size();
@@ -365,6 +389,8 @@ public class JsltInterpreter {
 				Object obj = inter(p);
 				stack.add(obj);
 			}
+			if (on.end())
+				return false;
 			int pos = on.addPos();
 			stack.add(on.readChar() + "");
 			Object res = findAlternative(parm.getMacro(), stackF, parms);
@@ -405,7 +431,10 @@ public class JsltInterpreter {
 		public int next(int field) {
 			if (field < 0)
 				return elm; // first element
-			return next(field);
+			int res = field + 1;
+			if (type(res) == null)
+				return -2;
+			return res;
 		}
 
 		@Override
@@ -751,7 +780,7 @@ public class JsltInterpreter {
 			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
 				return compare(p1, p2) == 0;
 			else if (p1 == null)
-				return p2 == null;
+				return p2 == null || (p2 instanceof Long && (Long) p2 == Long.MIN_VALUE) || (p2 instanceof Double && Double.isNaN((Double) p2));
 			return false;
 		case FIRST:
 			return first;
@@ -1114,9 +1143,10 @@ public class JsltInterpreter {
 	private String getString(Object val) {
 		if (val == null)
 			return "";
-		if (val instanceof Long)
-			return Long.toString((Long) val);
-		else if (val instanceof Double)
+		if (val instanceof Long) {
+			Long l = (Long) val;
+			return l == Long.MIN_VALUE ? "" : Long.toString(l);
+		} else if (val instanceof Double)
 			return Double.toString((Double) val);
 		else if (val instanceof RecordInterface) {
 			Writer write = new StringWriter();

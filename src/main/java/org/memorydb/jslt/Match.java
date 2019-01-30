@@ -227,6 +227,26 @@ public interface Match extends MemoryRecord, RecordInterface {
 		return new MatchObject(getStore(), getType() != Type.MULTIPLE ? 0 : getStore().getInt(getRec(), matchPosition() + 1));
 	}
 
+	@FieldData(
+		name = "mmin",
+		type = "BYTE",
+		when = "MULTIPLE",
+		mandatory = false
+	)
+	default byte getMmin() {
+		return getType() != Type.MULTIPLE ? 0 : getStore().getByte(getRec(), matchPosition() + 5);
+	}
+
+	@FieldData(
+		name = "mmax",
+		type = "BYTE",
+		when = "MULTIPLE",
+		mandatory = false
+	)
+	default byte getMmax() {
+		return getType() != Type.MULTIPLE ? 0 : getStore().getByte(getRec(), matchPosition() + 6);
+	}
+
 	default void outputMatch(Write write, int iterate) throws IOException {
 		if (getRec() == 0 || iterate <= 0)
 			return;
@@ -278,6 +298,8 @@ public interface Match extends MemoryRecord, RecordInterface {
 			fldMmatch.output(write, iterate);
 			write.endSub();
 		}
+		write.field("mmin", getMmin());
+		write.field("mmax", getMmax());
 	}
 
 	default Object getMatch(int field) {
@@ -304,6 +326,10 @@ public interface Match extends MemoryRecord, RecordInterface {
 			return getMacro();
 		case 14:
 			return getMmatch();
+		case 15:
+			return getMmin();
+		case 16:
+			return getMmax();
 		default:
 			return null;
 		}
@@ -352,6 +378,10 @@ public interface Match extends MemoryRecord, RecordInterface {
 			return FieldType.ARRAY;
 		case 14:
 			return FieldType.OBJECT;
+		case 15:
+			return FieldType.INTEGER;
+		case 16:
+			return FieldType.INTEGER;
 		default:
 			return null;
 		}
@@ -387,6 +417,10 @@ public interface Match extends MemoryRecord, RecordInterface {
 			return "mparms";
 		case 14:
 			return "mmatch";
+		case 15:
+			return "mmin";
+		case 16:
+			return "mmax";
 		default:
 			return null;
 		}

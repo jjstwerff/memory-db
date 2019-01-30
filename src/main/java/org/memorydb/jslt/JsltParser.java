@@ -232,6 +232,16 @@ public class JsltParser {
 				try (ChangeMatchObject sub = new ChangeMatchObject(store)) {
 					copyMatch(sub);
 					match.setType(Type.MULTIPLE);
+					match.setMmin((byte) 0);
+					match.setMmax((byte) -1);
+					match.setMmatch(sub);
+				}
+			} else if (scanner.matches("?")) {
+				try (ChangeMatchObject sub = new ChangeMatchObject(store)) {
+					copyMatch(sub);
+					match.setType(Type.MULTIPLE);
+					match.setMmin((byte) 0);
+					match.setMmax((byte) 1);
 					match.setMmatch(sub);
 				}
 			}

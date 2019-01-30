@@ -105,6 +105,8 @@ public class JsltStructure {
 		match.field("macro", Type.RELATION, macro).when("MACRO");
 		match.field("mparms", Type.ARRAY, step).when("MACRO");
 		match.field("mmatch", Type.OBJECT, mobj).when("MULTIPLE");
+		match.field("mmin", Type.BYTE).when("MULTIPLE");
+		match.field("mmax", Type.BYTE).when("MULTIPLE");
 
 		mfield.field("name", Type.STRING);
 		mfield.include(match);
