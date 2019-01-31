@@ -3,21 +3,21 @@ name=id, alternatives=[
     type=ARRAY, marray=[
       type=MULTIPLE, mmatch=[
         type=MACRO, macro={Name=wstoken}, mparms=[
-        ], mmin=0, mmax=0
+        ]
       ], mmin=0, mmax=-1
       type=VARIABLE, vmatch=[
         type=ARRAY, marray=[
           type=MACRO, macro={Name=idfirst}, mparms=[
-          ], mmin=0, mmax=0
+          ]
           type=MULTIPLE, mmatch=[
             type=MACRO, macro={Name=idnext}, mparms=[
-            ], mmin=0, mmax=0
+            ]
           ], mmin=0, mmax=-1
-        ], mmin=0, mmax=0
+        ]
       ], variable=[
-        name=i, type=NULL, record=slice
-      ], mmin=0, mmax=0
-    ], mmin=0, mmax=0
+        name=i, nr=0, multiple=false, type=NULL, record=slice
+      ]
+    ]
   ], code=[
     operation=VARIABLE, varName=i, varNr=0
   ]
@@ -25,8 +25,8 @@ name=id, alternatives=[
 name=idfirst, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=x, type=NULL
-    ], mmin=0, mmax=0
+      name=x, nr=0, multiple=false, type=NULL
+    ]
   ], if=[
     operation=FUNCTION, function=OR, fnParm1=[
       operation=FUNCTION, function=OR, fnParm1=[
@@ -72,8 +72,8 @@ name=idfirst, alternatives=[
 name=idnext, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=x, type=NULL
-    ], mmin=0, mmax=0
+      name=x, nr=0, multiple=false, type=NULL
+    ]
   ], if=[
     operation=FUNCTION, function=OR, fnParm1=[
       operation=CALL, macro={Name=nrtoken}, callParms=[
@@ -196,8 +196,8 @@ name=main, alternatives=[
 name=nrtoken, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=x, type=NULL
-    ], mmin=0, mmax=0
+      name=x, nr=0, multiple=false, type=NULL
+    ]
   ], if=[
     operation=FUNCTION, function=AND, fnParm1=[
       operation=FUNCTION, function=GT, fnParm1=[
@@ -221,24 +221,24 @@ name=numb, alternatives=[
     type=ARRAY, marray=[
       type=MULTIPLE, mmatch=[
         type=MACRO, macro={Name=wstoken}, mparms=[
-        ], mmin=0, mmax=0
+        ]
       ], mmin=0, mmax=-1
       type=VARIABLE, vmatch=[
         type=ARRAY, marray=[
           type=MULTIPLE, mmatch=[
-            type=STRING, string=-, mmin=0, mmax=0
+            type=STRING, string=-
           ], mmin=0, mmax=1
           type=MACRO, macro={Name=nrtoken}, mparms=[
-          ], mmin=0, mmax=0
+          ]
           type=MULTIPLE, mmatch=[
             type=MACRO, macro={Name=nrtoken}, mparms=[
-            ], mmin=0, mmax=0
+            ]
           ], mmin=0, mmax=-1
-        ], mmin=0, mmax=0
+        ]
       ], variable=[
-        name=n, type=NULL, record=slice
-      ], mmin=0, mmax=0
-    ], mmin=0, mmax=0
+        name=n, nr=0, multiple=false, type=NULL, record=slice
+      ]
+    ]
   ], code=[
     operation=FUNCTION, function=NUMBER, fnParm1=[
       operation=VARIABLE, varName=n, varNr=0
@@ -250,14 +250,14 @@ name=slice, alternatives=[
 name=t.assert, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=name, type=STRING
-    ], mmin=0, mmax=0
+      name=name, nr=0, multiple=false, type=STRING
+    ]
     type=VARIABLE, variable=[
-      name=should, type=NULL
-    ], mmin=0, mmax=0
+      name=should, nr=1, multiple=false, type=NULL
+    ]
     type=VARIABLE, variable=[
-      name=was, type=NULL
-    ], mmin=0, mmax=0
+      name=was, nr=2, multiple=false, type=NULL
+    ]
   ], code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[
@@ -296,15 +296,15 @@ name=t.assert, alternatives=[
 name=token, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=tok, type=NULL
-    ], mmin=0, mmax=0
+      name=tok, nr=0, multiple=false, type=NULL
+    ]
     type=ARRAY, marray=[
       type=MULTIPLE, mmatch=[
         type=MACRO, macro={Name=wstoken}, mparms=[
-        ], mmin=0, mmax=0
+        ]
       ], mmin=0, mmax=-1
-      type=CONSTANT, cparm=tok, constant=0, mmin=0, mmax=0
-    ], mmin=0, mmax=0
+      type=CONSTANT, cparm=tok, constant=0
+    ]
   ], code=[
     operation=BOOLEAN, boolean=true
   ]
@@ -312,8 +312,8 @@ name=token, alternatives=[
 name=wstoken, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=x, type=NULL
-    ], mmin=0, mmax=0
+      name=x, nr=0, multiple=false, type=NULL
+    ]
   ], if=[
     operation=FUNCTION, function=OR, fnParm1=[
       operation=FUNCTION, function=OR, fnParm1=[

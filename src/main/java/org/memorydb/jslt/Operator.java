@@ -418,7 +418,6 @@ public interface Operator extends ResultType {
 	@FieldData(
 		name = "listenSource",
 		type = "STRING",
-		related = Listener.class,
 		when = "READ",
 		mandatory = false
 	)
@@ -429,7 +428,6 @@ public interface Operator extends ResultType {
 	@FieldData(
 		name = "listemNr",
 		type = "INTEGER",
-		related = Listener.class,
 		when = "READ",
 		mandatory = false
 	)
@@ -440,7 +438,6 @@ public interface Operator extends ResultType {
 	@FieldData(
 		name = "varName",
 		type = "STRING",
-		related = Listener.class,
 		when = "VARIABLE",
 		mandatory = false
 	)
@@ -451,7 +448,6 @@ public interface Operator extends ResultType {
 	@FieldData(
 		name = "varNr",
 		type = "INTEGER",
-		related = Listener.class,
 		when = "VARIABLE",
 		mandatory = false
 	)

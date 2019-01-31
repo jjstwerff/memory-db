@@ -1,45 +1,29 @@
-name=const, alternatives=[
+name=eager, alternatives=[
   nr=0, parameters=[
-    type=NUMBER, number=2
-  ], code=[
-    operation=NUMBER, number=3
-  ]
-  nr=1, parameters=[
-    type=VARIABLE, variable=[
-      name=elm, nr=0, multiple=false, type=NULL
+    type=ARRAY, marray=[
+      type=MULTIPLE, mmatch=[
+        type=VARIABLE, variable=[
+          name=x, nr=0, multiple=true, type=NULL
+        ]
+      ], mmin=0, mmax=-1
+      type=STRING, string=abc
     ]
   ], code=[
-    operation=VARIABLE, varName=elm, varNr=0
+    operation=VARIABLE, varName=x, varNr=0
   ]
 ]
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=FUNCTION, function=ADD, fnParm1=[
-      operation=FUNCTION, function=ADD, fnParm1=[
-        operation=CALL, macro={Name=t.assert}, callParms=[
-          operation=STRING, string=other
-          operation=STRING, string=
-          operation=CALL, macro={Name=const}, callParms=[
-            operation=STRING, string=
-          ]
-        ]
-      ], fnParm2=[
-        operation=CALL, macro={Name=t.assert}, callParms=[
-          operation=STRING, string=hit
-          operation=NUMBER, number=3
-          operation=CALL, macro={Name=const}, callParms=[
-            operation=NUMBER, number=2
-          ]
-        ]
+    operation=CALL, macro={Name=t.assert}, callParms=[
+      operation=STRING, string=eager
+      operation=ARRAY, array=[
+        operation=STRING, string=a
+        operation=STRING, string=a
+        operation=STRING, string=b
       ]
-    ], fnParm2=[
-      operation=CALL, macro={Name=t.assert}, callParms=[
-        operation=STRING, string=number
-        operation=NUMBER, number=3
-        operation=CALL, macro={Name=const}, callParms=[
-          operation=NUMBER, number=3
-        ]
+      operation=CALL, macro={Name=eager}, callParms=[
+        operation=STRING, string=aababc
       ]
     ]
   ]

@@ -67,10 +67,10 @@ public class JsltStructure {
 		oper.field("if", Type.OBJECT, expr).when("IF");
 		oper.field("ifTrue", Type.ARRAY, step).when("IF");
 		oper.field("ifFalse", Type.ARRAY, step).when("IF");
-		oper.field("listenSource", Type.STRING, listener).when("READ");
-		oper.field("listemNr", Type.INTEGER, listener).when("READ");
-		oper.field("varName", Type.STRING, listener).when("VARIABLE");
-		oper.field("varNr", Type.INTEGER, listener).when("VARIABLE");
+		oper.field("listenSource", Type.STRING).when("READ");
+		oper.field("listemNr", Type.INTEGER).when("READ");
+		oper.field("varName", Type.STRING).when("VARIABLE");
+		oper.field("varNr", Type.INTEGER).when("VARIABLE");
 		oper.include(type);
 
 		field.field("name", Type.OBJECT, expr);
@@ -83,6 +83,8 @@ public class JsltStructure {
 
 		Record variable = project.table("Variable");
 		variable.field("name", Type.STRING).mandatory();
+		variable.field("nr", Type.INTEGER);
+		variable.field("multiple", Type.BOOLEAN);
 		variable.include(type);
 
 		Record subMatch = project.record("SubMatch");

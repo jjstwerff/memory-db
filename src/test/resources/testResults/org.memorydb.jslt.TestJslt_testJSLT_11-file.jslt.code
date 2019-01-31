@@ -88,7 +88,7 @@ name=main, alternatives=[
 ]
 name=parts, alternatives=[
   nr=0, parameters=[
-    type=STRING, string=, mmin=0, mmax=0
+    type=STRING, string=
   ], code=[
     operation=ARRAY, array=[
     ]
@@ -96,13 +96,13 @@ name=parts, alternatives=[
   nr=1, parameters=[
     type=ARRAY, marray=[
       type=VARIABLE, variable=[
-        name=elm, type=NULL
-      ], mmin=0, mmax=0
-      type=STRING, string=\t, mmin=0, mmax=0
+        name=elm, nr=0, multiple=false, type=NULL
+      ]
+      type=STRING, string=\t
       type=VARIABLE, variable=[
-        name=rest, type=NULL
-      ], mmin=0, mmax=0
-    ], mmin=0, mmax=0
+        name=rest, nr=1, multiple=false, type=NULL
+      ]
+    ]
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=ARRAY, array=[
@@ -116,8 +116,8 @@ name=parts, alternatives=[
   ]
   nr=2, parameters=[
     type=VARIABLE, variable=[
-      name=rest, type=NULL
-    ], mmin=0, mmax=0
+      name=rest, nr=0, multiple=false, type=NULL
+    ]
   ], code=[
     operation=ARRAY, array=[
       operation=VARIABLE, varName=rest, varNr=0
@@ -129,14 +129,14 @@ name=slice, alternatives=[
 name=t.assert, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=name, type=STRING
-    ], mmin=0, mmax=0
+      name=name, nr=0, multiple=false, type=STRING
+    ]
     type=VARIABLE, variable=[
-      name=should, type=NULL
-    ], mmin=0, mmax=0
+      name=should, nr=1, multiple=false, type=NULL
+    ]
     type=VARIABLE, variable=[
-      name=was, type=NULL
-    ], mmin=0, mmax=0
+      name=was, nr=2, multiple=false, type=NULL
+    ]
   ], code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[
@@ -174,7 +174,7 @@ name=t.assert, alternatives=[
 ]
 name=tabbed, alternatives=[
   nr=0, parameters=[
-    type=STRING, string=, mmin=0, mmax=0
+    type=STRING, string=
   ], code=[
     operation=ARRAY, array=[
     ]
@@ -182,14 +182,14 @@ name=tabbed, alternatives=[
   nr=1, parameters=[
     type=ARRAY, marray=[
       type=VARIABLE, variable=[
-        name=line, type=NULL
-      ], mmin=0, mmax=0
+        name=line, nr=0, multiple=false, type=NULL
+      ]
       type=STRING, string=
-              mmin=0, mmax=0
+        
       type=VARIABLE, variable=[
-        name=rest, type=NULL
-      ], mmin=0, mmax=0
-    ], mmin=0, mmax=0
+        name=rest, nr=1, multiple=false, type=NULL
+      ]
+    ]
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=ARRAY, array=[
@@ -205,8 +205,8 @@ name=tabbed, alternatives=[
   ]
   nr=2, parameters=[
     type=VARIABLE, variable=[
-      name=line, type=NULL
-    ], mmin=0, mmax=0
+      name=line, nr=0, multiple=false, type=NULL
+    ]
   ], code=[
     operation=ARRAY, array=[
       operation=CALL, macro={Name=parts}, callParms=[

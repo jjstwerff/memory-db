@@ -298,8 +298,10 @@ public interface Match extends MemoryRecord, RecordInterface {
 			fldMmatch.output(write, iterate);
 			write.endSub();
 		}
-		write.field("mmin", getMmin());
-		write.field("mmax", getMmax());
+		if (getType() == Type.MULTIPLE)
+			write.field("mmin", getMmin());
+		if (getType() == Type.MULTIPLE)
+			write.field("mmax", getMmax());
 	}
 
 	default Object getMatch(int field) {

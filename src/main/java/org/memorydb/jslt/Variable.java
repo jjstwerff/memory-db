@@ -18,7 +18,7 @@ import org.memorydb.structure.Store;
 public class Variable implements ResultType {
 	/* package private */ Store store;
 	protected int rec;
-	/* package private */ static final int RECORD_SIZE = 13;
+	/* package private */ static final int RECORD_SIZE = 18;
 
 	public Variable(Store store) {
 		this.store = store;
@@ -49,7 +49,7 @@ public class Variable implements ResultType {
 
 	@Override
 	public int resulttypePosition() {
-		return 8;
+		return 13;
 	}
 
 	@Override
@@ -66,11 +66,31 @@ public class Variable implements ResultType {
 		return rec == 0 ? null : store.getString(store.getInt(rec, 4));
 	}
 
+	@FieldData(
+		name = "nr",
+		type = "INTEGER",
+		mandatory = false
+	)
+	public int getNr() {
+		return rec == 0 ? Integer.MIN_VALUE : store.getInt(rec, 8);
+	}
+
+	@FieldData(
+		name = "multiple",
+		type = "BOOLEAN",
+		mandatory = false
+	)
+	public boolean isMultiple() {
+		return rec == 0 ? false : (store.getByte(rec, 12) & 1) > 0;
+	}
+
 	@Override
 	public void output(Write write, int iterate) throws IOException {
 		if (rec == 0 || iterate <= 0)
 			return;
 		write.field("name", getName());
+		write.field("nr", getNr());
+		write.field("multiple", isMultiple());
 		outputResultType(write, iterate);
 		write.endRecord();
 	}
@@ -131,11 +151,15 @@ public class Variable implements ResultType {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 1 && field <= 3)
-			return ResultType.super.getResultType(field - 1);
+		if (field >= 3 && field <= 5)
+			return ResultType.super.getResultType(field - 3);
 		switch (field) {
 		case 1:
 			return getName();
+		case 2:
+			return getNr();
+		case 3:
+			return isMultiple();
 		default:
 			return null;
 		}
@@ -143,8 +167,8 @@ public class Variable implements ResultType {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 1 && field <= 3)
-			return ResultType.super.iterateResultType(field - 1);
+		if (field >= 3 && field <= 5)
+			return ResultType.super.iterateResultType(field - 3);
 		switch (field) {
 		default:
 			return null;
@@ -153,11 +177,15 @@ public class Variable implements ResultType {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 1 && field <= 3)
-			return ResultType.super.typeResultType(field - 1);
+		if (field >= 3 && field <= 5)
+			return ResultType.super.typeResultType(field - 3);
 		switch (field) {
 		case 1:
 			return FieldType.STRING;
+		case 2:
+			return FieldType.INTEGER;
+		case 3:
+			return FieldType.BOOLEAN;
 		default:
 			return null;
 		}
@@ -165,11 +193,15 @@ public class Variable implements ResultType {
 
 	@Override
 	public String name(int field) {
-		if (field >= 1 && field <= 3)
-			return ResultType.super.nameResultType(field - 1);
+		if (field >= 3 && field <= 5)
+			return ResultType.super.nameResultType(field - 3);
 		switch (field) {
 		case 1:
 			return "name";
+		case 2:
+			return "nr";
+		case 3:
+			return "multiple";
 		default:
 			return null;
 		}

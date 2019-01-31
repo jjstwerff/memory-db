@@ -207,7 +207,8 @@ public class JsltInterpreter {
 				return false;
 			break;
 		case VARIABLE:
-			if (!matches(obj, parm.getVariable().getType()))
+			Variable variable = parm.getVariable();
+			if (!matches(obj, variable.getType()))
 				return false;
 			stack.add(obj);
 			break;
@@ -245,8 +246,7 @@ public class JsltInterpreter {
 					System.out.println("here");
 				}
 			} else if (!notLast) { // last element
-				if (elm.getType() == Match.Type.VARIABLE
-						&& (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
+				if (elm.getType() == Match.Type.VARIABLE && (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
 					stack.add(new SubArray(arr, aElm, elms));
 					return true; // match the rest of the array
 				}
@@ -267,47 +267,61 @@ public class JsltInterpreter {
 		}
 		return true;
 	}
+	
+	class DoMatch {
+		int count;
+		Match match;
+
+		DoMatch(Match match) {
+			this.count = 0;
+			this.match = match;
+		}
+		
+		@Override
+		public String toString() {
+			return "" + count + ": " + match;
+		}
+	}
 
 	private boolean textMatch(Match parm, Text obj) {
 		Iterator<MarrayArray> iterator = parm.getMarray().iterator();
-		List<Match> multiple = new ArrayList<>(); // remember multiple match elements
+		List<DoMatch> multiple = new ArrayList<>(); // remember multiple match elements
 		boolean notLast = iterator.hasNext();
 		int pos = obj.addPos();
 		while (notLast) {
 			MarrayArray elm = iterator.next();
 			notLast = iterator.hasNext();
 			if (elm.getType() == Match.Type.MULTIPLE) {
-				multiple.add(elm);
+				multiple.add(new DoMatch(elm));
 			} else if (!multiple.isEmpty()) {
-				if (!textParm(elm, obj)) { // TODO perform this test inside the while loop to possibly stop it
+				boolean found;
+				while (true) {
+					found = false;
+					if (textParm(elm, obj)) {
+						found = true;
+						break;
+					}
 					for (int i = multiple.size() - 1; i > -1; i--) {
-						boolean found = false;
-						int m = 0;
-						while (true) {
-							Match mult = multiple.get(i);
-							if (mult.getMmax() > -1 && m++ >= mult.getMmax())
-								break;
-							if (textParm(mult.getMmatch(), obj))
+						DoMatch doMatch = multiple.get(i);
+						Match mult = doMatch.match;
+						if (textParm(mult.getMmatch(), obj)) {
+							if (mult.getMmax() == -1 || doMatch.count++ <= mult.getMmax()) {
 								found = true;
-							else
 								break;
-						}
-						if (found)
-							break;
+							}
+						} else
+							doMatch.count = 0;
 					}
-					multiple.clear();
-					if (!textParm(elm, obj)) {
-						obj.toPos(pos);
-						return false;
-					}
+					if (!found)
+						break;
 				}
-				if (!notLast && !obj.end()) {
+				multiple.clear();
+				if (!found || (!notLast && !obj.end())) {
 					obj.toPos(pos);
 					return false; // not at the end of the array yet
 				}
 			} else if (!notLast) { // last element
-				if (elm.getType() == Match.Type.VARIABLE
-						&& (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
+				if (elm.getType() == Match.Type.VARIABLE && (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
 					stack.add(obj.tail());
 					obj.freePos(pos);
 					return true; // match the rest of the array
@@ -329,15 +343,25 @@ public class JsltInterpreter {
 			}
 		}
 		if (!multiple.isEmpty()) {
-			for (int i = multiple.size() - 1; i > -1; i--) {
-				int m = 0;
-				while (true) {
-					Match mult = multiple.get(i);
-					if (mult.getMmax() > -1 && m++ > mult.getMmax())
-						break;
-					if (!textParm(mult.getMmatch(), obj))
-						break;
+			while (true) {
+				boolean found = false;
+				for (int i = multiple.size() - 1; i > -1; i--) {
+					DoMatch doMatch = multiple.get(i);
+					Match mult = doMatch.match;
+					if (textParm(mult.getMmatch(), obj)) {
+						if (mult.getMmax() == -1 || doMatch.count++ <= mult.getMmax()) {
+							found = true;
+							break;
+						}
+					} else
+						doMatch.count = 0;
 				}
+				if (!found)
+					break;
+			}
+			if (!notLast && !obj.end()) {
+				obj.toPos(pos);
+				return false; // not at the end of the array yet
 			}
 		}
 		obj.freePos(pos);
@@ -370,7 +394,14 @@ public class JsltInterpreter {
 				on.freePos(pos);
 				return res;
 			} else {
-				stack.add(on.readChar() + "");
+				Variable var = parm.getVariable();
+				if (var.isMultiple()) {
+					if (stack.size() <= stackFrame + var.getNr()) {
+						stack.add(new ListArray());
+					}
+					((ListArray)stack.get(stackFrame + var.getNr())).add(on.readChar() + "");
+				} else
+					stack.add(on.readChar() + "");
 				return true;
 			}
 		case CONSTANT:
@@ -671,8 +702,8 @@ public class JsltInterpreter {
 		Object p1 = inter(code.getFnParm1());
 		Object p2 = null;
 		Function function = code.getFunction();
-		if (function != Function.EACH && function != Function.FOR && function != Function.PER && function != Function.OR
-				&& function != Function.AND && code.getFnParm2().getRec() != 0)
+		if (function != Function.EACH && function != Function.FOR && function != Function.PER && function != Function.OR && function != Function.AND
+				&& code.getFnParm2().getRec() != 0)
 			p2 = inter(code.getFnParm2());
 		switch (function) {
 		case ADD:
@@ -1182,7 +1213,7 @@ public class JsltInterpreter {
 		return Double.NaN;
 	}
 
-	public FieldType type(Object lastField) {
+	public static FieldType type(Object lastField) {
 		if (lastField == null)
 			return FieldType.NULL;
 		if (lastField instanceof Integer)

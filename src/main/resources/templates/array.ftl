@@ -249,7 +249,10 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 			return;
 <#list rec.fields as rfld><#if rfld.type == "RELATION"><#if rfld.name != "upRecord">
 		write.strField("${rfld.name}", "{" + get${rfld.name?cap_first}().keys() + "}");
-</#if><#elseif rfld.type != "SET" && rfld.type != "ARRAY" && rfld.type != "OBJECT">
+</#if><#elseif rfld.type == "BYTE" && rfld.when??>
+		if (get${table.condition.name?cap_first}() == ${table.condition.name?cap_first}.${rfld.when})
+			write.field("${rfld.name}", get${rfld.name?cap_first}());
+<#elseif rfld.type != "SET" && rfld.type != "ARRAY" && rfld.type != "OBJECT">
 		write.field("${rfld.name}", <#if rfld.type == "BOOLEAN" || rfld.type == "NULL_BOOLEAN">is<#else>get</#if>${rfld.name?cap_first}());
 </#if><#if rfld.type == "SET">
 		Index${rfld.name?cap_first} fld${rfld.name?cap_first} = get${rfld.name?cap_first}();

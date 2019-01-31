@@ -161,10 +161,10 @@ name=numb, alternatives=[
   nr=0, parameters=[
     type=ARRAY, marray=[
       type=VARIABLE, variable=[
-        name=a, type=NULL
-      ], mmin=0, mmax=0
-      type=NUMBER, number=2, mmin=0, mmax=0
-    ], mmin=0, mmax=0
+        name=a, nr=0, multiple=false, type=NULL
+      ]
+      type=NUMBER, number=2
+    ]
   ], code=[
     operation=VARIABLE, varName=a, varNr=0
   ]
@@ -172,11 +172,11 @@ name=numb, alternatives=[
 name=second, alternatives=[
   nr=0, parameters=[
     type=ARRAY, marray=[
-      type=NUMBER, number=2, mmin=0, mmax=0
+      type=NUMBER, number=2
       type=VARIABLE, variable=[
-        name=a, type=NULL
-      ], mmin=0, mmax=0
-    ], mmin=0, mmax=0
+        name=a, nr=0, multiple=false, type=NULL
+      ]
+    ]
   ], code=[
     operation=VARIABLE, varName=a, varNr=0
   ]
@@ -187,10 +187,10 @@ name=str, alternatives=[
   nr=0, parameters=[
     type=ARRAY, marray=[
       type=VARIABLE, variable=[
-        name=a, type=NULL
-      ], mmin=0, mmax=0
-      type=STRING, string=2, mmin=0, mmax=0
-    ], mmin=0, mmax=0
+        name=a, nr=0, multiple=false, type=NULL
+      ]
+      type=STRING, string=2
+    ]
   ], code=[
     operation=VARIABLE, varName=a, varNr=0
   ]
@@ -198,11 +198,11 @@ name=str, alternatives=[
 name=strsec, alternatives=[
   nr=0, parameters=[
     type=ARRAY, marray=[
-      type=STRING, string=2, mmin=0, mmax=0
+      type=STRING, string=2
       type=VARIABLE, variable=[
-        name=a, type=NULL
-      ], mmin=0, mmax=0
-    ], mmin=0, mmax=0
+        name=a, nr=0, multiple=false, type=NULL
+      ]
+    ]
   ], code=[
     operation=VARIABLE, varName=a, varNr=0
   ]
@@ -210,14 +210,14 @@ name=strsec, alternatives=[
 name=t.assert, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=name, type=STRING
-    ], mmin=0, mmax=0
+      name=name, nr=0, multiple=false, type=STRING
+    ]
     type=VARIABLE, variable=[
-      name=should, type=NULL
-    ], mmin=0, mmax=0
+      name=should, nr=1, multiple=false, type=NULL
+    ]
     type=VARIABLE, variable=[
-      name=was, type=NULL
-    ], mmin=0, mmax=0
+      name=was, nr=2, multiple=false, type=NULL
+    ]
   ], code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[

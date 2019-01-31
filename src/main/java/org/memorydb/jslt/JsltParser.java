@@ -213,7 +213,7 @@ public class JsltParser {
 					}
 				else
 					try (ChangeMatchObject sub = new ChangeMatchObject(store)) {
-						copyMatch(sub);
+						copyMatch(sub, false);
 						match.setType(Type.VARIABLE);
 						match.setVmatch(sub);
 						try (ChangeVariable var = new ChangeVariable(store)) {
@@ -230,7 +230,7 @@ public class JsltParser {
 			parseMPart();
 			if (scanner.matches("*")) {
 				try (ChangeMatchObject sub = new ChangeMatchObject(store)) {
-					copyMatch(sub);
+					copyMatch(sub, true);
 					match.setType(Type.MULTIPLE);
 					match.setMmin((byte) 0);
 					match.setMmax((byte) -1);
@@ -238,7 +238,7 @@ public class JsltParser {
 				}
 			} else if (scanner.matches("?")) {
 				try (ChangeMatchObject sub = new ChangeMatchObject(store)) {
-					copyMatch(sub);
+					copyMatch(sub, true);
 					match.setType(Type.MULTIPLE);
 					match.setMmin((byte) 0);
 					match.setMmax((byte) 1);
@@ -317,6 +317,8 @@ public class JsltParser {
 							scanner.expect(":");
 							var.setName(scanner.parseIdentifier());
 						}
+						var.setNr(parms.size());
+						var.setMultiple(false);
 						match.setVariable(var);
 						parms.put(var.getName(), new Parm(var, parms.size()));
 					}
@@ -373,7 +375,7 @@ public class JsltParser {
 			scanner.expect("}");
 		}
 
-		private void copyMatch(ChangeMatchObject sub) {
+		private void copyMatch(ChangeMatchObject sub, boolean multiple) {
 			Type type = match.getType();
 			sub.setType(type);
 			if (type != null)
@@ -410,6 +412,10 @@ public class JsltParser {
 					return;
 				case VARIABLE:
 					sub.setVariable(match.getVariable());
+					if (multiple)
+						try (ChangeVariable change = sub.getVariable().change()) {
+							change.setMultiple(true);
+						}
 					return;
 				}
 		}
@@ -862,7 +868,8 @@ public class JsltParser {
 			}
 			if (scanner.matches(":")) {
 				CallParmsArray callParms;
-				try (ChangeExpr struc = new ChangeExpr(spot.getFnParm1()); ChangeExpr from = new ChangeExpr(spot.getFnParm2())) {
+				try (ChangeExpr struc = new ChangeExpr(spot.getFnParm1());
+						ChangeExpr from = new ChangeExpr(spot.getFnParm2())) {
 					spot.setOperation(Operation.CALL);
 					callParms = spot.getCallParms();
 					spot.setMacro(slice);
@@ -1279,8 +1286,9 @@ public class JsltParser {
 							scanner.expect("}");
 						}
 					}
-					if (scanner.peek("b") || scanner.peek("c") || scanner.peek("e") || scanner.peek("E") || scanner.peek("f") || scanner.peek("F") || scanner.peek("g")
-							|| scanner.peek("G") || scanner.peek("o") || scanner.peek("x") || scanner.peek("X")) {
+					if (scanner.peek("b") || scanner.peek("c") || scanner.peek("e") || scanner.peek("E")
+							|| scanner.peek("f") || scanner.peek("F") || scanner.peek("g") || scanner.peek("G")
+							|| scanner.peek("o") || scanner.peek("x") || scanner.peek("X")) {
 						setObject(obj, "type", scanner.getChar());
 					}
 					spot.setFnParm1(data);

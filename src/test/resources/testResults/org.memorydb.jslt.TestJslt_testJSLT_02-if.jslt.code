@@ -1,8 +1,8 @@
 name=double, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=elm, type=NULL
-    ], mmin=0, mmax=0
+      name=elm, nr=0, multiple=false, type=NULL
+    ]
   ], if=[
     operation=FUNCTION, function=EQ, fnParm1=[
       operation=FUNCTION, function=LENGTH, fnParm1=[
@@ -172,14 +172,14 @@ name=slice, alternatives=[
 name=t.assert, alternatives=[
   nr=0, parameters=[
     type=VARIABLE, variable=[
-      name=name, type=STRING
-    ], mmin=0, mmax=0
+      name=name, nr=0, multiple=false, type=STRING
+    ]
     type=VARIABLE, variable=[
-      name=should, type=NULL
-    ], mmin=0, mmax=0
+      name=should, nr=1, multiple=false, type=NULL
+    ]
     type=VARIABLE, variable=[
-      name=was, type=NULL
-    ], mmin=0, mmax=0
+      name=was, nr=2, multiple=false, type=NULL
+    ]
   ], code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[

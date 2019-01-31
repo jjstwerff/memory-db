@@ -35,4 +35,9 @@ public class StringArray implements RecordInterface {
 	public boolean exists() {
 		return string != null;
 	}
+
+	@Override
+	public String toString() {
+		return string;
+	}
 }
