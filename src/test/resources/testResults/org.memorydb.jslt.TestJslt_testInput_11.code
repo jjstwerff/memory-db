@@ -18,7 +18,7 @@ name=main, alternatives=[
   ], code=[
     operation=FUNCTION, function=PER, fnParm1=[
       operation=FILTER, filter=[
-        operation=READ, listenSource=slice, listemNr=0
+        operation=READ, listenSource=$, listemNr=0
       ], filterDeep=false, filterExpr=[
         operation=FUNCTION, function=OR, fnParm1=[
           operation=FUNCTION, function=NOT, fnParm1=[

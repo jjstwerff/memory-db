@@ -426,7 +426,7 @@ public class Scanner implements AutoCloseable {
 	}
 
 	public void skipWhiteSpace() {
-		while (!eof() && (peek(" ") || peek("\t")))
+		while (!eof() && (peek(" ") || peek("\t") || peek("\r")))
 			pos++;
 	}
 

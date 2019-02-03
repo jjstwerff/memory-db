@@ -1038,7 +1038,21 @@ public class JsltParser {
 
 		private void parseListener() {
 			spot.setOperation(Operation.READ);
-			spot.setListenSource("$");
+			if (scanner.peek("/")) {
+				StringBuilder id = new StringBuilder();
+				while (true) {
+					if (scanner.peek(".") || scanner.peek("/"))
+						id.append(scanner.getChar());
+					else if (scanner.hasIdentifier())
+						id.append(scanner.parseIdentifier());
+					else
+						break; // not scanned a filename
+					if (scanner.peek(" ") || scanner.peek("\t") || scanner.peek("\r") || scanner.peek("\n"))
+						break; // scanned a whitespace
+				}
+				spot.setListenSource(id.toString());
+			} else
+				spot.setListenSource("$");
 			int listen = 0;
 			Source source = new Source(spot.getStore());
 			Source.IndexSources index = source.new IndexSources("$");
@@ -1388,6 +1402,10 @@ public class JsltParser {
 				case VARIABLE:
 					into.setVarName(from.getVarName());
 					into.setVarNr(from.getVarNr());
+					break;
+				case READ:
+					into.setListenSource(from.getListenSource());
+					into.setListemNr(from.getListemNr());
 					break;
 				default:
 					break;

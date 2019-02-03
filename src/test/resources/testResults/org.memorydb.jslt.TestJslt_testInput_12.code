@@ -21,7 +21,7 @@ name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
     operation=SORT, sort=[
-      operation=READ, listenSource=slice, listemNr=0
+      operation=READ, listenSource=$, listemNr=0
     ], sortParms=[
       operation=FUNCTION, function=ELEMENT, fnParm1=[
         operation=CURRENT

@@ -15,7 +15,7 @@ name=main, alternatives=[
   ], code=[
     operation=FUNCTION, function=ELEMENT, fnParm1=[
       operation=FUNCTION, function=ELEMENT, fnParm1=[
-        operation=READ, listenSource=slice, listemNr=0
+        operation=READ, listenSource=$, listemNr=0
       ], fnParm2=[
         operation=STRING, string=a
       ]

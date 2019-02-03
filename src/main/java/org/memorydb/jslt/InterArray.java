@@ -33,7 +33,7 @@ public class InterArray implements RecordInterface {
 			lastField = field;
 			lastObject = interpreter.inter(new ArrayArray(data, field - 1));
 		}
-		return interpreter.type(lastObject);
+		return JsltInterpreter.type(lastObject);
 	}
 
 	@Override

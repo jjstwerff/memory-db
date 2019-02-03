@@ -1,0 +1,3 @@
+import testing as t
+
+t.assert('contents', 'Name', $/start.tsv[0:4])

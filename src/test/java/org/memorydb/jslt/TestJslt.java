@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import org.junit.Assert;
 import org.junit.Test;
 import org.memorydb.file.Scanner;
+import org.memorydb.handler.Dir;
 import org.memorydb.jslt.JsltParser.Parser;
 import org.memorydb.structure.Store;
 import org.memorydb.table.MemoryTests;
@@ -159,7 +160,7 @@ public class TestJslt extends MemoryTests {
 				for (Macro m : new Macro(jsltStore).new IndexMacros())
 					code.append(m.toString());
 			compare(result, code.toString());
-			String into = JsltInterpreter.interpret(jsltStore, null);
+			String into = JsltInterpreter.interpret(jsltStore, null, new Dir(Paths.get(getClass().getResource("/files").getFile())));
 			Assert.assertEquals(result, "\"\"", into);
 		}
 	}

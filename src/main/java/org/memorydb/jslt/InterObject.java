@@ -38,7 +38,7 @@ public class InterObject implements RecordInterface {
 			lastObject = interpreter.inter(code);
 			lastName = code.getName().getString();
 		}
-		return interpreter.type(lastObject);
+		return JsltInterpreter.type(lastObject);
 	}
 
 	@Override

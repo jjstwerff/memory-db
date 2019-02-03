@@ -89,7 +89,7 @@ public class MemoryTests extends NormalCheck {
 
 	private static void jslt(RecordInterface source, Macro macro, String result) {
 		Store jsltStore = macro.getStore();
-		String into = JsltInterpreter.interpret(jsltStore, source);
+		String into = JsltInterpreter.interpret(jsltStore, source, null);
 		if (!into.equals(result)) {
 			Assert.assertEquals(result, into);
 		}

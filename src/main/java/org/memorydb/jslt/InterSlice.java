@@ -3,12 +3,10 @@ package org.memorydb.jslt;
 import org.memorydb.structure.RecordInterface;
 
 public class InterSlice implements RecordInterface {
-	private JsltInterpreter interpreter;
 	private RecordInterface data;
 	private long[] parms;
 
 	public InterSlice(JsltInterpreter interpreter, RecordInterface data, CallParmsArray parms) {
-		this.interpreter = interpreter;
 		this.data = data;
 		this.parms = new long[parms.getSize() - 1];
 		for (int p = 0; p < parms.getSize() - 1; p++)
@@ -26,7 +24,7 @@ public class InterSlice implements RecordInterface {
 		int idx = calc(field, size);
 		if (idx < 0 || idx > size)
 			return null;
-		return interpreter.type(data.get(idx + 1));
+		return JsltInterpreter.type(data.get(idx + 1));
 	}
 
 	private int calc(int field, int size) {

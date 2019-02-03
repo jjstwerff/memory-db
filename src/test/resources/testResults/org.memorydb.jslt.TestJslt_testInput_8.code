@@ -19,13 +19,13 @@ name=main, alternatives=[
   ], code=[
     operation=ARRAY, array=[
       operation=FUNCTION, function=ELEMENT, fnParm1=[
-        operation=READ, listenSource=slice, listemNr=0
+        operation=READ, listenSource=$, listemNr=0
       ], fnParm2=[
         operation=NUMBER, number=1
       ]
       operation=FUNCTION, function=ELEMENT, fnParm1=[
         operation=FUNCTION, function=ELEMENT, fnParm1=[
-          operation=READ, listenSource=slice, listemNr=0
+          operation=READ, listenSource=$, listemNr=1
         ], fnParm2=[
           operation=NUMBER, number=1
         ]
@@ -34,7 +34,7 @@ name=main, alternatives=[
       ]
       operation=FUNCTION, function=ELEMENT, fnParm1=[
         operation=FUNCTION, function=ELEMENT, fnParm1=[
-          operation=READ, listenSource=slice, listemNr=0
+          operation=READ, listenSource=$, listemNr=2
         ], fnParm2=[
           operation=NUMBER, number=0
         ]
@@ -43,7 +43,7 @@ name=main, alternatives=[
       ]
       operation=FUNCTION, function=ELEMENT, fnParm1=[
         operation=FUNCTION, function=ELEMENT, fnParm1=[
-          operation=READ, listenSource=slice, listemNr=0
+          operation=READ, listenSource=$, listemNr=3
         ], fnParm2=[
           operation=NUMBER, number=0
         ]

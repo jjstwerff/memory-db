@@ -187,4 +187,48 @@ public class TextFile implements Text, AutoCloseable {
 			throw new RuntimeException(e);
 		}
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder data = new StringBuilder();
+		int oldPos = pos;
+		int back = 0;
+		if (pos > 0 && (pos >= buffer.capacity() || buffer.get(pos) == 10))
+			pos--;
+		back = move2LinesBack(back);
+		gather5Lines(data, back);
+		pos = oldPos;
+		return data.toString();
+	}
+
+	private int move2LinesBack(int back) {
+		for (int i = 0; i < 3; i++) {
+			while (pos > 0 && buffer.get(pos) != '\n')
+				pos--;
+			if (i < 2 && pos > 0) {
+				pos--; // move back over the newline
+				back++;
+			}
+		}
+		if (back > 0 && pos != 0)
+			pos++;
+		return back;
+	}
+
+	private void gather5Lines(StringBuilder data, int back) {
+		int lp = linePos;
+		for (int i = 2 - back; i < 5; i++) {
+			data.append(String.format("%05d:%05d ", line + i - 2, pos));
+			while (pos < buffer.capacity() && buffer.get(pos) != '\n')
+				data.append(readChar());
+			if (pos < buffer.capacity())
+				data.append(readChar()); // eat the line end
+			if (i == 2) { // under the center (=current) line
+				data.append(".....:..... ");
+				for (int p = 1; p < lp; p++)
+					data.append(" ");
+				data.append("^\n");
+			}
+		}
+	}
 }

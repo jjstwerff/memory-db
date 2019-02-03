@@ -3,12 +3,10 @@ package org.memorydb.jslt;
 import org.memorydb.structure.RecordInterface;
 
 public class AddArray implements RecordInterface {
-	private final JsltInterpreter inter;
 	private final RecordInterface array;
 	private final Object elm;
 
-	public AddArray(JsltInterpreter inter, RecordInterface array, Object elm) {
-		this.inter = inter;
+	public AddArray(RecordInterface array, Object elm) {
 		this.array = array;
 		this.elm = elm;
 	}
@@ -59,7 +57,7 @@ public class AddArray implements RecordInterface {
 			if (elm instanceof RecordInterface)
 				return ((RecordInterface) elm).type(field - size);
 			else if (size + 1 == field)
-				return inter.type(elm);
+				return JsltInterpreter.type(elm);
 		}
 		return array.type(field);
 	}

@@ -3,12 +3,10 @@ package org.memorydb.jslt;
 import org.memorydb.structure.RecordInterface;
 
 public class InterMult implements RecordInterface {
-	private final JsltInterpreter interpreter;
 	private final RecordInterface data;
 	private final long number;
 
-	public InterMult(JsltInterpreter interpreter, RecordInterface data, long number) {
-		this.interpreter = interpreter;
+	public InterMult(RecordInterface data, long number) {
 		this.data = data;
 		this.number = number;
 	}
@@ -41,11 +39,11 @@ public class InterMult implements RecordInterface {
 			for(int i=0; i<m; i++) {
 				pos = data.next(pos);
 			}
-			return interpreter.type(data.get(pos));
+			return JsltInterpreter.type(data.get(pos));
 		}
 		if (field < 0 || field >= number)
 			return null;
-		return interpreter.type(data);
+		return JsltInterpreter.type(data);
 	}
 
 	@Override

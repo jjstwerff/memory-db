@@ -1,0 +1,63 @@
+name=main, alternatives=[
+  nr=0, parameters=[
+  ], code=[
+    operation=CALL, macro={Name=t.assert}, callParms=[
+      operation=STRING, string=contents
+      operation=STRING, string=Name
+      operation=CALL, macro={Name=slice}, callParms=[
+        operation=READ, listenSource=/start.tsv, listemNr=0
+        operation=NUMBER, number=0
+        operation=NUMBER, number=4
+        operation=NUMBER, number=1
+      ]
+    ]
+  ]
+]
+name=slice, alternatives=[
+]
+name=t.assert, alternatives=[
+  nr=0, parameters=[
+    type=VARIABLE, variable=[
+      name=name, nr=0, multiple=false, type=STRING
+    ]
+    type=VARIABLE, variable=[
+      name=should, nr=1, multiple=false, type=NULL
+    ]
+    type=VARIABLE, variable=[
+      name=was, nr=2, multiple=false, type=NULL
+    ]
+  ], code=[
+    operation=CONDITION, conExpr=[
+      operation=FUNCTION, function=EQ, fnParm1=[
+        operation=VARIABLE, varName=should, varNr=1
+      ], fnParm2=[
+        operation=VARIABLE, varName=was, varNr=2
+      ]
+    ], conTrue=[
+      operation=STRING, string=
+    ], conFalse=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=FUNCTION, function=ADD, fnParm1=[
+            operation=FUNCTION, function=ADD, fnParm1=[
+              operation=FUNCTION, function=ADD, fnParm1=[
+                operation=VARIABLE, varName=name, varNr=0
+              ], fnParm2=[
+                operation=STRING, string= was '
+              ]
+            ], fnParm2=[
+              operation=VARIABLE, varName=was, varNr=2
+            ]
+          ], fnParm2=[
+            operation=STRING, string=' should '
+          ]
+        ], fnParm2=[
+          operation=VARIABLE, varName=should, varNr=1
+        ]
+      ], fnParm2=[
+        operation=STRING, string=
+          '
+      ]
+    ]
+  ]
+]

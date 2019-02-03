@@ -52,7 +52,7 @@ public class InterMap implements RecordInterface {
 	public FieldType type(int field) {
 		if (lastField != field)
 			fill(field);
-		return interpreter.type(lastValue);
+		return JsltInterpreter.type(lastValue);
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.memorydb.handler.Dir;
 import org.memorydb.handler.StringText;
 import org.memorydb.handler.StringWriter;
 import org.memorydb.handler.Text;
@@ -33,9 +34,11 @@ public class JsltInterpreter {
 	private int stackFrame = 0;
 	private RecordInterface curFor = null;
 	private Object running = null;
+	private Dir dir = null;
 
-	public static String interpret(Store jsltStore, RecordInterface data) {
+	public static String interpret(Store jsltStore, RecordInterface data, Dir dir) {
 		JsltInterpreter inter = new JsltInterpreter();
+		inter.setDir(dir);
 		inter.data = data;
 		Writer write = new StringWriter();
 		Macro macro = new Macro(jsltStore);
@@ -44,6 +47,10 @@ public class JsltInterpreter {
 		for (CodeArray code : macro.getAlternatives(0).getCode())
 			inter.show(write, inter.inter(code));
 		return write.toString();
+	}
+
+	public void setDir(Dir dir) {
+		this.dir = dir;
 	}
 
 	public void setCurrent(Object current) {
@@ -110,6 +117,8 @@ public class JsltInterpreter {
 				return inter((Operator) current);
 			return current;
 		case READ:
+			if (code.getListenSource().startsWith("/"))
+				return dir == null ? null : dir.file(code.getListenSource().substring(1));
 			return data;
 		default:
 			return null;
@@ -124,7 +133,9 @@ public class JsltInterpreter {
 				return new InterSlice(this, (RecordInterface) parmData, code.getCallParms());
 			if (parmData instanceof String)
 				return subString((String) parmData, code.getCallParms());
-			throw new RuntimeException("Slice not implemented with type " + type(parmData));
+			if (parmData instanceof Text)
+				return subString((Text) parmData, code.getCallParms());
+			return null;
 		}
 		int stackF = stack.size();
 		int parms = code.getCallParms().getSize();
@@ -267,7 +278,7 @@ public class JsltInterpreter {
 		}
 		return true;
 	}
-	
+
 	class DoMatch {
 		int count;
 		Match match;
@@ -276,7 +287,7 @@ public class JsltInterpreter {
 			this.count = 0;
 			this.match = match;
 		}
-		
+
 		@Override
 		public String toString() {
 			return "" + count + ": " + match;
@@ -399,7 +410,7 @@ public class JsltInterpreter {
 					if (stack.size() <= stackFrame + var.getNr()) {
 						stack.add(new ListArray());
 					}
-					((ListArray)stack.get(stackFrame + var.getNr())).add(on.readChar() + "");
+					((ListArray) stack.get(stackFrame + var.getNr())).add(on.readChar() + "");
 				} else
 					stack.add(on.readChar() + "");
 				return true;
@@ -521,6 +532,41 @@ public class JsltInterpreter {
 		default:
 			return false;
 		}
+	}
+
+	private String subString(Text text, CallParmsArray callParms) {
+		int startPos = text.addPos();
+		long[] parms = new long[callParms.getSize() - 1];
+		for (int p = 0; p < callParms.getSize() - 1; p++)
+			parms[p] = getNumber(inter(new CallParmsArray(callParms, p + 1)));
+		StringBuilder res = new StringBuilder();
+		int pos = 0;
+		for (int p = 0; p < parms.length; p += 3) {
+			long start = parms[p];
+			long stop = parms[p + 1];
+			long step = parms[p + 2];
+			if (step == Long.MIN_VALUE)
+				step = 1;
+			if (start == Long.MIN_VALUE)
+				start = 0;
+			if (start > 0 && pos > start) {
+				text.toPos(startPos);
+				pos = 0;
+			}
+			while (pos < start) {
+				text.readChar();
+				pos++;
+			}
+			while (pos < stop) {
+				res.append(text.readChar());
+				for (int i=1; i < step; i++) {
+					text.readChar();
+					pos++;
+				}
+				pos++;
+			}
+		}
+		return res.toString();
 	}
 
 	private String subString(String str, CallParmsArray callParms) {
@@ -714,7 +760,7 @@ public class JsltInterpreter {
 			} else if (p1 instanceof Double) {
 				return ((Double) p1) + getFloat(p2);
 			} else if (p1 instanceof RecordInterface) {
-				return new AddArray(this, (RecordInterface) p1, p2);
+				return new AddArray((RecordInterface) p1, p2);
 			}
 			return null;
 		case AND:
@@ -929,7 +975,7 @@ public class JsltInterpreter {
 			} else if (p1 instanceof Double) {
 				return (Double) p1 * getFloat(p2);
 			} else if (p1 instanceof RecordInterface) {
-				return new InterMult(this, (RecordInterface) p1, getNumber(p2));
+				return new InterMult((RecordInterface) p1, getNumber(p2));
 			}
 			return null;
 		case NE:

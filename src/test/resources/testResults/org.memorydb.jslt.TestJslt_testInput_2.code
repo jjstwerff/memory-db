@@ -12,7 +12,7 @@ name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
     operation=FUNCTION, function=ELEMENT, fnParm1=[
-      operation=READ, listenSource=slice, listemNr=0
+      operation=READ, listenSource=$, listemNr=0
     ], fnParm2=[
       operation=STRING, string=name
     ]
