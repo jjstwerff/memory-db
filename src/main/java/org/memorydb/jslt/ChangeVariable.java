@@ -14,6 +14,7 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 		setName(null);
 		setNr(0);
 		setMultiple(false);
+		defaultResultType();
 	}
 
 	public ChangeVariable(Variable current) {

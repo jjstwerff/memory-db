@@ -57,6 +57,9 @@ public class Change${table.name} extends ${table.name} implements <#if table.inc
 		store.setInt(rec, ${field.pos / 8}, 0); // ARRAY ${field.name}
 		store.setInt(rec, ${(field.pos / 8) + 4}, 0);
 </#if></#list>
+<#list table.includes as incl>
+		default${incl.name}();
+</#list>
 	}
 
 	public Change${table.name}(${table.name} current) {

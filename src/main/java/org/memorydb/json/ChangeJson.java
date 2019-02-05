@@ -10,6 +10,7 @@ import org.memorydb.structure.ChangeInterface;
 public class ChangeJson extends Json implements ChangePart {
 	public ChangeJson(Store store) {
 		super(store, store.allocate(Json.RECORD_SIZE));
+		defaultPart();
 	}
 
 	public ChangeJson(Json current) {

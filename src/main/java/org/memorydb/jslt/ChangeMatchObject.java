@@ -10,6 +10,7 @@ import org.memorydb.structure.ChangeInterface;
 public class ChangeMatchObject extends MatchObject implements ChangeMatch {
 	public ChangeMatchObject(Store store) {
 		super(store, store.allocate(MatchObject.RECORD_SIZE));
+		defaultMatch();
 	}
 
 	public ChangeMatchObject(MatchObject current) {

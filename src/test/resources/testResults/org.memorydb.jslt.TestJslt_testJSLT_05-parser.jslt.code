@@ -15,7 +15,7 @@ name=id, alternatives=[
           ], mmin=0, mmax=-1
         ]
       ], variable=[
-        name=i, nr=0, multiple=false, type=NULL, record=slice
+        name=i, nr=0, multiple=false, type=NULL
       ]
     ]
   ], code=[
@@ -236,7 +236,7 @@ name=numb, alternatives=[
           ], mmin=0, mmax=-1
         ]
       ], variable=[
-        name=n, nr=0, multiple=false, type=NULL, record=slice
+        name=n, nr=0, multiple=false, type=NULL
       ]
     ]
   ], code=[

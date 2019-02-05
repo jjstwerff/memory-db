@@ -10,6 +10,7 @@ import org.memorydb.structure.ChangeInterface;
 public class ChangeExpr extends Expr implements ChangeOperator {
 	public ChangeExpr(Store store) {
 		super(store, store.allocate(Expr.RECORD_SIZE));
+		defaultOperator();
 	}
 
 	public ChangeExpr(Expr current) {
