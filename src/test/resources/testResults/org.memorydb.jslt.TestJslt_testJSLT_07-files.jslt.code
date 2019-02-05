@@ -1,14 +1,72 @@
+name=any, alternatives=[
+  nr=0, parameters=[
+    type=VARIABLE, variable=[
+      name=x, nr=0, multiple=false, type=NULL
+    ]
+  ], code=[
+    operation=BOOLEAN, boolean=true
+  ]
+]
+name=line, alternatives=[
+  nr=0, parameters=[
+    type=MULTIPLE, mmatch=[
+      type=ARRAY, marray=[
+        type=VARIABLE, vmatch=[
+          type=MULTIPLE, mmatch=[
+            type=MACRO, macro={Name=any}, mparms=[
+            ]
+          ], mmin=0, mmax=0
+        ], variable=[
+          name=l, nr=0, multiple=false, type=NULL
+        ]
+        type=STRING, string=
+          
+      ]
+    ], mmin=0, mmax=-1
+  ], code=[
+    operation=VARIABLE, varName=l, varNr=0
+  ]
+]
 name=main, alternatives=[
   nr=0, parameters=[
   ], code=[
-    operation=CALL, macro={Name=t.assert}, callParms=[
-      operation=STRING, string=contents
-      operation=STRING, string=Name
-      operation=CALL, macro={Name=slice}, callParms=[
-        operation=READ, listenSource=/start.tsv, listemNr=0
-        operation=NUMBER, number=0
-        operation=NUMBER, number=4
-        operation=NUMBER, number=1
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=FUNCTION, function=ADD, fnParm1=[
+        operation=CALL, macro={Name=t.assert}, callParms=[
+          operation=STRING, string=slice
+          operation=STRING, string=Name
+          operation=CALL, macro={Name=slice}, callParms=[
+            operation=READ, listenSource=/start.tsv, listemNr=0
+            operation=NUMBER, number=0
+            operation=NUMBER, number=4
+            operation=NUMBER, number=1
+          ]
+        ]
+      ], fnParm2=[
+        operation=CALL, macro={Name=t.assert}, callParms=[
+          operation=STRING, string=full
+          operation=STRING, string=
+            Name\tCost\tValue\tDescription
+            A\t1\t2\tThe first thing to buy
+            B\t2\t3\tAnother with slightly more value
+            C\t4\t5\tThis is costly
+          operation=READ, listenSource=/start.tsv, listemNr=1
+        ]
+      ]
+    ], fnParm2=[
+      operation=CALL, macro={Name=t.assert}, callParms=[
+        operation=STRING, string=lines
+        operation=ARRAY, array=[
+          operation=STRING, string=a
+          operation=STRING, string=bb
+          operation=STRING, string=ccc
+        ]
+        operation=CALL, macro={Name=line}, callParms=[
+          operation=STRING, string=
+            a
+            bb
+            ccc
+        ]
       ]
     ]
   ]

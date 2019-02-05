@@ -1,3 +1,8 @@
 import testing as t
 
-t.assert('contents', 'Name', $/start.tsv[0:4])
+def any(x): true
+def line((any*:l + '\n')*): l
+
+t.assert('slice', 'Name', $/start.tsv[0:4]) +
+t.assert('full', 'Name	Cost	Value	Description\nA	1	2	The first thing to buy\nB	2	3	Another with slightly more value\nC	4	5	This is costly\n', $/start.tsv) +
+t.assert('lines', ['a', 'bb', 'ccc'], line('a\nbb\nccc\n'))

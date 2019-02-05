@@ -35,6 +35,7 @@ public class JsltInterpreter {
 	private RecordInterface curFor = null;
 	private Object running = null;
 	private Dir dir = null;
+	private boolean debug = true;
 
 	public static String interpret(Store jsltStore, RecordInterface data, Dir dir) {
 		JsltInterpreter inter = new JsltInterpreter();
@@ -139,13 +140,18 @@ public class JsltInterpreter {
 		}
 		int stackF = stack.size();
 		int parms = code.getCallParms().getSize();
+		int stackPos = stackFrame;
 		for (CallParmsArray parm : code.getCallParms())
 			stack.add(inter(parm));
-		return findAlternative(macro, stackF, parms);
+		stackFrame = stackF;
+		Object obj = findAlternative(macro, stackF, parms);
+		while (stack.size() > stackF)
+			stack.remove(stack.size() - 1);
+		stackFrame = stackPos;
+		return obj;
 	}
 
 	private Object findAlternative(Macro macro, int stackF, int parms) {
-		int oldFrame = stackFrame;
 		for (Alternative alt : macro.getAlternatives()) {
 			if (alt.getParameters().getSize() != parms)
 				continue;
@@ -168,19 +174,26 @@ public class JsltInterpreter {
 			}
 			if (found) {
 				Object res = inter(alt.getCode().iterator().next());
-				stackFrame = oldFrame;
-				while (stack.size() > stackF)
-					stack.remove(stack.size() - 1);
+				if (debug)
+					showMacro(macro, res);
 				return res;
 			}
 			while (stack.size() > newFrame)
 				stack.remove(stack.size() - 1);
-			stackFrame = newFrame;
 		}
-		while (stack.size() > stackF)
-			stack.remove(stack.size() - 1);
-		stackFrame = oldFrame;
 		return null;
+	}
+
+	private void showMacro(Macro macro, Object res) {
+		StringBuilder bld = new StringBuilder();
+		bld.append(macro.getName()).append("('");
+		for (int s = stackFrame; s < stack.size(); s++) {
+			if (s > stackFrame)
+				bld.append("', '");
+			bld.append(stack.get(s));
+		}
+		bld.append("'): '").append(res).append("'");
+		System.out.println(bld);
 	}
 
 	private boolean testParm(Match parm, Object obj) {
@@ -218,19 +231,25 @@ public class JsltInterpreter {
 				return false;
 			break;
 		case VARIABLE:
-			Variable variable = parm.getVariable();
-			if (!matches(obj, variable.getType()))
-				return false;
 			stack.add(obj);
-			break;
+			return matches(obj, parm.getVariable().getType());
 		case CONSTANT:
 			throw new RuntimeException("Constant");
 		case MULTIPLE:
-			// multiple outside or the last element of an array
-			while (testParm(parm.getMmatch(), obj)) {
-				throw new RuntimeException("Not implemented yet");
-			}
-			break;
+			if (obj instanceof String)
+				obj = new StringText((String) obj);
+			if (obj instanceof Text) {
+				int count = 0;
+				boolean found = false;
+				while (textParm(parm.getMmatch(), (Text) obj)) {
+					if (parm.getMmax() == -1 || count++ <= parm.getMmax()) {
+						found = true;
+						break;
+					}
+				}
+				return found;
+			} else
+				return false;
 		case MACRO:
 			throw new RuntimeException("macro");
 		default:
@@ -347,7 +366,7 @@ public class JsltInterpreter {
 					return false; // not at the end of the array yet
 				}
 			} else {
-				if (!textParm(elm, obj)) {
+				if (!textParm(elm, obj)) { // TODO till next element
 					obj.toPos(pos);
 					return false; // next element is not of the correct type
 				}
@@ -425,7 +444,9 @@ public class JsltInterpreter {
 					return false;
 			return true;
 		case MACRO:
+			int oldStack = stackFrame;
 			int stackF = stack.size();
+			stackFrame = stackF;
 			int parms = parm.getMparms().getSize() + 1;
 			for (MparmsArray p : parm.getMparms()) {
 				Object obj = inter(p);
@@ -436,6 +457,9 @@ public class JsltInterpreter {
 			int pos = on.addPos();
 			stack.add(on.readChar() + "");
 			Object res = findAlternative(parm.getMacro(), stackF, parms);
+			while (stack.size() > stackF)
+				stack.remove(stack.size() - 1);
+			stackFrame = oldStack;
 			if (res instanceof Boolean && ((Boolean) res)) {
 				on.freePos(pos);
 				return true;
@@ -1225,7 +1249,15 @@ public class JsltInterpreter {
 			return l == Long.MIN_VALUE ? "" : Long.toString(l);
 		} else if (val instanceof Double)
 			return Double.toString((Double) val);
-		else if (val instanceof RecordInterface) {
+		else if (val instanceof Text) {
+			StringBuilder bld = new StringBuilder();
+			Text text = (Text) val;
+			int pos = text.addPos();
+			while (!text.end())
+				bld.append(text.readChar());
+			text.toPos(pos);
+			return bld.toString();
+		} else if (val instanceof RecordInterface) {
 			Writer write = new StringWriter();
 			write.append(true);
 			iterate(write, (RecordInterface) val);
