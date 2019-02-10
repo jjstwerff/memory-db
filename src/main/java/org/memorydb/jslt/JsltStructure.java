@@ -92,11 +92,10 @@ public class JsltStructure {
 		Record mfield = project.record("MatchField");
 
 		Record match = project.content("Match");
-		match.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "NULL", "VARIABLE", "FLOAT", "NUMBER", "STRING",
+		match.field("variable", Type.OBJECT, variable); // store current match into a variable
+		match.field("type", Type.ENUMERATE, "ANY", "ARRAY", "BOOLEAN", "NULL", "FLOAT", "NUMBER", "STRING",
 				"OBJECT", "CONSTANT", "MACRO", "MULTIPLE").condition();
 		match.field("marray", Type.ARRAY, subMatch).when("ARRAY");
-		match.field("vmatch", Type.OBJECT, mobj).when("VARIABLE");
-		match.field("variable", Type.OBJECT, variable).when("VARIABLE");
 		match.field("boolean", Type.BOOLEAN).when("BOOLEAN");
 		match.field("float", Type.FLOAT).when("FLOAT");
 		match.field("number", Type.LONG).when("NUMBER");

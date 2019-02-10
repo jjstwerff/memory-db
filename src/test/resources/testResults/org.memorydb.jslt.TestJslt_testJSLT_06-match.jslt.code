@@ -2,9 +2,9 @@ name=eager, alternatives=[
   nr=0, parameters=[
     type=ARRAY, marray=[
       type=MULTIPLE, mmatch=[
-        type=VARIABLE, variable=[
+        variable=[
           name=x, nr=0, multiple=true, type=NULL
-        ]
+        ], type=ANY
       ], mmin=0, mmax=-1
       type=STRING, string=abc
     ]
@@ -32,15 +32,15 @@ name=slice, alternatives=[
 ]
 name=t.assert, alternatives=[
   nr=0, parameters=[
-    type=VARIABLE, variable=[
+    variable=[
       name=name, nr=0, multiple=false, type=STRING
-    ]
-    type=VARIABLE, variable=[
+    ], type=ANY
+    variable=[
       name=should, nr=1, multiple=false, type=NULL
-    ]
-    type=VARIABLE, variable=[
+    ], type=ANY
+    variable=[
       name=was, nr=2, multiple=false, type=NULL
-    ]
+    ], type=ANY
   ], code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[

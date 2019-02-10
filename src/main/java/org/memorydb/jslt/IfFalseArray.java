@@ -177,6 +177,11 @@ public class IfFalseArray implements ChangeOperator, Iterable<IfFalseArray> {
 		return size;
 	}
 
+	public void clear() {
+		size = 0;
+		store.setInt(alloc, 4, size);
+	}
+
 	/* package private */ IfFalseArray add() {
 		if (parent.getRec() == 0)
 			return this;
@@ -208,6 +213,16 @@ public class IfFalseArray implements ChangeOperator, Iterable<IfFalseArray> {
 					throw new NoSuchElementException();
 				element++;
 				return new IfFalseArray(IfFalseArray.this, element);
+			}
+
+			@Override
+			public void remove() {
+				if (alloc == 0 || element > size || element < 0)
+					throw new NoSuchElementException();
+				store.copy(alloc, (element + 1) * 18 + 17, element * 18 + 17, size * 17);
+				element--;
+				size--;
+				store.setInt(alloc, 4, size);
 			}
 		};
 	}

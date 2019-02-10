@@ -24,7 +24,7 @@ public class Store implements Closeable {
 	private static final Unsafe unsafe;
 	private String filename;
 	private long addr;
-	private int length;
+	private int length; // length in 8 byte chunks
 	private static final boolean DO_CHECKS = true;
 	private static final boolean DO_VERIFY = true;
 	private static Logger logger = LoggerFactory.getLogger(Store.class);
@@ -362,6 +362,14 @@ public class Store implements Closeable {
 		if (DO_VERIFY)
 			verify();
 		return pos;
+	}
+
+	public void copy(int rec, int from, int to, int size) {
+		long rdata = addr + 8L * rec;
+		int len = unsafe.getInt(rdata);
+		if (from < 0 || size < 0 || from + size > 8 * len || to + size > 8 * len)
+			throw new RuntimeException("Copy out of bound");
+		unsafe.copyMemory(rdata + 4 + from, rdata + 4 + to, size);
 	}
 
 	public void free(int rec) {

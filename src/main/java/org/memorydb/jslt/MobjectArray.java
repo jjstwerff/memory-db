@@ -31,7 +31,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 		this.parent = parent;
 		this.idx = idx;
 		if (parent.getRec() != 0) {
-			this.alloc = store.getInt(parent.getRec(), parent.matchPosition() + 1);
+			this.alloc = store.getInt(parent.getRec(), parent.matchPosition() + 5);
 			if (alloc != 0) {
 				setUpRecord(parent);
 				this.size = store.getInt(alloc, 4);
@@ -122,16 +122,21 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 		return size;
 	}
 
+	public void clear() {
+		size = 0;
+		store.setInt(alloc, 4, size);
+	}
+
 	/* package private */ MobjectArray add() {
 		if (parent.getRec() == 0)
 			return this;
 		idx = size;
 		if (alloc == 0) {
-			alloc = store.allocate(13 + 17);
+			alloc = store.allocate(17 + 17);
 			setUpRecord(parent);
 		} else
-			alloc = store.resize(alloc, (17 + (idx + 1) * 13) / 8);
-		store.setInt(parent.getRec(), parent.matchPosition() + 1, alloc);
+			alloc = store.resize(alloc, (17 + (idx + 1) * 17) / 8);
+		store.setInt(parent.getRec(), parent.matchPosition() + 5, alloc);
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
 		setName(null);
@@ -155,6 +160,16 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 				element++;
 				return new MobjectArray(MobjectArray.this, element);
 			}
+
+			@Override
+			public void remove() {
+				if (alloc == 0 || element > size || element < 0)
+					throw new NoSuchElementException();
+				store.copy(alloc, (element + 1) * 17 + 17, element * 17 + 17, size * 17);
+				element--;
+				size--;
+				store.setInt(alloc, 4, size);
+			}
 		};
 	}
 
@@ -167,12 +182,12 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 	)
 
 	public String getName() {
-		return alloc == 0 || idx < 0 || idx >= size ? null : store.getString(store.getInt(alloc, idx * 13 + 17));
+		return alloc == 0 || idx < 0 || idx >= size ? null : store.getString(store.getInt(alloc, idx * 17 + 17));
 	}
 
 	public void setName(String value) {
 		if (alloc != 0 && idx >= 0 && idx < size) {
-			store.setInt(alloc, idx * 13 + 17, store.putString(value));
+			store.setInt(alloc, idx * 17 + 17, store.putString(value));
 		}
 	}
 
@@ -211,7 +226,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public int matchPosition() {
-		return idx * 13 + 17 + 4;
+		return idx * 17 + 17 + 4;
 	}
 
 	@Override
@@ -236,7 +251,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public String name(int field) {
-		if (field >= 1 && field <= 17)
+		if (field >= 1 && field <= 16)
 			return nameMatch(field - 1);
 		switch (field) {
 		case 1:
@@ -248,7 +263,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 1 && field <= 17)
+		if (field >= 1 && field <= 16)
 			return typeMatch(field - 1);
 		switch (field) {
 		case 1:
@@ -260,7 +275,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 1 && field <= 17)
+		if (field >= 1 && field <= 16)
 			return getMatch(field - 1);
 		switch (field) {
 		case 1:
@@ -272,7 +287,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 1 && field <= 17)
+		if (field >= 1 && field <= 16)
 			return iterateMatch(field - 1);
 		switch (field) {
 		default:
@@ -282,7 +297,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 1 && field <= 17)
+		if (field >= 1 && field <= 16)
 			return setMatch(field - 1, value);
 		switch (field) {
 		case 1:
@@ -296,7 +311,7 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 1 && field <= 17)
+		if (field >= 1 && field <= 16)
 			return addMatch(field - 1);
 		switch (field) {
 		default:

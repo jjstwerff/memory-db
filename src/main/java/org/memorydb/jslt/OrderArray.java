@@ -93,6 +93,11 @@ public class OrderArray implements ChangeOperator, Iterable<OrderArray> {
 		return size;
 	}
 
+	public void clear() {
+		size = 0;
+		store.setInt(alloc, 4, size);
+	}
+
 	/* package private */ OrderArray add() {
 		if (parent.getRec() == 0)
 			return this;
@@ -124,6 +129,16 @@ public class OrderArray implements ChangeOperator, Iterable<OrderArray> {
 					throw new NoSuchElementException();
 				element++;
 				return new OrderArray(OrderArray.this, element);
+			}
+
+			@Override
+			public void remove() {
+				if (alloc == 0 || element > size || element < 0)
+					throw new NoSuchElementException();
+				store.copy(alloc, (element + 1) * 18 + 12, element * 18 + 12, size * 17);
+				element--;
+				size--;
+				store.setInt(alloc, 4, size);
 			}
 		};
 	}

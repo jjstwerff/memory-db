@@ -36,8 +36,18 @@ public interface Match extends MemoryRecord, RecordInterface {
 		return null;
 	}
 
+	@FieldData(
+		name = "variable",
+		type = "OBJECT",
+		related = Variable.class,
+		mandatory = false
+	)
+	default Variable getVariable() {
+		return new Variable(getStore(), getRec() == 0 ? 0 : getStore().getInt(getRec(), matchPosition() + 0));
+	}
+
 	public enum Type {
-		ARRAY, BOOLEAN, NULL, VARIABLE, FLOAT, NUMBER, STRING, OBJECT, CONSTANT, MACRO, MULTIPLE;
+		ANY, ARRAY, BOOLEAN, NULL, FLOAT, NUMBER, STRING, OBJECT, CONSTANT, MACRO, MULTIPLE;
 
 		private static Map<String, Type> map = new HashMap<>();
 
@@ -55,12 +65,12 @@ public interface Match extends MemoryRecord, RecordInterface {
 	@FieldData(
 		name = "type",
 		type = "ENUMERATE",
-		enumerate = {"ARRAY", "BOOLEAN", "NULL", "VARIABLE", "FLOAT", "NUMBER", "STRING", "OBJECT", "CONSTANT", "MACRO", "MULTIPLE"},
+		enumerate = {"ANY", "ARRAY", "BOOLEAN", "NULL", "FLOAT", "NUMBER", "STRING", "OBJECT", "CONSTANT", "MACRO", "MULTIPLE"},
 		condition = true,
 		mandatory = false
 	)
 	default Type getType() {
-		int data = getRec() == 0 ? 0 : getStore().getByte(getRec(), matchPosition() + 0) & 31;
+		int data = getRec() == 0 ? 0 : getStore().getByte(getRec(), matchPosition() + 4) & 31;
 		if (data <= 0)
 			return null;
 		return Type.values()[data - 1];
@@ -86,35 +96,13 @@ public interface Match extends MemoryRecord, RecordInterface {
 	}
 
 	@FieldData(
-		name = "vmatch",
-		type = "OBJECT",
-		related = MatchObject.class,
-		when = "VARIABLE",
-		mandatory = false
-	)
-	default MatchObject getVmatch() {
-		return new MatchObject(getStore(), getType() != Type.VARIABLE ? 0 : getStore().getInt(getRec(), matchPosition() + 1));
-	}
-
-	@FieldData(
-		name = "variable",
-		type = "OBJECT",
-		related = Variable.class,
-		when = "VARIABLE",
-		mandatory = false
-	)
-	default Variable getVariable() {
-		return new Variable(getStore(), getType() != Type.VARIABLE ? 0 : getStore().getInt(getRec(), matchPosition() + 5));
-	}
-
-	@FieldData(
 		name = "boolean",
 		type = "BOOLEAN",
 		when = "BOOLEAN",
 		mandatory = false
 	)
 	default boolean isBoolean() {
-		return getType() != Type.BOOLEAN ? false : (getStore().getByte(getRec(), matchPosition() + 1) & 1) > 0;
+		return getType() != Type.BOOLEAN ? false : (getStore().getByte(getRec(), matchPosition() + 5) & 1) > 0;
 	}
 
 	@FieldData(
@@ -124,7 +112,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	default double getFloat() {
-		return getType() != Type.FLOAT ? Double.NaN : Double.longBitsToDouble(getStore().getLong(getRec(), matchPosition() + 1));
+		return getType() != Type.FLOAT ? Double.NaN : Double.longBitsToDouble(getStore().getLong(getRec(), matchPosition() + 5));
 	}
 
 	@FieldData(
@@ -134,7 +122,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	default long getNumber() {
-		return getType() != Type.NUMBER ? Long.MIN_VALUE : getStore().getLong(getRec(), matchPosition() + 1);
+		return getType() != Type.NUMBER ? Long.MIN_VALUE : getStore().getLong(getRec(), matchPosition() + 5);
 	}
 
 	@FieldData(
@@ -144,7 +132,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	default String getString() {
-		return getType() != Type.STRING ? null : getStore().getString(getStore().getInt(getRec(), matchPosition() + 1));
+		return getType() != Type.STRING ? null : getStore().getString(getStore().getInt(getRec(), matchPosition() + 5));
 	}
 
 	@FieldData(
@@ -173,7 +161,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	default String getCparm() {
-		return getType() != Type.CONSTANT ? null : getStore().getString(getStore().getInt(getRec(), matchPosition() + 1));
+		return getType() != Type.CONSTANT ? null : getStore().getString(getStore().getInt(getRec(), matchPosition() + 5));
 	}
 
 	@FieldData(
@@ -183,7 +171,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	default int getConstant() {
-		return getType() != Type.CONSTANT ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchPosition() + 5);
+		return getType() != Type.CONSTANT ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchPosition() + 9);
 	}
 
 	@FieldData(
@@ -194,7 +182,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	default Macro getMacro() {
-		return new Macro(getStore(), getType() != Type.MACRO ? 0 : getStore().getInt(getRec(), matchPosition() + 1));
+		return new Macro(getStore(), getType() != Type.MACRO ? 0 : getStore().getInt(getRec(), matchPosition() + 5));
 	}
 
 	@FieldData(
@@ -224,7 +212,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	default MatchObject getMmatch() {
-		return new MatchObject(getStore(), getType() != Type.MULTIPLE ? 0 : getStore().getInt(getRec(), matchPosition() + 1));
+		return new MatchObject(getStore(), getType() != Type.MULTIPLE ? 0 : getStore().getInt(getRec(), matchPosition() + 5));
 	}
 
 	@FieldData(
@@ -234,7 +222,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	default byte getMmin() {
-		return getType() != Type.MULTIPLE ? 0 : getStore().getByte(getRec(), matchPosition() + 5);
+		return getType() != Type.MULTIPLE ? 0 : getStore().getByte(getRec(), matchPosition() + 9);
 	}
 
 	@FieldData(
@@ -244,30 +232,24 @@ public interface Match extends MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	default byte getMmax() {
-		return getType() != Type.MULTIPLE ? 0 : getStore().getByte(getRec(), matchPosition() + 6);
+		return getType() != Type.MULTIPLE ? 0 : getStore().getByte(getRec(), matchPosition() + 10);
 	}
 
 	default void outputMatch(Write write, int iterate) throws IOException {
 		if (getRec() == 0 || iterate <= 0)
 			return;
+		Variable fldVariable = getVariable();
+		if (fldVariable != null && fldVariable.getRec() != 0) {
+			write.sub("variable");
+			fldVariable.output(write, iterate);
+			write.endSub();
+		}
 		write.field("type", getType());
 		MarrayArray fldMarray = getMarray();
 		if (fldMarray != null) {
 			write.sub("marray");
 			for (MarrayArray sub : fldMarray)
 				sub.output(write, iterate);
-			write.endSub();
-		}
-		MatchObject fldVmatch = getVmatch();
-		if (fldVmatch != null && fldVmatch.getRec() != 0) {
-			write.sub("vmatch");
-			fldVmatch.output(write, iterate);
-			write.endSub();
-		}
-		Variable fldVariable = getVariable();
-		if (fldVariable != null && fldVariable.getRec() != 0) {
-			write.sub("variable");
-			fldVariable.output(write, iterate);
 			write.endSub();
 		}
 		if (getType() == Type.BOOLEAN)
@@ -307,30 +289,28 @@ public interface Match extends MemoryRecord, RecordInterface {
 	default Object getMatch(int field) {
 		switch (field) {
 		case 1:
-			return getType();
-		case 3:
-			return getVmatch();
-		case 4:
 			return getVariable();
-		case 5:
+		case 2:
+			return getType();
+		case 4:
 			return isBoolean();
-		case 6:
+		case 5:
 			return getFloat();
-		case 7:
+		case 6:
 			return getNumber();
-		case 8:
+		case 7:
 			return getString();
-		case 10:
+		case 9:
 			return getCparm();
-		case 11:
+		case 10:
 			return getConstant();
-		case 12:
+		case 11:
 			return getMacro();
-		case 14:
+		case 13:
 			return getMmatch();
-		case 15:
+		case 14:
 			return getMmin();
-		case 16:
+		case 15:
 			return getMmax();
 		default:
 			return null;
@@ -339,11 +319,11 @@ public interface Match extends MemoryRecord, RecordInterface {
 
 	default Iterable<? extends RecordInterface> iterateMatch(int field, @SuppressWarnings("unused") Object... key) {
 		switch (field) {
-		case 2:
+		case 3:
 			return getMarray();
-		case 9:
+		case 8:
 			return getMobject();
-		case 13:
+		case 12:
 			return getMparms();
 		default:
 			return null;
@@ -353,36 +333,34 @@ public interface Match extends MemoryRecord, RecordInterface {
 	default FieldType typeMatch(int field) {
 		switch (field) {
 		case 1:
-			return FieldType.STRING;
+			return FieldType.OBJECT;
 		case 2:
-			return FieldType.ARRAY;
+			return FieldType.STRING;
 		case 3:
-			return FieldType.OBJECT;
+			return FieldType.ARRAY;
 		case 4:
-			return FieldType.OBJECT;
-		case 5:
 			return FieldType.BOOLEAN;
-		case 6:
+		case 5:
 			return FieldType.FLOAT;
-		case 7:
+		case 6:
 			return FieldType.LONG;
+		case 7:
+			return FieldType.STRING;
 		case 8:
-			return FieldType.STRING;
+			return FieldType.ARRAY;
 		case 9:
-			return FieldType.ARRAY;
-		case 10:
 			return FieldType.STRING;
+		case 10:
+			return FieldType.INTEGER;
 		case 11:
-			return FieldType.INTEGER;
+			return FieldType.OBJECT;
 		case 12:
-			return FieldType.OBJECT;
-		case 13:
 			return FieldType.ARRAY;
-		case 14:
+		case 13:
 			return FieldType.OBJECT;
-		case 15:
+		case 14:
 			return FieldType.INTEGER;
-		case 16:
+		case 15:
 			return FieldType.INTEGER;
 		default:
 			return null;
@@ -392,36 +370,34 @@ public interface Match extends MemoryRecord, RecordInterface {
 	default String nameMatch(int field) {
 		switch (field) {
 		case 1:
-			return "type";
-		case 2:
-			return "marray";
-		case 3:
-			return "vmatch";
-		case 4:
 			return "variable";
-		case 5:
+		case 2:
+			return "type";
+		case 3:
+			return "marray";
+		case 4:
 			return "boolean";
-		case 6:
+		case 5:
 			return "float";
-		case 7:
+		case 6:
 			return "number";
-		case 8:
+		case 7:
 			return "string";
-		case 9:
+		case 8:
 			return "mobject";
-		case 10:
+		case 9:
 			return "cparm";
-		case 11:
+		case 10:
 			return "constant";
-		case 12:
+		case 11:
 			return "macro";
-		case 13:
+		case 12:
 			return "mparms";
-		case 14:
+		case 13:
 			return "mmatch";
-		case 15:
+		case 14:
 			return "mmin";
-		case 16:
+		case 15:
 			return "mmax";
 		default:
 			return null;

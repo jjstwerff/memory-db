@@ -5,17 +5,15 @@ name=id, alternatives=[
         type=MACRO, macro={Name=wstoken}, mparms=[
         ]
       ], mmin=0, mmax=-1
-      type=VARIABLE, vmatch=[
-        type=ARRAY, marray=[
-          type=MACRO, macro={Name=idfirst}, mparms=[
-          ]
-          type=MULTIPLE, mmatch=[
-            type=MACRO, macro={Name=idnext}, mparms=[
-            ]
-          ], mmin=0, mmax=-1
-        ]
-      ], variable=[
+      variable=[
         name=i, nr=0, multiple=false, type=NULL
+      ], type=ARRAY, marray=[
+        type=MACRO, macro={Name=idfirst}, mparms=[
+        ]
+        type=MULTIPLE, mmatch=[
+          type=MACRO, macro={Name=idnext}, mparms=[
+          ]
+        ], mmin=0, mmax=-1
       ]
     ]
   ], code=[
@@ -24,9 +22,9 @@ name=id, alternatives=[
 ]
 name=idfirst, alternatives=[
   nr=0, parameters=[
-    type=VARIABLE, variable=[
+    variable=[
       name=x, nr=0, multiple=false, type=NULL
-    ]
+    ], type=ANY
   ], if=[
     operation=FUNCTION, function=OR, fnParm1=[
       operation=FUNCTION, function=OR, fnParm1=[
@@ -71,9 +69,9 @@ name=idfirst, alternatives=[
 ]
 name=idnext, alternatives=[
   nr=0, parameters=[
-    type=VARIABLE, variable=[
+    variable=[
       name=x, nr=0, multiple=false, type=NULL
-    ]
+    ], type=ANY
   ], if=[
     operation=FUNCTION, function=OR, fnParm1=[
       operation=CALL, macro={Name=nrtoken}, callParms=[
@@ -195,9 +193,9 @@ name=main, alternatives=[
 ]
 name=nrtoken, alternatives=[
   nr=0, parameters=[
-    type=VARIABLE, variable=[
+    variable=[
       name=x, nr=0, multiple=false, type=NULL
-    ]
+    ], type=ANY
   ], if=[
     operation=FUNCTION, function=AND, fnParm1=[
       operation=FUNCTION, function=GT, fnParm1=[
@@ -223,20 +221,18 @@ name=numb, alternatives=[
         type=MACRO, macro={Name=wstoken}, mparms=[
         ]
       ], mmin=0, mmax=-1
-      type=VARIABLE, vmatch=[
-        type=ARRAY, marray=[
-          type=MULTIPLE, mmatch=[
-            type=STRING, string=-
-          ], mmin=0, mmax=1
+      variable=[
+        name=n, nr=0, multiple=false, type=NULL
+      ], type=ARRAY, marray=[
+        type=MULTIPLE, mmatch=[
+          type=STRING, string=-
+        ], mmin=0, mmax=1
+        type=MACRO, macro={Name=nrtoken}, mparms=[
+        ]
+        type=MULTIPLE, mmatch=[
           type=MACRO, macro={Name=nrtoken}, mparms=[
           ]
-          type=MULTIPLE, mmatch=[
-            type=MACRO, macro={Name=nrtoken}, mparms=[
-            ]
-          ], mmin=0, mmax=-1
-        ]
-      ], variable=[
-        name=n, nr=0, multiple=false, type=NULL
+        ], mmin=0, mmax=-1
       ]
     ]
   ], code=[
@@ -249,15 +245,15 @@ name=slice, alternatives=[
 ]
 name=t.assert, alternatives=[
   nr=0, parameters=[
-    type=VARIABLE, variable=[
+    variable=[
       name=name, nr=0, multiple=false, type=STRING
-    ]
-    type=VARIABLE, variable=[
+    ], type=ANY
+    variable=[
       name=should, nr=1, multiple=false, type=NULL
-    ]
-    type=VARIABLE, variable=[
+    ], type=ANY
+    variable=[
       name=was, nr=2, multiple=false, type=NULL
-    ]
+    ], type=ANY
   ], code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[
@@ -295,9 +291,9 @@ name=t.assert, alternatives=[
 ]
 name=token, alternatives=[
   nr=0, parameters=[
-    type=VARIABLE, variable=[
+    variable=[
       name=tok, nr=0, multiple=false, type=NULL
-    ]
+    ], type=ANY
     type=ARRAY, marray=[
       type=MULTIPLE, mmatch=[
         type=MACRO, macro={Name=wstoken}, mparms=[
@@ -311,9 +307,9 @@ name=token, alternatives=[
 ]
 name=wstoken, alternatives=[
   nr=0, parameters=[
-    type=VARIABLE, variable=[
+    variable=[
       name=x, nr=0, multiple=false, type=NULL
-    ]
+    ], type=ANY
   ], if=[
     operation=FUNCTION, function=OR, fnParm1=[
       operation=FUNCTION, function=OR, fnParm1=[

@@ -17,7 +17,7 @@ import org.memorydb.structure.Store;
 public class MatchObject implements Match {
 	/* package private */ Store store;
 	protected int rec;
-	/* package private */ static final int RECORD_SIZE = 13;
+	/* package private */ static final int RECORD_SIZE = 17;
 
 	public MatchObject(Store store) {
 		this.store = store;
@@ -120,7 +120,7 @@ public class MatchObject implements Match {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return Match.super.getMatch(field - 0);
 		switch (field) {
 		default:
@@ -130,7 +130,7 @@ public class MatchObject implements Match {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return Match.super.iterateMatch(field - 0);
 		switch (field) {
 		default:
@@ -140,7 +140,7 @@ public class MatchObject implements Match {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return Match.super.typeMatch(field - 0);
 		switch (field) {
 		default:
@@ -150,7 +150,7 @@ public class MatchObject implements Match {
 
 	@Override
 	public String name(int field) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return Match.super.nameMatch(field - 0);
 		switch (field) {
 		default:

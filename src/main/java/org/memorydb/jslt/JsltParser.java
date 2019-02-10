@@ -187,6 +187,7 @@ public class JsltParser {
 						iterator.remove();
 				scanner.setState(state);
 				match.setType(Type.ARRAY);
+				match.setVariable(null);
 				try (ChangeMatch addM = match.addMarray()) {
 					ChangeMatch m = match;
 					match = addM;
@@ -206,24 +207,13 @@ public class JsltParser {
 
 		private void parseMVar() {
 			parseMMulti();
-			if (scanner.matches(":")) {
-				if (match.getType() == Type.VARIABLE)
-					try (ChangeVariable curVar = match.getVariable().change()) {
-						curVar.setName(scanner.parseIdentifier());
-					}
-				else
-					try (ChangeMatchObject sub = new ChangeMatchObject(store)) {
-						copyMatch(sub, false);
-						match.setType(Type.VARIABLE);
-						match.setVmatch(sub);
-						try (ChangeVariable var = new ChangeVariable(store)) {
-							var.setName(scanner.parseIdentifier());
-							var.setType(ResultType.Type.NULL);
-							match.setVariable(var);
-							parms.put(var.getName(), new Parm(var, parms.size()));
-						}
-					}
-			}
+			if (scanner.matches(":"))
+				try (ChangeVariable var = new ChangeVariable(store)) {
+					var.setName(scanner.parseIdentifier());
+					var.setType(ResultType.Type.NULL);
+					match.setVariable(var);
+					parms.put(var.getName(), new Parm(var, parms.size()));
+				}
 		}
 
 		private void parseMMulti() {
@@ -235,6 +225,7 @@ public class JsltParser {
 					match.setMmin((byte) 0);
 					match.setMmax((byte) -1);
 					match.setMmatch(sub);
+					match.setVariable(null);
 				}
 			} else if (scanner.matches("?")) {
 				try (ChangeMatchObject sub = new ChangeMatchObject(store)) {
@@ -243,6 +234,7 @@ public class JsltParser {
 					match.setMmin((byte) 0);
 					match.setMmax((byte) 1);
 					match.setMmatch(sub);
+					match.setVariable(null);
 				}
 			}
 		}
@@ -287,7 +279,6 @@ public class JsltParser {
 						match.setConstant(parm.position);
 						match.setCparm(parm.name);
 					} else {
-						match.setType(Type.VARIABLE);
 						switch (id) {
 						case "string":
 							var.setType(ResultType.Type.STRING);
@@ -320,6 +311,7 @@ public class JsltParser {
 						var.setNr(parms.size());
 						var.setMultiple(false);
 						match.setVariable(var);
+						match.setType(Type.ANY);
 						parms.put(var.getName(), new Parm(var, parms.size()));
 					}
 				}
@@ -375,11 +367,18 @@ public class JsltParser {
 			scanner.expect("}");
 		}
 
-		private void copyMatch(ChangeMatchObject sub, boolean multiple) {
+		private void copyMatch(ChangeMatch sub, boolean multiple) {
 			Type type = match.getType();
 			sub.setType(type);
+			sub.setVariable(match.getVariable());
+			if (multiple && match.getVariable().getRec() != 0)
+				try (ChangeVariable change = sub.getVariable().change()) {
+					change.setMultiple(true);
+				}
 			if (type != null)
 				switch (type) {
+				case ANY:
+					return;
 				case ARRAY:
 					sub.moveMarray(match);
 					return;
@@ -409,13 +408,6 @@ public class JsltParser {
 					return;
 				case STRING:
 					sub.setString(match.getString());
-					return;
-				case VARIABLE:
-					sub.setVariable(match.getVariable());
-					if (multiple)
-						try (ChangeVariable change = sub.getVariable().change()) {
-							change.setMultiple(true);
-						}
 					return;
 				}
 		}

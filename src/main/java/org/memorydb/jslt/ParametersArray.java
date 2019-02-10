@@ -93,15 +93,20 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 		return size;
 	}
 
+	public void clear() {
+		size = 0;
+		store.setInt(alloc, 4, size);
+	}
+
 	/* package private */ ParametersArray add() {
 		if (parent.getRec() == 0)
 			return this;
 		idx = size;
 		if (alloc == 0) {
-			alloc = store.allocate(9 + 12);
+			alloc = store.allocate(13 + 12);
 			setUpRecord(parent);
 		} else
-			alloc = store.resize(alloc, (12 + (idx + 1) * 9) / 8);
+			alloc = store.resize(alloc, (12 + (idx + 1) * 13) / 8);
 		store.setInt(parent.getRec(), 8, alloc);
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
@@ -124,6 +129,16 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 					throw new NoSuchElementException();
 				element++;
 				return new ParametersArray(ParametersArray.this, element);
+			}
+
+			@Override
+			public void remove() {
+				if (alloc == 0 || element > size || element < 0)
+					throw new NoSuchElementException();
+				store.copy(alloc, (element + 1) * 13 + 12, element * 13 + 12, size * 17);
+				element--;
+				size--;
+				store.setInt(alloc, 4, size);
 			}
 		};
 	}
@@ -158,7 +173,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public int matchPosition() {
-		return idx * 9 + 12;
+		return idx * 13 + 12;
 	}
 
 	@Override
@@ -183,7 +198,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public String name(int field) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return nameMatch(field - 0);
 		switch (field) {
 		default:
@@ -193,7 +208,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return typeMatch(field - 0);
 		switch (field) {
 		default:
@@ -203,7 +218,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return getMatch(field - 0);
 		switch (field) {
 		default:
@@ -213,7 +228,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return iterateMatch(field - 0);
 		switch (field) {
 		default:
@@ -223,7 +238,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return setMatch(field - 0, value);
 		switch (field) {
 		default:
@@ -233,7 +248,7 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return addMatch(field - 0);
 		switch (field) {
 		default:

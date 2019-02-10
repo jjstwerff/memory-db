@@ -6,9 +6,9 @@ name=a, alternatives=[
 ]
 name=b, alternatives=[
   nr=0, parameters=[
-    type=VARIABLE, variable=[
+    variable=[
       name=val, nr=0, multiple=false, type=NUMBER
-    ]
+    ], type=ANY
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=VARIABLE, varName=val, varNr=0
@@ -17,9 +17,9 @@ name=b, alternatives=[
     ]
   ]
   nr=1, parameters=[
-    type=VARIABLE, variable=[
+    variable=[
       name=val, nr=0, multiple=false, type=STRING
-    ]
+    ], type=ANY
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=VARIABLE, varName=val, varNr=0
@@ -29,9 +29,9 @@ name=b, alternatives=[
   ]
   nr=2, parameters=[
     type=NUMBER, number=0
-    type=VARIABLE, variable=[
+    variable=[
       name=val2, nr=0, multiple=false, type=NUMBER
-    ]
+    ], type=ANY
   ], code=[
     operation=FUNCTION, function=MUL, fnParm1=[
       operation=NUMBER, number=100
@@ -41,19 +41,19 @@ name=b, alternatives=[
   ]
   nr=3, parameters=[
     type=STRING, string=
-    type=VARIABLE, variable=[
+    variable=[
       name=val2, nr=0, multiple=false, type=NUMBER
-    ]
+    ], type=ANY
   ], code=[
     operation=VARIABLE, varName=val2, varNr=0
   ]
   nr=4, parameters=[
-    type=VARIABLE, variable=[
+    variable=[
       name=val, nr=0, multiple=false, type=NUMBER
-    ]
-    type=VARIABLE, variable=[
+    ], type=ANY
+    variable=[
       name=val2, nr=1, multiple=false, type=NUMBER
-    ]
+    ], type=ANY
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=VARIABLE, varName=val, varNr=0
@@ -130,15 +130,15 @@ name=slice, alternatives=[
 ]
 name=t.assert, alternatives=[
   nr=0, parameters=[
-    type=VARIABLE, variable=[
+    variable=[
       name=name, nr=0, multiple=false, type=STRING
-    ]
-    type=VARIABLE, variable=[
+    ], type=ANY
+    variable=[
       name=should, nr=1, multiple=false, type=NULL
-    ]
-    type=VARIABLE, variable=[
+    ], type=ANY
+    variable=[
       name=was, nr=2, multiple=false, type=NULL
-    ]
+    ], type=ANY
   ], code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[

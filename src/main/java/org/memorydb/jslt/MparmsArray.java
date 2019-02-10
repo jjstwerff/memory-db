@@ -30,7 +30,7 @@ public class MparmsArray implements ChangeOperator, Iterable<MparmsArray> {
 		this.parent = parent;
 		this.idx = idx;
 		if (parent.getRec() != 0) {
-			this.alloc = store.getInt(parent.getRec(), parent.matchPosition() + 5);
+			this.alloc = store.getInt(parent.getRec(), parent.matchPosition() + 9);
 			if (alloc != 0) {
 				setUpRecord(parent);
 				this.size = store.getInt(alloc, 4);
@@ -121,6 +121,11 @@ public class MparmsArray implements ChangeOperator, Iterable<MparmsArray> {
 		return size;
 	}
 
+	public void clear() {
+		size = 0;
+		store.setInt(alloc, 4, size);
+	}
+
 	/* package private */ MparmsArray add() {
 		if (parent.getRec() == 0)
 			return this;
@@ -130,7 +135,7 @@ public class MparmsArray implements ChangeOperator, Iterable<MparmsArray> {
 			setUpRecord(parent);
 		} else
 			alloc = store.resize(alloc, (17 + (idx + 1) * 18) / 8);
-		store.setInt(parent.getRec(), parent.matchPosition() + 5, alloc);
+		store.setInt(parent.getRec(), parent.matchPosition() + 9, alloc);
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
 		return this;
@@ -152,6 +157,16 @@ public class MparmsArray implements ChangeOperator, Iterable<MparmsArray> {
 					throw new NoSuchElementException();
 				element++;
 				return new MparmsArray(MparmsArray.this, element);
+			}
+
+			@Override
+			public void remove() {
+				if (alloc == 0 || element > size || element < 0)
+					throw new NoSuchElementException();
+				store.copy(alloc, (element + 1) * 18 + 17, element * 18 + 17, size * 17);
+				element--;
+				size--;
+				store.setInt(alloc, 4, size);
 			}
 		};
 	}

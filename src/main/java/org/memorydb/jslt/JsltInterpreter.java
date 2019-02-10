@@ -198,6 +198,12 @@ public class JsltInterpreter {
 
 	private boolean testParm(Match parm, Object obj) {
 		switch (parm.getType()) {
+		case ANY:
+			if (parm.getVariable().getRec() != 0) {
+				stack.add(obj);
+				return matches(obj, parm.getVariable().getType());
+			}
+			break;
 		case BOOLEAN:
 			if (!(obj instanceof Boolean) || (Boolean) obj != parm.isBoolean())
 				return false;
@@ -230,9 +236,6 @@ public class JsltInterpreter {
 			if (!(obj instanceof String) || !parm.getString().equals(obj))
 				return false;
 			break;
-		case VARIABLE:
-			stack.add(obj);
-			return matches(obj, parm.getVariable().getType());
 		case CONSTANT:
 			throw new RuntimeException("Constant");
 		case MULTIPLE:
@@ -276,7 +279,8 @@ public class JsltInterpreter {
 					System.out.println("here");
 				}
 			} else if (!notLast) { // last element
-				if (elm.getType() == Match.Type.VARIABLE && (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
+				Variable var = elm.getVariable();
+				if (var.getRec() != 0 && (var.getType() == Type.NULL || var.getType() == Type.ARRAY)) {
 					stack.add(new SubArray(arr, aElm, elms));
 					return true; // match the rest of the array
 				}
@@ -351,7 +355,8 @@ public class JsltInterpreter {
 					return false; // not at the end of the array yet
 				}
 			} else if (!notLast) { // last element
-				if (elm.getType() == Match.Type.VARIABLE && (elm.getVariable().getType() == Type.NULL || elm.getVariable().getType() == Type.ARRAY)) {
+				Variable var = elm.getVariable();
+				if (var.getRec() != 0 && (var.getType() == Type.NULL || var.getType() == Type.ARRAY)) {
 					stack.add(obj.tail());
 					obj.freePos(pos);
 					return true; // match the rest of the array
@@ -399,7 +404,22 @@ public class JsltInterpreter {
 	}
 
 	private boolean textParm(Match parm, Text on) {
+		Variable var = parm.getVariable();
 		switch (parm.getType()) {
+		case ANY:
+			if (!on.end()) {
+				if (var.getRec() != 0) {
+					if (var.isMultiple()) {
+						if (stack.size() <= stackFrame + var.getNr()) {
+							stack.add(new ListArray());
+						}
+						((ListArray) stack.get(stackFrame + var.getNr())).add(on.readChar() + "");
+					} else
+						stack.add(on.readChar() + "");
+				}
+			} else if (var.getRec() != 0)
+				stack.add(null);
+			return true;
 		case BOOLEAN:
 			return on.match(parm.isBoolean() ? "true" : "false");
 		case NUMBER:
@@ -407,33 +427,20 @@ public class JsltInterpreter {
 		case OBJECT:
 			throw new RuntimeException("Not implemented yet");
 		case ARRAY:
-			return textMatch(parm, on);
+			int start = -1;
+			if (var.getRec() != 0)
+				 start = on.addPos();
+			boolean arrRes = textMatch(parm, on);
+			if (var.getRec() != 0) {
+				if (arrRes)
+					stack.add(on.substring(start));
+				on.freePos(start);
+			}
+			return arrRes;
 		case NULL:
 			return on.match("null");
 		case STRING:
 			return on.match(parm.getString());
-		case VARIABLE:
-			if (on.end())
-				return false;
-			MatchObject vmatch = parm.getVmatch();
-			if (vmatch != null && vmatch.getRec() != 0) {
-				int pos = on.addPos();
-				boolean res = textParm(vmatch, on);
-				if (res)
-					stack.add(on.substring(pos));
-				on.freePos(pos);
-				return res;
-			} else {
-				Variable var = parm.getVariable();
-				if (var.isMultiple()) {
-					if (stack.size() <= stackFrame + var.getNr()) {
-						stack.add(new ListArray());
-					}
-					((ListArray) stack.get(stackFrame + var.getNr())).add(on.readChar() + "");
-				} else
-					stack.add(on.readChar() + "");
-				return true;
-			}
 		case CONSTANT:
 			Object object = stack.get(stackFrame + parm.getConstant());
 			return on.match(object == null ? "null" : object.toString());
@@ -583,7 +590,7 @@ public class JsltInterpreter {
 			}
 			while (pos < stop) {
 				res.append(text.readChar());
-				for (int i=1; i < step; i++) {
+				for (int i = 1; i < step; i++) {
 					text.readChar();
 					pos++;
 				}

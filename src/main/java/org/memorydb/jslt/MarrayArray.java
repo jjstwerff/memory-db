@@ -30,7 +30,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 		this.parent = parent;
 		this.idx = idx;
 		if (parent.getRec() != 0) {
-			this.alloc = store.getInt(parent.getRec(), parent.matchPosition() + 1);
+			this.alloc = store.getInt(parent.getRec(), parent.matchPosition() + 5);
 			if (alloc != 0) {
 				setUpRecord(parent);
 				this.size = store.getInt(alloc, 4);
@@ -121,16 +121,21 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 		return size;
 	}
 
+	public void clear() {
+		size = 0;
+		store.setInt(alloc, 4, size);
+	}
+
 	/* package private */ MarrayArray add() {
 		if (parent.getRec() == 0)
 			return this;
 		idx = size;
 		if (alloc == 0) {
-			alloc = store.allocate(9 + 17);
+			alloc = store.allocate(13 + 17);
 			setUpRecord(parent);
 		} else
-			alloc = store.resize(alloc, (17 + (idx + 1) * 9) / 8);
-		store.setInt(parent.getRec(), parent.matchPosition() + 1, alloc);
+			alloc = store.resize(alloc, (17 + (idx + 1) * 13) / 8);
+		store.setInt(parent.getRec(), parent.matchPosition() + 5, alloc);
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
 		return this;
@@ -152,6 +157,16 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 					throw new NoSuchElementException();
 				element++;
 				return new MarrayArray(MarrayArray.this, element);
+			}
+
+			@Override
+			public void remove() {
+				if (alloc == 0 || element > size || element < 0)
+					throw new NoSuchElementException();
+				store.copy(alloc, (element + 1) * 13 + 17, element * 13 + 17, size * 17);
+				element--;
+				size--;
+				store.setInt(alloc, 4, size);
 			}
 		};
 	}
@@ -186,7 +201,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public int matchPosition() {
-		return idx * 9 + 17;
+		return idx * 13 + 17;
 	}
 
 	@Override
@@ -211,7 +226,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public String name(int field) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return nameMatch(field - 0);
 		switch (field) {
 		default:
@@ -221,7 +236,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public FieldType type(int field) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return typeMatch(field - 0);
 		switch (field) {
 		default:
@@ -231,7 +246,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public Object get(int field) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return getMatch(field - 0);
 		switch (field) {
 		default:
@@ -241,7 +256,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return iterateMatch(field - 0);
 		switch (field) {
 		default:
@@ -251,7 +266,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return setMatch(field - 0, value);
 		switch (field) {
 		default:
@@ -261,7 +276,7 @@ public class MarrayArray implements ChangeMatch, Iterable<MarrayArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return addMatch(field - 0);
 		switch (field) {
 		default:

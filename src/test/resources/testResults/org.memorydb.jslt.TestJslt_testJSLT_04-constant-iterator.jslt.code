@@ -160,9 +160,9 @@ name=main, alternatives=[
 name=numb, alternatives=[
   nr=0, parameters=[
     type=ARRAY, marray=[
-      type=VARIABLE, variable=[
+      variable=[
         name=a, nr=0, multiple=false, type=NULL
-      ]
+      ], type=ANY
       type=NUMBER, number=2
     ]
   ], code=[
@@ -173,9 +173,9 @@ name=second, alternatives=[
   nr=0, parameters=[
     type=ARRAY, marray=[
       type=NUMBER, number=2
-      type=VARIABLE, variable=[
+      variable=[
         name=a, nr=0, multiple=false, type=NULL
-      ]
+      ], type=ANY
     ]
   ], code=[
     operation=VARIABLE, varName=a, varNr=0
@@ -186,9 +186,9 @@ name=slice, alternatives=[
 name=str, alternatives=[
   nr=0, parameters=[
     type=ARRAY, marray=[
-      type=VARIABLE, variable=[
+      variable=[
         name=a, nr=0, multiple=false, type=NULL
-      ]
+      ], type=ANY
       type=STRING, string=2
     ]
   ], code=[
@@ -199,9 +199,9 @@ name=strsec, alternatives=[
   nr=0, parameters=[
     type=ARRAY, marray=[
       type=STRING, string=2
-      type=VARIABLE, variable=[
+      variable=[
         name=a, nr=0, multiple=false, type=NULL
-      ]
+      ], type=ANY
     ]
   ], code=[
     operation=VARIABLE, varName=a, varNr=0
@@ -209,15 +209,15 @@ name=strsec, alternatives=[
 ]
 name=t.assert, alternatives=[
   nr=0, parameters=[
-    type=VARIABLE, variable=[
+    variable=[
       name=name, nr=0, multiple=false, type=STRING
-    ]
-    type=VARIABLE, variable=[
+    ], type=ANY
+    variable=[
       name=should, nr=1, multiple=false, type=NULL
-    ]
-    type=VARIABLE, variable=[
+    ], type=ANY
+    variable=[
       name=was, nr=2, multiple=false, type=NULL
-    ]
+    ], type=ANY
   ], code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[

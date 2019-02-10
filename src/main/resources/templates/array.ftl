@@ -156,6 +156,11 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 		return size;
 	}
 
+	public void clear() {
+		size = 0;
+		store.setInt(alloc, 4, size);
+	}
+
 	/* package private */ ${field.name?cap_first}Array add() {
 		if (parent.getRec() == 0)
 			return this;
@@ -196,6 +201,16 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 					throw new NoSuchElementException();
 				element++;
 				return new ${field.name?cap_first}Array(${field.name?cap_first}Array.this, element);
+			}
+
+			@Override
+			public void remove() {
+				if (alloc == 0 || element > size || element < 0)
+					throw new NoSuchElementException();
+				store.copy(alloc, (element + 1) * ${rec.totalSize?c} + ${table.reserve()}, element * ${rec.totalSize?c} + ${table.reserve()}, size * 17);
+				element--;
+				size--;
+				store.setInt(alloc, 4, size);
 			}
 		};
 	}

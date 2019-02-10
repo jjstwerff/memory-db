@@ -1,24 +1,10 @@
 Testing:
+- fix parser for variable matching on test 06/07
 - iterator matching:
-	define all variables encountered in the matching expression
 	detection of recursion (calls of functions on the same iterators) & array / object result:
 		create a lazy implementation: array + recursion -> internal array with original position & length & expression
 		indicate this finding in alternative type
 	if no constant is given: iterate for each element on the array... otherwise return sub arrays
-	what to do when no function alternative matches.. undefined result for now
-- these next two objects are general implementations of arrays/objects and possibly usable in multiple contexts
-- array (simple)
-    implement with the current context for the next call..
-    object list for old values (next result is the index in this list)
-- object (simple)
-	loop over all keys of the object
-	map per field to value, radix tree with array back-end?
-- macro implementation:
-	special type of macro
-	create return object
-	add to this object instead of calling Function.ADD
-	last function = right of last Function.ADD: calculate parameters in own context and remember code position & return
-	on next/length call: when reading element after last: add own context to stack and call the next code
 - error reporting / logging:
 	how to report on a syntax error for a parser.. current position: (line, character) + message
 	use in a global with the error or instead of the tree = could have been partially parsed already

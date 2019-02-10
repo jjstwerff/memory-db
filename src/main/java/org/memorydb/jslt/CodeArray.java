@@ -93,6 +93,11 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 		return size;
 	}
 
+	public void clear() {
+		size = 0;
+		store.setInt(alloc, 4, size);
+	}
+
 	/* package private */ CodeArray add() {
 		if (parent.getRec() == 0)
 			return this;
@@ -124,6 +129,16 @@ public class CodeArray implements ChangeOperator, Iterable<CodeArray> {
 					throw new NoSuchElementException();
 				element++;
 				return new CodeArray(CodeArray.this, element);
+			}
+
+			@Override
+			public void remove() {
+				if (alloc == 0 || element > size || element < 0)
+					throw new NoSuchElementException();
+				store.copy(alloc, (element + 1) * 18 + 12, element * 18 + 12, size * 17);
+				element--;
+				size--;
+				store.setInt(alloc, 4, size);
 			}
 		};
 	}

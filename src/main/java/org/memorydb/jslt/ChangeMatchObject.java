@@ -28,7 +28,7 @@ public class ChangeMatchObject extends MatchObject implements ChangeMatch {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return ChangeMatch.super.setMatch(field - 0, value);
 		switch (field) {
 		default:
@@ -38,7 +38,7 @@ public class ChangeMatchObject extends MatchObject implements ChangeMatch {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 0 && field <= 16)
+		if (field >= 0 && field <= 15)
 			return ChangeMatch.super.addMatch(field - 0);
 		switch (field) {
 		default:
