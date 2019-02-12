@@ -137,6 +137,11 @@ public class TextFile implements Text, AutoCloseable {
 	}
 
 	@Override
+	public String substring(int from, int till) {
+		throw new RuntimeException("Not implemented yet");
+	}
+
+	@Override
 	public String tail() {
 		int end = buffer.capacity();
 		StringBuilder bld = new StringBuilder();
@@ -218,13 +223,13 @@ public class TextFile implements Text, AutoCloseable {
 	private void gather5Lines(StringBuilder data, int back) {
 		int lp = linePos;
 		for (int i = 2 - back; i < 5; i++) {
-			data.append(String.format("%05d:%05d ", line + i - 2, pos));
+			data.append(String.format("%06d ", line + i - 2));
 			while (pos < buffer.capacity() && buffer.get(pos) != '\n')
 				data.append(readChar());
 			if (pos < buffer.capacity())
 				data.append(readChar()); // eat the line end
 			if (i == 2) { // under the center (=current) line
-				data.append(".....:..... ");
+				data.append("...... ");
 				for (int p = 1; p < lp; p++)
 					data.append(" ");
 				data.append("^\n");

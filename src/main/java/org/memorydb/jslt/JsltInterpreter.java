@@ -35,7 +35,7 @@ public class JsltInterpreter {
 	private RecordInterface curFor = null;
 	private Object running = null;
 	private Dir dir = null;
-	private boolean debug = true;
+	private boolean debug = false;
 
 	public static String interpret(Store jsltStore, RecordInterface data, Dir dir) {
 		JsltInterpreter inter = new JsltInterpreter();
@@ -243,13 +243,15 @@ public class JsltInterpreter {
 				obj = new StringText((String) obj);
 			if (obj instanceof Text) {
 				int count = 0;
-				boolean found = false;
+				boolean found = true;
 				while (textParm(parm.getMmatch(), (Text) obj)) {
-					if (parm.getMmax() == -1 || count++ <= parm.getMmax()) {
-						found = true;
+					if (parm.getMmax() != -1 && count++ > parm.getMmax()) {
+						found = false;
 						break;
 					}
 				}
+				if (!((Text)obj).end())
+					return false;
 				return found;
 			} else
 				return false;
@@ -305,10 +307,12 @@ public class JsltInterpreter {
 	class DoMatch {
 		int count;
 		Match match;
+		int pos;
 
 		DoMatch(Match match) {
 			this.count = 0;
 			this.match = match;
+			this.pos = -1;
 		}
 
 		@Override
@@ -331,26 +335,62 @@ public class JsltInterpreter {
 				boolean found;
 				while (true) {
 					found = false;
+					int finish = obj.addPos();
+					boolean remembered = false;
 					if (textParm(elm, obj)) {
+						for (int i = multiple.size() - 1; i > -1; i--) {
+							DoMatch doMatch = multiple.get(i);
+							if (doMatch.pos != -1) {
+								Variable var = doMatch.match.getVariable();
+								((ListArray) stack.get(stackFrame + var.getNr())).add(obj.substring(doMatch.pos, finish) + "");
+							}
+						}
 						found = true;
+						obj.freePos(finish);
+						for (int i = multiple.size() - 1; i > -1; i--) {
+							DoMatch doMatch = multiple.get(i);
+							if (doMatch.pos != -1) {
+								obj.freePos(doMatch.pos);
+								doMatch.pos = -1;
+							}
+						}
 						break;
 					}
 					for (int i = multiple.size() - 1; i > -1; i--) {
 						DoMatch doMatch = multiple.get(i);
 						Match mult = doMatch.match;
+						Variable var = mult.getVariable();
+						if (var.getRec() != 0)
+							if (doMatch.pos == -1) {
+								doMatch.pos = finish;
+								remembered = true;
+								if (stack.size() <= stackFrame + var.getNr())
+									stack.add(new ListArray());
+							}
 						if (textParm(mult.getMmatch(), obj)) {
 							if (mult.getMmax() == -1 || doMatch.count++ <= mult.getMmax()) {
 								found = true;
 								break;
 							}
-						} else
+						} else {
 							doMatch.count = 0;
+						}
 					}
-					if (!found)
+					if (!remembered)
+						obj.freePos(finish);
+					if (!found) {
+						for (int i = multiple.size() - 1; i > -1; i--) {
+							DoMatch doMatch = multiple.get(i);
+							if (doMatch.pos != -1) {
+								obj.freePos(doMatch.pos);
+								doMatch.pos = -1;
+							}
+						}
 						break;
+					}
 				}
 				multiple.clear();
-				if (!found || (!notLast && !obj.end())) {
+				if (!found) {
 					obj.toPos(pos);
 					return false; // not at the end of the array yet
 				}
@@ -429,7 +469,7 @@ public class JsltInterpreter {
 		case ARRAY:
 			int start = -1;
 			if (var.getRec() != 0)
-				 start = on.addPos();
+				start = on.addPos();
 			boolean arrRes = textMatch(parm, on);
 			if (var.getRec() != 0) {
 				if (arrRes)
@@ -459,8 +499,10 @@ public class JsltInterpreter {
 				Object obj = inter(p);
 				stack.add(obj);
 			}
-			if (on.end())
+			if (on.end()) {
+				stackFrame = oldStack;
 				return false;
+			}
 			int pos = on.addPos();
 			stack.add(on.readChar() + "");
 			Object res = findAlternative(parm.getMacro(), stackF, parms);

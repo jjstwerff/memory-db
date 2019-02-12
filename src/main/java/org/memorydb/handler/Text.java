@@ -19,6 +19,8 @@ public interface Text {
 
 	String substring(int from);
 
+	String substring(int from, int till);
+
 	String tail();
 
 	boolean match(String string);

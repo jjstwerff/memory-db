@@ -44,7 +44,7 @@ public class StringText implements Text {
 	public void toPos(int anchor) {
 		int toSize = positions.size() - 1;
 		if (toSize != anchor)
-			throw new RuntimeException("Not freed in order");
+			throw new RuntimeException("Not freed in order " + anchor + " != " + toSize);
 		pos = positions.get(toSize);
 		positions.trim(toSize);
 	}
@@ -53,7 +53,7 @@ public class StringText implements Text {
 	public void freePos(int anchor) {
 		int toSize = positions.size() - 1;
 		if (toSize != anchor)
-			throw new RuntimeException("Not freed in order");
+			throw new RuntimeException("Not freed in order " + anchor + " != " + toSize);
 		positions.trim(toSize);
 	}
 
@@ -62,6 +62,13 @@ public class StringText implements Text {
 		if (from < 0 || from >= positions.size())
 			return null;
 		return str.substring(positions.get(from), pos);
+	}
+
+	@Override
+	public String substring(int from, int till) {
+		if (from < 0 || from >= positions.size() || till < 0 || till >= positions.size())
+			return null;
+		return str.substring(positions.get(from), positions.get(till));
 	}
 
 	@Override
@@ -85,10 +92,30 @@ public class StringText implements Text {
 	@Override
 	public String toString() {
 		StringBuilder bld = new StringBuilder();
-		bld.append(str).append("\n");
-		for (int p = 0; p < pos; p++)
-			bld.append(" ");
-		bld.append("^");
+		int line = 1;
+		int lpos = 1;
+		int cpos = pos;
+		bld.append(String.format("%06d ", line));
+		for (int i=0; i < str.length(); i++) {
+			char charAt = str.charAt(i);
+			if (charAt == '\n') {
+				line++;
+				if (i >= cpos) {
+					cpos = Integer.MAX_VALUE;
+					bld.append("\n...... ");
+					for (int l=1; l < lpos; l++)
+						bld.append(" ");
+					bld.append("^");
+				}
+				bld.append("\n").append(String.format("%06d ", line));
+				lpos = 1;
+			} else {
+				if (i < cpos)
+					lpos++;
+				bld.append(charAt);
+			}
+		}
+		bld.append("\n");
 		return bld.toString();
 	}
 
