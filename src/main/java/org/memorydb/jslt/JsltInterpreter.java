@@ -35,7 +35,7 @@ public class JsltInterpreter {
 	private RecordInterface curFor = null;
 	private Object running = null;
 	private Dir dir = null;
-	private boolean debug = false;
+	private boolean debug = true;
 
 	public static String interpret(Store jsltStore, RecordInterface data, Dir dir) {
 		JsltInterpreter inter = new JsltInterpreter();
@@ -336,7 +336,6 @@ public class JsltInterpreter {
 				while (true) {
 					found = false;
 					int finish = obj.addPos();
-					boolean remembered = false;
 					if (textParm(elm, obj)) {
 						for (int i = multiple.size() - 1; i > -1; i--) {
 							DoMatch doMatch = multiple.get(i);
@@ -356,38 +355,8 @@ public class JsltInterpreter {
 						}
 						break;
 					}
-					for (int i = multiple.size() - 1; i > -1; i--) {
-						DoMatch doMatch = multiple.get(i);
-						Match mult = doMatch.match;
-						Variable var = mult.getVariable();
-						if (var.getRec() != 0)
-							if (doMatch.pos == -1) {
-								doMatch.pos = finish;
-								remembered = true;
-								if (stack.size() <= stackFrame + var.getNr())
-									stack.add(new ListArray());
-							}
-						if (textParm(mult.getMmatch(), obj)) {
-							if (mult.getMmax() == -1 || doMatch.count++ <= mult.getMmax()) {
-								found = true;
-								break;
-							}
-						} else {
-							doMatch.count = 0;
-						}
-					}
-					if (!remembered)
-						obj.freePos(finish);
-					if (!found) {
-						for (int i = multiple.size() - 1; i > -1; i--) {
-							DoMatch doMatch = multiple.get(i);
-							if (doMatch.pos != -1) {
-								obj.freePos(doMatch.pos);
-								doMatch.pos = -1;
-							}
-						}
+					if (!matchMultiple(multiple, finish, obj))
 						break;
-					}
 				}
 				multiple.clear();
 				if (!found) {
@@ -418,21 +387,8 @@ public class JsltInterpreter {
 			}
 		}
 		if (!multiple.isEmpty()) {
-			while (true) {
-				boolean found = false;
-				for (int i = multiple.size() - 1; i > -1; i--) {
-					DoMatch doMatch = multiple.get(i);
-					Match mult = doMatch.match;
-					if (textParm(mult.getMmatch(), obj)) {
-						if (mult.getMmax() == -1 || doMatch.count++ <= mult.getMmax()) {
-							found = true;
-							break;
-						}
-					} else
-						doMatch.count = 0;
-				}
-				if (!found)
-					break;
+			while (matchMultiple(multiple, obj.addPos(), obj)) {
+				// nothing
 			}
 			if (!notLast && !obj.end()) {
 				obj.toPos(pos);
@@ -441,6 +397,50 @@ public class JsltInterpreter {
 		}
 		obj.freePos(pos);
 		return true;
+	}
+
+	private boolean matchMultiple(List<DoMatch> multiple, int finish, Text obj) {
+		boolean remembered = false;
+		for (int i = multiple.size() - 1; i > -1; i--) {
+			DoMatch doMatch = multiple.get(i);
+			Match mult = doMatch.match;
+			Variable var = mult.getVariable();
+			if (var.getRec() != 0)
+				if (doMatch.pos == -1) {
+					doMatch.pos = finish;
+					remembered = true;
+					if (stack.size() <= stackFrame + var.getNr())
+						stack.add(new ListArray());
+				}
+			if (textParm(mult.getMmatch(), obj)) {
+				for (int j = multiple.size() - 1; j > j; i--) {
+					DoMatch prevMatch = multiple.get(i);
+					if (prevMatch.pos != -1) {
+						Variable ivar = doMatch.match.getVariable();
+						((ListArray) stack.get(stackFrame + ivar.getNr())).add(obj.substring(prevMatch.pos, finish) + "");
+					}
+				}
+				if (mult.getMmax() == -1 || doMatch.count++ <= mult.getMmax()) {
+					if (!remembered)
+						obj.freePos(finish);
+					return true;
+				}
+			} else {
+				doMatch.count = 0;
+			}
+		}
+		if (!remembered)
+			obj.freePos(finish);
+		for (int i = multiple.size() - 1; i > -1; i--) {
+			DoMatch doMatch = multiple.get(i);
+			if (doMatch.pos != -1) {
+				Variable ivar = doMatch.match.getVariable();
+				((ListArray) stack.get(stackFrame + ivar.getNr())).add(obj.substring(doMatch.pos, finish) + "");
+				obj.freePos(doMatch.pos);
+				doMatch.pos = -1;
+			}
+		}
+		return false;
 	}
 
 	private boolean textParm(Match parm, Text on) {

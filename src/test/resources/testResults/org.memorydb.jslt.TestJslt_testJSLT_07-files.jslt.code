@@ -30,6 +30,35 @@ name=main, alternatives=[
   ], code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=FUNCTION, function=ADD, fnParm1=[
+        operation=FUNCTION, function=ADD, fnParm1=[
+          operation=CALL, macro={Name=t.assert}, callParms=[
+            operation=STRING, string=simpleTabs
+            operation=ARRAY, array=[
+              operation=STRING, string=a
+              operation=STRING, string=bb
+              operation=STRING, string=ccc
+            ]
+            operation=CALL, macro={Name=simpleTabs}, callParms=[
+              operation=STRING, string=\ta\tbb\tccc
+            ]
+          ]
+        ], fnParm2=[
+          operation=CALL, macro={Name=t.assert}, callParms=[
+            operation=STRING, string=lines
+            operation=ARRAY, array=[
+              operation=STRING, string=a
+              operation=STRING, string=bb
+              operation=STRING, string=ccc
+            ]
+            operation=CALL, macro={Name=line}, callParms=[
+              operation=STRING, string=
+                a
+                bb
+                ccc
+            ]
+          ]
+        ]
+      ], fnParm2=[
         operation=CALL, macro={Name=t.assert}, callParms=[
           operation=STRING, string=slice
           operation=STRING, string=Name
@@ -40,33 +69,35 @@ name=main, alternatives=[
             operation=NUMBER, number=1
           ]
         ]
-      ], fnParm2=[
-        operation=CALL, macro={Name=t.assert}, callParms=[
-          operation=STRING, string=full
-          operation=STRING, string=
-            Name\tCost\tValue\tDescription
-            A\t1\t2\tThe first thing to buy
-            B\t2\t3\tAnother with slightly more value
-            C\t4\t5\tThis is costly
-          operation=READ, listenSource=/start.tsv, listemNr=1
-        ]
       ]
     ], fnParm2=[
       operation=CALL, macro={Name=t.assert}, callParms=[
-        operation=STRING, string=lines
-        operation=ARRAY, array=[
-          operation=STRING, string=a
-          operation=STRING, string=bb
-          operation=STRING, string=ccc
-        ]
-        operation=CALL, macro={Name=line}, callParms=[
-          operation=STRING, string=
-            a
-            bb
-            ccc
-        ]
+        operation=STRING, string=full
+        operation=STRING, string=
+          Name\tCost\tValue\tDescription
+          A\t1\t2\tThe first thing to buy
+          B\t2\t3\tAnother with slightly more value
+          C\t4\t5\tThis is costly
+        operation=READ, listenSource=/start.tsv, listemNr=1
       ]
     ]
+  ]
+]
+name=simpleTabs, alternatives=[
+  nr=0, parameters=[
+    type=MULTIPLE, mmatch=[
+      type=ARRAY, marray=[
+        type=STRING, string=\t
+        variable=[
+          name=n, nr=0, multiple=false, type=NULL
+        ], type=MULTIPLE, mmatch=[
+          type=MACRO, macro={Name=any}, mparms=[
+          ]
+        ], mmin=0, mmax=-1
+      ]
+    ], mmin=0, mmax=-1
+  ], code=[
+    operation=VARIABLE, varName=n, varNr=0
   ]
 ]
 name=slice, alternatives=[
@@ -114,6 +145,37 @@ name=t.assert, alternatives=[
         operation=STRING, string=
           '
       ]
+    ]
+  ]
+]
+name=tabs, alternatives=[
+  nr=0, parameters=[
+    type=ARRAY, marray=[
+      variable=[
+        name=f, nr=0, multiple=false, type=NULL
+      ], type=MULTIPLE, mmatch=[
+        type=MACRO, macro={Name=any}, mparms=[
+        ]
+      ], mmin=0, mmax=-1
+      type=MULTIPLE, mmatch=[
+        type=ARRAY, marray=[
+          type=STRING, string=\t
+          variable=[
+            name=n, nr=0, multiple=false, type=NULL
+          ], type=MULTIPLE, mmatch=[
+            type=MACRO, macro={Name=any}, mparms=[
+            ]
+          ], mmin=0, mmax=-1
+        ]
+      ], mmin=0, mmax=-1
+    ]
+  ], code=[
+    operation=FUNCTION, function=ADD, fnParm1=[
+      operation=ARRAY, array=[
+        operation=VARIABLE, varName=f, varNr=0
+      ]
+    ], fnParm2=[
+      operation=VARIABLE, varName=n, varNr=1
     ]
   ]
 ]

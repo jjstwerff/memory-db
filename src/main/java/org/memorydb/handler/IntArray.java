@@ -28,10 +28,14 @@ public class IntArray {
 	public String toString() {
 		StringBuilder bld = new StringBuilder();
 		bld.append("[");
+		int i = 0;
 		for (int v : array) {
-			if (bld.length() > 1)
+			if (i >= size)
+				break;
+			if (i > 0)
 				bld.append(", ");
 			bld.append(v);
+			i++;
 		}
 		bld.append("]");
 		return bld.toString();

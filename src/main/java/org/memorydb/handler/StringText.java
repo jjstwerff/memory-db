@@ -115,6 +115,12 @@ public class StringText implements Text {
 				bld.append(charAt);
 			}
 		}
+		if (cpos != Integer.MAX_VALUE) {
+			bld.append("\n...... ");
+			for (int l=1; l < lpos; l++)
+				bld.append(" ");
+			bld.append("^");
+		}
 		bld.append("\n");
 		return bld.toString();
 	}
