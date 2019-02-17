@@ -3,6 +3,7 @@ name=a, alternatives=[
   ], code=[
     operation=NUMBER, number=1
   ]
+], matching=[
 ]
 name=b, alternatives=[
   nr=0, parameters=[
@@ -61,6 +62,7 @@ name=b, alternatives=[
       operation=VARIABLE, varName=val2, varNr=1
     ]
   ]
+], matching=[
 ]
 name=main, alternatives=[
   nr=0, parameters=[
@@ -125,8 +127,10 @@ name=main, alternatives=[
       ]
     ]
   ]
+], matching=[
 ]
 name=slice, alternatives=[
+], matching=[
 ]
 name=t.assert, alternatives=[
   nr=0, parameters=[
@@ -173,4 +177,5 @@ name=t.assert, alternatives=[
       ]
     ]
   ]
+], matching=[
 ]

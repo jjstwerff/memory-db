@@ -12,6 +12,8 @@ public class ChangeMacro extends Macro implements ChangeInterface {
 		super(store, store.allocate(Macro.RECORD_SIZE));
 		setName(null);
 		store.setInt(rec, 8, 0); // SET alternatives
+		store.setInt(rec, 12, 0); // ARRAY matching
+		store.setInt(rec, 16, 0);
 	}
 
 	public ChangeMacro(Macro current) {
@@ -23,9 +25,22 @@ public class ChangeMacro extends Macro implements ChangeInterface {
 		store.setInt(rec, 4, store.putString(value));
 	}
 
+	public void moveMatching(ChangeMacro other) {
+		getStore().setInt(getRec(), 12, getStore().getInt(other.getRec(), 12));
+		getStore().setInt(other.getRec(), 12, 0);
+	}
+
 	/* package private */ void parseFields(Parser parser) {
 		if (parser.hasSub("alternatives")) {
 			new Alternative(store).parse(parser, this);
+		}
+		if (parser.hasSub("matching")) {
+			try (MatchingArray sub = new MatchingArray(this, -1)) {
+				while (parser.getSub()) {
+					sub.add();
+					sub.parse(parser);
+				}
+			}
 		}
 	}
 
@@ -51,6 +66,8 @@ public class ChangeMacro extends Macro implements ChangeInterface {
 		switch (field) {
 		case 2:
 			return addAlternatives();
+		case 3:
+			return addMatching();
 		default:
 			return null;
 		}

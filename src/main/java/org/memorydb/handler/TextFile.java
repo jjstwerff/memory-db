@@ -183,6 +183,11 @@ public class TextFile implements Text, AutoCloseable {
 	}
 
 	@Override
+	public void freePos() {
+		positions.trim(positions.size() - SIZE);
+	}
+
+	@Override
 	public void close() {
 		if (!sources.isEmpty() || !positions.isEmpty())
 			throw new RuntimeException("Not everything is closed yet");

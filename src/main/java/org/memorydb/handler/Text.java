@@ -17,6 +17,8 @@ public interface Text {
 
 	void freePos(int pos);
 
+	void freePos();
+
 	String substring(int from);
 
 	String substring(int from, int till);

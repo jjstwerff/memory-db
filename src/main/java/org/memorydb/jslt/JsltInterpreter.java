@@ -5,37 +5,32 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import org.memorydb.handler.Dir;
-import org.memorydb.handler.StringText;
 import org.memorydb.handler.StringWriter;
 import org.memorydb.handler.Text;
 import org.memorydb.handler.Writer;
 import org.memorydb.jslt.Macro.IndexMacros;
 import org.memorydb.jslt.Operator.Function;
 import org.memorydb.jslt.Operator.Operation;
-import org.memorydb.jslt.ResultType.Type;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.RecordInterface.FieldType;
 import org.memorydb.structure.Store;
 
 public class JsltInterpreter {
+	private final List<Object> stack = new ArrayList<>(100);
+	private final List<MatchError> errors = new ArrayList<>(); // only initialize on actual errors
 	private int index;
 	private Object current;
 	private boolean first;
 	private boolean last;
 	private String curName;
 	private RecordInterface data;
-	@SuppressWarnings("unused")
-	private List<Pair> pairs = new ArrayList<>();
-	private List<Object> stack = new ArrayList<>(100);
 	private int stackFrame = 0;
 	private RecordInterface curFor = null;
 	private Object running = null;
 	private Dir dir = null;
-	private boolean debug = true;
 
 	public static String interpret(Store jsltStore, RecordInterface data, Dir dir) {
 		JsltInterpreter inter = new JsltInterpreter();
@@ -72,6 +67,12 @@ public class JsltInterpreter {
 
 	public void setLast(boolean last) {
 		this.last = last;
+	}
+
+	public void setStack(int pos, Object val) {
+		while (stackFrame + pos >= stack.size())
+			stack.add(null);
+		stack.set(stackFrame + pos, val);
 	}
 
 	public Object inter(Operator code) {
@@ -128,29 +129,19 @@ public class JsltInterpreter {
 
 	private Object macro(Operator code) {
 		Macro macro = code.getMacro();
-		if (macro.getName().equals("slice")) {
-			Object parmData = inter(new CallParmsArray(code.getCallParms(), 0));
-			if (parmData instanceof RecordInterface)
-				return new InterSlice(this, (RecordInterface) parmData, code.getCallParms());
-			if (parmData instanceof String)
-				return subString((String) parmData, code.getCallParms());
-			if (parmData instanceof Text)
-				return subString((Text) parmData, code.getCallParms());
-			return null;
-		}
-		int stackF = stack.size();
-		int parms = code.getCallParms().getSize();
-		int stackPos = stackFrame;
-		for (CallParmsArray parm : code.getCallParms())
-			stack.add(inter(parm));
-		stackFrame = stackF;
-		Object obj = findAlternative(macro, stackF, parms);
-		while (stack.size() > stackF)
-			stack.remove(stack.size() - 1);
-		stackFrame = stackPos;
-		return obj;
+		if (!macro.getName().equals("slice"))
+			return new MatchMacro(this, code).match();
+		Object parmData = inter(new CallParmsArray(code.getCallParms(), 0));
+		if (parmData instanceof RecordInterface)
+			return new InterSlice(this, (RecordInterface) parmData, code.getCallParms());
+		if (parmData instanceof String)
+			return subString((String) parmData, code.getCallParms());
+		if (parmData instanceof Text)
+			return subString((Text) parmData, code.getCallParms());
+		return null;
 	}
 
+	/*
 	private Object findAlternative(Macro macro, int stackF, int parms) {
 		for (Alternative alt : macro.getAlternatives()) {
 			if (alt.getParameters().getSize() != parms)
@@ -178,8 +169,7 @@ public class JsltInterpreter {
 					showMacro(macro, res);
 				return res;
 			}
-			while (stack.size() > newFrame)
-				stack.remove(stack.size() - 1);
+			clearStack(newFrame);
 		}
 		return null;
 	}
@@ -250,7 +240,7 @@ public class JsltInterpreter {
 						break;
 					}
 				}
-				if (!((Text)obj).end())
+				if (!((Text) obj).end())
 					return false;
 				return found;
 			} else
@@ -341,7 +331,8 @@ public class JsltInterpreter {
 							DoMatch doMatch = multiple.get(i);
 							if (doMatch.pos != -1) {
 								Variable var = doMatch.match.getVariable();
-								((ListArray) stack.get(stackFrame + var.getNr())).add(obj.substring(doMatch.pos, finish) + "");
+								((ListArray) stack.get(stackFrame + var.getNr()))
+										.add(obj.substring(doMatch.pos, finish) + "");
 							}
 						}
 						found = true;
@@ -405,37 +396,49 @@ public class JsltInterpreter {
 			DoMatch doMatch = multiple.get(i);
 			Match mult = doMatch.match;
 			Variable var = mult.getVariable();
-			if (var.getRec() != 0)
-				if (doMatch.pos == -1) {
-					doMatch.pos = finish;
-					remembered = true;
-					if (stack.size() <= stackFrame + var.getNr())
-						stack.add(new ListArray());
-				}
+			if (var.getRec() != 0 && doMatch.pos == -1) {
+				doMatch.pos = finish;
+				remembered = true;
+				if (stack.size() <= stackFrame + var.getNr())
+					stack.add(new ListArray());
+			}
 			if (textParm(mult.getMmatch(), obj)) {
-				for (int j = multiple.size() - 1; j > j; i--) {
-					DoMatch prevMatch = multiple.get(i);
-					if (prevMatch.pos != -1) {
-						Variable ivar = doMatch.match.getVariable();
-						((ListArray) stack.get(stackFrame + ivar.getNr())).add(obj.substring(prevMatch.pos, finish) + "");
-					}
+				// for (int j = multiple.size() - 1; j > i; j--) {
+				for (int j = i - 1; j > -1; j--) {
+					DoMatch prevMatch = multiple.get(j);
+					if (prevMatch.pos != -1)
+						((ListArray) stack.get(stackFrame + prevMatch.match.getVariable().getNr()))
+								.add(obj.substring(prevMatch.pos, finish));
 				}
 				if (mult.getMmax() == -1 || doMatch.count++ <= mult.getMmax()) {
 					if (!remembered)
 						obj.freePos(finish);
+					for (int j = i; j > 0; j--) {
+						DoMatch prevMatch = multiple.get(j);
+						if (prevMatch.pos != -1) {
+							obj.freePos(prevMatch.pos);
+							prevMatch.pos = -1;
+						}
+					}
 					return true;
 				}
 			} else {
 				doMatch.count = 0;
 			}
 		}
+		for (int i = multiple.size() - 1; i > -1; i--) {
+			DoMatch doMatch = multiple.get(i);
+			if (doMatch.pos != -1)
+				((ListArray) stack.get(stackFrame + doMatch.match.getVariable().getNr()))
+						.add(obj.substring(doMatch.pos, finish));
+		}
 		if (!remembered)
 			obj.freePos(finish);
 		for (int i = multiple.size() - 1; i > -1; i--) {
 			DoMatch doMatch = multiple.get(i);
 			if (doMatch.pos != -1) {
-				Variable ivar = doMatch.match.getVariable();
-				((ListArray) stack.get(stackFrame + ivar.getNr())).add(obj.substring(doMatch.pos, finish) + "");
+				((ListArray) stack.get(stackFrame + doMatch.match.getVariable().getNr()))
+						.add(obj.substring(doMatch.pos, finish));
 				obj.freePos(doMatch.pos);
 				doMatch.pos = -1;
 			}
@@ -506,8 +509,7 @@ public class JsltInterpreter {
 			int pos = on.addPos();
 			stack.add(on.readChar() + "");
 			Object res = findAlternative(parm.getMacro(), stackF, parms);
-			while (stack.size() > stackF)
-				stack.remove(stack.size() - 1);
+			clearStack(stackF);
 			stackFrame = oldStack;
 			if (res instanceof Boolean && ((Boolean) res)) {
 				on.freePos(pos);
@@ -518,9 +520,7 @@ public class JsltInterpreter {
 		return false;
 	}
 
-	/**
 	 * An array that represents a sub array starting from a specified position
-	 */
 	class SubArray implements RecordInterface {
 		private final RecordInterface arr;
 		private final int elm;
@@ -605,7 +605,7 @@ public class JsltInterpreter {
 		default:
 			return false;
 		}
-	}
+	}*/
 
 	private String subString(Text text, CallParmsArray callParms) {
 		int startPos = text.addPos();
@@ -729,17 +729,6 @@ public class JsltInterpreter {
 		write.endArray();
 	}
 
-	@SuppressWarnings("unused")
-	private class Pair {
-		final Operator code;
-		int op; // <0 out of scope, 1:default, 2:override, 3:remove
-
-		public Pair(Operator code, int op) {
-			this.code = code;
-			this.op = op;
-		}
-	}
-
 	private void iterate(int maxDepth, Writer write, String name, RecordInterface rec, int ops) {
 		if (maxDepth <= 0 || !rec.exists())
 			return;
@@ -821,8 +810,8 @@ public class JsltInterpreter {
 		Object p1 = inter(code.getFnParm1());
 		Object p2 = null;
 		Function function = code.getFunction();
-		if (function != Function.EACH && function != Function.FOR && function != Function.PER && function != Function.OR && function != Function.AND
-				&& code.getFnParm2().getRec() != 0)
+		if (function != Function.EACH && function != Function.FOR && function != Function.PER && function != Function.OR
+				&& function != Function.AND && code.getFnParm2().getRec() != 0)
 			p2 = inter(code.getFnParm2());
 		switch (function) {
 		case ADD:
@@ -930,7 +919,8 @@ public class JsltInterpreter {
 			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
 				return compare(p1, p2) == 0;
 			else if (p1 == null)
-				return p2 == null || (p2 instanceof Long && (Long) p2 == Long.MIN_VALUE) || (p2 instanceof Double && Double.isNaN((Double) p2));
+				return p2 == null || (p2 instanceof Long && (Long) p2 == Long.MIN_VALUE)
+						|| (p2 instanceof Double && Double.isNaN((Double) p2));
 			return false;
 		case FIRST:
 			return first;
@@ -1358,5 +1348,32 @@ public class JsltInterpreter {
 		if (lastField instanceof RecordInterface)
 			return ((RecordInterface) lastField).type();
 		throw new RuntimeException("Unknown type");
+	}
+
+	public int getStackFrame() {
+		return stackFrame;
+	}
+
+	public void setStackFrame(int stackFrame) {
+		this.stackFrame = stackFrame;
+	}
+
+	public Object getStackElement(int elm) {
+		if (elm < 0 || elm >= stack.size())
+			return null;
+		return stack.get(elm);
+	}
+
+	public int getStackSize() {
+		return stack.size();
+	}
+
+	public void clearStack(int startFrame) {
+		while (stack.size() > startFrame)
+			stack.remove(stack.size() - 1);
+	}
+
+	public void error(String error) {
+		errors.add(new MatchError(error));
 	}
 }

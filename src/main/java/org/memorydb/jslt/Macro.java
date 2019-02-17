@@ -23,7 +23,7 @@ import org.memorydb.structure.TreeIndex;
 public class Macro implements MemoryRecord, RecordInterface {
 	/* package private */ Store store;
 	protected int rec;
-	/* package private */ static final int RECORD_SIZE = 21;
+	/* package private */ static final int RECORD_SIZE = 25;
 
 	public Macro(Store store) {
 		this.store = store;
@@ -142,9 +142,27 @@ public class Macro implements MemoryRecord, RecordInterface {
 		}
 	}
 
+	@FieldData(
+		name = "matching",
+		type = "ARRAY",
+		related = MatchingArray.class,
+		mandatory = false
+	)
+	public MatchingArray getMatching() {
+		return new MatchingArray(this, -1);
+	}
+
+	public MatchingArray getMatching(int index) {
+		return new MatchingArray(this, index);
+	}
+
+	public MatchingArray addMatching() {
+		return getMatching().add();
+	}
+
 	public class IndexMacros extends TreeIndex<Macro> {
 		public IndexMacros() {
-			super(Macro.this, null, 96, 13);
+			super(Macro.this, null, 128, 17);
 		}
 
 		public IndexMacros(String key1) {
@@ -164,7 +182,7 @@ public class Macro implements MemoryRecord, RecordInterface {
 				public IndexOperation oper() {
 					return IndexOperation.EQ;
 				}
-			}, 96, 13);
+			}, 128, 17);
 		}
 
 		@Override
@@ -201,6 +219,13 @@ public class Macro implements MemoryRecord, RecordInterface {
 		if (fldAlternatives != null) {
 			write.sub("alternatives");
 			for (Alternative sub : fldAlternatives)
+				sub.output(write, iterate);
+			write.endSub();
+		}
+		MatchingArray fldMatching = getMatching();
+		if (fldMatching != null) {
+			write.sub("matching");
+			for (MatchingArray sub : fldMatching)
 				sub.output(write, iterate);
 			write.endSub();
 		}
@@ -280,6 +305,8 @@ public class Macro implements MemoryRecord, RecordInterface {
 			if (key.length > 0)
 				return new IndexAlternatives(new Alternative(store), (int) key[0]);
 			return getAlternatives();
+		case 3:
+			return getMatching();
 		default:
 			return null;
 		}
@@ -291,6 +318,8 @@ public class Macro implements MemoryRecord, RecordInterface {
 		case 1:
 			return FieldType.STRING;
 		case 2:
+			return FieldType.ARRAY;
+		case 3:
 			return FieldType.ARRAY;
 		default:
 			return null;
@@ -304,6 +333,8 @@ public class Macro implements MemoryRecord, RecordInterface {
 			return "name";
 		case 2:
 			return "alternatives";
+		case 3:
+			return "matching";
 		default:
 			return null;
 		}

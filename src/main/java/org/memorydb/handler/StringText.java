@@ -58,6 +58,11 @@ public class StringText implements Text {
 	}
 
 	@Override
+	public void freePos() {
+		positions.trim(positions.size() - 1);
+	}
+
+	@Override
 	public String substring(int from) {
 		if (from < 0 || from >= positions.size())
 			return null;

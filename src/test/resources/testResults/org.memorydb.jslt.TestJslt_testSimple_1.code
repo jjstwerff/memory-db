@@ -7,4 +7,5 @@ name=main, alternatives=[
   ], code=[
     operation=NUMBER, number=0
   ]
+], matching=[
 ]

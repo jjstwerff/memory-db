@@ -1,0 +1,10 @@
+When to fill:
+- after all parsing.. loop macro's
+
+Add this aside the current code:
+- replace it on if it's finished
+
+Missing:
+- other parameters to calls
+- switching to named parameter
+- allow to write no errors

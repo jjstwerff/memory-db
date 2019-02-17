@@ -21,4 +21,5 @@ name=main, alternatives=[
       operation=STRING, string=a
     ]
   ]
+], matching=[
 ]
