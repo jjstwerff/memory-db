@@ -251,6 +251,8 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public String name(int field) {
+		if (idx == -1)
+			return null;
 		if (field >= 1 && field <= 16)
 			return nameMatch(field - 1);
 		switch (field) {
@@ -263,6 +265,8 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public FieldType type(int field) {
+		if (idx == -1)
+			return field < 1 || field > size ? null : FieldType.OBJECT;
 		if (field >= 1 && field <= 16)
 			return typeMatch(field - 1);
 		switch (field) {
@@ -275,6 +279,8 @@ public class MobjectArray implements ChangeMatch, Iterable<MobjectArray> {
 
 	@Override
 	public Object get(int field) {
+		if (idx == -1)
+			return field < 1 || field > size ? null : new MobjectArray(parent, field - 1);
 		if (field >= 1 && field <= 16)
 			return getMatch(field - 1);
 		switch (field) {

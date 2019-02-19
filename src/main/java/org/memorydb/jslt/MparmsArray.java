@@ -226,6 +226,8 @@ public class MparmsArray implements ChangeOperator, Iterable<MparmsArray> {
 
 	@Override
 	public String name(int field) {
+		if (idx == -1)
+			return null;
 		if (field >= 0 && field <= 28)
 			return nameOperator(field - 0);
 		switch (field) {
@@ -236,6 +238,8 @@ public class MparmsArray implements ChangeOperator, Iterable<MparmsArray> {
 
 	@Override
 	public FieldType type(int field) {
+		if (idx == -1)
+			return field < 1 || field > size ? null : FieldType.OBJECT;
 		if (field >= 0 && field <= 28)
 			return typeOperator(field - 0);
 		switch (field) {
@@ -246,6 +250,8 @@ public class MparmsArray implements ChangeOperator, Iterable<MparmsArray> {
 
 	@Override
 	public Object get(int field) {
+		if (idx == -1)
+			return field < 1 || field > size ? null : new MparmsArray(parent, field - 1);
 		if (field >= 0 && field <= 28)
 			return getOperator(field - 0);
 		switch (field) {

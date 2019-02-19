@@ -198,6 +198,8 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public String name(int field) {
+		if (idx == -1)
+			return null;
 		if (field >= 0 && field <= 15)
 			return nameMatch(field - 0);
 		switch (field) {
@@ -208,6 +210,8 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public FieldType type(int field) {
+		if (idx == -1)
+			return field < 1 || field > size ? null : FieldType.OBJECT;
 		if (field >= 0 && field <= 15)
 			return typeMatch(field - 0);
 		switch (field) {
@@ -218,6 +222,8 @@ public class ParametersArray implements ChangeMatch, Iterable<ParametersArray> {
 
 	@Override
 	public Object get(int field) {
+		if (idx == -1)
+			return field < 1 || field > size ? null : new ParametersArray(parent, field - 1);
 		if (field >= 0 && field <= 15)
 			return getMatch(field - 0);
 		switch (field) {

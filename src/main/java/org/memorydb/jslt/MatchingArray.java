@@ -198,6 +198,8 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 
 	@Override
 	public String name(int field) {
+		if (idx == -1)
+			return null;
 		if (field >= 0 && field <= 33)
 			return nameMatchStep(field - 0);
 		switch (field) {
@@ -208,6 +210,8 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 
 	@Override
 	public FieldType type(int field) {
+		if (idx == -1)
+			return field < 1 || field > size ? null : FieldType.OBJECT;
 		if (field >= 0 && field <= 33)
 			return typeMatchStep(field - 0);
 		switch (field) {
@@ -218,6 +222,8 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 
 	@Override
 	public Object get(int field) {
+		if (idx == -1)
+			return field < 1 || field > size ? null : new MatchingArray(parent, field - 1);
 		if (field >= 0 && field <= 33)
 			return getMatchStep(field - 0);
 		switch (field) {

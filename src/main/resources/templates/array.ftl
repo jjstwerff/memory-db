@@ -358,6 +358,8 @@ ${field.arrayFields}<#rt>
 
 	@Override
 	public String name(int field) {
+		if (idx == -1)
+			return null;
 <#assign max = rec.fields?size>
 <#list rec.includes as incl>
 <#assign nmax = max + incl.fields?size>
@@ -378,6 +380,8 @@ ${field.arrayFields}<#rt>
 
 	@Override
 	public FieldType type(int field) {
+		if (idx == -1)
+			return field < 1 || field > size ? null : FieldType.OBJECT;
 <#assign max = rec.fields?size>
 <#list rec.includes as incl>
 <#assign nmax = max + incl.fields?size>
@@ -408,6 +412,8 @@ ${field.arrayFields}<#rt>
 
 	@Override
 	public Object get(int field) {
+		if (idx == -1)
+			return field < 1 || field > size ? null : new ${field.name?cap_first}Array(parent, field - 1);
 <#assign max = rec.fields?size>
 <#list rec.includes as incl>
 <#assign nmax = max + incl.fields?size>
