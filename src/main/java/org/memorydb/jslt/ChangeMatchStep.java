@@ -36,6 +36,10 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
 				getStore().setInt(getRec(), matchstepPosition() + 9, 0);
 				break;
+			case TEST_STACK:
+				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
+				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
+				break;
 			case TEST_CALL:
 				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
 				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
@@ -135,6 +139,18 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 	default void setAvar(Variable value) {
 		if (getType() == Type.ALT) {
 			getStore().setInt(getRec(), matchstepPosition() + 9, value == null ? 0 : value.getRec());
+		}
+	}
+
+	default void setTstack(int value) {
+		if (getType() == Type.TEST_STACK) {
+			getStore().setInt(getRec(), matchstepPosition() + 1, value);
+		}
+	}
+
+	default void setTsfalse(int value) {
+		if (getType() == Type.TEST_STACK) {
+			getStore().setInt(getRec(), matchstepPosition() + 5, value);
 		}
 	}
 
@@ -318,6 +334,12 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 		if (parser.hasSub("avar")) {
 			setAvar(new Variable(getStore()).parse(parser));
 		}
+		if (parser.hasField("tstack")) {
+			setTstack(parser.getInt("tstack"));
+		}
+		if (parser.hasField("tsfalse")) {
+			setTsfalse(parser.getInt("tsfalse"));
+		}
 		if (parser.hasField("tmacro")) {
 			parser.getRelation("tmacro", (recNr, idx) -> {
 				Macro relRec = new Macro(getStore());
@@ -448,98 +470,106 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 				setAvar((Variable) value);
 			return value instanceof Variable;
 		case 10:
+			if (value instanceof Integer)
+				setTstack((Integer) value);
+			return value instanceof Integer;
+		case 11:
+			if (value instanceof Integer)
+				setTsfalse((Integer) value);
+			return value instanceof Integer;
+		case 12:
 			if (value instanceof Macro)
 				setTmacro((Macro) value);
 			return value instanceof Macro;
-		case 11:
+		case 13:
 			if (value instanceof Integer)
 				setTfalse((Integer) value);
 			return value instanceof Integer;
-		case 12:
+		case 14:
 			if (value instanceof Integer)
 				setJump((Integer) value);
 			return value instanceof Integer;
-		case 13:
+		case 15:
 			if (value instanceof Boolean)
 				setMboolean((Boolean) value);
 			return value instanceof Boolean;
-		case 14:
+		case 16:
 			if (value instanceof Integer)
 				setMbfalse((Integer) value);
 			return value instanceof Integer;
-		case 15:
+		case 17:
 			if (value instanceof String)
 				setMstring((String) value);
 			return value instanceof String;
-		case 16:
+		case 18:
 			if (value instanceof Integer)
 				setMsfalse((Integer) value);
 			return value instanceof Integer;
-		case 17:
+		case 19:
 			if (value instanceof Long)
 				setMnumber((Long) value);
 			return value instanceof Long;
-		case 18:
+		case 20:
 			if (value instanceof Integer)
 				setMnfalse((Integer) value);
 			return value instanceof Integer;
-		case 19:
+		case 21:
 			if (value instanceof Double)
 				setMfloat((Double) value);
 			return value instanceof Double;
-		case 20:
+		case 22:
 			if (value instanceof Integer)
 				setMffalse((Integer) value);
 			return value instanceof Integer;
-		case 21:
+		case 23:
 			if (value instanceof Ttype)
 				setTtype((Ttype) value);
 			return value instanceof Ttype;
-		case 22:
+		case 24:
 			if (value instanceof Integer)
 				setTtfalse((Integer) value);
 			return value instanceof Integer;
-		case 23:
+		case 25:
 			if (value instanceof Integer)
 				setPto((Integer) value);
 			return value instanceof Integer;
-		case 24:
+		case 26:
 			if (value instanceof Variable)
 				setVwrite((Variable) value);
 			return value instanceof Variable;
-		case 25:
+		case 27:
 			if (value instanceof Integer)
 				setVwfrom((Integer) value);
 			return value instanceof Integer;
-		case 26:
+		case 28:
 			if (value instanceof Integer)
 				setVwtill((Integer) value);
 			return value instanceof Integer;
-		case 27:
+		case 29:
 			if (value instanceof Variable)
 				setVstart((Variable) value);
 			return value instanceof Variable;
-		case 28:
+		case 30:
 			if (value instanceof Variable)
 				setVadd((Variable) value);
 			return value instanceof Variable;
-		case 29:
+		case 31:
 			if (value instanceof Integer)
 				setVafrom((Integer) value);
 			return value instanceof Integer;
-		case 30:
+		case 32:
 			if (value instanceof Integer)
 				setVatill((Integer) value);
 			return value instanceof Integer;
-		case 31:
+		case 33:
 			if (value instanceof String)
 				setError((String) value);
 			return value instanceof String;
-		case 32:
+		case 34:
 			if (value instanceof Integer)
 				setEfrom((Integer) value);
 			return value instanceof Integer;
-		case 33:
+		case 35:
 			if (value instanceof Integer)
 				setEtill((Integer) value);
 			return value instanceof Integer;

@@ -6,10 +6,12 @@ def b(string:val): val + "*"
 def b(0, number:val2): 100 * val2
 def b("", number:val2): val2
 def b(number:val, number:val2): val + val2
+def b(...): null
 
 t.assert("constant", 1, a()) + 
 t.assert("type-match-1", " *", b(" ")) +
 t.assert("type-match-2", 3, b(2)) +
 t.assert("type-match-3", 3, b(5, -2)) +
 t.assert("type-match-4", 200, b(0, 2)) +
-t.assert("type-match-5", 2, b("", 2))
+t.assert("type-match-5", 2, b("", 2)) +
+t.assert("type-unknown", null, b("", ""))

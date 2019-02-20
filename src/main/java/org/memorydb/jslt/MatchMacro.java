@@ -112,6 +112,12 @@ public class MatchMacro {
 				else
 					pos = matching.getMnfalse();
 				break;
+			case TEST_STACK:
+				if (inter.getStackSize() - startFrame == matching.getTstack())
+					pos = matching.next(pos);
+				else
+					pos = matching.getTsfalse();
+				break;
 			case TEST_STRING:
 				if (cur instanceof String && matching.getMstring().equals((String) cur))
 					pos = matching.next(pos);
@@ -192,6 +198,8 @@ public class MatchMacro {
 				else
 					obj = ((Text) cur).substring(from, till);
 				inter.setStack(startFrame + matching.getVadd().getNr(), obj);
+				break;
+			default:
 				break;
 			}
 		}

@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.memorydb.file.Write;
+import org.memorydb.jslt.JsltAnalyzer;
 import org.memorydb.jslt.JsltInterpreter;
 import org.memorydb.jslt.JsltParser;
 import org.memorydb.jslt.Macro;
@@ -82,6 +83,7 @@ public class MemoryTests extends NormalCheck {
 	private static Macro parse(String jslt) {
 		Store jsltStore = new Store(3);
 		JsltParser.parse(jslt, jsltStore);
+		JsltAnalyzer.analyze(jsltStore);
 		Macro macro = new Macro(jsltStore);
 		macro.setRec(macro.new IndexMacros("main").search());
 		return macro;

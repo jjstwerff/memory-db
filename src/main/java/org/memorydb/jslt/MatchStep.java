@@ -31,7 +31,7 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	}
 
 	public enum Type {
-		STACK, PARM, FIELD, ALT, TEST_CALL, JUMP, TEST_BOOLEAN, TEST_STRING, TEST_NUMBER, TEST_FLOAT, TEST_TYPE, POS_KEEP, POS_FREE, POS_TO, VAR_WRITE, VAR_START, VAR_ADD, ERROR;
+		STACK, PARM, FIELD, ALT, TEST_CALL, JUMP, TEST_STACK, TEST_BOOLEAN, TEST_STRING, TEST_NUMBER, TEST_FLOAT, TEST_TYPE, POS_KEEP, POS_FREE, POS_TO, VAR_WRITE, VAR_START, VAR_ADD, ERROR;
 
 		private static Map<String, Type> map = new HashMap<>();
 
@@ -49,7 +49,7 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	@FieldData(
 		name = "type",
 		type = "ENUMERATE",
-		enumerate = {"STACK", "PARM", "FIELD", "ALT", "TEST_CALL", "JUMP", "TEST_BOOLEAN", "TEST_STRING", "TEST_NUMBER", "TEST_FLOAT", "TEST_TYPE", "POS_KEEP", "POS_FREE", "POS_TO", "VAR_WRITE", "VAR_START", "VAR_ADD", "ERROR"},
+		enumerate = {"STACK", "PARM", "FIELD", "ALT", "TEST_CALL", "JUMP", "TEST_STACK", "TEST_BOOLEAN", "TEST_STRING", "TEST_NUMBER", "TEST_FLOAT", "TEST_TYPE", "POS_KEEP", "POS_FREE", "POS_TO", "VAR_WRITE", "VAR_START", "VAR_ADD", "ERROR"},
 		condition = true,
 		mandatory = false
 	)
@@ -139,6 +139,26 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	)
 	default Variable getAvar() {
 		return new Variable(getStore(), getType() != Type.ALT ? 0 : getStore().getInt(getRec(), matchstepPosition() + 9));
+	}
+
+	@FieldData(
+		name = "tstack",
+		type = "INTEGER",
+		when = "TEST_STACK",
+		mandatory = false
+	)
+	default int getTstack() {
+		return getType() != Type.TEST_STACK ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 1);
+	}
+
+	@FieldData(
+		name = "tsfalse",
+		type = "INTEGER",
+		when = "TEST_STACK",
+		mandatory = false
+	)
+	default int getTsfalse() {
+		return getType() != Type.TEST_STACK ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
 	}
 
 	@FieldData(
@@ -422,6 +442,8 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 			fldAvar.output(write, iterate);
 			write.endSub();
 		}
+		write.field("tstack", getTstack());
+		write.field("tsfalse", getTsfalse());
 		write.field("tmacro", getTmacro());
 		write.field("tfalse", getTfalse());
 		write.field("jump", getJump());
@@ -485,52 +507,56 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 		case 9:
 			return getAvar();
 		case 10:
-			return getTmacro();
+			return getTstack();
 		case 11:
-			return getTfalse();
+			return getTsfalse();
 		case 12:
-			return getJump();
+			return getTmacro();
 		case 13:
-			return isMboolean();
+			return getTfalse();
 		case 14:
-			return getMbfalse();
+			return getJump();
 		case 15:
-			return getMstring();
+			return isMboolean();
 		case 16:
-			return getMsfalse();
+			return getMbfalse();
 		case 17:
-			return getMnumber();
+			return getMstring();
 		case 18:
-			return getMnfalse();
+			return getMsfalse();
 		case 19:
-			return getMfloat();
+			return getMnumber();
 		case 20:
-			return getMffalse();
+			return getMnfalse();
 		case 21:
-			return getTtype();
+			return getMfloat();
 		case 22:
-			return getTtfalse();
+			return getMffalse();
 		case 23:
-			return getPto();
+			return getTtype();
 		case 24:
-			return getVwrite();
+			return getTtfalse();
 		case 25:
-			return getVwfrom();
+			return getPto();
 		case 26:
-			return getVwtill();
+			return getVwrite();
 		case 27:
-			return getVstart();
+			return getVwfrom();
 		case 28:
-			return getVadd();
+			return getVwtill();
 		case 29:
-			return getVafrom();
+			return getVstart();
 		case 30:
-			return getVatill();
+			return getVadd();
 		case 31:
-			return getError();
+			return getVafrom();
 		case 32:
-			return getEfrom();
+			return getVatill();
 		case 33:
+			return getError();
+		case 34:
+			return getEfrom();
+		case 35:
 			return getEtill();
 		default:
 			return null;
@@ -565,52 +591,56 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 		case 9:
 			return FieldType.OBJECT;
 		case 10:
-			return FieldType.OBJECT;
+			return FieldType.INTEGER;
 		case 11:
 			return FieldType.INTEGER;
 		case 12:
-			return FieldType.INTEGER;
+			return FieldType.OBJECT;
 		case 13:
-			return FieldType.BOOLEAN;
+			return FieldType.INTEGER;
 		case 14:
 			return FieldType.INTEGER;
 		case 15:
-			return FieldType.STRING;
+			return FieldType.BOOLEAN;
 		case 16:
 			return FieldType.INTEGER;
 		case 17:
-			return FieldType.LONG;
+			return FieldType.STRING;
 		case 18:
 			return FieldType.INTEGER;
 		case 19:
-			return FieldType.FLOAT;
+			return FieldType.LONG;
 		case 20:
 			return FieldType.INTEGER;
 		case 21:
-			return FieldType.STRING;
+			return FieldType.FLOAT;
 		case 22:
 			return FieldType.INTEGER;
 		case 23:
-			return FieldType.INTEGER;
+			return FieldType.STRING;
 		case 24:
-			return FieldType.OBJECT;
+			return FieldType.INTEGER;
 		case 25:
 			return FieldType.INTEGER;
 		case 26:
-			return FieldType.INTEGER;
+			return FieldType.OBJECT;
 		case 27:
-			return FieldType.OBJECT;
+			return FieldType.INTEGER;
 		case 28:
-			return FieldType.OBJECT;
+			return FieldType.INTEGER;
 		case 29:
-			return FieldType.INTEGER;
+			return FieldType.OBJECT;
 		case 30:
-			return FieldType.INTEGER;
+			return FieldType.OBJECT;
 		case 31:
-			return FieldType.STRING;
+			return FieldType.INTEGER;
 		case 32:
 			return FieldType.INTEGER;
 		case 33:
+			return FieldType.STRING;
+		case 34:
+			return FieldType.INTEGER;
+		case 35:
 			return FieldType.INTEGER;
 		default:
 			return null;
@@ -638,52 +668,56 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 		case 9:
 			return "avar";
 		case 10:
-			return "tmacro";
+			return "tstack";
 		case 11:
-			return "tfalse";
+			return "tsfalse";
 		case 12:
-			return "jump";
+			return "tmacro";
 		case 13:
-			return "mboolean";
+			return "tfalse";
 		case 14:
-			return "mbfalse";
+			return "jump";
 		case 15:
-			return "mstring";
+			return "mboolean";
 		case 16:
-			return "msfalse";
+			return "mbfalse";
 		case 17:
-			return "mnumber";
+			return "mstring";
 		case 18:
-			return "mnfalse";
+			return "msfalse";
 		case 19:
-			return "mfloat";
+			return "mnumber";
 		case 20:
-			return "mffalse";
+			return "mnfalse";
 		case 21:
-			return "ttype";
+			return "mfloat";
 		case 22:
-			return "ttfalse";
+			return "mffalse";
 		case 23:
-			return "pto";
+			return "ttype";
 		case 24:
-			return "vwrite";
+			return "ttfalse";
 		case 25:
-			return "vwfrom";
+			return "pto";
 		case 26:
-			return "vwtill";
+			return "vwrite";
 		case 27:
-			return "vstart";
+			return "vwfrom";
 		case 28:
-			return "vadd";
+			return "vwtill";
 		case 29:
-			return "vafrom";
+			return "vstart";
 		case 30:
-			return "vatill";
+			return "vadd";
 		case 31:
-			return "error";
+			return "vafrom";
 		case 32:
-			return "efrom";
+			return "vatill";
 		case 33:
+			return "error";
+		case 34:
+			return "efrom";
+		case 35:
 			return "etill";
 		default:
 			return null;

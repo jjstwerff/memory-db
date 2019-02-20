@@ -115,10 +115,19 @@ public class JsltParser {
 			}
 			parms.clear();
 			scanner.expect("(");
-			if (!scanner.matches(")")) {
+			if (scanner.matches("...")) {
+				curAlt.setAnyParm(true);
+				scanner.expect(")");
+			}
+			else if (!scanner.matches(")")) {
 				parseParameter();
-				while (scanner.matches(","))
-					parseParameter();
+				while (scanner.matches(",")) {
+					if (scanner.matches("...")) {
+						curAlt.setAnyParm(true);
+						break;
+					} else
+						parseParameter();
+				}
 				if (scanner.matches("if")) {
 					try (ChangeExpr data = new ChangeExpr(store)) {
 						remember();

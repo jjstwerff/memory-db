@@ -101,7 +101,7 @@ public class JsltStructure {
 		match.field("number", Type.LONG).when("NUMBER");
 		match.field("string", Type.STRING).when("STRING");
 		match.field("mobject", Type.ARRAY, mfield).when("OBJECT");
-		match.field("cparm", Type.STRING).when("CONSTANT");
+		match.field("cparm", Type.STRING).when("CONSTANT"); // current parameter should hold the same value as the specified parameter
 		match.field("constant", Type.INTEGER).when("CONSTANT");
 		match.field("macro", Type.RELATION, macro).when("MACRO");
 		match.field("mparms", Type.ARRAY, step).when("MACRO");
@@ -120,12 +120,13 @@ public class JsltStructure {
 		Record alt = project.table("Alternative");
 		alt.field("nr", Type.INTEGER);
 		alt.field("parameters", Type.ARRAY, parameter);
+		alt.field("anyParm", Type.BOOLEAN); // match any remaining parameters after the given set
 		alt.field("if", Type.OBJECT, expr);
 		alt.field("code", Type.ARRAY, step);
 
 		Record matchStep = project.content("MatchStep");
 		matchStep.field("type", Type.ENUMERATE, "STACK", "PARM", "FIELD", "ALT", "TEST_CALL", "JUMP", //
-				"TEST_BOOLEAN", "TEST_STRING", "TEST_NUMBER", "TEST_FLOAT", //
+				"TEST_STACK", "TEST_BOOLEAN", "TEST_STRING", "TEST_NUMBER", "TEST_FLOAT", //
 				"TEST_TYPE", "POS_KEEP", "POS_FREE", "POS_TO", "VAR_WRITE", "VAR_START", "VAR_ADD", "ERROR")
 				.condition();
 		matchStep.field("stack", Type.INTEGER).when("STACK"); // increase or decrease the stack frame (variables/call)
@@ -136,6 +137,8 @@ public class JsltStructure {
 		matchStep.field("altnr", Type.INTEGER).when("ALT"); // record Id of Alternative, perform if-condition & calculate
 		matchStep.field("afalse", Type.INTEGER).when("ALT"); // goto position if if-condition is not met
 		matchStep.field("avar", Type.OBJECT, variable).when("ALT"); // result into variable: null = return main
+		matchStep.field("tstack", Type.INTEGER).when("TEST_STACK"); // test the number of elements on the stack
+		matchStep.field("tsfalse", Type.INTEGER).when("TEST_STACK"); // where to continue if the stack is not this size
 		matchStep.field("tmacro", Type.RELATION, macro).when("TEST_CALL"); // current element as extra parameter
 		matchStep.field("tfalse", Type.INTEGER).when("TEST_CALL"); // jump when result is false
 		matchStep.field("jump", Type.INTEGER).when("JUMP"); // continue at a specific location

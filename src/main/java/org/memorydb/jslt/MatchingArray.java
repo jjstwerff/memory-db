@@ -200,7 +200,7 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 	public String name(int field) {
 		if (idx == -1)
 			return null;
-		if (field >= 0 && field <= 33)
+		if (field >= 0 && field <= 35)
 			return nameMatchStep(field - 0);
 		switch (field) {
 		default:
@@ -212,7 +212,7 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 	public FieldType type(int field) {
 		if (idx == -1)
 			return field < 1 || field > size ? null : FieldType.OBJECT;
-		if (field >= 0 && field <= 33)
+		if (field >= 0 && field <= 35)
 			return typeMatchStep(field - 0);
 		switch (field) {
 		default:
@@ -224,7 +224,7 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 	public Object get(int field) {
 		if (idx == -1)
 			return field < 1 || field > size ? null : new MatchingArray(parent, field - 1);
-		if (field >= 0 && field <= 33)
+		if (field >= 0 && field <= 35)
 			return getMatchStep(field - 0);
 		switch (field) {
 		default:
@@ -234,7 +234,7 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 33)
+		if (field >= 0 && field <= 35)
 			return iterateMatchStep(field - 0);
 		switch (field) {
 		default:
@@ -244,7 +244,7 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 
 	@Override
 	public boolean set(int field, Object value) {
-		if (field >= 0 && field <= 33)
+		if (field >= 0 && field <= 35)
 			return setMatchStep(field - 0, value);
 		switch (field) {
 		default:
@@ -254,7 +254,7 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 
 	@Override
 	public ChangeInterface add(int field) {
-		if (field >= 0 && field <= 33)
+		if (field >= 0 && field <= 35)
 			return addMatchStep(field - 0);
 		switch (field) {
 		default:

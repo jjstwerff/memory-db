@@ -155,6 +155,7 @@ public class TestJslt extends MemoryTests {
 			String result = file.getFileName().toString();
 			System.out.println("Check: " + result);
 			new Parser(new Scanner(file), jsltStore).parse();
+			JsltAnalyzer.analyze(jsltStore);
 			StringBuilder code = new StringBuilder();
 			if (!result.equals(""))
 				for (Macro m : new Macro(jsltStore).new IndexMacros())

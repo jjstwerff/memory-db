@@ -2,6 +2,7 @@ package org.memorydb.jslt;
 
 import org.memorydb.file.Parser;
 import org.memorydb.structure.ChangeInterface;
+import org.memorydb.handler.MutationException;
 
 /**
  * Automatically generated record class for table Alternative
@@ -14,8 +15,9 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 		}
 		setNr(0);
 		store.setInt(getRec(), 8, 0); // ARRAY parameters
+		setAnyParm(false);
 		setIf(null);
-		store.setInt(getRec(), 16, 0); // ARRAY code
+		store.setInt(getRec(), 17, 0); // ARRAY code
 		setUpRecord(parent);
 		if (rec != 0) {
 			getUpRecord().new IndexAlternatives(this).remove(rec);
@@ -38,17 +40,21 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 		getStore().setInt(other.getRec(), 8, 0);
 	}
 
+	public void setAnyParm(boolean value) {
+		store.setByte(rec, 12, (store.getByte(rec, 12) & 254) + (value ? 1 : 0));
+	}
+
 	public void setIf(Expr value) {
-		store.setInt(rec, 12, value == null ? 0 : value.getRec());
+		store.setInt(rec, 13, value == null ? 0 : value.getRec());
 	}
 
 	public void moveCode(ChangeAlternative other) {
-		getStore().setInt(getRec(), 16, getStore().getInt(other.getRec(), 16));
-		getStore().setInt(other.getRec(), 16, 0);
+		getStore().setInt(getRec(), 17, getStore().getInt(other.getRec(), 17));
+		getStore().setInt(other.getRec(), 17, 0);
 	}
 
 	public void setUpRecord(Macro value) {
-		store.setInt(rec, 29, value == null ? 0 : value.getRec());
+		store.setInt(rec, 30, value == null ? 0 : value.getRec());
 	}
 
 	/* package private */ void parseFields(Parser parser) {
@@ -59,6 +65,12 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 					sub.parse(parser);
 				}
 			}
+		}
+		if (parser.hasField("anyParm")) {
+			Boolean valueAnyParm = parser.getBoolean("anyParm");
+			if (valueAnyParm == null)
+				throw new MutationException("Mandatory 'anyParm' field");
+			setAnyParm(valueAnyParm);
 		}
 		if (parser.hasSub("if")) {
 			setIf(new Expr(store).parse(parser));
@@ -86,6 +98,10 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 				setNr((Integer) value);
 			return value instanceof Integer;
 		case 3:
+			if (value instanceof Boolean)
+				setAnyParm((Boolean) value);
+			return value instanceof Boolean;
+		case 4:
 			if (value instanceof Expr)
 				setIf((Expr) value);
 			return value instanceof Expr;
@@ -99,7 +115,7 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 		switch (field) {
 		case 2:
 			return addParameters();
-		case 4:
+		case 5:
 			return addCode();
 		default:
 			return null;

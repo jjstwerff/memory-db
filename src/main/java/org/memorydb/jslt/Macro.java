@@ -94,7 +94,7 @@ public class Macro implements MemoryRecord, RecordInterface {
 	/* package private */ class IndexAlternatives extends TreeIndex<Alternative> {
 
 		public IndexAlternatives(Alternative record) {
-			super(record, null, 160, 21);
+			super(record, null, 168, 22);
 		}
 
 		public IndexAlternatives(Alternative record, int key1) {
@@ -114,7 +114,7 @@ public class Macro implements MemoryRecord, RecordInterface {
 				public IndexOperation oper() {
 					return IndexOperation.EQ;
 				}
-			}, 160, 21);
+			}, 168, 22);
 		}
 
 		@Override

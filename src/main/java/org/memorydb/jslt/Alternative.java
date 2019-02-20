@@ -19,7 +19,7 @@ import org.memorydb.structure.Store;
 public class Alternative implements MemoryRecord, RecordInterface {
 	/* package private */ Store store;
 	protected int rec;
-	/* package private */ static final int RECORD_SIZE = 33;
+	/* package private */ static final int RECORD_SIZE = 34;
 
 	public Alternative(Store store) {
 		this.store = store;
@@ -81,13 +81,22 @@ public class Alternative implements MemoryRecord, RecordInterface {
 	}
 
 	@FieldData(
+		name = "anyParm",
+		type = "BOOLEAN",
+		mandatory = false
+	)
+	public boolean isAnyParm() {
+		return rec == 0 ? false : (store.getByte(rec, 12) & 1) > 0;
+	}
+
+	@FieldData(
 		name = "if",
 		type = "OBJECT",
 		related = Expr.class,
 		mandatory = false
 	)
 	public Expr getIf() {
-		return new Expr(store, rec == 0 ? 0 : store.getInt(rec, 12));
+		return new Expr(store, rec == 0 ? 0 : store.getInt(rec, 13));
 	}
 
 	@FieldData(
@@ -116,7 +125,7 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		mandatory = false
 	)
 	public Macro getUpRecord() {
-		return new Macro(store, rec == 0 ? 0 : store.getInt(rec, 29));
+		return new Macro(store, rec == 0 ? 0 : store.getInt(rec, 30));
 	}
 
 	@Override
@@ -131,6 +140,7 @@ public class Alternative implements MemoryRecord, RecordInterface {
 				sub.output(write, iterate);
 			write.endSub();
 		}
+		write.field("anyParm", isAnyParm());
 		Expr fldIf = getIf();
 		if (fldIf != null && fldIf.getRec() != 0) {
 			write.sub("if");
@@ -212,6 +222,8 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		case 1:
 			return getNr();
 		case 3:
+			return isAnyParm();
+		case 4:
 			return getIf();
 		default:
 			return null;
@@ -223,7 +235,7 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		switch (field) {
 		case 2:
 			return getParameters();
-		case 4:
+		case 5:
 			return getCode();
 		default:
 			return null;
@@ -238,8 +250,10 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		case 2:
 			return FieldType.ARRAY;
 		case 3:
-			return FieldType.OBJECT;
+			return FieldType.BOOLEAN;
 		case 4:
+			return FieldType.OBJECT;
+		case 5:
 			return FieldType.ARRAY;
 		default:
 			return null;
@@ -254,8 +268,10 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		case 2:
 			return "parameters";
 		case 3:
-			return "if";
+			return "anyParm";
 		case 4:
+			return "if";
+		case 5:
 			return "code";
 		default:
 			return null;

@@ -3,7 +3,6 @@ package org.memorydb.table;
 import org.junit.Assert;
 import org.junit.Test;
 import org.memorydb.jslt.ChangeMacro;
-import org.memorydb.jslt.Macro;
 import org.memorydb.jslt.MatchStep.Type;
 import org.memorydb.jslt.MatchingArray;
 import org.memorydb.structure.Store;
