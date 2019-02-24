@@ -8,3 +8,23 @@ Missing:
 - other parameters to calls
 - switching to named parameter
 - allow to write no errors
+
+
+
+def numb( a + 2 ): a
+.. get first parameter
+.. test array size of 2
+.. get second array element & test constant
+.. increase stack with 1
+.. get first array element & stack
+.. calculate alternative
+.. error
+
+def second( 2 + a ): a
+.. get first parameter
+.. get first array element & test constant
+.. increase stack with 1
+.. get rest of array & stack
+.. calculate alternative
+.. error
+

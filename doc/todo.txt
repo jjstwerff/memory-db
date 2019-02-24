@@ -1,5 +1,5 @@
 Testing:
-- fix parser for variable matching on test 06/07
+- validate returned errors
 - iterator matching:
 	detection of recursion (calls of functions on the same iterators) & array / object result:
 		create a lazy implementation: array + recursion -> internal array with original position & length & expression

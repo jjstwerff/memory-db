@@ -1,7 +1,5 @@
 package org.memorydb.jslt;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -12,10 +10,10 @@ import org.memorydb.structure.Store;
 
 public class JsltAnalyzer {
 	private interface Setter {
-		void set(int pos);
+		void set(MatchingArray elm, int pos);
 	}
 
-	private Map<String, List<Setter>> jumpto = new TreeMap<>();
+	private Map<String, Map<Integer, Setter>> jumpto = new TreeMap<>();
 	private Macro macro;
 
 	public static void analyze(Store data) {
@@ -29,11 +27,11 @@ public class JsltAnalyzer {
 
 	private void analyze() {
 		int parms = -1;
-		for (Entry<String, List<Setter>> entry : jumpto.entrySet())
+		for (Entry<String, Map<Integer, Setter>> entry : jumpto.entrySet())
 			if (entry.getValue().size() != 0)
 				throw new RuntimeException("Not previously resolved jump:" + entry.getKey());
 		for (Alternative alt : macro.getAlternatives()) {
-			showAlt(alt);
+			// showAlt(alt);
 			resolve("NextAlternative");
 			int size = alt.getParameters().getSize();
 			if (parms != size) {
@@ -43,67 +41,132 @@ public class JsltAnalyzer {
 					parms = size;
 					MatchingArray stackTest = addStep(MatchingArray.Type.TEST_STACK);
 					stackTest.setTstack(parms);
-					jump(s -> stackTest.setTsfalse(s), "NextParmSize");
+					jump(stackTest, (e, s) -> e.setTsfalse(s), "NextParmSize");
 				}
 			}
-			if (checkPassAsIs(alt)) {
-				int p = 0;
+			if (checkPassAsIs(alt))
+				for (ParametersArray parm : alt.getParameters())
+					testType(parm);
+			else if (checkContinuesAsIs(alt) >= 0) {
 				for (ParametersArray parm : alt.getParameters()) {
-					MatchingArray setParm = addStep(MatchingArray.Type.PARM);
-					setParm.setParm(p++);
-					Type type = parm.getVariable().getType();
-					if (type != null) {
-						MatchingArray typeTest = addStep(MatchingArray.Type.TEST_TYPE);
-						switch (type) {
-						case ARRAY:
-							typeTest.setTtype(Ttype.TYPE_ARRAY);
-							break;
-						case BOOLEAN:
-							typeTest.setTtype(Ttype.TYPE_BOOLEAN);
-							break;
-						case FLOAT:
-							typeTest.setTtype(Ttype.TYPE_FLOAT);
-							break;
-						case NULL:
-							typeTest.setTtype(Ttype.TYPE_NULL);
-							break;
-						case NUMBER:
-							typeTest.setTtype(Ttype.TYPE_NUMBER);
-							break;
-						case OBJECT:
-							typeTest.setTtype(Ttype.TYPE_OBJECT);
-							break;
-						case STRING:
-							typeTest.setTtype(Ttype.TYPE_STRING);
-							break;
-						case STRUCTURE:
-							typeTest.setTtype(Ttype.TYPE_OBJECT);
-							break;
-						}
-						jump(s -> typeTest.setTtfalse(s), "NextAlternative");
+					if (parm.getVariable().getRec() != 0)
+						testType(parm);
+					else {
+						setParm(parm);
+						testConst(parm);
 					}
 				}
+				int cont = checkContinuesAsIs(alt);
+				if (cont != 0) {
+					MatchingArray stackAdd = addStep(MatchingArray.Type.STACK);
+					stackAdd.setStack(cont);
+				}
+			} else {
+				throw new RuntimeException("Not defined yet");
 			}
 			MatchingArray call = addStep(MatchingArray.Type.ALT);
 			call.setAltnr(alt.getRec());
-			jump(s -> call.setAfalse(s), "NextAlternative");
-			int r = 0;
-			for (MatchingArray elm: macro.getMatching()) {
-				System.out.print(r++ + ":[" + elm.getRec() + "] " + elm);
-			}
-			System.out.println();
+			jump(call, (e, s) -> e.setAfalse(s), "NextAlternative");
+			// showMatching();
 		}
 		resolve("NextAlternative");
 		resolve("NextParmSize");
 		error("No matching macro named '" + macro.getName() + "' found");
-		System.out.println(macro.getMatching());
 	}
 
-	private void showAlt(Alternative alt) {
+	private void testType(Match match) {
+		Type type = match.getVariable().getType();
+		if (type != Type.NULL) {
+			setParm(match);
+			MatchingArray typeTest = addStep(MatchingArray.Type.TEST_TYPE);
+			switch (type) {
+			case ARRAY:
+				typeTest.setTtype(Ttype.TYPE_ARRAY);
+				break;
+			case BOOLEAN:
+				typeTest.setTtype(Ttype.TYPE_BOOLEAN);
+				break;
+			case FLOAT:
+				typeTest.setTtype(Ttype.TYPE_FLOAT);
+				break;
+			case NULL:
+				typeTest.setTtype(Ttype.TYPE_NULL);
+				break;
+			case NUMBER:
+				typeTest.setTtype(Ttype.TYPE_NUMBER);
+				break;
+			case OBJECT:
+				typeTest.setTtype(Ttype.TYPE_OBJECT);
+				break;
+			case STRING:
+				typeTest.setTtype(Ttype.TYPE_STRING);
+				break;
+			case STRUCTURE:
+				typeTest.setTtype(Ttype.TYPE_OBJECT);
+				break;
+			}
+			jump(typeTest, (e, s) -> e.setTtfalse(s), "NextAlternative");
+		}
+	}
+
+	private void setParm(Match match) {
+		MatchingArray setParm = addStep(MatchingArray.Type.PARM);
+		setParm.setParm(match.getArrayIndex());
+		jump(setParm, (e, s) -> e.setPfalse(s), "NextAlternative");
+	}
+
+	private void testConst(Match match) {
+		switch(match.getType()) {
+		case ARRAY:
+			throw new RuntimeException("Not defined yet");
+		case BOOLEAN:
+			MatchingArray testBool = addStep(MatchingArray.Type.TEST_BOOLEAN);
+			testBool.setMboolean(match.isBoolean());
+			jump(testBool, (e, s) -> e.setMbfalse(s), "NextAlternative");
+			break;
+		case CONSTANT:
+			throw new RuntimeException("Not defined yet");
+		case FLOAT:
+			MatchingArray testFloat = addStep(MatchingArray.Type.TEST_FLOAT);
+			testFloat.setMfloat(match.getFloat());
+			jump(testFloat, (e, s) -> e.setMffalse(s), "NextAlternative");
+			break;
+		case MACRO:
+			throw new RuntimeException("Not defined yet");
+		case MULTIPLE:
+			throw new RuntimeException("Not defined yet");
+		case NULL:
+			throw new RuntimeException("Not defined yet");
+		case NUMBER:
+			MatchingArray testNumber = addStep(MatchingArray.Type.TEST_NUMBER);
+			testNumber.setMnumber(match.getNumber());
+			jump(testNumber, (e, s) -> e.setMnfalse(s), "NextAlternative");
+			break;
+		case OBJECT:
+			throw new RuntimeException("Not defined yet");
+		case STRING:
+			MatchingArray testStr = addStep(MatchingArray.Type.TEST_STRING);
+			testStr.setMstring(match.getString());
+			jump(testStr, (e, s) -> e.setMsfalse(s), "NextAlternative");
+			break;
+		default:
+			break;
+		}
+	}
+
+
+	/* package private */ static void showMatching(Macro macro) {
+		for (MatchingArray elm : macro.getMatching()) {
+			System.out.print((elm.getArrayIndex() + 1) + ":[" + elm.getRec() + "] " + elm);
+		}
+		System.out.println();
+	}
+
+	/* package private */ static void showAlt(Alternative alt) {
 		StringBuilder bld = new StringBuilder();
 		bld.append(alt.getUpRecord().getName()).append("(");
 		boolean first = true;
-		for(ParametersArray p: alt.getParameters()) {
+		for (ParametersArray p : alt.getParameters()) {
 			if (first)
 				first = false;
 			else
@@ -131,22 +194,22 @@ public class JsltAnalyzer {
 		err.setEfrom(0);
 	}
 
-	private void jump(Setter setter, String name) {
+	private void jump(MatchingArray elm, Setter setter, String name) {
 		validateName(name);
-		jumpto.get(name).add(setter);
+		jumpto.get(name).put(elm.getArrayIndex(), setter);
 	}
 
 	private void resolve(String name) {
 		validateName(name);
-		List<Setter> list = jumpto.get(name);
-		for (Setter s : list)
-			s.set(macro.getMatching().getSize());
-		list.clear();
+		Map<Integer, Setter> elms = jumpto.get(name);
+		for (Entry<Integer, Setter> s : elms.entrySet())
+			s.getValue().set(macro.getMatching(s.getKey()), macro.getMatching().getSize() + 1);
+		elms.clear();
 	}
 
 	private void validateName(String name) {
 		if (!jumpto.containsKey(name))
-			jumpto.put(name, new ArrayList<>());
+			jumpto.put(name, new TreeMap<>());
 	}
 
 	private boolean checkPassAsIs(Alternative alt) {
@@ -154,5 +217,46 @@ public class JsltAnalyzer {
 			if (parm.getType() != Match.Type.ANY)
 				return false;
 		return true;
+	}
+
+	private int checkContinuesAsIs(Alternative alt) {
+		int startContinues = 0;
+		int any = 0;
+		for (ParametersArray parm : alt.getParameters()) {
+			int idx = parm.getArrayIndex();
+			if (parm.getType() != Match.Type.ANY) {
+				if (hasVariable(parm))
+					return -1;
+				startContinues = idx + 1;
+			} else {
+				if (startContinues + any != idx)
+					return -1;
+				any++;
+			}
+		}
+		return startContinues;
+	}
+
+	private boolean hasVariable(Match match) {
+		if (match.getVariable().getRec() != 0)
+			return true;
+		switch (match.getType()) {
+		case ARRAY:
+			for (MarrayArray arr : match.getMarray())
+				if (hasVariable(arr))
+					return true;
+			return false;
+		case MULTIPLE:
+			if (hasVariable(match.getMmatch()))
+				return true;
+			return false;
+		case OBJECT:
+			for (MobjectArray arr : match.getMobject())
+				if (hasVariable(arr))
+					return true;
+			return false;
+		default:
+			return false;
+		}
 	}
 }

@@ -1,16 +1,19 @@
 name=a, alternatives=[
   nr=0, parameters=[
-  ], code=[
+  ], anyParm=false, code=[
     operation=NUMBER, number=1
   ]
 ], matching=[
+  type=TEST_STACK, tstack=0, tsfalse=3
+  type=ALT, altnr=553, afalse=3
+  type=ERROR, error=No matching macro named 'a' found, efrom=0, etill=0
 ]
 name=b, alternatives=[
   nr=0, parameters=[
     variable=[
       name=val, nr=0, multiple=false, type=NUMBER
     ], type=ANY
-  ], code=[
+  ], anyParm=false, code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=VARIABLE, varName=val, varNr=0
     ], fnParm2=[
@@ -21,7 +24,7 @@ name=b, alternatives=[
     variable=[
       name=val, nr=0, multiple=false, type=STRING
     ], type=ANY
-  ], code=[
+  ], anyParm=false, code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=VARIABLE, varName=val, varNr=0
     ], fnParm2=[
@@ -33,7 +36,7 @@ name=b, alternatives=[
     variable=[
       name=val2, nr=0, multiple=false, type=NUMBER
     ], type=ANY
-  ], code=[
+  ], anyParm=false, code=[
     operation=FUNCTION, function=MUL, fnParm1=[
       operation=NUMBER, number=100
     ], fnParm2=[
@@ -45,7 +48,7 @@ name=b, alternatives=[
     variable=[
       name=val2, nr=0, multiple=false, type=NUMBER
     ], type=ANY
-  ], code=[
+  ], anyParm=false, code=[
     operation=VARIABLE, varName=val2, varNr=0
   ]
   nr=4, parameters=[
@@ -55,82 +58,128 @@ name=b, alternatives=[
     variable=[
       name=val2, nr=1, multiple=false, type=NUMBER
     ], type=ANY
-  ], code=[
+  ], anyParm=false, code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=VARIABLE, varName=val, varNr=0
     ], fnParm2=[
       operation=VARIABLE, varName=val2, varNr=1
     ]
   ]
+  nr=5, parameters=[
+  ], anyParm=true, code=[
+    operation=NULL
+  ]
 ], matching=[
+  type=TEST_STACK, tstack=1, tsfalse=8
+  type=PARM, parm=0, pfalse=5
+  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=5
+  type=ALT, altnr=642, afalse=5
+  type=PARM, parm=0, pfalse=8
+  type=TEST_TYPE, ttype=TYPE_STRING, ttfalse=8
+  type=ALT, altnr=793, afalse=8
+  type=TEST_STACK, tstack=2, tsfalse=26
+  type=PARM, parm=0, pfalse=15
+  type=TEST_NUMBER, mnumber=0, mnfalse=15
+  type=PARM, parm=1, pfalse=15
+  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=15
+  type=STACK, stack=1
+  type=ALT, altnr=944, afalse=15
+  type=PARM, parm=0, pfalse=21
+  type=TEST_STRING, mstring=, msfalse=21
+  type=PARM, parm=1, pfalse=21
+  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=21
+  type=STACK, stack=1
+  type=ALT, altnr=1095, afalse=21
+  type=PARM, parm=0, pfalse=26
+  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=26
+  type=PARM, parm=1, pfalse=26
+  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=26
+  type=ALT, altnr=1202, afalse=26
+  type=ALT, altnr=1371, afalse=27
+  type=ERROR, error=No matching macro named 'b' found, efrom=0, etill=0
 ]
 name=main, alternatives=[
   nr=0, parameters=[
-  ], code=[
+  ], anyParm=false, code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=FUNCTION, function=ADD, fnParm1=[
         operation=FUNCTION, function=ADD, fnParm1=[
           operation=FUNCTION, function=ADD, fnParm1=[
             operation=FUNCTION, function=ADD, fnParm1=[
-              operation=CALL, macro={Name=t.assert}, callParms=[
-                operation=STRING, string=constant
-                operation=NUMBER, number=1
-                operation=CALL, macro={Name=a}, callParms=[
+              operation=FUNCTION, function=ADD, fnParm1=[
+                operation=CALL, macro={Name=t.assert}, callParms=[
+                  operation=STRING, string=constant
+                  operation=NUMBER, number=1
+                  operation=CALL, macro={Name=a}, callParms=[
+                  ]
+                ]
+              ], fnParm2=[
+                operation=CALL, macro={Name=t.assert}, callParms=[
+                  operation=STRING, string=type-match-1
+                  operation=STRING, string= *
+                  operation=CALL, macro={Name=b}, callParms=[
+                    operation=STRING, string= 
+                  ]
                 ]
               ]
             ], fnParm2=[
               operation=CALL, macro={Name=t.assert}, callParms=[
-                operation=STRING, string=type-match-1
-                operation=STRING, string= *
+                operation=STRING, string=type-match-2
+                operation=NUMBER, number=3
                 operation=CALL, macro={Name=b}, callParms=[
-                  operation=STRING, string= 
+                  operation=NUMBER, number=2
                 ]
               ]
             ]
           ], fnParm2=[
             operation=CALL, macro={Name=t.assert}, callParms=[
-              operation=STRING, string=type-match-2
+              operation=STRING, string=type-match-3
               operation=NUMBER, number=3
               operation=CALL, macro={Name=b}, callParms=[
-                operation=NUMBER, number=2
+                operation=NUMBER, number=5
+                operation=NUMBER, number=-2
               ]
             ]
           ]
         ], fnParm2=[
           operation=CALL, macro={Name=t.assert}, callParms=[
-            operation=STRING, string=type-match-3
-            operation=NUMBER, number=3
+            operation=STRING, string=type-match-4
+            operation=NUMBER, number=200
             operation=CALL, macro={Name=b}, callParms=[
-              operation=NUMBER, number=5
-              operation=NUMBER, number=-2
+              operation=NUMBER, number=0
+              operation=NUMBER, number=2
             ]
           ]
         ]
       ], fnParm2=[
         operation=CALL, macro={Name=t.assert}, callParms=[
-          operation=STRING, string=type-match-4
-          operation=NUMBER, number=200
+          operation=STRING, string=type-match-5
+          operation=NUMBER, number=2
           operation=CALL, macro={Name=b}, callParms=[
-            operation=NUMBER, number=0
+            operation=STRING, string=
             operation=NUMBER, number=2
           ]
         ]
       ]
     ], fnParm2=[
       operation=CALL, macro={Name=t.assert}, callParms=[
-        operation=STRING, string=type-match-5
-        operation=NUMBER, number=2
+        operation=STRING, string=type-unknown
+        operation=NULL
         operation=CALL, macro={Name=b}, callParms=[
           operation=STRING, string=
-          operation=NUMBER, number=2
+          operation=STRING, string=
         ]
       ]
     ]
   ]
 ], matching=[
+  type=TEST_STACK, tstack=0, tsfalse=3
+  type=ALT, altnr=1460, afalse=3
+  type=ERROR, error=No matching macro named 'main' found, efrom=0, etill=0
 ]
 name=slice, alternatives=[
 ], matching=[
+  type=ERROR, error=No matching macro named 'slice' found, efrom=0, etill=0
 ]
 name=t.assert, alternatives=[
   nr=0, parameters=[
@@ -143,7 +192,7 @@ name=t.assert, alternatives=[
     variable=[
       name=was, nr=2, multiple=false, type=NULL
     ], type=ANY
-  ], code=[
+  ], anyParm=false, code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[
         operation=VARIABLE, varName=should, varNr=1
@@ -178,4 +227,9 @@ name=t.assert, alternatives=[
     ]
   ]
 ], matching=[
+  type=TEST_STACK, tstack=3, tsfalse=5
+  type=PARM, parm=0, pfalse=5
+  type=TEST_TYPE, ttype=TYPE_STRING, ttfalse=5
+  type=ALT, altnr=55, afalse=5
+  type=ERROR, error=No matching macro named 't.assert' found, efrom=0, etill=0
 ]

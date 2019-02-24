@@ -20,11 +20,12 @@ public class MatchMacro {
 		this.macro = code.getMacro();
 		this.previousFrame = inter.getStackFrame();
 		this.startFrame = inter.getStackSize();
+		inter.setStackFrame(startFrame);
 		CallParmsArray callParms = code.getCallParms();
 		this.maxParameter = callParms.getSize();
 		int i = 0;
 		for (CallParmsArray parm : callParms)
-			inter.setStack(startFrame + i++, inter.inter(parm));
+			inter.setStack(i++, inter.inter(parm));
 	}
 
 	public Object match() {
@@ -32,14 +33,14 @@ public class MatchMacro {
 		int pos = -1;
 		pos = matching.next(pos);
 		while (true) {
-			if (pos < 0)
+			if (pos <= 0)
 				throw new RuntimeException("Not correctly matching macro " + macro.getName());
-			matching.setIdx(pos);
+			matching.setIdx(pos - 1);
 			switch (matching.getType()) {
 			case ALT:
 				Alternative alt = new Alternative(macro.getStore(), matching.getAltnr());
-				if ((Boolean) inter.inter(alt.getIf())) {
-					Object res = inter.inter(alt.getCode());
+				if (alt.getIf().getRec() <= 0 || (Boolean) inter.inter(alt.getIf())) {
+					Object res = inter.inter(alt.getCode(0));
 					Variable avar = matching.getAvar();
 					if (avar.getRec() == 0) {
 						inter.clearStack(startFrame);
@@ -53,7 +54,9 @@ public class MatchMacro {
 				break;
 			case ERROR:
 				inter.error(matching.getError());
-				break;
+				inter.clearStack(startFrame);
+				inter.setStackFrame(previousFrame);
+				return null;
 			case FIELD:
 				int f = -1;
 				if (!(cur instanceof RecordInterface) || //
@@ -130,43 +133,43 @@ public class MatchMacro {
 					if (cur instanceof RecordInterface && ((RecordInterface) cur).type() == FieldType.ARRAY)
 						pos = matching.next(pos);
 					else
-						pos = matching.getTfalse();
+						pos = matching.getTtfalse();
 					break;
 				case TYPE_BOOLEAN:
 					if (cur instanceof Boolean)
 						pos = matching.next(pos);
 					else
-						pos = matching.getTfalse();
+						pos = matching.getTtfalse();
 					break;
 				case TYPE_FLOAT:
 					if (cur instanceof Double)
 						pos = matching.next(pos);
 					else
-						pos = matching.getTfalse();
+						pos = matching.getTtfalse();
 					break;
 				case TYPE_NULL:
 					if (cur == null)
 						pos = matching.next(pos);
 					else
-						pos = matching.getTfalse();
+						pos = matching.getTtfalse();
 					break;
 				case TYPE_NUMBER:
 					if (cur instanceof Long)
 						pos = matching.next(pos);
 					else
-						pos = matching.getTfalse();
+						pos = matching.getTtfalse();
 					break;
 				case TYPE_OBJECT:
 					if (cur instanceof RecordInterface && ((RecordInterface) cur).type() == FieldType.OBJECT)
 						pos = matching.next(pos);
 					else
-						pos = matching.getTfalse();
+						pos = matching.getTtfalse();
 					break;
 				case TYPE_STRING:
 					if (cur instanceof String || cur instanceof Text)
 						pos = matching.next(pos);
 					else
-						pos = matching.getTfalse();
+						pos = matching.getTtfalse();
 					break;
 				}
 				break;
