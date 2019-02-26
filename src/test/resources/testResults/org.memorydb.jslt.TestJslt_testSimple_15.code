@@ -4,7 +4,7 @@ not(1.0 > 2.1)
 Code:
 name=main, alternatives=[
   nr=0, parameters=[
-  ], code=[
+  ], anyParm=false, code=[
     operation=FUNCTION, function=NOT, fnParm1=[
       operation=FUNCTION, function=GT, fnParm1=[
         operation=FLOAT, float=1.0
@@ -14,4 +14,7 @@ name=main, alternatives=[
     ]
   ]
 ], matching=[
+  type=TEST_STACK, tstack=0, tsfalse=3
+  type=ALT, altnr=55, afalse=3
+  type=ERROR, error=No matching macro named 'main' found, efrom=0, etill=0
 ]

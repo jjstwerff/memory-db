@@ -4,7 +4,7 @@ Test:
 Code:
 name=main, alternatives=[
   nr=0, parameters=[
-  ], code=[
+  ], anyParm=false, code=[
     operation=FUNCTION, function=GT, fnParm1=[
       operation=NUMBER, number=1
     ], fnParm2=[
@@ -12,4 +12,7 @@ name=main, alternatives=[
     ]
   ]
 ], matching=[
+  type=TEST_STACK, tstack=0, tsfalse=3
+  type=ALT, altnr=55, afalse=3
+  type=ERROR, error=No matching macro named 'main' found, efrom=0, etill=0
 ]
