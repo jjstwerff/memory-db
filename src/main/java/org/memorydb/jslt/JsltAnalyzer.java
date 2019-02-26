@@ -53,7 +53,7 @@ public class JsltAnalyzer {
 						testType(parm);
 					else {
 						setParm(parm);
-						testConst(parm);
+						testConst(parm, false);
 					}
 				}
 				int cont = checkContinuesAsIs(alt);
@@ -62,7 +62,11 @@ public class JsltAnalyzer {
 					stackAdd.setStack(cont);
 				}
 			} else {
-				throw new RuntimeException("Not defined yet");
+				MatchingArray stackSkip = addStep(MatchingArray.Type.STACK);
+				stackSkip.setStack(alt.getParameters().getSize());
+				for (ParametersArray parm : alt.getParameters()) {
+					testConst(parm, true);
+				}
 			}
 			MatchingArray call = addStep(MatchingArray.Type.ALT);
 			call.setAltnr(alt.getRec());
@@ -115,10 +119,19 @@ public class JsltAnalyzer {
 		jump(setParm, (e, s) -> e.setPfalse(s), "NextAlternative");
 	}
 
-	private void testConst(Match match) {
-		switch(match.getType()) {
+	private void testConst(Match match, boolean variables) {
+		switch (match.getType()) {
 		case ARRAY:
-			throw new RuntimeException("Not defined yet");
+			MatchingArray testArr = addStep(MatchingArray.Type.TEST_TYPE);
+			testArr.setTtype(Ttype.TYPE_ARRAY);
+			jump(testArr, (e, s) -> e.setTtfalse(s), "NextAlternative");
+			for (Match sub : match.getMarray()) {
+				if (sub.getType() == Match.Type.ANY)
+					continue;
+				// TODO get next value
+				testConst(sub, variables);
+			}
+			break;
 		case BOOLEAN:
 			MatchingArray testBool = addStep(MatchingArray.Type.TEST_BOOLEAN);
 			testBool.setMboolean(match.isBoolean());
@@ -153,7 +166,6 @@ public class JsltAnalyzer {
 			break;
 		}
 	}
-
 
 	/* package private */ static void showMatching(Macro macro) {
 		for (MatchingArray elm : macro.getMatching()) {

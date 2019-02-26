@@ -59,14 +59,14 @@ public class MatchMacro {
 				return null;
 			case FIELD:
 				int f = -1;
-				if (!(cur instanceof RecordInterface) || //
-						((RecordInterface) cur).type() != FieldType.OBJECT || //
-						(f = ((RecordInterface) cur).scanName(matching.getField())) < 0)
+				RecordInterface rec = cur instanceof RecordInterface ? (RecordInterface) cur : null;
+				if (rec != null && rec.type() == FieldType.OBJECT)
+					f = rec.scanName(matching.getField()); // search the field name
+				if (f > 0 && rec.type(f) != null) {
+					cur = rec.get(f); // get the field value
+					pos = matching.next(pos); // continue with the next match
+				} else
 					pos = matching.getFfalse(); // Element doesn't have the specified field
-				else {
-					cur = ((RecordInterface) cur).get(f);
-					pos = matching.next(pos);
-				}
 				break;
 			case JUMP:
 				pos = matching.getJump();
