@@ -1,6 +1,6 @@
 name=main, alternatives=[
   nr=0, parameters=[
-  ], code=[
+  ], anyParm=false, code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=FUNCTION, function=ADD, fnParm1=[
         operation=FUNCTION, function=ADD, fnParm1=[
@@ -156,6 +156,10 @@ name=main, alternatives=[
       ]
     ]
   ]
+], matching=[
+  type=TEST_STACK, tstack=0, tsfalse=3
+  type=ALT, altnr=1237, afalse=3
+  type=ERROR, error=No matching macro named 'main' found, efrom=0, etill=0
 ]
 name=numb, alternatives=[
   nr=0, parameters=[
@@ -165,9 +169,16 @@ name=numb, alternatives=[
       ], type=ANY
       type=NUMBER, number=2
     ]
-  ], code=[
+  ], anyParm=false, code=[
     operation=VARIABLE, varName=a, varNr=0
   ]
+], matching=[
+  type=TEST_STACK, tstack=1, tsfalse=6
+  type=STACK, stack=1
+  type=TEST_TYPE, ttype=TYPE_ARRAY, ttfalse=6
+  type=TEST_NUMBER, mnumber=2, mnfalse=6
+  type=ALT, altnr=553, afalse=6
+  type=ERROR, error=No matching macro named 'numb' found, efrom=0, etill=0
 ]
 name=second, alternatives=[
   nr=0, parameters=[
@@ -177,11 +188,20 @@ name=second, alternatives=[
         name=a, nr=0, multiple=false, type=NULL
       ], type=ANY
     ]
-  ], code=[
+  ], anyParm=false, code=[
     operation=VARIABLE, varName=a, varNr=0
   ]
+], matching=[
+  type=TEST_STACK, tstack=1, tsfalse=6
+  type=STACK, stack=1
+  type=TEST_TYPE, ttype=TYPE_ARRAY, ttfalse=6
+  type=TEST_NUMBER, mnumber=2, mnfalse=6
+  type=ALT, altnr=913, afalse=6
+  type=ERROR, error=No matching macro named 'second' found, efrom=0, etill=0
 ]
 name=slice, alternatives=[
+], matching=[
+  type=ERROR, error=No matching macro named 'slice' found, efrom=0, etill=0
 ]
 name=str, alternatives=[
   nr=0, parameters=[
@@ -191,9 +211,16 @@ name=str, alternatives=[
       ], type=ANY
       type=STRING, string=2
     ]
-  ], code=[
+  ], anyParm=false, code=[
     operation=VARIABLE, varName=a, varNr=0
   ]
+], matching=[
+  type=TEST_STACK, tstack=1, tsfalse=6
+  type=STACK, stack=1
+  type=TEST_TYPE, ttype=TYPE_ARRAY, ttfalse=6
+  type=TEST_STRING, mstring=2, msfalse=6
+  type=ALT, altnr=733, afalse=6
+  type=ERROR, error=No matching macro named 'str' found, efrom=0, etill=0
 ]
 name=strsec, alternatives=[
   nr=0, parameters=[
@@ -203,9 +230,16 @@ name=strsec, alternatives=[
         name=a, nr=0, multiple=false, type=NULL
       ], type=ANY
     ]
-  ], code=[
+  ], anyParm=false, code=[
     operation=VARIABLE, varName=a, varNr=0
   ]
+], matching=[
+  type=TEST_STACK, tstack=1, tsfalse=6
+  type=STACK, stack=1
+  type=TEST_TYPE, ttype=TYPE_ARRAY, ttfalse=6
+  type=TEST_STRING, mstring=2, msfalse=6
+  type=ALT, altnr=1075, afalse=6
+  type=ERROR, error=No matching macro named 'strsec' found, efrom=0, etill=0
 ]
 name=t.assert, alternatives=[
   nr=0, parameters=[
@@ -218,7 +252,7 @@ name=t.assert, alternatives=[
     variable=[
       name=was, nr=2, multiple=false, type=NULL
     ], type=ANY
-  ], code=[
+  ], anyParm=false, code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[
         operation=VARIABLE, varName=should, varNr=1
@@ -252,4 +286,10 @@ name=t.assert, alternatives=[
       ]
     ]
   ]
+], matching=[
+  type=TEST_STACK, tstack=3, tsfalse=5
+  type=PARM, parm=0, pfalse=5
+  type=TEST_TYPE, ttype=TYPE_STRING, ttfalse=5
+  type=ALT, altnr=55, afalse=5
+  type=ERROR, error=No matching macro named 't.assert' found, efrom=0, etill=0
 ]

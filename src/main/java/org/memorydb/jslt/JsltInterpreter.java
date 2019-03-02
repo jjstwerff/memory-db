@@ -33,6 +33,10 @@ public class JsltInterpreter {
 	private Dir dir = null;
 
 	public static String interpret(Store jsltStore, RecordInterface data, Dir dir) {
+		return interpret(jsltStore, data, dir, null);
+	}
+
+	public static String interpret(Store jsltStore, RecordInterface data, Dir dir, List<String> errors) {
 		JsltInterpreter inter = new JsltInterpreter();
 		inter.dir = dir;
 		inter.data = data;
@@ -42,6 +46,9 @@ public class JsltInterpreter {
 		macro.setRec(macros.search());
 		for (CodeArray code : macro.getAlternatives(0).getCode())
 			inter.show(write, inter.inter(code));
+		if (errors != null)
+			for (MatchError err : inter.errors)
+				errors.add(err.getMessage());
 		return write.toString();
 	}
 

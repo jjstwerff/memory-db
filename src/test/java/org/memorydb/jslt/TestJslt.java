@@ -5,6 +5,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -161,7 +163,11 @@ public class TestJslt extends MemoryTests {
 				for (Macro m : new Macro(jsltStore).new IndexMacros())
 					code.append(m.toString());
 			compare(result, code.toString());
-			String into = JsltInterpreter.interpret(jsltStore, null, new Dir(Paths.get(getClass().getResource("/files").getFile())));
+			List<String> errors = new ArrayList<>();
+			String into = JsltInterpreter.interpret(jsltStore, null, new Dir(Paths.get(getClass().getResource("/files").getFile())), errors);
+			if (errors.size() > 0) {
+				compare(result + ".error", String.join("\n", errors));
+			}
 			Assert.assertEquals(result, "\"\"", into);
 		}
 	}
