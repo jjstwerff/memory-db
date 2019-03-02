@@ -1,3 +1,13 @@
+  type=TEST_STACK, tstack=1, tsfalse=...                is there one parameter
+  type=STACK, stack=1 ..                                switch to the first parameter
+  type=TEST_TYPE, ttype=TYPE_ARRAY, ttfalse=...         test that this parameter is an ARRAY
+                                                        remember position
+                                                        remember first parameter as 'a' + step
+  type=TEST_NUMBER, mnumber=2, mnfalse=6                
+  type=ALT, altnr=553, afalse=6
+  type=ERROR, error=No matching macro named 'numb' found, efrom=0, etill=0
+
+
 Testing:
 - validate returned errors
 - iterator matching:

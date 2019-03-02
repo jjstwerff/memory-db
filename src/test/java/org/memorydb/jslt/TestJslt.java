@@ -89,29 +89,23 @@ public class TestJslt extends MemoryTests {
 		jslt("\"1234\"[-3:]", "\"234\"");
 		jslt("\"1234\".index(\"23\")", "1");
 		jslt("\"1234\".index(\"231\")", "null");
-		jslt("{value:@, index:@.index(), first:@.first(), last:@.last()} in \"abc\"",
-				"[{\"value\":\"a\",\"index\":0,\"first\":true,\"last\":false},"
-						+ "{\"value\":\"b\",\"index\":1,\"first\":false,\"last\":false},{\"value\":\"c\",\"index\":2,\"first\":false,\"last\":true}]");
+		jslt("{value:@, index:@.index(), first:@.first(), last:@.last()} in \"abc\"", "[{\"value\":\"a\",\"index\":0,\"first\":true,\"last\":false},"
+				+ "{\"value\":\"b\",\"index\":1,\"first\":false,\"last\":false},{\"value\":\"c\",\"index\":2,\"first\":false,\"last\":true}]");
 		jslt("\"count &{[@ + 1, @.last()?'':', '] in 3}\"", "\"count 1, 2, 3\"");
-		jslt("[pow(2, 4), string(1), boolean(\"true\"), number(\"123\"), float(\"2.1e4\")]",
-				"[16,\"1\",true,123,21000.0]");
+		jslt("[pow(2, 4), string(1), boolean(\"true\"), number(\"123\"), float(\"2.1e4\")]", "[16,\"1\",true,123,21000.0]");
 		jslt("[[1,2],[1,3],[0,2],[0,1]][/@]", "[[0,1],[0,2],[1,2],[1,3]]");
 		jslt("[[1,\"aa\"]==[1,\"aaa\"], [1,'aa']==[1,'aa'], [2]*2, {\"this\":1, \"too\":2} - \"too\", [2] > [1]]",
 				"[false,true,[2,2],{\"this\":1},true]");
-		jslt("each([''], @ == '\t' ? # + '' : #[:-1] + (#[-1] + @)) for 'abc\tdef\t\tg\t'",
-				"[\"abc\",\"def\",\"\",\"g\",\"\"]");
+		jslt("each([''], @ == '\t' ? # + '' : #[:-1] + (#[-1] + @)) for 'abc\tdef\t\tg\t'", "[\"abc\",\"def\",\"\",\"g\",\"\"]");
 		jslt("1 > 2 ? 1 : 2 > 3 ? 2 : 3", "3");
 		jslt("{ sum:each(0, # + @), array:each([], # + @*2), maximum:each(0, @ > # ? @ : #) } for [1, 2, 3]",
 				"{\"sum\":6,\"array\":[2,4,6],\"maximum\":3}");
-		jslt("'&{'a':>2}+&{'b':2}+&{'c':^4}+&{'d':^5}+&{'1234567890':5...}+&{'1234567890':...5}'",
-				"\" a+b + c  +  d  +12...+...90\"");
-		jslt("'&{123:b}+&{12:5b}+&{5:05b}+&{123:_b}+&{12:_b}+&{255.3:,b}+&{1:05_b}'",
-				"\"1111011+ 1100+00101+111_1011+1100+1111,1111+0_0001\"");
+		jslt("'&{'a':>2}+&{'b':2}+&{'c':^4}+&{'d':^5}+&{'1234567890':5...}+&{'1234567890':...5}'", "\" a+b + c  +  d  +12...+...90\"");
+		jslt("'&{123:b}+&{12:5b}+&{5:05b}+&{123:_b}+&{12:_b}+&{255.3:,b}+&{1:05_b}'", "\"1111011+ 1100+00101+111_1011+1100+1111,1111+0_0001\"");
 		jslt("'&{0x1234F:06_x}+&{123:#03x}'", "\"01_234f+0x07b\"");
 		jslt("'&{0o777:04_o}+&{123:#05o}'", "\"0_777+0o00173\"");
 		jslt("'&{1234:,}+&{12:5}+&{234:4_}'", "\"1,234+00012+0_234\"");
-		jslt("'&{1234.56:e}+&{0.000000123456:g}+&{2.0/3:.6f}+&{2.0/3:{1+1}.{2*3}f}'",
-				"\"1.23456e3+1.23456e-7+0.666667+00.666667\"");
+		jslt("'&{1234.56:e}+&{0.000000123456:g}+&{2.0/3:.6f}+&{2.0/3:{1+1}.{2*3}f}'", "\"1.23456e3+1.23456e-7+0.666667+00.666667\"");
 		jslt("true == null", "false");
 		jslt("null == true", "false");
 		jslt("false == null", "true");
@@ -128,29 +122,23 @@ public class TestJslt extends MemoryTests {
 		jslt("[1,[2],3]", "$[0]", "1");
 		jslt("[1,[2],3]", "$[1 + 1]", "3");
 		jslt("[1,[2],3]", "$[1][0]", "2");
-		jslt("[{\"name\":\"Tim\", \"value\":123}, {\"name\":null, \"value\":true}]",
-				"[$[1],$[1].value,$[0].name,$[0].name]", "[{\"name\":null,\"value\":true},true,\"Tim\",\"Tim\"]");
+		jslt("[{\"name\":\"Tim\", \"value\":123}, {\"name\":null, \"value\":true}]", "[$[1],$[1].value,$[0].name,$[0].name]",
+				"[{\"name\":null,\"value\":true},true,\"Tim\",\"Tim\"]");
 		jslt("[2,5,3,0]", "$[/@]", "[0,2,3,5]");
 		jslt("[2,5,3,0]", "$[\\@]", "[5,3,2,0]");
-		jslt("[{\"name\":\"Tim\", \"value\":123}, {\"name\":\"Dan\"}]", "@.name in $[?not @.value or @.value == 123]",
-				"[\"Tim\",\"Dan\"]");
+		jslt("[{\"name\":\"Tim\", \"value\":123}, {\"name\":\"Dan\"}]", "@.name in $[?not @.value or @.value == 123]", "[\"Tim\",\"Dan\"]");
 		// jslt("[{\"name\":\"Tim\", \"value\":123}, [1,{\"data\":[{\"name\":\"Dan\",
 		// \"value\":true}]}]]", "@.name in $..[?@.value]", "[\"Tim\",\"Dan\"]");
-		jslt("[{\"a\":3,\"b\":0},{\"a\":3,\"b\":1},{\"a\":1}]", "$[/@.a][\\@.b]",
-				"[{\"a\":1},{\"a\":3,\"b\":1},{\"a\":3,\"b\":0}]");
+		jslt("[{\"a\":3,\"b\":0},{\"a\":3,\"b\":1},{\"a\":1}]", "$[/@.a][\\@.b]", "[{\"a\":1},{\"a\":3,\"b\":1},{\"a\":3,\"b\":0}]");
 	}
 
 	@Test
 	public void testJSLT() throws IOException {
 		Set<Path> files = new TreeSet<>();
-		try (DirectoryStream<Path> dir = Files
-				.newDirectoryStream(Paths.get(getClass().getResource("/jslt").getFile()))) {
-			for (Path file : dir) {
-				String fileName = file.getFileName().toString();
-				if (fileName.endsWith(".jslt") && fileName.matches("[0-9]?.*")) {
+		try (DirectoryStream<Path> dir = Files.newDirectoryStream(Paths.get(getClass().getResource("/jslt").getFile()))) {
+			for (Path file : dir)
+				if (file.getFileName().toString().matches("[0-9]?.*\\.jslt"))
 					files.add(file);
-				}
-			}
 		}
 		for (Path file : files) {
 			Store jsltStore = new Store(3);
@@ -165,9 +153,8 @@ public class TestJslt extends MemoryTests {
 			compare(result, code.toString());
 			List<String> errors = new ArrayList<>();
 			String into = JsltInterpreter.interpret(jsltStore, null, new Dir(Paths.get(getClass().getResource("/files").getFile())), errors);
-			if (errors.size() > 0) {
+			if (!errors.isEmpty())
 				compare(result + ".error", String.join("\n", errors));
-			}
 			Assert.assertEquals(result, "\"\"", into);
 		}
 	}
