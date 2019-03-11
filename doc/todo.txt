@@ -8,6 +8,13 @@
   type=ERROR, error=No matching macro named 'numb' found, efrom=0, etill=0
 
 
+
+Structure notation in language:
+- notation for key / mandatory fields
+- link between conditional field definition and optional field list
+- explicit documentation on fields / tables
+
+
 Testing:
 - validate returned errors
 - iterator matching:

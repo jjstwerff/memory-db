@@ -24,18 +24,8 @@ public class JsltStructure {
 		Record expr = project.table("Expr");
 		Record macro = project.table("Macro");
 
-		Record level = project.table("Level");
-		level.field("level", Type.INTEGER); // 0 = root, 1 = next, -1 = top, -2 = top-1
-		level.field("order", Type.ARRAY, step);
-		level.field("slice", Type.ARRAY, step);
-
-		Record listener = project.table("Listener");
-		listener.field("nr", Type.INTEGER).isKey();
-		listener.field("levels", level, "level");
-
 		Record source = project.table("Source");
 		source.field("name", Type.STRING);
-		source.field("listeners", listener, "nr");
 		source.index("sources", "name");
 
 		Record oper = project.content("Operator");
@@ -78,8 +68,6 @@ public class JsltStructure {
 
 		step.include(oper);
 		expr.include(oper);
-		listener.include(oper);
-		level.include(oper);
 
 		Record variable = project.table("Variable");
 		variable.field("name", Type.STRING).mandatory();
