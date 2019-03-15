@@ -1,0 +1,31 @@
+To do:
+- add organization types
+- add notable places (riverside, bridges, parks, buildings)
+- add persons 
+- add items
+- demi-human races?
+- add different specials (occult, bizarre, banned, privy)
+- add descriptions when needed with possible changes due to specials
+- possible names: persons / pubs / shops / factories
+- districts of London / rivers / towns
+- add secrets
+
+location:Luxor manor
+location:Stansfield Castle
+location:Nutley Village
+location:Royston's magnificent Circus
+location:Westminster Cathedral
+location:Brompton Cemetery
+location:Bethlem Mental Hospital
+location:St George's Cathedral
+location:Swithun Rare Books
+location:The Daintily Chaperone
+location:Newington Police Station
+location:Clipper Borderer
+person:John Jock Wharton
+location:Covent Gardens
+location:Geoffrey Club
+location:Ponders Brewery
+location:Elvin Wade and sons Tannery
+location:Eastoft Finest Clothing
+location:Nibley & Winthrob Steam Company

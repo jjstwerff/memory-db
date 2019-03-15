@@ -1,0 +1,863 @@
+space:atelier
+space:kitchen
+space:office
+space:library
+space:smithy
+space:forest
+space:factory
+space:water
+space:river
+  space:water
+space:lake
+  space:water
+space:sea
+  space:water
+space:stall
+space:field
+
+building:palace
+building:church
+building:cathedral
+building:guildhall
+building:shop
+building:mall
+building:greenhouse
+building:house
+building:city wall
+building:tower
+building:barracks
+building:harbor
+building:warehouse
+building:castle
+building:station
+building:factory
+building:manor
+building:college
+building:university
+building:stables
+building:coach house
+building:bath-house
+building:hospital
+building:market
+building:road
+building:path
+building:quarry
+building:bridge
+building:monastery
+
+animal:horse
+animal:pony
+animal:donkey
+animal:sheep
+animal:pig
+animal:dog
+animal:cat
+animal:falcon
+animal:eagle
+animal:vulture
+animal:elephant
+animal:tiger
+animal:sabre tiger
+animal:unicorn
+animal:bear
+animal:wolf
+animal:boar
+animal:lion
+animal:crocodile
+animal:sea lion
+animal:shark
+animal:piranha
+animal:fox
+animal:raccoon
+animal:dragon lizard
+animal:cobra
+animal:eagle
+animal:jellyfish
+animal:giant frog
+animal:giant spider
+animal:scorpion
+animal:worm
+animal:whale
+animal:kraken
+animal:crab
+animal:rhinos
+animal:raptor
+animal:hyppos
+animal:raptor
+animal:stag
+animal:gorilla
+animal:abolition
+animal:bat
+animal:giant bat
+animal:gargoyle
+
+plant:oak
+plant:conifer
+plant:pine
+plant:grass
+plant:taxus
+plant:willow
+plant:palm
+plant:herbs
+plant:vegetables
+
+race:demon
+race:wolfmen
+race:troll
+race:dwarf
+race:goblin
+race:elf
+race:sprite
+race:centaur
+race:minotaur
+race:devil
+
+item:animal body
+item:kettle
+item:barrel
+item:needle
+item:wine
+item:food
+item:fruit
+item:spices
+item:herbs
+item:beer
+item:wool
+item:leather
+item:cotton
+item:silk
+item:hat
+item:shoes
+item:gloves
+item:watch
+item:monocle
+item:specticles
+item:jewelry
+
+item:wire
+  needs:engineer
+  needs:wire mill
+  uses:iron
+
+item:wire mill
+  needs:engineer
+  uses:iron
+  uses:wood
+
+item:spinner
+  needs:woodworker
+  uses:wood
+
+item:blast furnace
+  needs:architect
+  uses:stone
+
+item:leather clothes
+item:gun
+item:nets
+item:raw iron
+item:coal
+item:sword
+item:sabre
+item:floret
+item:knife
+item:pistol
+item:cane
+item:stuffed animal
+item:animal head
+item:doll
+item:book
+item:play
+item:song
+item:story
+item:automaton
+item:portrait
+item:painting
+item:mirror
+item:clock
+item:indemnity papers
+item:hijacker letters
+item:import duties
+item:trade rights
+item:inspection report
+item:certificate of conduct
+item:search warrant
+item:royal command
+item:bona vide credentials
+  effect:validates the name and address of a person
+item:authority certificate
+item:quality certificate
+
+vehicle:ship
+vehicle:boat
+vehicle:wagon
+vehicle:coach
+vehicle:carriage
+vehicle:train
+vehicle:plane
+vehicle:balloon
+
+potion:blank sleep
+  effect:less inspiration in the next days
+
+potion:vivid dreams
+  effect:more inspiration but possibly terrorizing nightmares & emotional
+
+potion:escape body
+  effect:travel outside of your now comatose body (special skills needed)
+
+potion:numbing
+  effect:able to walk around and do tasks but highly inattentive & apathetic
+
+potion:lovers
+  effect:emotional vulnerable
+
+potion:solace
+  effect:able to fully relax but also very weak
+
+potion:hyper
+  effect:awoke, attentive and fast, (waking) nightmare & sleeplessness
+
+potion:brazen
+  effect:fearless and no self control
+
+potion:depression
+  effect:solemn, apathetic, uninspired, fearful
+
+potion:neurotic
+  effect:trembling, weak
+
+potion:boost
+  effect:powerful, reckless (daring)
+
+potion:uplifting
+  effect:cheerful, negligent, inspired, trusting
+
+potion:mindful
+  effect:able to see through the veil, expect horrors (mind reading)
+
+potion:montrous
+  effect:dangerous, powerful, fast, imposing, fearless, negligent, upset, bizarre, loud, negative, banned
+
+potion:blinding
+  effect:blinded, trembling, unrefined
+
+job:hand
+  needs:clothes
+
+job:taxidermist
+  employs:hand
+  in:atelier
+  needs:clothes
+  needs:leather clothes
+  needs:needle
+  needs:spinner
+  uses:animal body
+  uses:wool
+  uses:wire
+  produces:stuffed animal
+
+job:hatter
+  employs:hand
+  in:atelier
+  needs:clothes
+  uses:leather
+  uses:cloth
+  uses:wire
+  produces:hat
+
+job:leather-worker
+  employs:hand
+  in:atelier
+  needs:leather clothes
+  uses:leather
+  produces:leather clothes
+
+job:seamstress
+  employs:hand
+  in:atelier
+  needs:clothes
+  needs:needle
+  needs:spinner
+  uses:cloth
+  produces:clothes
+
+job:hunter
+  employs:hand
+  in:forest
+  needs:bow,gun
+  needs:leather clothes
+  produces:animal body
+
+job:fisher
+  in:water
+  needs:clothes
+  needs:nets
+  produces:animal body
+
+job:butcher
+  employs:hand
+  in:kitchen
+  needs:clothes
+  needs:leather clothes
+  uses:animal body
+  produces:meat
+  produces:animal skin
+
+job:baker
+  employs:hand
+  in:kitchen
+  needs:clothes
+  needs:kettle
+  uses:flower
+  uses:meat
+  uses:burning material
+  produces:food
+
+job:tanner
+  employs:hand
+  in:factory
+  needs:leather clothes
+  uses:animal skin
+  uses:chemicals
+  produces:leather
+
+jog:brewer
+  employs:hand
+  in:kitchen
+  needs:clothes
+  needs:kettle
+  uses:barrel
+  uses:burning material
+
+job:woodworker
+  needs:leather clothes
+  in:factory
+  needs:clothes
+  uses:wood
+  uses:iron
+  produces:barrel
+
+job:smelter
+  employs:hand
+  in:blast furnace
+  needs:leather clothes
+  uses:iron ore
+  uses:coal
+  produces:raw iron
+
+job:black smith
+  employs:hand
+  in:smithy
+  uses:raw iron
+  uses:coal
+  produces:kettle, iron
+  produces:needle
+
+job:engineer
+  employs:hand
+  in:factory
+
+job:gunsmith
+  employs:hand
+  in:atelier
+  uses:iron
+  uses:wood
+  produces:gun
+
+job:architect
+  employs:overseer
+
+job:overseer
+  employs:builder
+
+job:builder
+
+job:mason
+
+job:director
+  employs:engineer
+
+job:worker
+
+job:lord
+  employs:falconer
+  employs:secretary
+
+job:secretary
+  employs:butler
+
+job:butler
+  employs:servant
+
+job:farmer
+
+job:shephard
+
+job:servant
+
+job:cook
+
+job:captain
+
+job:navigator
+
+job:sailor
+
+job:gunner
+
+job:general
+
+job:strategist
+
+job:officer
+
+job:knight
+
+job:scout
+
+job:soldier
+
+job:cavalier
+
+job:archer
+
+job:pikeman
+
+job:professor
+
+job:researcher
+
+job:teacher
+
+job:zoologist
+
+job:alchemist
+
+job:herbalist
+
+job:psychologist
+
+job:mathematician
+
+job:cardinal
+
+job:priest
+
+job:cleric
+
+job:exorcist
+
+job:monk
+
+job:painter
+
+job:musician
+
+job:sculptor
+
+job:bard
+
+job:photographer
+
+job:playwright
+
+job:author
+
+job:poet
+
+job:journalist
+
+job:coiffeuse
+
+job:barber
+
+job:masseur
+
+job:manicurists
+
+job:hotelier
+
+job:taxi driver
+
+job:proprietor
+
+job:barkeep
+
+job:comedian
+
+job:magician
+
+job:seer
+
+job:actor
+
+job:host
+
+job:dancer
+
+job:bouncer
+
+job:boxer
+
+job:wrestler
+
+job:animal tamer
+
+job:gladiator
+
+job:merchant
+
+job:trader
+
+job:vendor
+
+job:mercenary
+
+job:enforcer
+
+job:priest
+
+job:shaman
+
+job:magician
+
+job:warlock
+
+job:prophet
+
+job:cultist
+
+job:police head
+
+job:inspector
+
+job:healer
+
+job:nurse
+
+job:scribe
+
+job:cop
+
+job:guard
+
+job:undertaker
+
+job:forger
+
+job:pawnbroker
+
+job:burglar
+
+job:enchanter
+
+job:beggar
+
+special:superior
+  contrary:inferior
+  effect:bonus on skill when using this
+
+special:genuine
+  contrary:counterfeit
+    
+special:trim
+  contrary:mangled
+
+special:mint
+  contrary:broken
+  effect:has something gone wrong and broke it
+
+special:polished
+  contrary:shabby
+
+special:heroic
+  contrary:meek
+  effect:paintings, stories and deeds
+
+special:elegant
+  contrary:dull
+
+special:alert
+  contrary:sleepy
+
+special:taste
+  effect:how enamoured is someone by this
+
+special:vitalizing
+  contrary:upsetting
+
+special:detailed
+  contrary:imprecise        plan, painting
+
+special:steady
+  contrary:trembling
+
+special:fearless
+  contrary:fearful
+
+special:inspired
+  contrary:apathetic
+
+special:attentive
+  contrary:neglectful
+
+special:relaxed
+  contrary:upset
+
+special:positive
+  contrary:negative
+
+special:clear
+  contrary:blinded
+
+special:exotic
+  contrary:commonplace
+  effect:extra or lower value on sale
+  special:taste
+
+special:dangerous
+  contrary:stable
+  effect:critical chance higher or lower
+  special:taste
+
+special:sturdy
+  contrary:delicate
+  effect:less prone to breaking
+
+special:fast
+  contrary:slow
+  effect:speed of animals and vehicles
+  special:taste
+
+special:bizarre
+  contrary:ordinary
+  special:taste
+
+special:relaxed
+  contrary:hyper
+  special:taste
+
+special:trusting
+  contrary:suspicious
+  special:taste
+
+special:powerful
+  contrary:weak
+  special:taste
+
+special:new
+  contrary:patched
+  special:taste
+
+special:prestigious
+  contrary:ordinary
+  special:taste
+
+special:lavish
+  contrary:somber
+  special:taste
+
+special:imposing
+  contrary:discrete
+  special:taste
+
+special:flamboyant
+  contrary:simple
+  special:taste
+
+special:exorbitant
+  contrary:cheap
+  special:taste
+
+special:aristocratic
+  contrary:unrefined
+  special:taste
+
+special:classified
+  contrary:public
+  special:taste
+
+special:banned
+  contrary:sanctioned
+  effect:the government disallowed this
+  special:taste
+
+special:scandalous
+  contrary:respectable
+  effect:this goes against the morals of society
+  special:taste
+
+special:privy
+  contrary:revealed
+  special:taste
+
+special:eccentric
+  contrary:conventional
+  special:taste
+
+special:notable
+  contrary:camouflage
+  special:taste
+
+special:spectacular
+  contrary:plain
+  special:taste
+
+special:sincere
+  contrary:vaunter
+  special:taste
+
+special:exclusive
+  contrary:traditional
+  special:taste
+
+special:occult
+  contrary:known
+  special:taste
+
+special:fantastical
+  contrary:familiar
+  special:taste
+
+special:daring
+  contrary:timid
+  special:taste
+
+special:intoxicating
+  contrary:sobering
+  special:taste
+
+special:compelling
+  contrary:optional
+  special:taste
+
+special:cozy
+  contrary:uncomfortable
+  special:taste
+
+special:cheerful
+  contrary:solemn
+  special:taste
+
+special:derelict
+  contrary:lifely
+  special:taste
+
+special:innovative
+  contrary:old-fashioned
+  special:taste
+
+special:whimsical
+  contrary:dramatic
+  special:taste
+
+special:hilarious
+  contrary:serious
+  special:taste
+
+special:provocative
+  contrary:pleasing
+  special:taste
+
+special:spicy
+  contrary:bland
+  special:taste
+
+special:fragrant
+  contrary:putrid
+  special:taste
+
+special:sneak
+  contrary:loud
+  special:taste
+
+special:strict
+  contrary:flexible
+  special:taste
+
+organization:cops
+
+organization:city council
+
+organization:government
+
+organization:curch
+
+organization:cult
+
+organization:gild
+
+organization:company
+
+organization:household
+
+organization:militairy
+
+organization:club
+
+organization:shop
+
+organization:group of friends
+
+organization:establishment
+
+organization:university
+
+organization:faculty
+
+organization:hospital
+
+organization:carnival
+
+organization:school
+
+relation:family
+  obtain:start with a new character or through marriage
+  states:head, favorite, liked, fine, rascal, outcast
+  specials:classified, occult, cheerful, whimsical, scandalous, privy, strict
+
+relation:romance
+  states:captivated, intrigued, amicable, indifferent, disliked, shunned, despised, hated
+  specials:exotic, dangerous, sturdy, new, flamboyant, cheerful, exorbitant, notable, daring, spicy, whimsical, hilarious, classified, banned
+  specials:scandalous, privy, strict
+
+relation:member
+  effect:relation to an organization
+  states:leader, member, contractor, supporter, contact, critic, contender, adversary, detained
+  specials:sturdy, new, classified, banned, notable, scandalous, privy, strict
+
+relation:friendship
+  states:close, amicable, acquaintance, deteriorated, annoying, rival, adversary
+  specials:exotic, dangerous, sturdy, new, mint, flamboyant, cheerful, exorbitant, notable, whimsical, hilarious, classified, banned, scandalous
+  specials:privy, strict
+
+relation:pet
+  effect:relation with a pet
+  states:affectionate, trusting, curious, indifferent, suspicious, nasty
+  specials:privy, strict, scandalous
+
+relation:politics
+  effect:relation between two organizations
+  states:alliance, collaborating, friendly, trusting, watch full, distrusted, rivalry, contesting, war
+  specials:new, sturdy, mint, classified, notable, privy, strict
+
+relation:favor
+  effect:helped a person or organization in a significant way
+  specials:new, superior, powerful, notable, privy
+
+relation:fact
+  effect:knowledge on a specific relation
+  specials:detailed, new, mint, privy
+
+relation:project
+  stage:conception, planning, finalized, started, done, abandoned, failed
+  client:person or organization
+  assistance:person, organization or an item
+  type:rescue, assist in skills, further knowledge, create item, validate fact, establish relation
+  specials:heroic, privy, new
+
+relation:essence
+  effect:touched by the essence of a great old one, lending some of it's power but also grant it some influence
+  states:feasted, indulged, influenced, touched
+  specials:privy, new, classified, scandalous, banned, occult
