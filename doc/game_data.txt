@@ -249,7 +249,6 @@ job:taxidermist
   employs:hand
   in:atelier
   needs:clothes
-  needs:leather clothes
   needs:needle
   needs:spinner
   uses:animal body
@@ -391,6 +390,8 @@ job:butler
   employs:servant
 
 job:farmer
+
+job:gardener
 
 job:shephard
 

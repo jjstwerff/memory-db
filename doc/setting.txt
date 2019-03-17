@@ -7,12 +7,108 @@ To do:
 - add different specials (occult, bizarre, banned, privy)
 - add descriptions when needed with possible changes due to specials
 - possible names: persons / pubs / shops / factories
+    https://en.wiktionary.org/w/index.php?title=Category:English_surnames&from=im
+	https://en.wiktionary.org/wiki/Category:English_male_given_names
+	https://en.wiktionary.org/wiki/Category:English_female_given_names
 - districts of London / rivers / towns
 - add secrets
 
 location:Luxor manor
+person:Emily Ingraham
+  home:Luxor manor
+  skill:lord
+
+person:Orville Ingraham
+  home:Luxor manor
+  skill:lord
+  romance:Larissa Ingraham-Luxor
+  romance:Sarah Rockwell
+
+person:Larissa Ingraham-Luxor
+  home:Luxor manor
+  skill:lord
+  romance:Orville Ingraham
+  friendship:..
+
+person:Roseanne Ingraham
+  home:Luxor manor
+  skill:lord
+
+person:Quintin Luxor
+  home:Luxor manor
+  skill:lord
+
+person:Owen Spencer
+  home:Luxor manor
+  skill:secretary
+  supervisor:Orville Ingraham
+
+person:Pierce Hobbins
+  home:Nutley Village
+  skill:butler
+  supervisor:Owen Spencer
+
+person:Yvette Brusseau
+  home:Nutley Village
+  skill:teacher
+  supervisor:Owen Spencer
+
+person:Teagan Montgomery
+  home:Luxor manor
+  skill:overseer, servant
+  supervisor:Owen Spencer
+
+person:Marley Donnell
+  home:Nutley Village
+  skill:servant
+  supervisor:Teagan Montgomery
+
+person:Luis Selleck
+  home:Nutley Village
+  skill:cook
+  skill:servant
+  supervisor:Teagan Montgomery
+
+person:Yvonne Upton
+  home:Nutley Village
+  skill:servant
+  supervisor:Teagan Montgomery
+
+person:Marco Vance
+  home:Luxor manor
+  skill:gardener
+  supervisor:Teagan Montgomery
+
+amimal:Boomer
+  race:dog
+  home:Luxor manor
+  skill:guard, hunter
+
+animal:Dixy
+  race:dog
+  home:Luxor manor
+  skill:guard, shephard
+
 location:Stansfield Castle
-location:Nutley Village
+
+person:Griffith Luxor
+  home:Stansfield Castle
+  skill:lord
+
+person:Valery Luxor-Harley
+  home:Stansfield Castle
+  skill:lord
+
+location:Nutley village
+
+person:Timothy Knudtson
+  home:Nutley village
+  skill:black smith
+
+person:Sarah Rockwell
+  home:Nutley village
+  skill:seamstress, herbalist, masseur, bard
+
 location:Royston's magnificent Circus
 location:Westminster Cathedral
 location:Brompton Cemetery
