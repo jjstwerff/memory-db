@@ -1,26 +1,21 @@
 package org.memorydb.structure;
 
-import java.io.IOException;
-
 import org.memorydb.file.Write;
 
 public interface MemoryRecord {
-	int getRec();
+	int rec();
 
-	default int getArrayIndex() {
+	default int index() {
 		return -1;
 	}
 
-	void setRec(int rec);
+	void rec(int rec);
 
-	Store getStore();
+	Store store();
 
-	void output(Write write, int iterate) throws IOException;
+	void output(Write write, int iterate);
 
-	/**
-	 * @throws IOException  
-	 */
-	default String keys() throws IOException {
+	default String keys() {
 		return "";
 	}
 }

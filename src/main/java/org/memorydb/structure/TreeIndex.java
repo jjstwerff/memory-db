@@ -3,7 +3,7 @@ package org.memorydb.structure;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public abstract class TreeIndex<T extends MemoryRecord> extends RedBlackTree implements Iterable<T>, RecordInterface {
+public abstract class TreeIndex<T extends MemoryRecord> extends RedBlackTree implements Iterable<T> {
 	private final Key key;
 	private final T record;
 	private final int flag; // position of flag bit inside record
@@ -34,7 +34,7 @@ public abstract class TreeIndex<T extends MemoryRecord> extends RedBlackTree imp
 				nextRec = TreeIndex.super.next(nextRec);
 				if (key != null && key.compareTo(nextRec) != 0)
 					nextRec = 0;
-				record.setRec(n);
+				record.rec(n);
 				return record;
 			}
 		};
@@ -46,54 +46,39 @@ public abstract class TreeIndex<T extends MemoryRecord> extends RedBlackTree imp
 
 	@Override
 	protected boolean readRed(int recNr) {
-		assert record.getStore().validate(recNr);
-		return (record.getStore().getByte(recNr, flag >> 3) & (byte) (1 << (flag & 7))) > 0;
+		assert record.store().validate(recNr);
+		return (record.store().getByte(recNr, flag >> 3) & (byte) (1 << (flag & 7))) > 0;
 	}
 
 	@Override
 	protected void changeRed(int recNr, boolean value) {
-		assert record.getStore().validate(recNr);
+		assert record.store().validate(recNr);
 		int bitMap = 1 << (flag & 7);
-		record.getStore().setByte(recNr, flag >> 3, (record.getStore().getByte(recNr, flag >> 3) & (255 - bitMap)) + (value ? bitMap : 0));
+		record.store().setByte(recNr, flag >> 3, (record.store().getByte(recNr, flag >> 3) & (255 - bitMap)) + (value ? bitMap : 0));
 	}
 
 	@Override
 	protected int readLeft(int recNr) {
-		assert record.getStore().validate(recNr);
-		return record.getStore().getInt(recNr, field);
+		assert record.store().validate(recNr);
+		return record.store().getInt(recNr, field);
 	}
 
 	@Override
 	protected void changeLeft(int recNr, int value) {
-		assert record.getStore().validate(recNr);
-		record.getStore().setInt(recNr, field, value);
+		assert record.store().validate(recNr);
+		record.store().setInt(recNr, field, value);
 	}
 
 	@Override
 	protected int readRight(int recNr) {
-		assert record.getStore().validate(recNr);
-		return record.getStore().getInt(recNr, field + 4);
+		assert record.store().validate(recNr);
+		return record.store().getInt(recNr, field + 4);
 	}
 
 	@Override
 	protected void changeRight(int recNr, int value) {
-		assert record.getStore().validate(recNr);
-		record.getStore().setInt(recNr, field + 4, value);
-	}
-
-	@Override
-	public String name(int field) {
-		return null;
-	}
-
-	@Override
-	public FieldType type(int field) {
-		return FieldType.OBJECT;
-	}
-
-	@Override
-	public boolean exists() {
-		return true;
+		assert record.store().validate(recNr);
+		record.store().setInt(recNr, field + 4, value);
 	}
 
 	@Override

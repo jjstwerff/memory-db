@@ -1,28 +1,26 @@
 package org.memorydb.structure;
 
-import java.io.IOException;
-
 import org.memorydb.file.Write;
 
 // class to indicate no related type.
 public class Nothing implements MemoryRecord, RecordInterface {
 	@Override
-	public int getRec() {
+	public int rec() {
 		return 0;
 	}
 
 	@Override
-	public void setRec(int rec) {
+	public void rec(int rec) {
 		// nothing
 	}
 
 	@Override
-	public Store getStore() {
+	public Store store() {
 		return null;
 	}
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		// nothing
 	}
 
@@ -37,22 +35,12 @@ public class Nothing implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public boolean next() {
-		return false;
+	public Nothing next() {
+		return null;
 	}
 
 	@Override
-	public RecordInterface getClone() {
+	public RecordInterface copy() {
 		return this;
-	}
-
-	@Override
-	public RecordInterface get(String search) {
-		return null;
-	}
-
-	@Override
-	public RecordInterface get(int index) {
-		return null;
 	}
 }

@@ -28,25 +28,25 @@ public class Write {
 		return indent;
 	}
 
-	public Write field(String name, int value) throws IOException {
+	public Write field(String name, int value) {
 		if (value != Integer.MIN_VALUE)
 			strField(name, Integer.toString(value));
 		return this;
 	}
 
-	public Write field(String name, MemoryRecord value) throws IOException {
-		if (value != null && value.getRec() != 0) {
+	public Write field(String name, MemoryRecord value) {
+		if (value != null && value.rec() != 0) {
 			strField(name, "");
-			writer.append("{");
+			append("{");
 			String keys = value.keys();
 			for (int i = 0; i < keys.length(); i++)
 				writeChar(keys.charAt(i), true);
-			writer.append("}");
+			append("}");
 		}
 		return this;
 	}
 
-	public Write field(String name, Object value) throws IOException {
+	public Write field(String name, Object value) {
 		if (value == null || (value instanceof Double && Double.isNaN((double) value)) || (value instanceof Long && (long) value == Long.MIN_VALUE)) {
 			return this; // skip null fields
 		}
@@ -59,20 +59,20 @@ public class Write {
 		return field(name, buffer);
 	}
 
-	public Write field(String name, LocalDateTime value) throws IOException {
+	public Write field(String name, LocalDateTime value) {
 		buffer.setLength(0);
 		DateTime.toString(value, buffer);
 		strField(name, buffer.toString());
 		return this;
 	}
 
-	public void strField(String name, String value) throws IOException {
+	public void strField(String name, String value) {
 		lineStart();
 		int valLength = value == null ? 0 : value.length();
 		singleField(name, value, valLength);
 	}
 
-	public Write field(String name, StringBuilder value) throws IOException {
+	public Write field(String name, StringBuilder value) {
 		lineStart();
 		if (value.length() > MAX_STRING || isMulti(value))
 			multiLine(name, value);
@@ -81,24 +81,41 @@ public class Write {
 		return this;
 	}
 
-	private void lineStart() throws IOException {
+	private void append(String str) {
+		try {
+			writer.append(str);
+		} catch (IOException e) {
+			// fall on the ground
+		}
+	}
+
+	private void append(char str) {
+		try {
+			writer.append(str);
+		} catch (IOException e) {
+			// fall on the ground
+		}
+	}
+
+	private void lineStart() {
 		if (len == 0) {
 			for (int i = 0; i < indent; i++)
-				writer.append("  ");
+				append("  ");
 			len = indent * 2;
 		} else {
-			writer.append(", ");
+			append(", ");
 			len += 2;
 		}
 	}
 
-	private void multiLine(String name, StringBuilder value) throws IOException {
-		writer.append(name).append("=\n");
+	private void multiLine(String name, StringBuilder value) {
+		append(name);
+		append("=\n");
 		int c = 0;
 		int p = lineEnd(value, 0);
 		while (true) {
 			for (int i = 0; i <= indent; i++)
-				writer.append("  ");
+				append("  ");
 			if (p == -1) {
 				for (int i = c; i < value.length(); i++)
 					writeChar(value.charAt(i), false);
@@ -110,28 +127,28 @@ public class Write {
 			p = lineEnd(value, p + 1);
 			if (c >= p)
 				break;
-			writer.append("\n");
+			append("\n");
 		}
 		len = 0;
 	}
 
-	private void singleField(String name, CharSequence value, int valLength) throws IOException {
+	private void singleField(String name, CharSequence value, int valLength) {
 		if (len + name.length() + 1 + valLength > MAX_LENGTH) {
-			writer.append("\n");
+			append("\n");
 			for (int i = 0; i < indent; i++)
-				writer.append("  ");
-			writer.append("& ");
+				append("  ");
+			append("& ");
 			len = indent * 2 + 2;
 		} else if (len == 0) {
 			for (int i = 0; i < indent; i++)
-				writer.append("  ");
+				append("  ");
 			len = indent * 2;
 		}
-		writer.append(name);
+		append(name);
 		if (value == null)
-			writer.append("!");
+			append("!");
 		else {
-			writer.append("=");
+			append("=");
 			for (int i = 0; i < valLength; i++)
 				writeChar(value.charAt(i), true);
 		}
@@ -143,26 +160,26 @@ public class Write {
 		return end == -1 ? value.length() : end;
 	}
 
-	private void writeChar(char ch, boolean full) throws IOException {
+	private void writeChar(char ch, boolean full) {
 		if (ch == '\t') {
-			writer.append("\\t");
+			append("\\t");
 			return;
 		}
 		if (ch == '\r') {
-			writer.append("\\r");
+			append("\\r");
 			return;
 		}
 		if (ch == '\f') {
-			writer.append("\\f");
+			append("\\f");
 			return;
 		}
 		if (ch == '\b') {
-			writer.append("\\b");
+			append("\\b");
 			return;
 		}
 		if (full && (ch == ',' || ch == '\\' || ch == '}' || ch == '{'))
-			writer.append("\\");
-		writer.append(ch);
+			append("\\");
+		append(ch);
 	}
 
 	private boolean isMulti(StringBuilder value) {
@@ -172,8 +189,8 @@ public class Write {
 		return false;
 	}
 
-	public void endRecord() throws IOException {
-		writer.append("\n");
+	public void endRecord() {
+		append("\n");
 		len = 0;
 	}
 
@@ -182,17 +199,17 @@ public class Write {
 		return writer.toString();
 	}
 
-	public void sub(String string) throws IOException {
+	public void sub(String string) {
 		strField(string, "[\n");
 		indent++;
 		len = 0;
 	}
 
-	public void endSub() throws IOException {
+	public void endSub() {
 		indent--;
 		for (int i = 0; i < indent; i++)
-			writer.append("  ");
-		writer.append("]");
+			append("  ");
+		append("]");
 		len = indent * 2 + 1;
 	}
 }
