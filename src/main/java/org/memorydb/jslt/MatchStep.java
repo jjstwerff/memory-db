@@ -31,7 +31,7 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	}
 
 	public enum Type {
-		STACK, PARM, FIELD, ALT, TEST_CALL, JUMP, TEST_STACK, TEST_BOOLEAN, TEST_STRING, TEST_NUMBER, TEST_FLOAT, TEST_TYPE, POS_KEEP, POS_FREE, POS_TO, VAR_WRITE, VAR_START, VAR_ADD, ERROR;
+		STACK, PARM, FIELD, ALT, TEST_CALL, JUMP, TEST_STACK, TEST_BOOLEAN, TEST_STRING, TEST_NUMBER, TEST_FLOAT, TEST_TYPE, PUSH, POP, VAR_WRITE, VAR_START, VAR_ADD, ERROR, START, FINISH;
 
 		private static Map<String, Type> map = new HashMap<>();
 
@@ -49,7 +49,7 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	@FieldData(
 		name = "type",
 		type = "ENUMERATE",
-		enumerate = {"STACK", "PARM", "FIELD", "ALT", "TEST_CALL", "JUMP", "TEST_STACK", "TEST_BOOLEAN", "TEST_STRING", "TEST_NUMBER", "TEST_FLOAT", "TEST_TYPE", "POS_KEEP", "POS_FREE", "POS_TO", "VAR_WRITE", "VAR_START", "VAR_ADD", "ERROR"},
+		enumerate = {"STACK", "PARM", "FIELD", "ALT", "TEST_CALL", "JUMP", "TEST_STACK", "TEST_BOOLEAN", "TEST_STRING", "TEST_NUMBER", "TEST_FLOAT", "TEST_TYPE", "PUSH", "POP", "VAR_WRITE", "VAR_START", "VAR_ADD", "ERROR", "START", "FINISH"},
 		condition = true,
 		mandatory = false
 	)
@@ -273,7 +273,7 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	}
 
 	public enum Ttype {
-		TYPE_NULL, TYPE_BOOLEAN, TYPE_STRING, TYPE_NUMBER, TYPE_FLOAT, TYPE_ARRAY, TYPE_OBJECT;
+		TYPE_NULL, TYPE_BOOLEAN, TYPE_STRING, TYPE_NUMBER, TYPE_FLOAT, TYPE_ARRAY, TYPE_OBJECT, SKIP;
 
 		private static Map<String, Ttype> map = new HashMap<>();
 
@@ -291,7 +291,7 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	@FieldData(
 		name = "ttype",
 		type = "ENUMERATE",
-		enumerate = {"TYPE_NULL", "TYPE_BOOLEAN", "TYPE_STRING", "TYPE_NUMBER", "TYPE_FLOAT", "TYPE_ARRAY", "TYPE_OBJECT"},
+		enumerate = {"TYPE_NULL", "TYPE_BOOLEAN", "TYPE_STRING", "TYPE_NUMBER", "TYPE_FLOAT", "TYPE_ARRAY", "TYPE_OBJECT", "SKIP"},
 		when = "TEST_TYPE",
 		mandatory = false
 	)
@@ -313,16 +313,6 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	}
 
 	@FieldData(
-		name = "pto",
-		type = "INTEGER",
-		when = "POS_TO",
-		mandatory = false
-	)
-	default int getPto() {
-		return getType() != Type.POS_TO ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 1);
-	}
-
-	@FieldData(
 		name = "vwrite",
 		type = "OBJECT",
 		related = Variable.class,
@@ -334,23 +324,13 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	}
 
 	@FieldData(
-		name = "vwfrom",
+		name = "vwrange",
 		type = "INTEGER",
 		when = "VAR_WRITE",
 		mandatory = false
 	)
-	default int getVwfrom() {
+	default int getVwrange() {
 		return getType() != Type.VAR_WRITE ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
-	}
-
-	@FieldData(
-		name = "vwtill",
-		type = "INTEGER",
-		when = "VAR_WRITE",
-		mandatory = false
-	)
-	default int getVwtill() {
-		return getType() != Type.VAR_WRITE ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 9);
 	}
 
 	@FieldData(
@@ -376,23 +356,13 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	}
 
 	@FieldData(
-		name = "vafrom",
+		name = "varange",
 		type = "INTEGER",
 		when = "VAR_ADD",
 		mandatory = false
 	)
-	default int getVafrom() {
+	default int getVarange() {
 		return getType() != Type.VAR_ADD ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
-	}
-
-	@FieldData(
-		name = "vatill",
-		type = "INTEGER",
-		when = "VAR_ADD",
-		mandatory = false
-	)
-	default int getVatill() {
-		return getType() != Type.VAR_ADD ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 9);
 	}
 
 	@FieldData(
@@ -406,23 +376,33 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	}
 
 	@FieldData(
-		name = "efrom",
+		name = "erange",
 		type = "INTEGER",
 		when = "ERROR",
 		mandatory = false
 	)
-	default int getEfrom() {
+	default int getErange() {
 		return getType() != Type.ERROR ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
 	}
 
 	@FieldData(
-		name = "etill",
+		name = "notstarted",
 		type = "INTEGER",
-		when = "ERROR",
+		when = "START",
 		mandatory = false
 	)
-	default int getEtill() {
-		return getType() != Type.ERROR ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 9);
+	default int getNotstarted() {
+		return getType() != Type.START ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 1);
+	}
+
+	@FieldData(
+		name = "notfinished",
+		type = "INTEGER",
+		when = "FINISH",
+		mandatory = false
+	)
+	default int getNotfinished() {
+		return getType() != Type.FINISH ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 1);
 	}
 
 	default void outputMatchStep(Write write, int iterate) throws IOException {
@@ -458,15 +438,13 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 		write.field("mffalse", getMffalse());
 		write.field("ttype", getTtype());
 		write.field("ttfalse", getTtfalse());
-		write.field("pto", getPto());
 		Variable fldVwrite = getVwrite();
 		if (fldVwrite != null && fldVwrite.getRec() != 0) {
 			write.sub("vwrite");
 			fldVwrite.output(write, iterate);
 			write.endSub();
 		}
-		write.field("vwfrom", getVwfrom());
-		write.field("vwtill", getVwtill());
+		write.field("vwrange", getVwrange());
 		Variable fldVstart = getVstart();
 		if (fldVstart != null && fldVstart.getRec() != 0) {
 			write.sub("vstart");
@@ -479,11 +457,11 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 			fldVadd.output(write, iterate);
 			write.endSub();
 		}
-		write.field("vafrom", getVafrom());
-		write.field("vatill", getVatill());
+		write.field("varange", getVarange());
 		write.field("error", getError());
-		write.field("efrom", getEfrom());
-		write.field("etill", getEtill());
+		write.field("erange", getErange());
+		write.field("notstarted", getNotstarted());
+		write.field("notfinished", getNotfinished());
 	}
 
 	default Object getMatchStep(int field) {
@@ -537,27 +515,23 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 		case 24:
 			return getTtfalse();
 		case 25:
-			return getPto();
-		case 26:
 			return getVwrite();
+		case 26:
+			return getVwrange();
 		case 27:
-			return getVwfrom();
-		case 28:
-			return getVwtill();
-		case 29:
 			return getVstart();
-		case 30:
+		case 28:
 			return getVadd();
-		case 31:
-			return getVafrom();
-		case 32:
-			return getVatill();
-		case 33:
+		case 29:
+			return getVarange();
+		case 30:
 			return getError();
-		case 34:
-			return getEfrom();
-		case 35:
-			return getEtill();
+		case 31:
+			return getErange();
+		case 32:
+			return getNotstarted();
+		case 33:
+			return getNotfinished();
 		default:
 			return null;
 		}
@@ -621,26 +595,22 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 		case 24:
 			return FieldType.INTEGER;
 		case 25:
-			return FieldType.INTEGER;
+			return FieldType.OBJECT;
 		case 26:
-			return FieldType.OBJECT;
+			return FieldType.INTEGER;
 		case 27:
-			return FieldType.INTEGER;
+			return FieldType.OBJECT;
 		case 28:
-			return FieldType.INTEGER;
+			return FieldType.OBJECT;
 		case 29:
-			return FieldType.OBJECT;
+			return FieldType.INTEGER;
 		case 30:
-			return FieldType.OBJECT;
+			return FieldType.STRING;
 		case 31:
 			return FieldType.INTEGER;
 		case 32:
 			return FieldType.INTEGER;
 		case 33:
-			return FieldType.STRING;
-		case 34:
-			return FieldType.INTEGER;
-		case 35:
 			return FieldType.INTEGER;
 		default:
 			return null;
@@ -698,27 +668,23 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 		case 24:
 			return "ttfalse";
 		case 25:
-			return "pto";
-		case 26:
 			return "vwrite";
+		case 26:
+			return "vwrange";
 		case 27:
-			return "vwfrom";
-		case 28:
-			return "vwtill";
-		case 29:
 			return "vstart";
-		case 30:
+		case 28:
 			return "vadd";
-		case 31:
-			return "vafrom";
-		case 32:
-			return "vatill";
-		case 33:
+		case 29:
+			return "varange";
+		case 30:
 			return "error";
-		case 34:
-			return "efrom";
-		case 35:
-			return "etill";
+		case 31:
+			return "erange";
+		case 32:
+			return "notstarted";
+		case 33:
+			return "notfinished";
 		default:
 			return null;
 		}

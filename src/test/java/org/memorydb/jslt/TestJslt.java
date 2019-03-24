@@ -143,6 +143,8 @@ public class TestJslt extends MemoryTests {
 		for (Path file : files) {
 			Store jsltStore = new Store(3);
 			String result = file.getFileName().toString();
+			if (!result.startsWith("04"))
+				continue;
 			System.out.println("Check: " + result);
 			new Parser(new Scanner(file), jsltStore).parse();
 			JsltAnalyzer.analyze(jsltStore);

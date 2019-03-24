@@ -11,7 +11,6 @@ public class ChangeSource extends Source implements ChangeInterface {
 	public ChangeSource(Store store) {
 		super(store, store.allocate(Source.RECORD_SIZE));
 		setName(null);
-		store.setInt(rec, 8, 0); // SET listeners
 	}
 
 	public ChangeSource(Source current) {
@@ -23,10 +22,8 @@ public class ChangeSource extends Source implements ChangeInterface {
 		store.setInt(rec, 4, store.putString(value));
 	}
 
-	/* package private */ void parseFields(Parser parser) {
-		if (parser.hasSub("listeners")) {
-			new Listener(store).parse(parser, this);
-		}
+	/* package private */ void parseFields(@SuppressWarnings("unused") Parser parser) {
+		// empty
 	}
 
 	@Override
@@ -49,8 +46,6 @@ public class ChangeSource extends Source implements ChangeInterface {
 	@Override
 	public ChangeInterface add(int field) {
 		switch (field) {
-		case 2:
-			return addListeners();
 		default:
 			return null;
 		}

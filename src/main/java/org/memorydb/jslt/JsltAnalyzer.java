@@ -65,17 +65,18 @@ public class JsltAnalyzer {
 				MatchingArray stackSkip = addStep(MatchingArray.Type.STACK);
 				stackSkip.setStack(alt.getParameters().getSize());
 				for (ParametersArray parm : alt.getParameters()) {
+					setParm(parm);
 					testConst(parm, true);
 				}
 			}
 			MatchingArray call = addStep(MatchingArray.Type.ALT);
 			call.setAltnr(alt.getRec());
 			jump(call, (e, s) -> e.setAfalse(s), "NextAlternative");
-			// showMatching();
 		}
 		resolve("NextAlternative");
 		resolve("NextParmSize");
 		error("No matching macro named '" + macro.getName() + "' found");
+		showMatching(macro);
 	}
 
 	private void testType(Match match) {
@@ -126,8 +127,12 @@ public class JsltAnalyzer {
 			testArr.setTtype(Ttype.TYPE_ARRAY);
 			jump(testArr, (e, s) -> e.setTtfalse(s), "NextAlternative");
 			for (Match sub : match.getMarray()) {
-				if (sub.getType() == Match.Type.ANY)
+				if (sub.getType() == Match.Type.ANY) {
+					System.out.println("here");
+					//MatchingArray posKeep = addStep(MatchingArray.Type.POS_KEEP);
+					MatchingArray writeVar = addStep(MatchingArray.Type.VAR_WRITE); // write to variable
 					continue;
+				}
 				// TODO get next value
 				testConst(sub, variables);
 			}
@@ -168,7 +173,9 @@ public class JsltAnalyzer {
 	}
 
 	/* package private */ static void showMatching(Macro macro) {
-		for (MatchingArray elm : macro.getMatching()) {
+		System.out.println("macro:" + macro.getName());
+		MatchingArray matching = macro.getMatching();
+		for (MatchingArray elm : matching) {
 			System.out.print((elm.getArrayIndex() + 1) + ":[" + elm.getRec() + "] " + elm);
 		}
 		System.out.println();
@@ -203,7 +210,7 @@ public class JsltAnalyzer {
 	private void error(String string) {
 		MatchingArray err = addStep(MatchingArray.Type.ERROR);
 		err.setError(string);
-		err.setEfrom(0);
+		err.setErange(Integer.MIN_VALUE);
 	}
 
 	private void jump(MatchingArray elm, Setter setter, String name) {

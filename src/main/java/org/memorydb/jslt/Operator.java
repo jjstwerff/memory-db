@@ -32,10 +32,6 @@ public interface Operator extends ResultType {
 	default ChangeOperator changeOperator() {
 		if (this instanceof ObjectArray)
 			return (ObjectArray) this;
-		if (this instanceof OrderArray)
-			return (OrderArray) this;
-		if (this instanceof SliceArray)
-			return (SliceArray) this;
 		if (this instanceof ArrayArray)
 			return (ArrayArray) this;
 		if (this instanceof AppendArray)
@@ -54,10 +50,6 @@ public interface Operator extends ResultType {
 			return (CodeArray) this;
 		if (this instanceof Expr)
 			return new ChangeExpr((Expr) this);
-		if (this instanceof Listener)
-			return new ChangeListener((Listener) this);
-		if (this instanceof Level)
-			return new ChangeLevel((Level) this);
 		return null;
 	}
 

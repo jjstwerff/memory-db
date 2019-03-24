@@ -1,11 +1,34 @@
-  type=TEST_STACK, tstack=1, tsfalse=...                is there one parameter
-  type=STACK, stack=1 ..                                switch to the first parameter
-  type=TEST_TYPE, ttype=TYPE_ARRAY, ttfalse=...         test that this parameter is an ARRAY
-                                                        remember position
-                                                        remember first parameter as 'a' + step
-  type=TEST_NUMBER, mnumber=2, mnfalse=6                
-  type=ALT, altnr=553, afalse=6
-  type=ERROR, error=No matching macro named 'numb' found, efrom=0, etill=0
+MatchMacro:
+- validate that the stack is empty
+- implement stack push / pop
+	validate that each element in a RecordImplementation
+	only a stack of objects, each split-off is a new object.. copy of current
+- implement type validation & content validation on RecordImplementation type data
+	tests increment the pointers when inside array/object
+	when test is only a type do not increment??
+- implement call to function as validation
+	increment array on true
+- implement variable write with element
+	output current element or range between top element on stack and current element
+	next element on write
+- read the current field name into cur
+
+macro:numb
+1:[3044] type=TEST_STACK, tstack=1, tsfalse=7			// test if there is one parameter
+2:[3044] type=STACK, stack=1							// make room for one actual parameter
+3:[3044] type=PARM, parm=0, pfalse=7					// switch to first parameter
+
+	not needed anymore
+4:[3044] type=TEST_TYPE, ttype=TYPE_ARRAY, ttfalse=7	// test if that is an array...
+
+[]		 type=START
+[]		 type=VAR_WRITE, vwrite=x
+	VAR_WRITE: write to a variable (same start/finish position for now) & next element
+5:[3044] type=TEST_NUMBER, mnumber=2, mnfalse=7			// test if the array contains a number 2
+[]		 type=FINISH
+	test if this was the last array element
+6:[3044] type=ALT, altnr=553, afalse=7					// calculate alternative expression
+7:[3044] type=ERROR, error=No matching macro named 'numb' found, efrom=0, etill=0
 
 
 
@@ -108,6 +131,7 @@ Testing:
 	more efficient when indexes exist
 
 Optimizations:
+	stack optimizations (stack of objects with pointers inside the original objects)
 	introduce lazy evaluation version of FOR when possible
 	rewrite MAP as FOR statement & remove old implementation
 	rewrite FILTER as FOR statement & remove old implementation

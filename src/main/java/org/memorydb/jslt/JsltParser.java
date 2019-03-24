@@ -15,7 +15,6 @@ import org.memorydb.file.Scanner.State;
 import org.memorydb.jslt.Match.Type;
 import org.memorydb.jslt.Operator.Function;
 import org.memorydb.jslt.Operator.Operation;
-import org.memorydb.jslt.Source.IndexListeners;
 import org.memorydb.structure.InputOutputException;
 import org.memorydb.structure.Store;
 
@@ -1065,15 +1064,7 @@ public class JsltParser {
 				}
 			} else
 				source.setRec(search);
-			IndexListeners listeners = source.getListeners();
-			for (Listener l : listeners)
-				if (l.getNr() >= listen)
-					listen = l.getNr() + 1;
 			spot.setListemNr(listen);
-			try (ChangeListener l = new ChangeListener(source, 0)) {
-				l.setNr(listen);
-				l.setOperation(Operation.CURRENT);
-			}
 		}
 
 		private void parseFn(String string, int parms) {

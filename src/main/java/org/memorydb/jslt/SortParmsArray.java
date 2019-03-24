@@ -81,52 +81,40 @@ public class SortParmsArray implements ChangeOperator, Iterable<SortParmsArray> 
 			store.setByte(alloc, 12, 1);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof OrderArray) {
+		if (record instanceof ArrayArray) {
 			store.setByte(alloc, 12, 2);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof SliceArray) {
+		if (record instanceof AppendArray) {
 			store.setByte(alloc, 12, 3);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof ArrayArray) {
+		if (record instanceof CallParmsArray) {
 			store.setByte(alloc, 12, 4);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof AppendArray) {
+		if (record instanceof SortParmsArray) {
 			store.setByte(alloc, 12, 5);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof CallParmsArray) {
+		if (record instanceof IfTrueArray) {
 			store.setByte(alloc, 12, 6);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof SortParmsArray) {
+		if (record instanceof IfFalseArray) {
 			store.setByte(alloc, 12, 7);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof IfTrueArray) {
+		if (record instanceof MparmsArray) {
 			store.setByte(alloc, 12, 8);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof IfFalseArray) {
+		if (record instanceof CodeArray) {
 			store.setByte(alloc, 12, 9);
 			store.setInt(alloc, 13, record.getArrayIndex());
 		}
-		if (record instanceof MparmsArray) {
-			store.setByte(alloc, 12, 10);
-			store.setInt(alloc, 13, record.getArrayIndex());
-		}
-		if (record instanceof CodeArray) {
-			store.setByte(alloc, 12, 11);
-			store.setInt(alloc, 13, record.getArrayIndex());
-		}
 		if (record instanceof Expr)
-			store.setByte(alloc, 12, 12);
-		if (record instanceof Listener)
-			store.setByte(alloc, 12, 13);
-		if (record instanceof Level)
-			store.setByte(alloc, 12, 14);
+			store.setByte(alloc, 12, 10);
 	}
 
 	@Override
@@ -137,31 +125,23 @@ public class SortParmsArray implements ChangeOperator, Iterable<SortParmsArray> 
 		case 1:
 			return new ObjectArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
 		case 2:
-			return new OrderArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
-		case 3:
-			return new SliceArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
-		case 4:
 			return new ArrayArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
-		case 5:
+		case 3:
 			return new AppendArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
-		case 6:
+		case 4:
 			return new CallParmsArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
-		case 7:
+		case 5:
 			return new SortParmsArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
-		case 8:
+		case 6:
 			return new IfTrueArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
-		case 9:
+		case 7:
 			return new IfFalseArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
-		case 10:
+		case 8:
 			return new MparmsArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
-		case 11:
+		case 9:
 			return new CodeArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
-		case 12:
+		case 10:
 			return new Expr(store, store.getInt(alloc, 8));
-		case 13:
-			return new Listener(store, store.getInt(alloc, 8));
-		case 14:
-			return new Level(store, store.getInt(alloc, 8));
 		default:
 			throw new CorruptionException("Unknown upRecord type");
 		}

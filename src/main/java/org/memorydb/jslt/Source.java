@@ -23,7 +23,7 @@ import org.memorydb.structure.TreeIndex;
 public class Source implements MemoryRecord, RecordInterface {
 	/* package private */ Store store;
 	protected int rec;
-	/* package private */ static final int RECORD_SIZE = 21;
+	/* package private */ static final int RECORD_SIZE = 17;
 
 	public Source(Store store) {
 		this.store = store;
@@ -66,85 +66,9 @@ public class Source implements MemoryRecord, RecordInterface {
 		return rec == 0 ? null : store.getString(store.getInt(rec, 4));
 	}
 
-	@FieldData(
-		name = "listeners",
-		type = "SET",
-		keyNames = {"nr"},
-		keyTypes = {"INTEGER"},
-		related = Listener.class,
-		mandatory = false
-	)
-	public IndexListeners getListeners() {
-		return new IndexListeners(new Listener(store));
-	}
-
-	public Listener getListeners(int key1) {
-		Listener resultRec = new Listener(store);
-		IndexListeners idx = new IndexListeners(resultRec, key1);
-		int res = idx.search();
-		if (res == 0)
-			return resultRec;
-		return new Listener(store, res);
-	}
-
-	public ChangeListener addListeners() {
-		return new ChangeListener(this, 0);
-	}
-
-	/* package private */ class IndexListeners extends TreeIndex<Listener> {
-
-		public IndexListeners(Listener record) {
-			super(record, null, 96, 13);
-		}
-
-		public IndexListeners(Listener record, int key1) {
-			super(record, new Key() {
-				@Override
-				public int compareTo(int recNr) {
-					if (recNr < 0)
-						return -1;
-					assert store.validate(recNr);
-					record.setRec(recNr);
-					int o = 0;
-					o = RedBlackTree.compare(key1, record.getNr());
-					return o;
-				}
-
-				@Override
-				public IndexOperation oper() {
-					return IndexOperation.EQ;
-				}
-			}, 96, 13);
-		}
-
-		@Override
-		protected int readTop() {
-			return store.getInt(rec, 8);
-		}
-
-		@Override
-		protected void changeTop(int value) {
-			store.setInt(rec, 8, value);
-		}
-
-		@Override
-		protected int compareTo(int a, int b) {
-			Listener recA = new Listener(store, a);
-			Listener recB = new Listener(store, b);
-			int o = 0;
-			o = compare(recA.getNr(), recB.getNr());
-			return o;
-		}
-
-		@Override
-		public Object get(int field) {
-			return new Listener(store, field);
-		}
-	}
-
 	public class IndexSources extends TreeIndex<Source> {
 		public IndexSources() {
-			super(Source.this, null, 96, 13);
+			super(Source.this, null, 64, 9);
 		}
 
 		public IndexSources(String key1) {
@@ -164,7 +88,7 @@ public class Source implements MemoryRecord, RecordInterface {
 				public IndexOperation oper() {
 					return IndexOperation.EQ;
 				}
-			}, 96, 13);
+			}, 64, 9);
 		}
 
 		@Override
@@ -197,13 +121,6 @@ public class Source implements MemoryRecord, RecordInterface {
 		if (rec == 0 || iterate <= 0)
 			return;
 		write.field("name", getName());
-		IndexListeners fldListeners = getListeners();
-		if (fldListeners != null) {
-			write.sub("listeners");
-			for (Listener sub : fldListeners)
-				sub.output(write, iterate);
-			write.endSub();
-		}
 		write.endRecord();
 	}
 
@@ -276,10 +193,6 @@ public class Source implements MemoryRecord, RecordInterface {
 	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
 		switch (field) {
-		case 2:
-			if (key.length > 0)
-				return new IndexListeners(new Listener(store), (int) key[0]);
-			return getListeners();
 		default:
 			return null;
 		}
@@ -290,8 +203,6 @@ public class Source implements MemoryRecord, RecordInterface {
 		switch (field) {
 		case 1:
 			return FieldType.STRING;
-		case 2:
-			return FieldType.ARRAY;
 		default:
 			return null;
 		}
@@ -302,8 +213,6 @@ public class Source implements MemoryRecord, RecordInterface {
 		switch (field) {
 		case 1:
 			return "name";
-		case 2:
-			return "listeners";
 		default:
 			return null;
 		}

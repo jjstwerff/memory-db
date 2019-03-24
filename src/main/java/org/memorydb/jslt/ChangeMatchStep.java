@@ -67,13 +67,9 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 				getStore().setByte(getRec(), matchstepPosition() + 1, (getStore().getByte(getRec(), matchstepPosition() + 1) & 224) + 0);
 				getStore().setInt(getRec(), matchstepPosition() + 2, 0);
 				break;
-			case POS_TO:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
-				break;
 			case VAR_WRITE:
 				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
 				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 9, 0);
 				break;
 			case VAR_START:
 				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
@@ -81,12 +77,16 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 			case VAR_ADD:
 				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
 				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 9, 0);
 				break;
 			case ERROR:
 				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
 				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 9, 0);
+				break;
+			case START:
+				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
+				break;
+			case FINISH:
+				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
 				break;
 			default:
 				break;
@@ -236,27 +236,15 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 		}
 	}
 
-	default void setPto(int value) {
-		if (getType() == Type.POS_TO) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, value);
-		}
-	}
-
 	default void setVwrite(Variable value) {
 		if (getType() == Type.VAR_WRITE) {
 			getStore().setInt(getRec(), matchstepPosition() + 1, value == null ? 0 : value.getRec());
 		}
 	}
 
-	default void setVwfrom(int value) {
+	default void setVwrange(int value) {
 		if (getType() == Type.VAR_WRITE) {
 			getStore().setInt(getRec(), matchstepPosition() + 5, value);
-		}
-	}
-
-	default void setVwtill(int value) {
-		if (getType() == Type.VAR_WRITE) {
-			getStore().setInt(getRec(), matchstepPosition() + 9, value);
 		}
 	}
 
@@ -272,15 +260,9 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 		}
 	}
 
-	default void setVafrom(int value) {
+	default void setVarange(int value) {
 		if (getType() == Type.VAR_ADD) {
 			getStore().setInt(getRec(), matchstepPosition() + 5, value);
-		}
-	}
-
-	default void setVatill(int value) {
-		if (getType() == Type.VAR_ADD) {
-			getStore().setInt(getRec(), matchstepPosition() + 9, value);
 		}
 	}
 
@@ -290,15 +272,21 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 		}
 	}
 
-	default void setEfrom(int value) {
+	default void setErange(int value) {
 		if (getType() == Type.ERROR) {
 			getStore().setInt(getRec(), matchstepPosition() + 5, value);
 		}
 	}
 
-	default void setEtill(int value) {
-		if (getType() == Type.ERROR) {
-			getStore().setInt(getRec(), matchstepPosition() + 9, value);
+	default void setNotstarted(int value) {
+		if (getType() == Type.START) {
+			getStore().setInt(getRec(), matchstepPosition() + 1, value);
+		}
+	}
+
+	default void setNotfinished(int value) {
+		if (getType() == Type.FINISH) {
+			getStore().setInt(getRec(), matchstepPosition() + 1, value);
 		}
 	}
 
@@ -391,17 +379,11 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 		if (parser.hasField("ttfalse")) {
 			setTtfalse(parser.getInt("ttfalse"));
 		}
-		if (parser.hasField("pto")) {
-			setPto(parser.getInt("pto"));
-		}
 		if (parser.hasSub("vwrite")) {
 			setVwrite(new Variable(getStore()).parse(parser));
 		}
-		if (parser.hasField("vwfrom")) {
-			setVwfrom(parser.getInt("vwfrom"));
-		}
-		if (parser.hasField("vwtill")) {
-			setVwtill(parser.getInt("vwtill"));
+		if (parser.hasField("vwrange")) {
+			setVwrange(parser.getInt("vwrange"));
 		}
 		if (parser.hasSub("vstart")) {
 			setVstart(new Variable(getStore()).parse(parser));
@@ -409,20 +391,20 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 		if (parser.hasSub("vadd")) {
 			setVadd(new Variable(getStore()).parse(parser));
 		}
-		if (parser.hasField("vafrom")) {
-			setVafrom(parser.getInt("vafrom"));
-		}
-		if (parser.hasField("vatill")) {
-			setVatill(parser.getInt("vatill"));
+		if (parser.hasField("varange")) {
+			setVarange(parser.getInt("varange"));
 		}
 		if (parser.hasField("error")) {
 			setError(parser.getString("error"));
 		}
-		if (parser.hasField("efrom")) {
-			setEfrom(parser.getInt("efrom"));
+		if (parser.hasField("erange")) {
+			setErange(parser.getInt("erange"));
 		}
-		if (parser.hasField("etill")) {
-			setEtill(parser.getInt("etill"));
+		if (parser.hasField("notstarted")) {
+			setNotstarted(parser.getInt("notstarted"));
+		}
+		if (parser.hasField("notfinished")) {
+			setNotfinished(parser.getInt("notfinished"));
 		}
 	}
 
@@ -530,48 +512,40 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 				setTtfalse((Integer) value);
 			return value instanceof Integer;
 		case 25:
-			if (value instanceof Integer)
-				setPto((Integer) value);
-			return value instanceof Integer;
-		case 26:
 			if (value instanceof Variable)
 				setVwrite((Variable) value);
 			return value instanceof Variable;
+		case 26:
+			if (value instanceof Integer)
+				setVwrange((Integer) value);
+			return value instanceof Integer;
 		case 27:
-			if (value instanceof Integer)
-				setVwfrom((Integer) value);
-			return value instanceof Integer;
-		case 28:
-			if (value instanceof Integer)
-				setVwtill((Integer) value);
-			return value instanceof Integer;
-		case 29:
 			if (value instanceof Variable)
 				setVstart((Variable) value);
 			return value instanceof Variable;
-		case 30:
+		case 28:
 			if (value instanceof Variable)
 				setVadd((Variable) value);
 			return value instanceof Variable;
-		case 31:
+		case 29:
 			if (value instanceof Integer)
-				setVafrom((Integer) value);
+				setVarange((Integer) value);
 			return value instanceof Integer;
-		case 32:
-			if (value instanceof Integer)
-				setVatill((Integer) value);
-			return value instanceof Integer;
-		case 33:
+		case 30:
 			if (value instanceof String)
 				setError((String) value);
 			return value instanceof String;
-		case 34:
+		case 31:
 			if (value instanceof Integer)
-				setEfrom((Integer) value);
+				setErange((Integer) value);
 			return value instanceof Integer;
-		case 35:
+		case 32:
 			if (value instanceof Integer)
-				setEtill((Integer) value);
+				setNotstarted((Integer) value);
+			return value instanceof Integer;
+		case 33:
+			if (value instanceof Integer)
+				setNotfinished((Integer) value);
 			return value instanceof Integer;
 		default:
 			return false;

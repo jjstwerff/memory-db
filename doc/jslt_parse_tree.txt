@@ -66,12 +66,12 @@ Jslt.MatchField: Match {
 
 Jslt.MatchStep {
 	enumerate[stack, parm, field, alt, test_call, jump, test_stack, test_boolean, test_string, test_number, test_float, test_type,
-		pos_keep, pos_free, pos_to, var_write, var_start, var_add, error] type,
-	?stack { int32 stack } "increase or decrease the stack frame (variables/call)",
-	?parm { int32 parm, int32 pfalse } "increase or decrease the stack frame (variables/call)",
-	?field { string field, int32 ffalse } "switch to a specific field",
+		push, pop, var_write, var_start, var_add, error, start, finish] type,
+	?stack { int32 stack } "increase or decrease the output stack frame (variables/call)",
+	?parm { int32 parm, int32 pfalse } "switch to a specific original parameter",
+	?field { string field, int32 ffalse } "switch to a specific field inside an object",
 	?alt { int32 altnr, int32 afalse, Variable avar } "record Id of Alternative, perform if-condition & calculate, result into avar",
-	?test_stack { int32 tstack, int32 fsfalse } "test the number of elements on the stack",
+	?test_stack { int32 tstack, int32 fsfalse } "test the number of original parameters on the stack",
 	?test_call { Macro tmacro, int32 tfalse } "current element as extra parameter",
 	?jump { int32 jump } "continue at a specific location",
 	?test_boolean { boolean mboolean, int32 mbfalse },
@@ -79,8 +79,8 @@ Jslt.MatchStep {
 	?test_number { number mnumber, int32 mnfalse },
 	?test_float { float mfloat, int32 mffalse },
 	?test_type { enumerate[type_null, type_boolean, type_string, type_number, type_float, type_array, type_object] ttype, integr ttfalse },
-	?pos_to { int32 pto } "jump back to a specific position on a parameter",
-	?var_write { Variable vwrite, int32 vwfrom, int32 vwtill } "write to a variable",
+	?var_write { Variable vwrite, int32 vwrange } "write to a variable, possibly a range from a stack element",
 	?var_start { Variable vstart } "start a new variable as an array",
-	?var_add { Variable vadd, int32 vafrom, int32 vatill } "add a new element to a variable",
-	?error { string error, int32 efrom, int32 etill } "write a specific error text" }
+	?var_add { Variable vadd, int32 varange } "add a new element to a variable, possibly a range from a stack element",
+	?error { string error, int32 erange } "write a specific error text, possibly from a stack element",
+	?finish { int32 notFinished } "stop interpreting the content of an array, jump when not at the end"

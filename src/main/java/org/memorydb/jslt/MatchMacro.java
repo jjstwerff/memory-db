@@ -14,6 +14,7 @@ public class MatchMacro {
 	private final int startFrame;
 	private final int maxParameter;
 	private Object cur; // currently selected object
+	private int cur_pos; // current position
 
 	public MatchMacro(JsltInterpreter inter, Operator code) {
 		this.inter = inter;
@@ -68,6 +69,14 @@ public class MatchMacro {
 				} else
 					pos = matching.getFfalse(); // Element doesn't have the specified field
 				break;
+			case FINISH:
+				RecordInterface frec = cur instanceof RecordInterface ? (RecordInterface) cur : null;
+				boolean problem = frec == null || cur_pos > 0 || frec.next(cur_pos) != -2;
+				if (problem && matching.getNotfinished() != Integer.MIN_VALUE) {
+					pos = matching.getNotfinished();
+				} else
+					pos = matching.next(pos);
+				break;
 			case JUMP:
 				pos = matching.getJump();
 				break;
@@ -79,16 +88,27 @@ public class MatchMacro {
 					pos = matching.next(pos);
 				}
 				break;
-			case POS_FREE:
+			case PUSH:
+				// validate that each element in a RecordImplementation
+				// only a stack of objects, each split-off is a new object.. copy of current
 				((Text) cur).freePos();
 				pos = matching.next(pos);
 				break;
-			case POS_KEEP:
-				((Text) cur).addPos();
+			case POP:
+				// 
 				pos = matching.next(pos);
 				break;
-			case POS_TO:
-				((Text) cur).toPos(matching.getPto());
+			case START:
+				RecordInterface ri;
+				if (cur instanceof String)
+					ri = new StringArray((String) cur);
+				else if (cur instanceof RecordInterface)
+					ri = (RecordInterface) cur;
+				else {
+					pos = matching.getNotstarted();
+					break;
+				}
+				cur_pos = ri.next(-1);
 				pos = matching.next(pos);
 				break;
 			case STACK:
@@ -102,7 +122,7 @@ public class MatchMacro {
 					pos = matching.getMbfalse();
 				break;
 			case TEST_CALL:
-				break;
+				throw new RuntimeException("Not written yet");
 			case TEST_FLOAT:
 				if (cur instanceof Double && (Double) cur == matching.getMfloat())
 					pos = matching.next(pos);
@@ -176,14 +196,13 @@ public class MatchMacro {
 			case VAR_ADD: {
 				@SuppressWarnings("unchecked")
 				List<Object> list = (List<Object>) inter.getStackElement(matching.getVadd().getNr());
-				int from = matching.getVafrom(); // TODO handle TEXT substring
-				int till = matching.getVafrom();
-				if (from == Integer.MIN_VALUE && till == Integer.MIN_VALUE)
+				int range = matching.getVarange(); // TODO handle TEXT substring
+				if (range == Integer.MIN_VALUE)
 					list.add(cur);
-				else if (till == Integer.MIN_VALUE)
-					list.add(((Text) cur).substring(from));
-				else
-					list.add(((Text) cur).substring(from, till));
+				else {
+					throw new RuntimeException("Not implemented yet!");
+					//list.add(((Text) cur).substring(from, till));
+				}
 				pos = matching.next(pos);
 				break;
 			}
@@ -191,15 +210,12 @@ public class MatchMacro {
 				inter.setStack(startFrame + matching.getVadd().getNr(), new ArrayList<>());
 				break;
 			case VAR_WRITE:
-				int from = matching.getVwfrom(); // TODO handle TEXT substring
-				int till = matching.getVwfrom();
+				int range = matching.getVwrange();
 				Object obj;
-				if (from == Integer.MIN_VALUE && till == Integer.MIN_VALUE)
+				if (range == Integer.MIN_VALUE)
 					obj = cur;
-				else if (till == Integer.MIN_VALUE)
-					obj = ((Text) cur).substring(from);
 				else
-					obj = ((Text) cur).substring(from, till);
+					throw new RuntimeException("Not implemented yet!");
 				inter.setStack(startFrame + matching.getVadd().getNr(), obj);
 				break;
 			default:

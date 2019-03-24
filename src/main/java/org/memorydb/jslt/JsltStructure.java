@@ -15,8 +15,8 @@ public class JsltStructure {
 		Project project = new Project("Jslt", "org.memorydb.jslt", "src/main/java/org/memorydb/jslt");
 
 		Record type = project.content("ResultType");
-		type.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "FLOAT", "NUMBER", "NULL", "OBJECT", "STRING",
-				"STRUCTURE").defaultValue("NULL").mandatory();
+		type.field("type", Type.ENUMERATE, "ARRAY", "BOOLEAN", "FLOAT", "NUMBER", "NULL", "OBJECT", "STRING", "STRUCTURE").defaultValue("NULL")
+				.mandatory();
 		type.field("record", Type.STRING);
 
 		Record step = project.record("Step");
@@ -29,12 +29,11 @@ public class JsltStructure {
 		source.index("sources", "name");
 
 		Record oper = project.content("Operator");
-		oper.field("operation", Type.ENUMERATE, "FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT",
-				"BOOLEAN", "APPEND", "NULL", "CALL", "FILTER", "SORT", "IF", "CURRENT", "RUNNING", "READ", "VARIABLE")
-				.condition();
-		oper.field("function", Type.ENUMERATE, "NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT",
-				"LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING",
-				"BOOLEAN", "NAME", "TYPE", "ELEMENT", "PER", "FOR", "EACH", "LAYOUT").mandatory().when("FUNCTION");
+		oper.field("operation", Type.ENUMERATE, "FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT", "BOOLEAN", "APPEND", "NULL",
+				"CALL", "FILTER", "SORT", "IF", "CURRENT", "RUNNING", "READ", "VARIABLE").condition();
+		oper.field("function", Type.ENUMERATE, "NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT", "LE", "GE", "AND", "OR",
+				"NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT", "PER", "FOR", "EACH",
+				"LAYOUT").mandatory().when("FUNCTION");
 		oper.field("fnParm1", Type.OBJECT, expr).when("FUNCTION");
 		oper.field("fnParm2", Type.OBJECT, expr).when("FUNCTION");
 		oper.field("conExpr", Type.OBJECT, expr).when("CONDITION");
@@ -81,8 +80,8 @@ public class JsltStructure {
 
 		Record match = project.content("Match");
 		match.field("variable", Type.OBJECT, variable); // store current match into a variable
-		match.field("type", Type.ENUMERATE, "ANY", "ARRAY", "BOOLEAN", "NULL", "FLOAT", "NUMBER", "STRING", "OBJECT",
-				"CONSTANT", "MACRO", "MULTIPLE").condition();
+		match.field("type", Type.ENUMERATE, "ANY", "ARRAY", "BOOLEAN", "NULL", "FLOAT", "NUMBER", "STRING", "OBJECT", "CONSTANT", "MACRO", "MULTIPLE")
+				.condition();
 		match.field("marray", Type.ARRAY, subMatch).when("ARRAY");
 		match.field("boolean", Type.BOOLEAN).when("BOOLEAN");
 		match.field("float", Type.FLOAT).when("FLOAT");
@@ -114,20 +113,21 @@ public class JsltStructure {
 
 		Record matchStep = project.content("MatchStep");
 		matchStep.field("type", Type.ENUMERATE, "STACK", "PARM", "FIELD", "ALT", "TEST_CALL", "JUMP", //
-				"TEST_STACK", "TEST_BOOLEAN", "TEST_STRING", "TEST_NUMBER", "TEST_FLOAT", //
-				"TEST_TYPE", "POS_KEEP", "POS_FREE", "POS_TO", "VAR_WRITE", "VAR_START", "VAR_ADD", "ERROR")
-				.condition();
-		matchStep.field("stack", Type.INTEGER).when("STACK"); // increase or decrease the stack frame (variables/call)
+				"TEST_STACK", "TEST_BOOLEAN", "TEST_STRING", "TEST_NUMBER", "TEST_FLOAT", "TEST_TYPE", //
+				"PUSH", "POP", "VAR_WRITE", "VAR_START", "VAR_ADD", "ERROR", "START", "FINISH").condition();
+		matchStep.field("stack", Type.INTEGER).when("STACK"); // increase or decrease the output stack frame (variables/call)
 		matchStep.field("parm", Type.INTEGER).when("PARM"); // switch to a specific original parameter
 		matchStep.field("pfalse", Type.INTEGER).when("PARM"); // continue if this parameter is not given
-		matchStep.field("field", Type.STRING).when("FIELD"); // switch to a specific field
+		matchStep.field("field", Type.STRING).when("FIELD"); // switch to a specific field inside an object
 		matchStep.field("ffalse", Type.INTEGER).when("FIELD"); // continue of not an object of field doesn't exists
 		matchStep.field("altnr", Type.INTEGER).when("ALT"); // record Id of Alternative, perform if-condition & calculate
 		matchStep.field("afalse", Type.INTEGER).when("ALT"); // goto position if if-condition is not met
 		matchStep.field("avar", Type.OBJECT, variable).when("ALT"); // result into variable: null = return main
-		matchStep.field("tstack", Type.INTEGER).when("TEST_STACK"); // test the number of elements on the stack
+		matchStep.field("tstack", Type.INTEGER).when("TEST_STACK"); // test the number of original parameters on the stack
 		matchStep.field("tsfalse", Type.INTEGER).when("TEST_STACK"); // where to continue if the stack is not this size
-		matchStep.field("tmacro", Type.RELATION, macro).when("TEST_CALL"); // current element as extra parameter
+		matchStep.field("tmacro", Type.RELATION, macro).when("TEST_CALL"); // call macro with current element as only parameter
+		// TODO: allow more parameters to this call, expressions using current
+		// parameters & already calculated fields
 		matchStep.field("tfalse", Type.INTEGER).when("TEST_CALL"); // jump when result is false
 		matchStep.field("jump", Type.INTEGER).when("JUMP"); // continue at a specific location
 		matchStep.field("mboolean", Type.BOOLEAN).when("TEST_BOOLEAN"); // specific boolean value
@@ -138,20 +138,18 @@ public class JsltStructure {
 		matchStep.field("mnfalse", Type.INTEGER).when("TEST_NUMBER"); // continue when not matched
 		matchStep.field("mfloat", Type.FLOAT).when("TEST_FLOAT"); // specific float value
 		matchStep.field("mffalse", Type.INTEGER).when("TEST_FLOAT"); // continue when not matched
-		matchStep.field("ttype", Type.ENUMERATE, "TYPE_NULL", "TYPE_BOOLEAN", "TYPE_STRING", "TYPE_NUMBER",
-				"TYPE_FLOAT", "TYPE_ARRAY", "TYPE_OBJECT").when("TEST_TYPE"); // test parameter on a type
+		matchStep.field("ttype", Type.ENUMERATE, "TYPE_NULL", "TYPE_BOOLEAN", "TYPE_STRING", "TYPE_NUMBER", "TYPE_FLOAT", "TYPE_ARRAY", "TYPE_OBJECT",
+				"SKIP").when("TEST_TYPE"); // test parameter on a type
 		matchStep.field("ttfalse", Type.INTEGER).when("TEST_TYPE"); // continue when not the specified type
-		matchStep.field("pto", Type.INTEGER).when("POS_TO"); // jump back to a specific position on a parameter
 		matchStep.field("vwrite", Type.OBJECT, variable).when("VAR_WRITE"); // write to a variable
-		matchStep.field("vwfrom", Type.INTEGER).when("VAR_WRITE"); // from current element position
-		matchStep.field("vwtill", Type.INTEGER).when("VAR_WRITE"); // to position
+		matchStep.field("vwrange", Type.INTEGER).when("VAR_WRITE"); // write range from stack object till current, 0: from current to end of array
 		matchStep.field("vstart", Type.OBJECT, variable).when("VAR_START"); // start a new variable as an array
 		matchStep.field("vadd", Type.OBJECT, variable).when("VAR_ADD"); // add a new element to a variable
-		matchStep.field("vafrom", Type.INTEGER).when("VAR_ADD"); // from position
-		matchStep.field("vatill", Type.INTEGER).when("VAR_ADD"); // to position
+		matchStep.field("varange", Type.INTEGER).when("VAR_ADD"); // write range from stack object till current, 0: from current to end of array
 		matchStep.field("error", Type.STRING).when("ERROR"); // write a specific error text
-		matchStep.field("efrom", Type.INTEGER).when("ERROR"); // from position
-		matchStep.field("etill", Type.INTEGER).when("ERROR"); // to position
+		matchStep.field("erange", Type.INTEGER).when("ERROR"); // show range from stack position till current element
+		matchStep.field("notstarted", Type.INTEGER).when("START"); // jump when incorrect type
+		matchStep.field("notfinished", Type.INTEGER).when("FINISH"); // expect the list to be finished otherwise jump to notfinished
 
 		Record mStep = project.record("MStep");
 		mStep.include(matchStep);
