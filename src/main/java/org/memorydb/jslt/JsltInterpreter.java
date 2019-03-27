@@ -240,70 +240,65 @@ public class JsltInterpreter {
 	}
 
 	private void iterateObject(int maxDepth, Writer write, RecordInterface rec) {
-		if (maxDepth <= 0 || rec == null || !rec.exists())
+		if (maxDepth <= 0 || rec == null)
 			return;
 		write.startObject();
-		for (int field = rec.next(-1); field >= 0; field = rec.next(field)) {
-			FieldType type = rec.type(field);
-			write.field(rec.name(field));
-			if (type == FieldType.OBJECT)
-				iterateObject(maxDepth - 1, write, (RecordInterface) rec.get(field));
-			else if (type == FieldType.ARRAY)
-				iterateArray(maxDepth, write, (RecordInterface) rec.get(field));
+		for (RecordInterface elm : rec) {
+			write.field(elm.name());
+			if (elm.type() == FieldType.OBJECT)
+				iterateObject(maxDepth - 1, write, elm);
+			else if (elm.type() == FieldType.ARRAY)
+				iterateArray(maxDepth, write, elm);
 			else
-				write.element(rec.get(field));
+				write.element(elm);
 		}
 		write.endObject();
 	}
 
 	private void iterateArray(int maxDepth, Writer write, RecordInterface rec) {
 		write.startArray();
-		for (int field = rec.next(-1); field >= 0; field = rec.next(field)) {
-			FieldType type = rec.type(field);
-			if (type == FieldType.OBJECT)
-				iterateObject(maxDepth, write, (RecordInterface) rec.get(field));
-			else if (type == FieldType.ARRAY)
-				iterateArray(maxDepth, write, (RecordInterface) rec.get(field));
+		for (RecordInterface elm : rec) {
+			if (elm.type() == FieldType.OBJECT)
+				iterateObject(maxDepth, write, elm);
+			else if (elm.type() == FieldType.ARRAY)
+				iterateArray(maxDepth, write, elm);
 			else
-				write.element(rec.get(field));
+				write.element(elm);
 		}
 		write.endArray();
 	}
 
 	private void iterate(int maxDepth, Writer write, String name, RecordInterface rec, int ops) {
-		if (maxDepth <= 0 || !rec.exists())
+		if (maxDepth <= 0)
 			return;
-		int f = rec.next(-1);
-		if (f == 0) {
-			nonObject(maxDepth, write, rec, 0, ops);
+		RecordInterface f = rec.start();
+		if (f == null) {
+			nonObject(maxDepth, write, rec, ops);
 			return;
 		}
 		if (name != null)
 			write.field(name);
 		write.startObject();
-		for (int field = f; field >= 0; field = rec.next(field)) {
-			if (rec.type(field) == FieldType.OBJECT)
-				iterate(maxDepth - 1, write, rec.name(field), (RecordInterface) rec.get(field), ops);
+		for (RecordInterface elm : rec) {
+			if (elm.type() == FieldType.OBJECT)
+				iterate(maxDepth - 1, write, elm.name(), elm, ops);
 			else
-				nonObject(maxDepth, write, rec, field, ops);
+				nonObject(maxDepth, write, elm, ops);
 		}
 		write.endObject();
 	}
 
-	private void nonObject(int maxDepth, Writer write, RecordInterface rec, int field, int ops) {
-		String name = rec.name(field);
+	private void nonObject(int maxDepth, Writer write, RecordInterface elm, int ops) {
+		String name = elm.name();
 		if (name != null)
 			write.field(name);
-		if (rec.type(field) == FieldType.ARRAY) {
+		if (elm.type() == FieldType.ARRAY) {
 			write.startArray();
-			Iterable<? extends RecordInterface> iterate = rec.iterate(field);
-			if (iterate != null) {
-				for (RecordInterface sub : iterate)
-					iterate(maxDepth, write, null, sub, ops);
-			}
+			while (!elm.isLast())
+				iterate(maxDepth, write, null, elm, ops);
 			write.endArray();
 		} else {
-			write.element(rec.get(field));
+			write.element(elm);
 		}
 	}
 
@@ -329,18 +324,18 @@ public class JsltInterpreter {
 			RecordInterface r1 = (RecordInterface) t1;
 			RecordInterface r2 = (RecordInterface) t2;
 			if (r1.type() == FieldType.ARRAY && r2.type() == FieldType.ARRAY) {
-				int f1 = r1.next(-1);
-				int f2 = r2.next(-1);
-				while (f1 >= 0 && f2 >= 0) {
-					int c = compare(r1.get(f1), r2.get(f2));
+				RecordInterface e1 = r1.start();
+				RecordInterface e2 = r2.start();
+				while (true) {
+					int c = compare(e1, e2);
 					if (c != 0)
 						return c;
-					f1 = r1.next(f1);
-					f2 = r2.next(f2);
-					if (f1 < 0 && f2 >= 0)
+					if (e1.isLast())
 						return -1;
-					if (f2 < 0 && f1 >= 0)
+					if (e2.isLast())
 						return 1;
+					e1.next();
+					e2.next();
 				}
 			}
 		}
@@ -351,8 +346,8 @@ public class JsltInterpreter {
 		Object p1 = inter(code.getFnParm1());
 		Object p2 = null;
 		Function function = code.getFunction();
-		if (function != Function.EACH && function != Function.FOR && function != Function.PER && function != Function.OR
-				&& function != Function.AND && code.getFnParm2().getRec() != 0)
+		if (function != Function.EACH && function != Function.FOR && function != Function.PER && function != Function.OR && function != Function.AND
+				&& code.getFnParm2().getRec() != 0)
 			p2 = inter(code.getFnParm2());
 		switch (function) {
 		case ADD:
@@ -383,13 +378,11 @@ public class JsltInterpreter {
 			return resObj;
 		case EACH:
 			running = p1;
-			int pos = 1;
-			while (curFor.type(pos) != null) {
-				current = curFor.get(pos);
+			for (RecordInterface elm : curFor) {
+				current = elm;
 				RecordInterface remFor = curFor;
 				running = inter(code.getFnParm2());
 				curFor = remFor;
-				pos = curFor.next(pos);
 			}
 			return running;
 		case DIV:
@@ -424,17 +417,12 @@ public class JsltInterpreter {
 						return null;
 					if (s < 0)
 						s += rec.getSize();
-					if (rec.name(1 + (int) s) != null || rec.type(1 + (int) s) == null)
-						return null;
-					return rec.get(1 + (int) s);
+					return rec.get((int) s);
 				} else if (p2 instanceof String) {
 					String name = getString(p2);
 					if (name == null)
 						return null;
-					int res = rec.scanName(name);
-					if (res == -1)
-						return null;
-					return rec.get(res);
+					return rec.get(name);
 				}
 			} else if (p1 instanceof String) {
 				long s = getNumber(p2);
@@ -460,8 +448,7 @@ public class JsltInterpreter {
 			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
 				return compare(p1, p2) == 0;
 			else if (p1 == null)
-				return p2 == null || (p2 instanceof Long && (Long) p2 == Long.MIN_VALUE)
-						|| (p2 instanceof Double && Double.isNaN((Double) p2));
+				return p2 == null || (p2 instanceof Long && (Long) p2 == Long.MIN_VALUE) || (p2 instanceof Double && Double.isNaN((Double) p2));
 			return false;
 		case FIRST:
 			return first;
@@ -629,17 +616,16 @@ public class JsltInterpreter {
 			return formatNumber(layout, obj);
 		int width = -1;
 		String align = "L";
-		for (int fld = layout.next(-1); layout.type(fld) != null; fld = layout.next(fld)) {
-			switch (layout.name(fld)) {
+		for (RecordInterface fld : layout) {
+			switch (fld.name()) {
 			case "width":
-				Object w = layout.get(fld);
-				if (w instanceof Operator)
-					width = ((Long) inter((Operator) w)).intValue();
+				if (fld instanceof Operator)
+					width = ((Long) inter((Operator) fld)).intValue();
 				else
-					width = ((Long) w).intValue();
+					width = (int) getNumber(fld.get());
 				break;
 			case "align":
-				align = (String) layout.get(fld);
+				align = getString(fld.get());
 				break;
 			}
 		}
@@ -677,30 +663,30 @@ public class JsltInterpreter {
 		String separator = null;
 		boolean alternative = false;
 		boolean leadingZero = false;
-		for (int fld = layout.next(-1); layout.type(fld) != null; fld = layout.next(fld)) {
-			switch (layout.name(fld)) {
+		for (RecordInterface fld : layout) {
+			switch (fld.name()) {
 			case "width":
-				Object w = layout.get(fld);
+				Object w = layout.get();
 				if (w instanceof Operator)
 					width = ((Long) inter((Operator) w)).intValue();
 				else
 					width = ((Long) w).intValue();
 				break;
 			case "precision":
-				Object p = layout.get(fld);
+				Object p = layout.get();
 				if (p instanceof Operator)
 					precision = ((Long) inter((Operator) p)).intValue();
 				else
 					precision = ((Long) p).intValue();
 				break;
 			case "align":
-				align = (String) layout.get(fld);
+				align = (String) layout.get();
 				break;
 			case "type":
-				type = (String) layout.get(fld);
+				type = (String) layout.get();
 				break;
 			case "separator":
-				separator = (String) layout.get(fld);
+				separator = (String) layout.get();
 				break;
 			case "leadingZero":
 				leadingZero = true;

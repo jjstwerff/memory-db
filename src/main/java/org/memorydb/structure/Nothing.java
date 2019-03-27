@@ -27,27 +27,32 @@ public class Nothing implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
-	}
-
-	@Override
-	public String name(int field) {
+	public String name() {
 		return null;
 	}
 
 	@Override
-	public FieldType type(int field) {
+	public FieldType type() {
 		return null;
 	}
 
 	@Override
-	public Object get(int field) {
+	public boolean next() {
+		return false;
+	}
+
+	@Override
+	public RecordInterface getClone() {
+		return this;
+	}
+
+	@Override
+	public RecordInterface get(String search) {
 		return null;
 	}
 
 	@Override
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
+	public RecordInterface get(int index) {
 		return null;
 	}
 }

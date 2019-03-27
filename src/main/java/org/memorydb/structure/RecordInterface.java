@@ -2,7 +2,7 @@ package org.memorydb.structure;
 
 import java.util.Iterator;
 
-public interface RecordInterface {
+public interface RecordInterface extends Iterable<RecordInterface> {
 	public enum FieldType {
 		INTEGER, LONG, FLOAT, STRING, DATE, BOOLEAN, // single types
 		ARRAY, // this field holds a list of records
@@ -12,109 +12,82 @@ public interface RecordInterface {
 		NULL
 	}
 
+	/**
+	 * Return the parent object of the current data.
+	 */
 	default RecordInterface getUpRecord() {
 		return null;
 	}
 
+	default Object get() {
+		return null;
+	}
+
 	/**
-	 * return the next field defined on this record:
-	 * -2 means unknown field
-	 * -1 means end of fields found
-	 *  0 is a special value.. this is not an object but a single value
-	 * >0 is a field pointer
+	 * Return the first element of an ARRAY or the first field of an OBJECT.
+	 * Return null when the ARRAY or OBJECT is empty of when the type is something else.
 	 */
-	default int next(int field) {
-		int res = field < 0 ? 1 : field + 1;
-		if (type(res) == null)
-			return -2;
-		return res;
+	default RecordInterface start() {
+		return get(0);
 	}
 
-	String name(int field);
+	/**
+	 * Switch to the next field of an OBJECT or an element of a ARRAY.
+	 * Return false if it was the last element.
+	 */
+	boolean next();
 
-	default int scanName(String search) {
-		if (search == null)
-			return -1;
-		for (int p = next(-1); p > 0; p = next(p)) {
-			String n = name(p);
-			if (n == null)
-				return -1;
-			if (search.equals(n))
-				return p;
-		}
-		return -1;
+	/**
+	 * Return true if this is the last element on an ARRAY or field on an OBJET.
+	 */
+	default boolean isLast() {
+		return true;
 	}
+
+	/**
+	 * Create a clone of the current element.
+	 */
+	RecordInterface getClone();
+
+	/**
+	 * When this is a field of an OBJECT return its name.
+	 * Otherwise returns null; 
+	 */
+	default String name() {
+		return null;
+	}
+
+	/**
+	 * When this is an OBJECT return the requested field.
+	 * Otherwise return null.
+	 */
+	RecordInterface get(String search);
+
+	/**
+	 * When this is an ARRAY return the requested element.
+	 * Otherwise return null.
+	 */
+	RecordInterface get(int index);
 
 	default FieldType type() {
 		return null;
 	}
 
 	/**
-	 * Return null when an unknown field is requested. 
+	 * Iterate through elements in an ARRAY or fields on an OBJECT
 	 */
-	FieldType type(int field);
-
-	Object get(int field);
-
-	/**
-	 * @param field  
-	 * @param key 
-	 */
-	default String key(int field, int key) {
-		return null;
-	}
-
-	/**
-	 * Return the possible type of restrictions on the iterator.
-	 * When a key FILTERS is found the rest of the keys will loop the known iterators.
-	 * @param field 
-	 * @param key 
-	 */
-	default FieldType type(int field, int key) {
-		return null;
-	}
-
-	/**
-	 * @param name  
-	 * @param min 
-	 * @param max 
-	 */
-	default Object rangeFilter(String name, Object min, Object max) {
-		return null;
-	}
-
-	/**
-	 * @param name  
-	 * @param inverse 
-	 * @param values 
-	 */
-	default Object codedFilter(String name, boolean inverse, Object... values) {
-		return null;
-	}
-
-	/**
-	 * @param field  
-	 * @param key 
-	 */
-	default Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		return new Iterable<>() {
+	default Iterator<RecordInterface> iterator() {
+		start();
+		return new Iterator<RecordInterface>() {
 			@Override
-			public Iterator<RecordInterface> iterator() {
-				return new Iterator<>() {
-					int next = RecordInterface.this.next(-1);
+			public boolean hasNext() {
+				return !isLast();
+			}
 
-					@Override
-					public boolean hasNext() {
-						return next > 0;
-					}
-
-					@Override
-					public RecordInterface next() {
-						int fieldNr = next;
-						next = RecordInterface.this.next(fieldNr);
-						return (RecordInterface) get(fieldNr);
-					}
-				};
+			@Override
+			public RecordInterface next() {
+				next();
+				return RecordInterface.this;
 			}
 		};
 	}
@@ -125,9 +98,5 @@ public interface RecordInterface {
 
 	default int getSize() {
 		return 0;
-	}
-
-	default boolean exists() { // indication the the data is defined
-		return true;
 	}
 }

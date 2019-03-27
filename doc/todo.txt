@@ -1,3 +1,11 @@
+Abstract Array / Object element
+- knows its place in the array/object
+- can move to the next state
+- can be cloned
+
+Instead of normal RecordInterface. Prevent current errors with indexes.
+
+
 MatchMacro:
 - validate that the stack is empty
 - implement stack push / pop

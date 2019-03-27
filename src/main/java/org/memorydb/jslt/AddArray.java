@@ -80,11 +80,6 @@ public class AddArray implements RecordInterface {
 	}
 
 	@Override
-	public boolean exists() {
-		return true;
-	}
-
-	@Override
 	public FieldType type() {
 		return array.type();
 	}
