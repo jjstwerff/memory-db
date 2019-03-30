@@ -103,6 +103,6 @@ public interface RecordInterface {
 	 * Test if the structure or STRING is empty.
 	 */
 	default boolean empty() {
-		return true;
+		return size() == 0;
 	}
 }

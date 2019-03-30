@@ -9,14 +9,15 @@ import java.util.Iterator;
  */
 public class ChangeRecord extends Record implements ChangeInterface {
 	/* package private */ ChangeRecord(Project parent, int rec) {
-		super(parent.store(), rec);
-		setName(null);
-		store.setInt(rec(), 8, 0); // SET fieldName
-		store.setInt(rec(), 12, 0); // SET fields
-		setCondition(null);
-		setDescription(null);
-		up(parent);
-		if (rec != 0) {
+		super(parent.store(), rec == 0 ? parent.store().allocate(Record.RECORD_SIZE) : rec);
+		if (rec == 0) {
+			setName(null);
+			store.setInt(rec(), 8, 0); // SET fieldName
+			store.setInt(rec(), 12, 0); // SET fields
+			setCondition(null);
+			setDescription(null);
+			up(parent);
+		} else {
 			up().new IndexRecords().remove(rec);
 		}
 	}

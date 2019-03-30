@@ -33,9 +33,13 @@ public class TestInserts extends NormalCheck {
 				}
 				if (i > 1000) {
 					int nr = rand.nextInt(1000);
+					int c = 0;
 					for (Record rec : project.getRecords()) {
-						if (nr-- == 0)
+						if (nr-- == 0) {
 							project.getRecords().remove(rec.rec());
+						}
+						c++;
+						assert c < 1100;
 					}
 				}
 			}

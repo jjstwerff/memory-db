@@ -12,28 +12,29 @@ import org.memorydb.handler.MutationException;
  */
 public class ChangeField extends Field implements MemoryRecord, ChangeInterface {
 	/* package private */ ChangeField(Record parent, int rec) {
-		super(parent.store(), rec);
-		setName(null);
-		setNr(0);
-		setType(Field.Type.STRING);
-		setKey(false);
-		store.setInt(rec(), 13, 0); // ARRAY values
-		setRelated(null);
-		setRecord(null);
-		setContent(null);
-		setChild(null);
-		setTo(null);
-		store.setInt(rec(), 17, 0); // ARRAY order
-		setMandatory(false);
-		setMinimum(0L);
-		setMaximum(0L);
-		setFormat(null);
-		setDecimals((byte) 0);
-		setDefault(null);
-		setCondition(null);
-		setDescription(null);
-		up(parent);
-		if (rec != 0) {
+		super(parent.store(), rec == 0 ? parent.store().allocate(Field.RECORD_SIZE) : rec);
+		if (rec == 0) {
+			setName(null);
+			setNr(0);
+			setType(Field.Type.STRING);
+			setKey(false);
+			store.setInt(rec(), 13, 0); // ARRAY values
+			setRelated(null);
+			setRecord(null);
+			setContent(null);
+			setChild(null);
+			setTo(null);
+			store.setInt(rec(), 17, 0); // ARRAY order
+			setMandatory(false);
+			setMinimum(0L);
+			setMaximum(0L);
+			setFormat(null);
+			setDecimals((byte) 0);
+			setDefault(null);
+			setCondition(null);
+			setDescription(null);
+			up(parent);
+		} else {
 			up().new IndexFieldName().remove(rec);
 			up().new IndexFields().remove(rec);
 		}

@@ -11,15 +11,21 @@ import java.util.Iterator;
 public class ChangeProject extends Project implements ChangeInterface {
 	public ChangeProject(Store store, int rec) {
 		super(store, rec == 0 ? store.allocate(Project.RECORD_SIZE) : rec);
-		store.setInt(rec, 4, 0); // SET records
-		setMain(null);
-		setPack(null);
-		setDirectory(null);
+		if (rec == 0) {
+			store.setInt(rec(), 4, 0); // SET records
+			setMain(null);
+			setPack(null);
+			setDirectory(null);
+		} else {
+			new IndexMeta().remove(rec());
+		}
 	}
 
 	public ChangeProject(Project current) {
 		super(current.store(), current.rec());
-		new IndexMeta().remove(rec());
+		if (rec != 0) {
+			new IndexMeta().remove(rec());
+		}
 	}
 
 	public void setMain(Record value) {

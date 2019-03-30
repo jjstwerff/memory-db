@@ -119,7 +119,7 @@ public class Project implements MemoryRecord, RecordInterface {
 
 				@Override
 				public boolean hasNext() {
-					return nextRec != 0;
+					return nextRec > 0;
 				}
 
 				@Override
@@ -198,7 +198,7 @@ public class Project implements MemoryRecord, RecordInterface {
 
 				@Override
 				public boolean hasNext() {
-					return nextRec != 0;
+					return nextRec > 0;
 				}
 
 				@Override

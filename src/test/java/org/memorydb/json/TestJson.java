@@ -55,6 +55,11 @@ public class TestJson extends NormalCheck {
 		Assert.assertEquals("[true]", iterate(res.index(3)));
 		Assert.assertEquals("{\"b\":1}", iterate(res.index(4)));
 		Assert.assertEquals(null, iterate(res.index(5)));
+
+		RecordInterface elm = res.index(3).index(0);
+		Assert.assertEquals("true", iterate(elm));
+		Assert.assertEquals("[true]", iterate(elm.up()));
+		Assert.assertEquals("[\"a\",1,[],[true],{\"b\":1}]", iterate(elm.up().up()));
 	}
 
 	@Test

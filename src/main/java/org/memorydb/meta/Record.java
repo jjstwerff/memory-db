@@ -19,8 +19,8 @@ import org.memorydb.structure.TreeIndex;
  */
 @RecordData(name = "Record")
 public class Record implements MemoryRecord, RecordInterface {
-	/* package private */ Store store;
-	protected int rec;
+	/* package private */ final Store store;
+	protected final int rec;
 	/* package private */ static final int RECORD_SIZE = 37;
 
 	public Record(Store store, int rec) {
@@ -120,7 +120,7 @@ public class Record implements MemoryRecord, RecordInterface {
 
 				@Override
 				public boolean hasNext() {
-					return nextRec != 0;
+					return nextRec > 0;
 				}
 
 				@Override
@@ -197,7 +197,7 @@ public class Record implements MemoryRecord, RecordInterface {
 
 				@Override
 				public boolean hasNext() {
-					return nextRec != 0;
+					return nextRec > 0;
 				}
 
 				@Override
