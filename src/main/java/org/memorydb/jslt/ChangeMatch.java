@@ -14,49 +14,49 @@ public interface ChangeMatch extends ChangeInterface, Match {
 	}
 
 	default void setVariable(Variable value) {
-		if (getRec() != 0) {
-			getStore().setInt(getRec(), matchPosition() + 0, value == null ? 0 : value.getRec());
+		if (rec() != 0) {
+			getStore().setInt(rec(), matchPosition() + 0, value == null ? 0 : value.getRec());
 		}
 	}
 
 	default void setType(Type value) {
-		if (getRec() != 0) {
+		if (rec() != 0) {
 			if (value == null) {
-				getStore().setByte(getRec(), matchPosition() + 4, (getStore().getByte(getRec(), matchPosition() + 4) & 224) + 0);
+				getStore().setByte(rec(), matchPosition() + 4, (getStore().getByte(rec(), matchPosition() + 4) & 224) + 0);
 				return;
 			}
-			getStore().setByte(getRec(), matchPosition() + 4, (getStore().getByte(getRec(), matchPosition() + 4) & 224) + 1 + value.ordinal());
+			getStore().setByte(rec(), matchPosition() + 4, (getStore().getByte(rec(), matchPosition() + 4) & 224) + 1 + value.ordinal());
 			switch (value) {
 			case ARRAY:
-				getStore().setInt(getRec(), matchPosition() + 5, 0);
+				getStore().setInt(rec(), matchPosition() + 5, 0);
 				break;
 			case BOOLEAN:
-				getStore().setByte(getRec(), matchPosition() + 5, getStore().getByte(getRec(), matchPosition() + 5) & 254);
+				getStore().setByte(rec(), matchPosition() + 5, getStore().getByte(rec(), matchPosition() + 5) & 254);
 				break;
 			case FLOAT:
-				getStore().setLong(getRec(), matchPosition() + 5, Double.doubleToLongBits(0.0));
+				getStore().setLong(rec(), matchPosition() + 5, Double.doubleToLongBits(0.0));
 				break;
 			case NUMBER:
-				getStore().setLong(getRec(), matchPosition() + 5, 0L);
+				getStore().setLong(rec(), matchPosition() + 5, 0L);
 				break;
 			case STRING:
-				getStore().setInt(getRec(), matchPosition() + 5, 0);
+				getStore().setInt(rec(), matchPosition() + 5, 0);
 				break;
 			case OBJECT:
-				getStore().setInt(getRec(), matchPosition() + 5, 0);
+				getStore().setInt(rec(), matchPosition() + 5, 0);
 				break;
 			case CONSTANT:
-				getStore().setInt(getRec(), matchPosition() + 5, 0);
-				getStore().setInt(getRec(), matchPosition() + 9, 0);
+				getStore().setInt(rec(), matchPosition() + 5, 0);
+				getStore().setInt(rec(), matchPosition() + 9, 0);
 				break;
 			case MACRO:
-				getStore().setInt(getRec(), matchPosition() + 5, 0);
-				getStore().setInt(getRec(), matchPosition() + 9, 0);
+				getStore().setInt(rec(), matchPosition() + 5, 0);
+				getStore().setInt(rec(), matchPosition() + 9, 0);
 				break;
 			case MULTIPLE:
-				getStore().setInt(getRec(), matchPosition() + 5, 0);
-				getStore().setByte(getRec(), matchPosition() + 9, (byte) 0);
-				getStore().setByte(getRec(), matchPosition() + 10, (byte) 0);
+				getStore().setInt(rec(), matchPosition() + 5, 0);
+				getStore().setByte(rec(), matchPosition() + 9, (byte) 0);
+				getStore().setByte(rec(), matchPosition() + 10, (byte) 0);
 				break;
 			default:
 				break;
@@ -65,77 +65,77 @@ public interface ChangeMatch extends ChangeInterface, Match {
 	}
 
 	default void moveMarray(ChangeMatch other) {
-		getStore().setInt(getRec(), matchPosition() + 5, getStore().getInt(other.getRec(), other.matchPosition() + 5));
-		getStore().setInt(other.getRec(), other.matchPosition() + 5, 0);
+		getStore().setInt(rec(), matchPosition() + 5, getStore().getInt(other.rec(), other.matchPosition() + 5));
+		getStore().setInt(other.rec(), other.matchPosition() + 5, 0);
 	}
 
 	default void setBoolean(boolean value) {
 		if (getType() == Type.BOOLEAN) {
-			getStore().setByte(getRec(), matchPosition() + 5, (getStore().getByte(getRec(), matchPosition() + 5) & 254) + (value ? 1 : 0));
+			getStore().setByte(rec(), matchPosition() + 5, (getStore().getByte(rec(), matchPosition() + 5) & 254) + (value ? 1 : 0));
 		}
 	}
 
 	default void setFloat(double value) {
 		if (getType() == Type.FLOAT) {
-			getStore().setLong(getRec(), matchPosition() + 5, Double.doubleToLongBits(value));
+			getStore().setLong(rec(), matchPosition() + 5, Double.doubleToLongBits(value));
 		}
 	}
 
 	default void setNumber(long value) {
 		if (getType() == Type.NUMBER) {
-			getStore().setLong(getRec(), matchPosition() + 5, value);
+			getStore().setLong(rec(), matchPosition() + 5, value);
 		}
 	}
 
 	default void setString(String value) {
 		if (getType() == Type.STRING) {
-			getStore().setInt(getRec(), matchPosition() + 5, getStore().putString(value));
+			getStore().setInt(rec(), matchPosition() + 5, getStore().putString(value));
 		}
 	}
 
 	default void moveMobject(ChangeMatch other) {
-		getStore().setInt(getRec(), matchPosition() + 5, getStore().getInt(other.getRec(), other.matchPosition() + 5));
-		getStore().setInt(other.getRec(), other.matchPosition() + 5, 0);
+		getStore().setInt(rec(), matchPosition() + 5, getStore().getInt(other.rec(), other.matchPosition() + 5));
+		getStore().setInt(other.rec(), other.matchPosition() + 5, 0);
 	}
 
 	default void setCparm(String value) {
 		if (getType() == Type.CONSTANT) {
-			getStore().setInt(getRec(), matchPosition() + 5, getStore().putString(value));
+			getStore().setInt(rec(), matchPosition() + 5, getStore().putString(value));
 		}
 	}
 
 	default void setConstant(int value) {
 		if (getType() == Type.CONSTANT) {
-			getStore().setInt(getRec(), matchPosition() + 9, value);
+			getStore().setInt(rec(), matchPosition() + 9, value);
 		}
 	}
 
 	default void setMacro(Macro value) {
 		if (getType() == Type.MACRO) {
-			getStore().setInt(getRec(), matchPosition() + 5, value == null ? 0 : value.getRec());
+			getStore().setInt(rec(), matchPosition() + 5, value == null ? 0 : value.getRec());
 		}
 	}
 
 	default void moveMparms(ChangeMatch other) {
-		getStore().setInt(getRec(), matchPosition() + 9, getStore().getInt(other.getRec(), other.matchPosition() + 9));
-		getStore().setInt(other.getRec(), other.matchPosition() + 9, 0);
+		getStore().setInt(rec(), matchPosition() + 9, getStore().getInt(other.rec(), other.matchPosition() + 9));
+		getStore().setInt(other.rec(), other.matchPosition() + 9, 0);
 	}
 
 	default void setMmatch(MatchObject value) {
 		if (getType() == Type.MULTIPLE) {
-			getStore().setInt(getRec(), matchPosition() + 5, value == null ? 0 : value.getRec());
+			getStore().setInt(rec(), matchPosition() + 5, value == null ? 0 : value.getRec());
 		}
 	}
 
 	default void setMmin(byte value) {
 		if (getType() == Type.MULTIPLE) {
-			getStore().setByte(getRec(), matchPosition() + 9, value);
+			getStore().setByte(rec(), matchPosition() + 9, value);
 		}
 	}
 
 	default void setMmax(byte value) {
 		if (getType() == Type.MULTIPLE) {
-			getStore().setByte(getRec(), matchPosition() + 10, value);
+			getStore().setByte(rec(), matchPosition() + 10, value);
 		}
 	}
 
@@ -193,7 +193,7 @@ public interface ChangeMatch extends ChangeInterface, Match {
 				boolean found = relRec.parseKey(parser);
 				setMacro(relRec);
 				return found;
-			}, getRec());
+			}, rec());
 		}
 		if (parser.hasSub("mparms")) {
 			try (MparmsArray sub = new MparmsArray(this, -1)) {

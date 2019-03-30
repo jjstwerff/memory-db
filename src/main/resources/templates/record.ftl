@@ -7,8 +7,6 @@ package ${project.package};
 <#if field.type == "SET"><#assign hasIndexes=true></#if>
 </#list>
 
-import java.io.IOException;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 <#if table.fields?size gt 0>
@@ -37,10 +35,7 @@ import ${import};
 /**
  * Automatically generated record class for table ${table.name}
  */
-@RecordData(
-	name = "${table.name}",
-	keyFields = {<#assign first=true><#list table.fields as key><#if key.isKey()><#if first><#assign first=false><#else>, </#if>"${key.name}"</#if></#list>}<#if table.description??>, 
-	description = "${table.description}"</#if>)
+@RecordData(name = "${table.name}"<#if table.description??>, description = "${table.description}"</#if>)
 public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord, RecordInterface<#else><#list table.includes as incl>${incl.name}<#if incl?has_next>, </#if></#list></#if> {
 	/* package private */ Store store;
 	protected int rec;
@@ -58,18 +53,18 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return rec;
 	}
 
 	@Override
-	public void setRec(int rec) {
+	public void rec(int rec) {
 		assert store.validate(rec);
 		this.rec = rec;
 	}
 
 	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 <#list table.includes as incl>
@@ -104,31 +99,7 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 	}
 </#if>
 
-<#if field.name == "upRecord">
-	@Override
-</#if>
-	@FieldData(
-		name = "${field.name}",
-		type = "${field.type}",
-<#if field.type == "ENUMERATE">
-		enumerate = {<#list field.values as val>"${val}"<#if val?has_next>, </#if></#list>},
-</#if><#if field.type == "SET">
-		keyNames = {<#list field.index.keys as key>"${key.name}"<#if key?has_next>, </#if></#list>},
-		keyTypes = {<#list field.index.keys as key>"${key.type}"<#if key?has_next>, </#if></#list>},
-</#if>
-<#if field.related??><#if field.type == "ARRAY">
-		related = ${field.javaType}.class,
-<#else>
-		related = ${field.related}.class,
-</#if></#if>
-<#if field.isCondition()>
-		condition = true,
-</#if>
-<#if field.getWhen()??>
-		when = "${field.getWhen()}",
-</#if>
-		mandatory = ${field.isMandatory()?string("true", "false")}
-	)
+	@FieldData(name = "${field.name}", type = "${field.type}", <#if field.type == "ENUMERATE">enumerate = { <#list field.values as val>"${val}"<#if val?has_next>, </#if></#list> }, </#if><#if field.related??><#if field.type == "ARRAY">related = ${field.javaType}.class, <#else>related = ${field.related}.class, </#if></#if><#if field.isCondition()>condition = true, </#if><#if field.getWhen()??>when = "${field.getWhen()}", </#if>mandatory = ${field.isMandatory()?string("true", "false")})
 	public ${field.javaType} <#if field.type == "BOOLEAN" || field.type == "NULL_BOOLEAN">is<#else>get</#if>${field.name?cap_first}() {
 		${field.getter}
 	}
@@ -164,7 +135,7 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		return new Change${field.related.name}(this, 0);
 	}
 
-	/* package private */ class Index${index.name?cap_first} extends TreeIndex<${field.related.name}> {
+	/* package private */ class Index${index.name?cap_first} extends TreeIndex<${field.related.name}> implements RecordInterface {
 
 		public Index${index.name?cap_first}(${field.related.name} record) {
 			super(record, null, ${index.flagPos}, ${index.fieldPos});
@@ -178,7 +149,7 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 					if (recNr < 0)
 						return -1;
 					assert store.validate(recNr);
-					record.setRec(recNr);
+					record.rec(recNr);
 					int o = 0;
 <#list index.javaTypes[0..*i] as t>
 					o = RedBlackTree.compare(key${t?index + 1}, record.${index.retrieve[t?index]});
@@ -222,14 +193,31 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		}
 
 		@Override
-		public Object get(int field) {
-			return new ${field.related.name}(store, field);
+		public Object java() {
+			return new ${field.related.name}(store, 0);
+		}
+
+		@Override
+		public RecordInterface next() {
+			return null;
+		}
+
+		@Override
+		public RecordInterface copy() {
+			return null;
 		}
 	}
 </#if></#list>
+<#if table.parent??>
+
+	@Override
+	public ${table.parent.name?cap_first} up() {
+		return new ${table.parent.name?cap_first}(store, rec == 0 ? 0 : store.getInt(rec, ${table.upPos}));
+	}
+</#if>
 <#list table.indexes as index><#if !table.parent??>
 
-	public class Index${index.name?cap_first} extends TreeIndex<${table.name}> {
+	public class Index${index.name?cap_first} extends TreeIndex<${table.name}> implements RecordInterface {
 		public Index${index.name?cap_first}() {
 			super(${table.name}.this, null, ${index.flagPos}, ${index.fieldPos});
 		}
@@ -242,7 +230,7 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 					if (recNr < 0)
 						return -1;
 					assert store.validate(recNr);
-					setRec(recNr);
+					rec(recNr);
 					int o = 0;
 <#list index.javaTypes[0..*i] as t>
 					o = RedBlackTree.compare(key${t?index + 1}, ${table.name}.this.${index.retrieve[t?index]});
@@ -286,14 +274,24 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		}
 
 		@Override
-		public Object get(int field) {
-			return new ${table.name}(store, field);
+		public Object java() {
+			return new ${table.name}(store, 0);
+		}
+
+		@Override
+		public RecordInterface next() {
+			return null;
+		}
+
+		@Override
+		public RecordInterface copy() {
+			return null;
 		}
 	}
 </#if></#list>
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (rec == 0 || iterate <= 0)
 			return;
 <#list table.fields as field><#if field.type == "RELATION"><#if field.name != "upRecord">
@@ -334,12 +332,12 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 	}
 
 	@Override
-	public String keys() throws IOException {
+	public String keys() {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
 <#if table.parent??>
-		res.append("${table.parent.name}").append("{").append(getUpRecord().keys()).append("}");
+		res.append("${table.parent.name}").append("{").append(up().keys()).append("}");
 </#if>
 <#if table.keyRetrieve??><#list table.keyRetrieve as key>
 <#if table.parent?? || key?index gt 0>
@@ -353,11 +351,7 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			output(write, 4);
-		} catch (IOException e) {
-			return "";
-		}
+		output(write, 4);
 		return write.toString();
 	}
 
@@ -366,8 +360,8 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 ${table.keyFields}<#rt>
 			if (parser.isDelete(nextRec)) {
 				try (Change${table.name} record = new Change${table.name}(this)) {
-					store.free(record.getRec());
-					record.setRec(0);
+					store.free(record.rec());
+					record.rec(0);
 				}
 				continue;
 			}
@@ -399,14 +393,22 @@ ${table.parseKeys}<#rt>
 	}
 
 	@Override
-	public Object get(int field) {
+	public Object java() {
+		int field = 0;
 <#assign max = table.fields?size>
+<#if max == 0 && table.includes?size == 1>
+<#list table.includes as incl>
+		return ${incl.name}.super.get${incl.name}(field);
+</#list>
+<#else>
 <#list table.includes as incl>
 <#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
+		if (field > ${max} && field <= ${nmax})
 			return ${incl.name}.super.get${incl.name}(field - ${max});
 <#assign max = nmax>
 </#list>
+</#if>
+<#if max &gt; 0>
 		switch (field) {
 <#list table.fields as field>
 <#if field.type == 'BOOLEAN'>
@@ -419,9 +421,9 @@ ${table.parseKeys}<#rt>
 		default:
 			return null;
 		}
+</#if>
 	}
 
-	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
 <#assign max = table.fields?size>
 <#list table.includes as incl>
@@ -449,17 +451,24 @@ ${table.parseKeys}<#rt>
 	}
 
 	@Override
-	public FieldType type(int field) {
+	public FieldType type() {
+		int field = 0;
 <#assign max = table.fields?size>
+<#if max == 0 && table.includes?size == 1>
+<#list table.includes as incl>
+		return ${incl.name}.super.type${incl.name}(field);
+</#list>
+<#else>
 <#list table.includes as incl>
 <#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
+		if (field > ${max} && field <= ${nmax})
 			return ${incl.name}.super.type${incl.name}(field - ${max});
 <#assign max = nmax>
 </#list>
+</#if>
+<#if table.fields?size &gt; 0>
 		switch (field) {
 <#list table.fields as field>
-<#if field.name != "upRecord">
 		case ${1 + field?index}:
 <#if field.type == 'SET' || field.type == 'ARRAY'>
 			return FieldType.ARRAY;
@@ -471,35 +480,49 @@ ${table.parseKeys}<#rt>
 			return FieldType.INTEGER;
 <#else>
 			return FieldType.${field.type};
-</#if></#if>
+</#if>
 </#list>
 		default:
 			return null;
 		}
+</#if>
 	}
 
 	@Override
-	public String name(int field) {
+	public String name() {
+		int field = 0;
 <#assign max = table.fields?size>
+<#if max == 0 && table.includes?size == 1>
+<#list table.includes as incl>
+		return ${incl.name}.super.name${incl.name}(field);
+</#list>
+<#else>
 <#list table.includes as incl>
 <#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
+		if (field > ${max} && field <= ${nmax})
 			return ${incl.name}.super.name${incl.name}(field - ${max});
 <#assign max = nmax>
 </#list>
+</#if>
+<#if table.fields?size &gt; 0>
 		switch (field) {
 <#list table.fields as field>
-<#if field.name != "upRecord">
 		case ${1 + field?index}:
 			return "${field.name}";
-</#if></#list>
+</#list>
 		default:
 			return null;
 		}
+</#if>
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
+	public ${table.name?cap_first} next() {
+		return null;
+	}
+
+	@Override
+	public ${table.name?cap_first} copy() {
+		return new ${table.name?cap_first}(store, rec);
 	}
 }

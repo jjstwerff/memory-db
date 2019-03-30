@@ -1,12 +1,12 @@
 package org.memorydb.structure;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.memorydb.generate.MetaStructure;
 import org.memorydb.generate.Project;
 import org.memorydb.jslt.JsltStructure;
 import org.memorydb.json.JsonStructure;
 import org.memorydb.meta.ProjectTests;
+import org.memorydb.world.WorldStructure;
 
 public class TestStructure extends ProjectTests {
 	@Test
@@ -18,13 +18,12 @@ public class TestStructure extends ProjectTests {
 
 	@Test
 	public void testWorldStructure() {
-		Project project = JsonStructure.getProject();
-		assertContent(this, "testJsonStructure.txt", project.toString());
+		Project project = WorldStructure.getProject();
+		assertContent(this, "testWorldStructure.txt", project.toString());
 		validate(project);
 	}
 
 	@Test
-	@Ignore("The generated json code is deliberately different. Allow to override methods in the future.")
 	public void testJsonStructure() {
 		Project project = JsonStructure.getProject();
 		assertContent(this, "testJsonStructure.txt", project.toString());

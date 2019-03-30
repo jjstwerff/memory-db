@@ -144,7 +144,7 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 	}
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (alloc == 0 || iterate <= 0)
 			return;
 		outputMatchStep(write, iterate);
@@ -154,16 +154,12 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			if (idx == -1)
-				for (MatchingArray a : this) {
-					a.output(write, 4);
-				}
-			else
-				output(write, 4);
-		} catch (IOException e) {
-			throw new InputOutputException(e);
-		}
+		if (idx == -1)
+			for (MatchingArray a : this) {
+				a.output(write, 4);
+			}
+		else
+			output(write, 4);
 		return write.toString();
 	}
 

@@ -18,7 +18,7 @@ public class Meta implements AutoCloseable {
 		this.store = new Store(1);
 	}
 
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
@@ -27,13 +27,7 @@ public class Meta implements AutoCloseable {
 		return store.toString();
 	}
 
-	@FieldData(
-		name = "meta",
-		type = "SET",
-		keyNames = {"pack"},
-		keyTypes = {"STRING"},
-		related = Project.class
-	)
+	@FieldData(name = "meta", type = "SET", related = Project.class)
 	public Project getMeta(String key1) {
 		Project rec = new Project(store);
 		Project.IndexMeta idx = rec.new IndexMeta(key1);
@@ -44,7 +38,7 @@ public class Meta implements AutoCloseable {
 	}
 
 	public ChangeProject addProject() {
-		return new ChangeProject(store);
+		return new ChangeProject(store, 0);
 	}
 
 	@Override

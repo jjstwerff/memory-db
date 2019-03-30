@@ -1,12 +1,8 @@
 package org.memorydb.json;
 
-import java.io.IOException;
-
 import org.junit.Test;
-
 import org.memorydb.file.Write;
 import org.memorydb.json.Part.Type;
-import org.memorydb.structure.InputOutputException;
 import org.memorydb.structure.NormalCheck;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.RecordInterface.FieldType;
@@ -40,6 +36,8 @@ public class TestJson extends NormalCheck {
 
 	@Test
 	public void testIterate() {
+		Assert.assertEquals("{\"a\":1,\"b\":12.3,\"c\":\"d\",\"d\":false}", iterate("{\"a\":1, \"b\":12.3, \"c\":\"d\", \"d\":false}"));
+
 		Assert.assertEquals("123", iterate("123"));
 		Assert.assertEquals("\"123 4\"", iterate("\"123 4\""));
 		Assert.assertEquals("true", iterate("true"));
@@ -52,11 +50,7 @@ public class TestJson extends NormalCheck {
 	private String parse(String json) {
 		Json res = json(json);
 		StringBuilder wr = new StringBuilder();
-		try {
-			res.output(new Write(wr), 10);
-		} catch (IOException e) {
-			throw new InputOutputException(e);
-		}
+		res.output(new Write(wr), 10);
 		if (wr.length() == 0)
 			return "";
 		return wr.toString().substring(0, wr.length() - 1);
@@ -69,35 +63,39 @@ public class TestJson extends NormalCheck {
 	}
 
 	private void iterate(JsonWriter write, String name, RecordInterface rec) {
-		int f = rec.next(-1);
 		if (rec.type() != FieldType.OBJECT) {
-			nonObject(write, rec, 0);
+			nonObject(write, rec);
 			return;
 		}
 		if (name == null)
 			write.startObject();
 		else
 			write.startObject(name);
-		for (int field = f; field >= 0; field = rec.next(field)) {
-			if (rec.type(field) == FieldType.OBJECT)
-				iterate(write, rec.name(field), (RecordInterface) rec.get(field));
+		RecordInterface elm = rec.start();
+		while (elm != null) {
+			if (elm.type() == FieldType.OBJECT)
+				iterate(write, elm.name(), (RecordInterface) elm.java());
 			else
-				nonObject(write, rec, field);
+				nonObject(write, elm);
+			elm = elm.next();
 		}
 		write.end();
 	}
 
-	private void nonObject(JsonWriter write, RecordInterface rec, int field) {
-		if (rec.type(field) == FieldType.ARRAY) {
-			if (field == 0)
+	private void nonObject(JsonWriter write, RecordInterface rec) {
+		if (rec.type() == FieldType.ARRAY) {
+			if (rec.name() == null)
 				write.startArray();
 			else
-				write.startArray(rec.name(field));
-			for (RecordInterface sub : rec.iterate(field))
-				iterate(write, null, sub);
+				write.startArray(rec.name());
+			RecordInterface elm = rec.start();
+			while (elm != null) {
+				iterate(write, null, elm);
+				elm = elm.next();
+			}
 			write.end();
 		} else
-			write.write(rec.name(field), rec.get(field));
+			write.write(rec.name(), rec.java());
 	}
 
 	private Json json(String json) {

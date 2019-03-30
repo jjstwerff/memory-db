@@ -35,7 +35,7 @@ public class TestInserts extends NormalCheck {
 					int nr = rand.nextInt(1000);
 					for (Record rec : project.getRecords()) {
 						if (nr-- == 0)
-							project.getRecords().remove(rec.getRec());
+							project.getRecords().remove(rec.rec());
 					}
 				}
 			}

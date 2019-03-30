@@ -16,7 +16,7 @@ public class Data implements AutoCloseable {
 		this.store = new Store(0);
 	}
 
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 

@@ -9,8 +9,8 @@ import java.util.Iterator;
  * Automatically generated record class for table Project
  */
 public class ChangeProject extends Project implements ChangeInterface {
-	public ChangeProject(Store store) {
-		super(store, store.allocate(Project.RECORD_SIZE));
+	public ChangeProject(Store store, int rec) {
+		super(store, rec == 0 ? store.allocate(Project.RECORD_SIZE) : rec);
 		store.setInt(rec, 4, 0); // SET records
 		setMain(null);
 		setPack(null);
@@ -18,12 +18,12 @@ public class ChangeProject extends Project implements ChangeInterface {
 	}
 
 	public ChangeProject(Project current) {
-		super(current.getStore(), current.getRec());
-		new IndexMeta().remove(getRec());
+		super(current.store(), current.rec());
+		new IndexMeta().remove(rec());
 	}
 
 	public void setMain(Record value) {
-		store.setInt(rec, 8, value == null ? 0 : value.getRec());
+		store.setInt(rec, 8, value == null ? 0 : value.rec());
 	}
 
 	public void setPack(String value) {
@@ -36,17 +36,18 @@ public class ChangeProject extends Project implements ChangeInterface {
 
 	/* package private */ void parseFields(Parser parser) {
 		if (parser.hasSub("records")) {
-			new Record(store).parse(parser, this);
+			parse(parser);
 		}
 		if (parser.hasField("main")) {
 			parser.getRelation("main", (recNr, idx) -> {
-				Iterator<Record> iterator = null;
+				Iterator<Record> iterator = getRecords().iterator();
 				Record relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
-				setRec(recNr);
-				setMain(relRec);
-				return found;
-			}, getRec());
+				if (relRec != null)
+					relRec = relRec.parseKey(parser);
+				ChangeProject old = copy(recNr);
+				old.setMain(relRec);
+				return relRec != null;
+			}, rec());
 		}
 		if (parser.hasField("directory")) {
 			setDirectory(parser.getString("directory"));
@@ -55,11 +56,12 @@ public class ChangeProject extends Project implements ChangeInterface {
 
 	@Override
 	public void close() {
-		new IndexMeta().insert(getRec());
+		new IndexMeta().insert(rec());
 	}
 
 	@Override
-	public boolean set(int field, Object value) {
+	public boolean java(Object value) {
+		int field = 0;
 		switch (field) {
 		case 2:
 			if (value instanceof Record)
@@ -79,12 +81,19 @@ public class ChangeProject extends Project implements ChangeInterface {
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
+	public ChangeInterface add() {
+		int field = 0;
 		switch (field) {
 		case 1:
 			return addRecords();
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public ChangeProject copy(int rec) {
+		assert store.validate(rec);
+		return new ChangeProject(store, rec);
 	}
 }

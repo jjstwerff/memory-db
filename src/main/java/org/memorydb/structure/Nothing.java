@@ -10,11 +10,6 @@ public class Nothing implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public void rec(int rec) {
-		// nothing
-	}
-
-	@Override
 	public Store store() {
 		return null;
 	}
@@ -41,6 +36,11 @@ public class Nothing implements MemoryRecord, RecordInterface {
 
 	@Override
 	public RecordInterface copy() {
+		return this;
+	}
+
+	@Override
+	public Nothing copy(int rec) {
 		return this;
 	}
 }

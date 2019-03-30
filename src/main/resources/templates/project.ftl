@@ -23,7 +23,7 @@ public class ${project.name} implements AutoCloseable {
 		this.store = new Store(${project.indexes?size});
 	}
 
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
@@ -33,13 +33,7 @@ public class ${project.name} implements AutoCloseable {
 	}
 <#list project.indexes as index>
 
-	@FieldData(
-		name = "${index.name}",
-		type = "SET",
-		keyNames = {<#list index.keys as key>"${key.name}"<#if key?has_next>, </#if></#list>},
-		keyTypes = {<#list index.keys as key>"${key.type}"<#if key?has_next>, </#if></#list>},
-		related = ${index.table.name}.class
-	)
+	@FieldData(name = "${index.name}", type = "SET", related = ${index.table.name}.class)
 	public ${index.table.name} get${index.name?cap_first}(<#list index.javaTypes[0..*index.javaTypes?size] as t>${t} key${t?index + 1}<#if t?has_next>, </#if></#list>) {
 		${index.table.name} rec = new ${index.table.name}(store);
 		${index.table.name}.Index${index.name?cap_first} idx = rec.new Index${index.name?cap_first}(<#list index.javaTypes[0..*index.javaTypes?size] as t>key${t?index + 1}<#if t?has_next>, </#if></#list>);

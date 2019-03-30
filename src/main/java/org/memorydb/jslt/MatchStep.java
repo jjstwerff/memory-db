@@ -405,8 +405,8 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 		return getType() != Type.FINISH ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 1);
 	}
 
-	default void outputMatchStep(Write write, int iterate) throws IOException {
-		if (getRec() == 0 || iterate <= 0)
+	default void outputMatchStep(Write write, int iterate) {
+		if (rec() == 0 || iterate <= 0)
 			return;
 		write.field("type", getType());
 		write.field("stack", getStack());

@@ -1,7 +1,5 @@
 package org.memorydb.json;
 
-import java.io.IOException;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
@@ -12,12 +10,10 @@ import org.memorydb.structure.Store;
 /**
  * Automatically generated record class for table Field
  */
-@RecordData(
-	name = "Field",
-	keyFields = {"name"})
+@RecordData(name = "Field")
 public class Field implements Part {
-	/* package private */ Store store;
-	protected int rec;
+	/* package private */ final Store store;
+	protected final int rec;
 	/* package private */ static final int RECORD_SIZE = 35;
 
 	public Field(Store store) {
@@ -32,18 +28,18 @@ public class Field implements Part {
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return rec;
 	}
 
 	@Override
-	public void setRec(int rec) {
-		assert store.validate(rec);
-		this.rec = rec;
+	public Field copy(int newRec) {
+		assert store.validate(newRec);
+		return new Field(store, newRec);
 	}
 
 	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
@@ -57,23 +53,14 @@ public class Field implements Part {
 		return new ChangeField(this);
 	}
 
-	@FieldData(
-		name = "name",
-		type = "STRING",
-		mandatory = false
-	)
+	@FieldData(name = "name", type = "STRING", mandatory = false)
 	public String getName() {
 		return rec == 0 ? null : store.getString(store.getInt(rec, 4));
 	}
 
 	@Override
-	@FieldData(
-		name = "upRecord",
-		type = "RELATION",
-		related = Part.class,
-		mandatory = false
-	)
-	public Part getUpRecord() {
+	@FieldData(name = "upRecord", type = "RELATION", related = Part.class, mandatory = false)
+	public Part up() {
 		if (rec == 0)
 			return null;
 		switch (store.getByte(rec, 21)) {
@@ -89,7 +76,7 @@ public class Field implements Part {
 	}
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (rec == 0 || iterate <= 0)
 			return;
 		write.field("name", getName());
@@ -97,12 +84,11 @@ public class Field implements Part {
 		write.endRecord();
 	}
 
-	@Override
-	public String keys() throws IOException {
+	public String keys() {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
-		res.append("Part").append("{").append(getUpRecord().keys()).append("}");
+		res.append("Part").append("{").append(up().keys()).append("}");
 		res.append(", ");
 		res.append("Name").append("=").append(getName());
 		return res.toString();
@@ -111,22 +97,17 @@ public class Field implements Part {
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			output(write, 4);
-		} catch (IOException e) {
-			return "";
-		}
+		output(write, 4);
 		return write.toString();
 	}
 
 	public Field parse(Parser parser, Part parent) {
 		while (parser.getSub()) {
 			String name = parser.getString("name");
-			int nextRec = new Part.IndexObject(parent, this, name).search();
+			int nextRec = new Part.IndexObject(parent, name).search();
 			if (parser.isDelete(nextRec)) {
 				try (ChangeField record = new ChangeField(this)) {
-					store.free(record.getRec());
-					record.setRec(0);
+					store.free(record.rec());
 				}
 				continue;
 			}
@@ -134,10 +115,8 @@ public class Field implements Part {
 				try (ChangeField record = new ChangeField(parent, 0)) {
 					record.setName(name);
 					record.parseFields(parser);
-					rec = record.rec;
 				}
 			} else {
-				rec = nextRec;
 				try (ChangeField record = new ChangeField(this)) {
 					record.parseFields(parser);
 				}
@@ -148,27 +127,11 @@ public class Field implements Part {
 
 	@Override
 	public boolean parseKey(Parser parser) {
-		Part parent = getUpRecord();
+		Part parent = up();
 		String name = parser.getString("name");
-		int nextRec = new Part.IndexObject(parent, this, name).search();
+		int nextRec = new Part.IndexObject(parent, name).search();
 		parser.finishRelation();
-		rec = nextRec;
 		return nextRec != 0;
-	}
-
-	@Override
-	public Object get(int field) {
-		return Part.super.getPart(field);
-	}
-
-	@Override
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 2 && field <= 9)
-			return Part.super.iteratePart(field - 2);
-		switch (field) {
-		default:
-			return null;
-		}
 	}
 
 	@Override
@@ -177,17 +140,12 @@ public class Field implements Part {
 	}
 
 	@Override
-	public FieldType type(int field) {
-		return Part.super.typePart(field);
+	public String name() {
+		return Part.super.namePart(0);
 	}
 
 	@Override
-	public String name(int field) {
-		return Part.super.namePart(field);
-	}
-
-	@Override
-	public boolean exists() {
-		return getRec() != 0;
+	public RecordInterface copy() {
+		return new Field(store, rec);
 	}
 }

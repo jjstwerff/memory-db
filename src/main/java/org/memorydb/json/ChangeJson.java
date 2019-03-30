@@ -14,7 +14,7 @@ public class ChangeJson extends Json implements ChangePart {
 	}
 
 	public ChangeJson(Json current) {
-		super(current.getStore(), current.getRec());
+		super(current.store(), current.rec());
 	}
 
 	/* package private */ void parseFields(Parser parser) {
@@ -27,7 +27,8 @@ public class ChangeJson extends Json implements ChangePart {
 	}
 
 	@Override
-	public boolean set(int field, Object value) {
+	public boolean java(Object value) {
+		int field = 0;
 		if (field >= 0 && field <= 7)
 			return ChangePart.super.setPart(field - 0, value);
 		switch (field) {
@@ -37,7 +38,8 @@ public class ChangeJson extends Json implements ChangePart {
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
+	public ChangeInterface add() {
+		int field = 0;
 		if (field >= 0 && field <= 7)
 			return ChangePart.super.addPart(field - 0);
 		switch (field) {

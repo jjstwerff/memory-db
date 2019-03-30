@@ -8,8 +8,6 @@ public @interface FieldData {
 	String name();
 	String type();
 	String[] enumerate() default {};
-	String[] keyNames() default {};
-	String[] keyTypes() default {};
 	Class<? extends RecordInterface> related() default Nothing.class;
 	boolean mandatory() default false;
 	boolean condition() default false;

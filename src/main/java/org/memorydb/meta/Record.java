@@ -1,6 +1,6 @@
 package org.memorydb.meta;
 
-import java.io.IOException;
+import java.util.Iterator;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
@@ -17,18 +17,11 @@ import org.memorydb.structure.TreeIndex;
 /**
  * Automatically generated record class for table Record
  */
-@RecordData(
-	name = "Record",
-	keyFields = {"name"})
+@RecordData(name = "Record")
 public class Record implements MemoryRecord, RecordInterface {
 	/* package private */ Store store;
 	protected int rec;
 	/* package private */ static final int RECORD_SIZE = 37;
-
-	public Record(Store store) {
-		this.store = store;
-		this.rec = 0;
-	}
 
 	public Record(Store store, int rec) {
 		rec = store.correct(rec);
@@ -37,18 +30,18 @@ public class Record implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return rec;
 	}
 
 	@Override
-	public void setRec(int rec) {
+	public Record copy(int rec) {
 		assert store.validate(rec);
-		this.rec = rec;
+		return new Record(store, rec);
 	}
 
 	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
@@ -57,56 +50,40 @@ public class Record implements MemoryRecord, RecordInterface {
 		return new ChangeRecord(this);
 	}
 
-	@FieldData(
-		name = "name",
-		type = "STRING",
-		mandatory = false
-	)
+	@FieldData(name = "name", type = "STRING", mandatory = false)
 	public String getName() {
 		return rec == 0 ? null : store.getString(store.getInt(rec, 4));
 	}
 
-	@FieldData(
-		name = "fieldName",
-		type = "SET",
-		keyNames = {"name"},
-		keyTypes = {"STRING"},
-		related = Field.class,
-		mandatory = false
-	)
+	@FieldData(name = "fieldName", type = "SET", related = Field.class, mandatory = false)
 	public IndexFieldName getFieldName() {
-		return new IndexFieldName(new Field(store));
+		return new IndexFieldName();
 	}
 
 	public Field getFieldName(String key1) {
-		Field resultRec = new Field(store);
-		IndexFieldName idx = new IndexFieldName(resultRec, key1);
-		int res = idx.search();
-		if (res == 0)
-			return resultRec;
-		return new Field(store, res);
+		return new Field(store, new IndexFieldName(key1).search());
 	}
 
 	public ChangeField addFieldName() {
 		return new ChangeField(this, 0);
 	}
 
-	/* package private */ class IndexFieldName extends TreeIndex<Field> {
+	/* package private */ class IndexFieldName extends TreeIndex implements Iterable<Field> {
 
-		public IndexFieldName(Field record) {
-			super(record, null, 112, 15);
+		public IndexFieldName() {
+			super(store(), null, 112, 15);
 		}
 
-		public IndexFieldName(Field record, String key1) {
-			super(record, new Key() {
+		public IndexFieldName(String key1) {
+			super(store(), new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert store.validate(recNr);
-					record.setRec(recNr);
+					assert store().validate(recNr);
+					Field old = new Field(store(), recNr);
 					int o = 0;
-					o = RedBlackTree.compare(key1, record.getName());
+					o = RedBlackTree.compare(key1, old.getName());
 					return o;
 				}
 
@@ -137,52 +114,53 @@ public class Record implements MemoryRecord, RecordInterface {
 		}
 
 		@Override
-		public Object get(int field) {
-			return new Field(store, field);
+		public Iterator<Field> iterator() {
+			return new Iterator<Field>() {
+				int nextRec = search();
+
+				@Override
+				public boolean hasNext() {
+					return nextRec != 0;
+				}
+
+				@Override
+				public Field next() {
+					int n = nextRec;
+					nextRec = toNext(nextRec);
+					return new Field(store(), n);
+				}
+			};
 		}
 	}
 
-	@FieldData(
-		name = "fields",
-		type = "SET",
-		keyNames = {"nr"},
-		keyTypes = {"INTEGER"},
-		related = Field.class,
-		mandatory = false
-	)
+	@FieldData(name = "fields", type = "SET", related = Field.class, mandatory = false)
 	public IndexFields getFields() {
-		return new IndexFields(new Field(store));
+		return new IndexFields();
 	}
 
 	public Field getFields(int key1) {
-		Field resultRec = new Field(store);
-		IndexFields idx = new IndexFields(resultRec, key1);
-		int res = idx.search();
-		if (res == 0)
-			return resultRec;
-		return new Field(store, res);
+		return new Field(store, new IndexFields(key1).search());
 	}
 
 	public ChangeField addFields() {
 		return new ChangeField(this, 0);
 	}
 
-	/* package private */ class IndexFields extends TreeIndex<Field> {
+	/* package private */ class IndexFields extends TreeIndex implements Iterable<Field> {
 
-		public IndexFields(Field record) {
-			super(record, null, 216, 28);
+		public IndexFields() {
+			super(store(), null, 216, 28);
 		}
 
-		public IndexFields(Field record, int key1) {
-			super(record, new Key() {
+		public IndexFields(int key1) {
+			super(store(), new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert store.validate(recNr);
-					record.setRec(recNr);
+					Field old = new Field(store(), recNr);
 					int o = 0;
-					o = RedBlackTree.compare(key1, record.getNr());
+					o = RedBlackTree.compare(key1, old.getNr());
 					return o;
 				}
 
@@ -213,43 +191,42 @@ public class Record implements MemoryRecord, RecordInterface {
 		}
 
 		@Override
-		public Object get(int field) {
-			return new Field(store, field);
+		public Iterator<Field> iterator() {
+			return new Iterator<>() {
+				int nextRec = search();
+
+				@Override
+				public boolean hasNext() {
+					return nextRec != 0;
+				}
+
+				@Override
+				public Field next() {
+					int n = nextRec;
+					nextRec = toNext(nextRec);
+					return new Field(store, n);
+				}
+			};
 		}
 	}
 
-	@FieldData(
-		name = "condition",
-		type = "RELATION",
-		related = Field.class,
-		mandatory = false
-	)
+	@FieldData(name = "condition", type = "RELATION", related = Field.class, mandatory = false)
 	public Field getCondition() {
 		return new Field(store, rec == 0 ? 0 : store.getInt(rec, 16));
 	}
 
-	@FieldData(
-		name = "description",
-		type = "STRING",
-		mandatory = false
-	)
+	@FieldData(name = "description", type = "STRING", mandatory = false)
 	public String getDescription() {
 		return rec == 0 ? null : store.getString(store.getInt(rec, 20));
 	}
 
 	@Override
-	@FieldData(
-		name = "upRecord",
-		type = "RELATION",
-		related = Project.class,
-		mandatory = false
-	)
-	public Project getUpRecord() {
+	public Project up() {
 		return new Project(store, rec == 0 ? 0 : store.getInt(rec, 33));
 	}
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (rec == 0 || iterate <= 0)
 			return;
 		write.field("name", getName());
@@ -273,11 +250,11 @@ public class Record implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public String keys() throws IOException {
+	public String keys() {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
-		res.append("Project").append("{").append(getUpRecord().keys()).append("}");
+		res.append("Project").append("{").append(up().keys()).append("}");
 		res.append(", ");
 		res.append("Name").append("=").append(getName());
 		return res.toString();
@@ -286,22 +263,17 @@ public class Record implements MemoryRecord, RecordInterface {
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			output(write, 4);
-		} catch (IOException e) {
-			return "";
-		}
+		output(write, 4);
 		return write.toString();
 	}
 
 	public Record parse(Parser parser, Project parent) {
 		while (parser.getSub()) {
 			String name = parser.getString("name");
-			int nextRec = parent.new IndexRecords(this, name).search();
+			int nextRec = parent.new IndexRecords(name).search();
 			if (parser.isDelete(nextRec)) {
 				try (ChangeRecord record = new ChangeRecord(this)) {
-					store.free(record.getRec());
-					record.setRec(0);
+					store.free(record.rec());
 				}
 				continue;
 			}
@@ -309,10 +281,8 @@ public class Record implements MemoryRecord, RecordInterface {
 				try (ChangeRecord record = new ChangeRecord(parent, 0)) {
 					record.setName(name);
 					record.parseFields(parser);
-					rec = record.rec;
 				}
 			} else {
-				rec = nextRec;
 				try (ChangeRecord record = new ChangeRecord(this)) {
 					record.parseFields(parser);
 				}
@@ -321,18 +291,17 @@ public class Record implements MemoryRecord, RecordInterface {
 		return this;
 	}
 
-	public boolean parseKey(Parser parser) {
-		Project parent = getUpRecord();
+	public Record parseKey(Parser parser) {
+		Project parent = up();
 		String name = parser.getString("name");
-		int nextRec = parent.new IndexRecords(this, name).search();
+		int nextRec = parent.new IndexRecords(name).search();
 		parser.finishRelation();
-		if (nextRec != 0)
-			rec = nextRec;
-		return nextRec != 0;
+		return nextRec == 0 ? null : new Record(store, nextRec);
 	}
 
 	@Override
-	public Object get(int field) {
+	public Object java() {
+		int field = 0;
 		switch (field) {
 		case 1:
 			return getName();
@@ -346,23 +315,8 @@ public class Record implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		switch (field) {
-		case 2:
-			if (key.length > 0)
-				return new IndexFieldName(new Field(store), (String) key[0]);
-			return getFieldName();
-		case 3:
-			if (key.length > 0)
-				return new IndexFields(new Field(store), (int) key[0]);
-			return getFields();
-		default:
-			return null;
-		}
-	}
-
-	@Override
-	public FieldType type(int field) {
+	public FieldType type() {
+		int field = 0;
 		switch (field) {
 		case 1:
 			return FieldType.STRING;
@@ -380,7 +334,8 @@ public class Record implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public String name(int field) {
+	public String name() {
+		int field = 0;
 		switch (field) {
 		case 1:
 			return "name";
@@ -398,7 +353,12 @@ public class Record implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
+	public Record next() {
+		return null;
+	}
+
+	@Override
+	public Record copy() {
+		return new Record(store, rec);
 	}
 }

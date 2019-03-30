@@ -1,6 +1,5 @@
 package org.memorydb.meta;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -8,7 +7,7 @@ import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.ChangeInterface;
 import org.memorydb.structure.FieldData;
-import org.memorydb.structure.InputOutputException;
+import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RecordData;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
@@ -18,21 +17,21 @@ import org.memorydb.structure.Store;
  */
 
 @RecordData(name = "Value")
-public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
+public class ValuesArray implements MemoryRecord, ChangeInterface, Iterable<ValuesArray> {
 	private final Store store;
 	private final Field parent;
-	private int idx;
+	private final int idx;
 	private int alloc;
 	private int size;
 
 	/* package private */ ValuesArray(Field parent, int idx) {
-		this.store = parent.getStore();
+		this.store = parent.store();
 		this.parent = parent;
 		this.idx = idx;
-		if (parent.getRec() != 0) {
-			this.alloc = store.getInt(parent.getRec(), 36);
+		if (parent.rec() != 0) {
+			this.alloc = store.getInt(parent.rec(), 13);
 			if (alloc != 0) {
-				setUpRecord(parent);
+				up(parent);
 				this.size = store.getInt(alloc, 4);
 			} else
 				this.size = 0;
@@ -56,59 +55,62 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 		this.store = store;
 		this.alloc = rec;
 		this.idx = idx;
-		this.parent = getUpRecord();
+		this.parent = up();
 		this.size = alloc == 0 ? 0 : store.getInt(alloc, 4);
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return alloc;
 	}
 
 	@Override
-	public int getArrayIndex() {
+	public int index() {
 		return idx;
 	}
 
 	@Override
-	public void setRec(int rec) {
-		this.alloc = rec;
+	public ValuesArray copy(int rec) {
+		assert store.validate(rec);
+		return new ValuesArray(store, rec, -1);
 	}
 
-	/* package private */ void setUpRecord(Field record) {
-		store.setInt(alloc, 8, record.getRec());
+	private void up(Field record) {
+		store.setInt(alloc, 8, record.rec());
 	}
 
 	@Override
-	public Field getUpRecord() {
+	public Field up() {
 		return new Field(store, store.getInt(alloc, 8));
 	}
 
 	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return size;
 	}
 
-	/* package private */ ValuesArray add() {
-		if (parent.getRec() == 0)
-			return this;
-		idx = size;
-		if (alloc == 0) {
-			alloc = store.allocate(8 + 12);
-			setUpRecord(parent);
-		} else
-			alloc = store.resize(alloc, (12 + (idx + 1) * 8) / 8);
-		store.setInt(parent.getRec(), 36, alloc);
-		size = idx + 1;
+	public void clear() {
+		size = 0;
 		store.setInt(alloc, 4, size);
-		setValue(null);
-		setDescription(null);
-		return this;
+	}
+
+	@Override
+	public ValuesArray add() {
+		if (parent.rec() == 0)
+			return this;
+		alloc = alloc == 0 ? store.allocate(8 + 12) : store.resize(alloc, (12 + (idx + 1) * 8) / 8);
+		store.setInt(parent.rec(), 13, alloc);
+		store.setInt(alloc, 4, size+1);
+		ValuesArray res =  new ValuesArray(up(), size);
+		res.setValue(null);
+		res.setDescription(null);
+		size++;
+		return res;
 	}
 
 	@Override
@@ -128,17 +130,20 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 				element++;
 				return new ValuesArray(ValuesArray.this, element);
 			}
+
+			@Override
+			public void remove() {
+				if (alloc == 0 || element > size || element < 0)
+					throw new NoSuchElementException();
+				store.copy(alloc, (element + 1) * 8 + 12, element * 8 + 12, size * 17);
+				element--;
+				size--;
+				store.setInt(alloc, 4, size);
+			}
 		};
 	}
 
-	@FieldData(
-		name = "values",
-		type = "ARRAY",
-		related = ValuesArray.class,
-		when = "ENUMERATE",
-		mandatory = false
-	)
-
+	@FieldData(name = "values", type = "ARRAY", related = ValuesArray.class, when = "ENUMERATE", mandatory = false)
 	public String getValue() {
 		return alloc == 0 || idx < 0 || idx >= size ? null : store.getString(store.getInt(alloc, idx * 8 + 12));
 	}
@@ -149,14 +154,7 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 		}
 	}
 
-	@FieldData(
-		name = "values",
-		type = "ARRAY",
-		related = ValuesArray.class,
-		when = "ENUMERATE",
-		mandatory = false
-	)
-
+	@FieldData(name = "values", type = "ARRAY", related = ValuesArray.class, when = "ENUMERATE", mandatory = false)
 	public String getDescription() {
 		return alloc == 0 || idx < 0 || idx >= size ? null : store.getString(store.getInt(alloc, idx * 8 + 16));
 	}
@@ -168,7 +166,7 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	}
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (alloc == 0 || iterate <= 0)
 			return;
 		write.field("value", getValue());
@@ -179,16 +177,12 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			if (idx == -1)
-				for (ValuesArray a : this) {
-					a.output(write, 4);
-				}
-			else
-				output(write, 4);
-		} catch (IOException e) {
-			throw new InputOutputException(e);
-		}
+		if (idx == -1)
+			for (ValuesArray a : this) {
+				a.output(write, 4);
+			}
+		else
+			output(write, 4);
 		return write.toString();
 	}
 
@@ -209,12 +203,10 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
-	}
-
-	@Override
-	public String name(int field) {
+	public String name() {
+		int field = 0;
+		if (idx == -1)
+			return null;
 		switch (field) {
 		case 1:
 			return "value";
@@ -226,7 +218,10 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	}
 
 	@Override
-	public FieldType type(int field) {
+	public FieldType type() {
+		int field = 0;
+		if (idx == -1)
+			return field < 1 || field > size ? null : FieldType.OBJECT;
 		switch (field) {
 		case 1:
 			return FieldType.STRING;
@@ -238,7 +233,10 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	}
 
 	@Override
-	public Object get(int field) {
+	public Object java() {
+		int field = 0;
+		if (idx == -1)
+			return field < 1 || field > size ? null : new ValuesArray(parent, field - 1);
 		switch (field) {
 		case 1:
 			return getValue();
@@ -250,15 +248,8 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	}
 
 	@Override
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		switch (field) {
-		default:
-			return null;
-		}
-	}
-
-	@Override
-	public boolean set(int field, Object value) {
+	public boolean java(Object value) {
+		int field = 0;
 		switch (field) {
 		case 1:
 			if (value instanceof String)
@@ -274,10 +265,12 @@ public class ValuesArray implements ChangeInterface, Iterable<ValuesArray> {
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
-		switch (field) {
-		default:
-			return null;
-		}
+	public RecordInterface next() {
+		return null;
+	}
+
+	@Override
+	public ValuesArray copy() {
+		return new ValuesArray(parent, idx);
 	}
 }

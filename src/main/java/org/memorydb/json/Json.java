@@ -1,28 +1,18 @@
 package org.memorydb.json;
 
-import java.io.IOException;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
  * Automatically generated record class for table Json
  */
-@RecordData(
-	name = "Json",
-	keyFields = {})
+@RecordData(name = "Json")
 public class Json implements Part {
-	/* package private */ Store store;
-	protected int rec;
+	/* package private */ final Store store;
+	protected final int rec;
 	/* package private */ static final int RECORD_SIZE = 13;
-
-	public Json(Store store) {
-		this.store = store;
-		this.rec = 0;
-	}
 
 	public Json(Store store, int rec) {
 		rec = store.correct(rec);
@@ -31,18 +21,12 @@ public class Json implements Part {
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return rec;
 	}
 
 	@Override
-	public void setRec(int rec) {
-		assert store.validate(rec);
-		this.rec = rec;
-	}
-
-	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
@@ -57,7 +41,7 @@ public class Json implements Part {
 	}
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (rec == 0 || iterate <= 0)
 			return;
 		outputPart(write, iterate);
@@ -65,7 +49,7 @@ public class Json implements Part {
 	}
 
 	@Override
-	public String keys() throws IOException {
+	public String keys() {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
@@ -75,11 +59,7 @@ public class Json implements Part {
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			output(write, 4);
-		} catch (IOException e) {
-			return "";
-		}
+		output(write, 4);
 		return write.toString();
 	}
 
@@ -88,19 +68,15 @@ public class Json implements Part {
 			int nextRec = 0;
 			if (parser.isDelete(nextRec)) {
 				try (ChangeJson record = new ChangeJson(this)) {
-					store.free(record.getRec());
-					record.setRec(0);
+					store.free(record.rec());
 				}
 				continue;
 			}
 			if (nextRec == 0) {
 				try (ChangeJson record = new ChangeJson(store)) {
-
 					record.parseFields(parser);
-					rec = record.rec;
 				}
 			} else {
-				rec = nextRec;
 				try (ChangeJson record = new ChangeJson(this)) {
 					record.parseFields(parser);
 				}
@@ -111,21 +87,8 @@ public class Json implements Part {
 
 	@Override
 	public boolean parseKey(Parser parser) {
-		int nextRec = 0;
 		parser.finishRelation();
-		if (nextRec != 0)
-			rec = nextRec;
-		return nextRec != 0;
-	}
-
-	@Override
-	public Object get(int field) {
-		return Part.super.getPart(field);
-	}
-
-	@Override
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		return Part.super.iteratePart(field, key);
+		return true;
 	}
 
 	@Override
@@ -134,17 +97,18 @@ public class Json implements Part {
 	}
 
 	@Override
-	public FieldType type(int field) {
-		return Part.super.typePart(field);
+	public String name() {
+		return null;
 	}
 
 	@Override
-	public String name(int field) {
-		return Part.super.namePart(field);
+	public Json copy() {
+		return new Json(store, rec);
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
+	public Json copy(int newRec) {
+		assert store.validate(newRec);
+		return new Json(store, newRec);
 	}
 }

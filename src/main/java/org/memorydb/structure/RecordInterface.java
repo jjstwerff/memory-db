@@ -39,13 +39,15 @@ public interface RecordInterface {
 	}
 
 	/**
-	 * Switch to the next field of an OBJECT or an element of a ARRAY or the next character in a STRING.
-	 * Return false if it was the last element.
+	 * Switch to the next field of an OBJECT or an element of a ARRAY.
+	 * Return null if it was the last element.
 	 */
-	RecordInterface next();
+	default RecordInterface next() {
+		return null;
+	}
 
 	/**
-	 * Return true if this is the last element on an ARRAY or field on an OBJECT or character in a STRING.
+	 * Return true if this is the last element on an ARRAY or field on an OBJECT.
 	 */
 	default boolean testLast() {
 		return true;

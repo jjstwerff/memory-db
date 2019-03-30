@@ -9,25 +9,22 @@ import java.util.Iterator;
  */
 public class ChangeRecord extends Record implements ChangeInterface {
 	/* package private */ ChangeRecord(Project parent, int rec) {
-		super(parent.getStore(), rec);
-		if (rec == 0) {
-			setRec(getStore().allocate(Record.RECORD_SIZE));
-		}
+		super(parent.store(), rec);
 		setName(null);
-		store.setInt(getRec(), 8, 0); // SET fieldName
-		store.setInt(getRec(), 12, 0); // SET fields
+		store.setInt(rec(), 8, 0); // SET fieldName
+		store.setInt(rec(), 12, 0); // SET fields
 		setCondition(null);
 		setDescription(null);
-		setUpRecord(parent);
+		up(parent);
 		if (rec != 0) {
-			getUpRecord().new IndexRecords(this).remove(rec);
+			up().new IndexRecords().remove(rec);
 		}
 	}
 
 	/* package private */ ChangeRecord(Record current) {
 		super(current.store, current.rec);
 		if (rec != 0) {
-			getUpRecord().new IndexRecords(this).remove(rec);
+			up().new IndexRecords().remove(rec);
 		}
 	}
 
@@ -36,15 +33,16 @@ public class ChangeRecord extends Record implements ChangeInterface {
 	}
 
 	public void setCondition(Field value) {
-		store.setInt(rec, 16, value == null ? 0 : value.getRec());
+		store.setInt(rec, 16, value == null ? 0 : value.rec());
 	}
 
 	public void setDescription(String value) {
 		store.setInt(rec, 20, store.putString(value));
 	}
 
-	public void setUpRecord(Project value) {
-		store.setInt(rec, 33, value == null ? 0 : value.getRec());
+	private void up(Project value) {
+		store.setInt(rec, 33, value == null ? 0 : value.rec());
+		store.setInt(rec, 38, value == null ? 0 : value.index());
 	}
 
 	/* package private */ void parseFields(Parser parser) {
@@ -56,13 +54,14 @@ public class ChangeRecord extends Record implements ChangeInterface {
 		}
 		if (parser.hasField("condition")) {
 			parser.getRelation("condition", (recNr, idx) -> {
-				Iterator<Field> iterator = null;
+				Iterator<Field> iterator = getFields().iterator();
 				Field relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
-				setRec(recNr);
-				setCondition(relRec);
-				return found;
-			}, getRec());
+				if (relRec != null)
+					relRec = relRec.parseKey(parser);
+				ChangeRecord old = copy(recNr);
+				old.setCondition(relRec);
+				return relRec != null;
+			}, rec());
 		}
 		if (parser.hasField("description")) {
 			setDescription(parser.getString("description"));
@@ -71,11 +70,12 @@ public class ChangeRecord extends Record implements ChangeInterface {
 
 	@Override
 	public void close() {
-		getUpRecord().new IndexRecords(this).insert(getRec());
+		up().new IndexRecords().insert(rec());
 	}
 
 	@Override
-	public boolean set(int field, Object value) {
+	public boolean java(Object value) {
+		int field = 0;
 		switch (field) {
 		case 1:
 			if (value instanceof String)
@@ -95,7 +95,8 @@ public class ChangeRecord extends Record implements ChangeInterface {
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
+	public ChangeInterface add() {
+		int field = 0;
 		switch (field) {
 		case 2:
 			return addFieldName();
@@ -104,5 +105,11 @@ public class ChangeRecord extends Record implements ChangeInterface {
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public ChangeRecord copy(int newRec) {
+		assert store.validate(newRec);
+		return new ChangeRecord(up(), newRec);
 	}
 }

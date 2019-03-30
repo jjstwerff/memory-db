@@ -328,12 +328,7 @@ public class Field {
 			return "int data = store.getByte(rec, " + (pos >> 3) + ") & " + (3 << (pos & 7)) + ";\n" //
 					+ "		return data == 0 ? null : data == " + (3 << (pos & 7));
 		case RELATION:
-			StringBuilder extra = new StringBuilder();
-			if (name.equals("upRecord") && !table.getParent().isFull())
-				createUpRecord(extra);
-			else
-				extra.append("return new " + related.getName() + "(store, rec == 0 ? 0 : store.getInt(rec, " + (pos >> 3) + "));");
-			return extra.toString();
+			return "return new " + related.getName() + "(store, rec == 0 ? 0 : store.getInt(rec, " + (pos >> 3) + "));";
 		case SET:
 			return "return new Index" + getUpperName() + "(new " + related.getName() + "(store));";
 		case STRING:
@@ -348,36 +343,15 @@ public class Field {
 		}
 	}
 
-	private void createUpRecord(StringBuilder extra) {
-		extra.append("if (rec == 0)\n");
-		extra.append("\t\t\treturn null;\n");
-		extra.append("\t\tswitch (store.getByte(rec, " + (4 + (pos >> 3)) + ")) {\n");
-		int nr = 1;
-		for (Record included : table.getParent().getIncluded()) {
-			if (included.isFull()) {
-				extra.append("\t\tcase ").append(nr++).append(":\n");
-				extra.append("\t\t\treturn new ").append(included.getName()).append("(store, store.getInt(rec, ").append(pos >> 3).append("));\n");
-			} else
-				for (Field link : included.getLinked()) {
-					extra.append("\t\tcase ").append(nr++).append(":\n");
-					extra.append("\t\t\treturn new ").append(link.getUpperName()).append("Array").append("(store, store.getInt(rec, ").append(pos >> 3)
-							.append("), store.getInt(rec, ").append(5 + (pos >> 3)).append("));\n");
-				}
-		}
-		extra.append("\t\tdefault:\n");
-		extra.append("\t\t\treturn null;\n");
-		extra.append("\t\t}");
-	}
-
 	public String getGetter(Record array) {
 		boolean included = !table.getIncluded().isEmpty();
-		String test = included ? "getRec() == 0" : "alloc == 0 || idx < 0 || idx >= size";
+		String test = included ? "rec() == 0" : "alloc == 0 || idx < 0 || idx >= size";
 		if (when != null)
 			test = "get" + table.getCondition().getUpperName() + "() != " + table.getCondition().getUpperName() + "." + when;
 		// keep an integer of room for the size of the array block
-		String apos = included ? "getRec(), " + table.getName().toLowerCase() + "Position() + " + (pos >> 3)
+		String apos = included ? "rec(), " + table.getName().toLowerCase() + "Position() + " + (pos >> 3)
 				: "alloc, idx * " + table.getSize() + " + " + (array.reserve() + (pos >> 3));
-		String store = included ? "getStore()" : "store";
+		String store = included ? "store()" : "store";
 		switch (type) {
 		case ARRAY:
 			return "return " + test + " ? null : new " + name.substring(0, 1).toUpperCase() + name.substring(1) + "Array(this, -1);";
@@ -420,10 +394,10 @@ public class Field {
 
 	private String getEnum(boolean array) {
 		boolean included = !table.getIncluded().isEmpty();
-		String store = included ? "getStore()" : "store";
+		String store = included ? "store()" : "store";
 		String code = "(rec, ";
 		if (included)
-			code = "(getRec(), " + table.getName().toLowerCase() + "Position() + ";
+			code = "(rec(), " + table.getName().toLowerCase() + "Position() + ";
 		else if (array)
 			code += "idx * " + table.getSize() + " + ";
 		int b = getSize();
@@ -482,11 +456,9 @@ public class Field {
 		case RELATION:
 			StringBuilder extra = new StringBuilder();
 			extra.append(end);
-			if (name.equals("upRecord") && !table.getParent().isFull())
-				changeUpRecord(extra);
-			return test + "store.setInt(rec, " + (pos >> 3) + ", value == null ? 0 : value.getRec())" + extra;
+			return test + "store.setInt(rec, " + (pos >> 3) + ", value == null ? 0 : value.rec())" + extra;
 		case OBJECT:
-			return test + "store.setInt(rec, " + (pos >> 3) + ", value == null ? 0 : value.getRec())" + end;
+			return test + "store.setInt(rec, " + (pos >> 3) + ", value == null ? 0 : value.rec())" + end;
 		case SET:
 			return null;
 		case STRING:
@@ -498,28 +470,10 @@ public class Field {
 		}
 	}
 
-	private void changeUpRecord(StringBuilder extra) {
-		extra.append("\n");
-		extra.append("\t\tstore.setInt(rec, " + (5 + (pos >> 3)) + ", value == null ? 0 : value.getArrayIndex());\n");
-		extra.append("\t\tbyte type = 0;\n");
-		int nr = 1;
-		for (Record included : table.getParent().getIncluded()) {
-			if (included.isFull()) {
-				extra.append("\t\tif (value instanceof ").append(included.getName()).append(")\n");
-				extra.append("\t\t\ttype = ").append(nr++).append(";\n");
-			} else
-				for (Field link : included.getLinked()) {
-					extra.append("\t\tif (value instanceof ").append(link.getUpperName()).append("Array)\n");
-					extra.append("\t\t\ttype = ").append(nr++).append(";\n");
-				}
-		}
-		extra.append("\t\tstore.setByte(rec, " + (4 + (pos >> 3)) + ", type);");
-	}
-
 	public String getSetter(Record array) {
 		boolean included = !table.getIncluded().isEmpty();
 		String defaults = gatherDefaults(included);
-		String store = included ? "getStore()" : "store";
+		String store = included ? "store()" : "store";
 		StringBuilder test = new StringBuilder();
 		if (mandatory) {
 			test.append("if (value == null)\n");
@@ -529,12 +483,12 @@ public class Field {
 			Field cond = table.getCondition();
 			test.append("if (get" + cond.getUpperName() + "() == " + cond.getUpperName() + "." + when + ") {\n\t\t\t");
 		} else if (included)
-			test.append("if (getRec() != 0) {\n\t\t\t");
+			test.append("if (rec() != 0) {\n\t\t\t");
 		else
 			test.append("if (alloc != 0 && idx >= 0 && idx < size) {\n\t\t\t");
 		String end = ";\n\t\t}";
 		// keep an integer of room for the size of the array block
-		String apos = included ? "getRec(), " + table.getName().toLowerCase() + "Position() + " + (pos >> 3)
+		String apos = included ? "rec(), " + table.getName().toLowerCase() + "Position() + " + (pos >> 3)
 				: "alloc, idx * " + table.getSize() + " + " + (array.reserve() + (pos >> 3));
 		switch (type) {
 		case ARRAY:
@@ -566,7 +520,7 @@ public class Field {
 					+ (3 << (pos & 7)) + " : " + (1 << (pos & 7)) + "))" + end;
 		case RELATION:
 		case OBJECT:
-			return test + store + ".setInt(" + apos + ", value == null ? 0 : value.getRec())" + end;
+			return test + store + ".setInt(" + apos + ", value == null ? 0 : value.rec())" + end;
 		case SET:
 			return null;
 		case STRING:
@@ -593,9 +547,9 @@ public class Field {
 				res.append("\t\t\tcase " + fld.when + ":\n				");
 			}
 			String def = fld.getDefault();
-			String apos = included ? "getRec(), " + table.getName().toLowerCase() + "Position() + " + (fld.getPos() >> 3)
+			String apos = included ? "rec(), " + table.getName().toLowerCase() + "Position() + " + (fld.getPos() >> 3)
 					: "alloc, idx * " + table.getSize() + " + " + (4 + (fld.getPos() >> 3));
-			String store = included ? "getStore()." : "store.";
+			String store = included ? "store()." : "store.";
 			int fps = fld.getPos();
 			switch (fld.getType()) {
 			case ARRAY:
@@ -649,7 +603,7 @@ public class Field {
 				if (def == null || def.equals("null"))
 					res.append(store + "setInt(" + apos + ", 0)");
 				else
-					res.append(store + "setInt(" + apos + ", " + def + ".getRec())");
+					res.append(store + "setInt(" + apos + ", " + def + ".rec())");
 				break;
 			case STRING:
 				res.append(store + "setInt(" + apos + ", " + (def.equals("null") ? "0" : "store.putString(" + def + ")") + ")");
@@ -670,7 +624,7 @@ public class Field {
 
 	private String setEnum(String store, boolean array, String value) {
 		boolean incl = !store.equals("store.");
-		String code = incl ? "(getRec(), " + table.getName().toLowerCase() + "Position() + " : "(rec, ";
+		String code = incl ? "(rec(), " + table.getName().toLowerCase() + "Position() + " : "(rec, ";
 		if (array && !incl)
 			code += "idx * " + table.getSize() + " + ";
 		int b = getSize();

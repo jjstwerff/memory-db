@@ -1,43 +1,16 @@
 package org.memorydb.structure;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
-public abstract class TreeIndex<T extends MemoryRecord> extends RedBlackTree implements Iterable<T> {
+public abstract class TreeIndex extends RedBlackTree {
 	private final Key key;
-	private final T record;
+	protected final Store store;
 	private final int flag; // position of flag bit inside record
 	private final int field; // position of left/right field in bytes
 
-	public TreeIndex(T record, Key key, int flag, int field) {
+	public TreeIndex(Store store, Key key, int flag, int field) {
 		this.key = key;
-		this.record = record;
+		this.store = store;
 		this.flag = flag;
 		this.field = field;
-	}
-
-	@Override
-	public Iterator<T> iterator() {
-		return new Iterator<>() {
-			int nextRec = search();
-
-			@Override
-			public boolean hasNext() {
-				return nextRec != 0;
-			}
-
-			@Override
-			public T next() {
-				if (nextRec == 0)
-					throw new NoSuchElementException();
-				int n = nextRec;
-				nextRec = TreeIndex.super.next(nextRec);
-				if (key != null && key.compareTo(nextRec) != 0)
-					nextRec = 0;
-				record.rec(n);
-				return record;
-			}
-		};
 	}
 
 	public int search() {
@@ -46,48 +19,47 @@ public abstract class TreeIndex<T extends MemoryRecord> extends RedBlackTree imp
 
 	@Override
 	protected boolean readRed(int recNr) {
-		assert record.store().validate(recNr);
-		return (record.store().getByte(recNr, flag >> 3) & (byte) (1 << (flag & 7))) > 0;
+		assert store.validate(recNr);
+		return (store.getByte(recNr, flag >> 3) & (byte) (1 << (flag & 7))) > 0;
 	}
 
 	@Override
 	protected void changeRed(int recNr, boolean value) {
-		assert record.store().validate(recNr);
+		assert store.validate(recNr);
 		int bitMap = 1 << (flag & 7);
-		record.store().setByte(recNr, flag >> 3, (record.store().getByte(recNr, flag >> 3) & (255 - bitMap)) + (value ? bitMap : 0));
+		store.setByte(recNr, flag >> 3, (store.getByte(recNr, flag >> 3) & (255 - bitMap)) + (value ? bitMap : 0));
 	}
 
 	@Override
 	protected int readLeft(int recNr) {
-		assert record.store().validate(recNr);
-		return record.store().getInt(recNr, field);
+		assert store.validate(recNr);
+		return store.getInt(recNr, field);
 	}
 
 	@Override
 	protected void changeLeft(int recNr, int value) {
-		assert record.store().validate(recNr);
-		record.store().setInt(recNr, field, value);
+		assert store.validate(recNr);
+		store.setInt(recNr, field, value);
 	}
 
 	@Override
 	protected int readRight(int recNr) {
-		assert record.store().validate(recNr);
-		return record.store().getInt(recNr, field + 4);
+		assert store.validate(recNr);
+		return store.getInt(recNr, field + 4);
 	}
 
 	@Override
 	protected void changeRight(int recNr, int value) {
-		assert record.store().validate(recNr);
-		record.store().setInt(recNr, field + 4, value);
+		assert store.validate(recNr);
+		store.setInt(recNr, field + 4, value);
 	}
 
-	@Override
-	public int next(int fieldNr) {
+	public int toNext(int fieldNr) {
 		int result;
 		if (fieldNr < 0)
 			result = first();
 		else
-			result = super.next(fieldNr);
+			result = next(fieldNr);
 		return result == 0 ? -1 : result;
 	}
 }

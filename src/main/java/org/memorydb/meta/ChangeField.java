@@ -2,30 +2,28 @@ package org.memorydb.meta;
 
 import org.memorydb.file.Parser;
 import org.memorydb.structure.ChangeInterface;
+import org.memorydb.structure.MemoryRecord;
+
 import java.util.Iterator;
 import org.memorydb.handler.MutationException;
 
 /**
  * Automatically generated record class for table Field
  */
-public class ChangeField extends Field implements ChangeInterface {
+public class ChangeField extends Field implements MemoryRecord, ChangeInterface {
 	/* package private */ ChangeField(Record parent, int rec) {
-		super(parent.getStore(), rec);
-		if (rec == 0) {
-			setRec(getStore().allocate(Field.RECORD_SIZE));
-		}
+		super(parent.store(), rec);
 		setName(null);
 		setNr(0);
 		setType(Field.Type.STRING);
 		setKey(false);
-		store.setInt(getRec(), 36, 0); // ARRAY values
+		store.setInt(rec(), 13, 0); // ARRAY values
 		setRelated(null);
 		setRecord(null);
 		setContent(null);
 		setChild(null);
 		setTo(null);
-		store.setInt(getRec(), 60, 0); // ARRAY order
-		setUpRecord(parent);
+		store.setInt(rec(), 17, 0); // ARRAY order
 		setMandatory(false);
 		setMinimum(0L);
 		setMaximum(0L);
@@ -34,17 +32,18 @@ public class ChangeField extends Field implements ChangeInterface {
 		setDefault(null);
 		setCondition(null);
 		setDescription(null);
+		up(parent);
 		if (rec != 0) {
-			getUpRecord().new IndexFieldName(this).remove(rec);
-			getUpRecord().new IndexFields(this).remove(rec);
+			up().new IndexFieldName().remove(rec);
+			up().new IndexFields().remove(rec);
 		}
 	}
 
 	/* package private */ ChangeField(Field current) {
 		super(current.store, current.rec);
 		if (rec != 0) {
-			getUpRecord().new IndexFieldName(this).remove(rec);
-			getUpRecord().new IndexFields(this).remove(rec);
+			up().new IndexFieldName().remove(rec);
+			up().new IndexFields().remove(rec);
 		}
 	}
 
@@ -67,79 +66,80 @@ public class ChangeField extends Field implements ChangeInterface {
 	}
 
 	public void moveValues(ChangeField other) {
-		getStore().setInt(getRec(), 36, getStore().getInt(other.getRec(), 36));
-		getStore().setInt(other.getRec(), 36, 0);
+		store().setInt(rec(), 13, store().getInt(other.rec(), 13));
+		store().setInt(other.rec(), 13, 0);
 	}
 
 	public void setRelated(Record value) {
 		if (getType() == Type.RELATION) {
-			store.setInt(rec, 40, value == null ? 0 : value.getRec());
+			store.setInt(rec, 13, value == null ? 0 : value.rec());
 		}
 	}
 
 	public void setRecord(Record value) {
 		if (getType() == Type.INCLUDE) {
-			store.setInt(rec, 44, value == null ? 0 : value.getRec());
+			store.setInt(rec, 13, value == null ? 0 : value.rec());
 		}
 	}
 
 	public void setContent(Record value) {
 		if (getType() == Type.ARRAY) {
-			store.setInt(rec, 48, value == null ? 0 : value.getRec());
+			store.setInt(rec, 13, value == null ? 0 : value.rec());
 		}
 	}
 
 	public void setChild(Record value) {
 		if (getType() == Type.SUB) {
-			store.setInt(rec, 52, value == null ? 0 : value.getRec());
+			store.setInt(rec, 13, value == null ? 0 : value.rec());
 		}
 	}
 
 	public void setTo(Record value) {
 		if (getType() == Type.INDEX) {
-			store.setInt(rec, 56, value == null ? 0 : value.getRec());
+			store.setInt(rec, 13, value == null ? 0 : value.rec());
 		}
 	}
 
 	public void moveOrder(ChangeField other) {
-		getStore().setInt(getRec(), 60, getStore().getInt(other.getRec(), 60));
-		getStore().setInt(other.getRec(), 60, 0);
-	}
-
-	public void setUpRecord(Record value) {
-		store.setInt(rec, 23, value == null ? 0 : value.getRec());
+		store().setInt(rec(), 17, store().getInt(other.rec(), 17));
+		store().setInt(other.rec(), 17, 0);
 	}
 
 	public void setMandatory(boolean value) {
-		store.setByte(rec, 64, (store.getByte(rec, 64) & 254) + (value ? 1 : 0));
+		store.setByte(rec, 21, (store.getByte(rec, 21) & 254) + (value ? 1 : 0));
 	}
 
 	public void setMinimum(long value) {
-		store.setLong(rec, 65, value);
+		store.setLong(rec, 22, value);
 	}
 
 	public void setMaximum(long value) {
-		store.setLong(rec, 73, value);
+		store.setLong(rec, 30, value);
 	}
 
 	public void setFormat(String value) {
-		store.setInt(rec, 81, store.putString(value));
+		store.setInt(rec, 38, store.putString(value));
 	}
 
 	public void setDecimals(byte value) {
-		store.setByte(rec, 85, value);
+		store.setByte(rec, 42, value);
 	}
 
 	public void setDefault(String value) {
-		store.setInt(rec, 86, store.putString(value));
+		store.setInt(rec, 43, store.putString(value));
 	}
 
 	public void setCondition(String value) {
-		store.setInt(rec, 90, store.putString(value));
+		store.setInt(rec, 47, store.putString(value));
 	}
 
 	public void setDescription(String value) {
-		store.setInt(rec, 94, store.putString(value));
+		store.setInt(rec, 51, store.putString(value));
+	}
+
+	private void up(Record value) {
+		store.setInt(rec, 23, value == null ? 0 : value.rec());
+		store.setInt(rec, 28, value == null ? 0 : value.index());
 	}
 
 	/* package private */ void parseFields(Parser parser) {
@@ -169,53 +169,58 @@ public class ChangeField extends Field implements ChangeInterface {
 		}
 		if (parser.hasField("related")) {
 			parser.getRelation("related", (recNr, idx) -> {
-				Iterator<Record> iterator = getUpRecord().getUpRecord().getRecords().iterator();
+				Iterator<Record> iterator = up().up().getRecords().iterator();
 				Record relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
-				setRec(recNr);
-				setRelated(relRec);
-				return found;
-			}, getRec());
+				if (relRec != null)
+					relRec = relRec.parseKey(parser);
+				ChangeField old = copy(recNr);
+				old.setRelated(relRec);
+				return relRec != null;
+			}, rec());
 		}
 		if (parser.hasField("record")) {
 			parser.getRelation("record", (recNr, idx) -> {
-				Iterator<Record> iterator = getUpRecord().getUpRecord().getRecords().iterator();
+				Iterator<Record> iterator = up().up().getRecords().iterator();
 				Record relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
-				setRec(recNr);
-				setRecord(relRec);
-				return found;
-			}, getRec());
+				if (relRec != null)
+					relRec = relRec.parseKey(parser);
+				ChangeField old = copy(recNr);
+				old.setRecord(relRec);
+				return relRec != null;
+			}, rec());
 		}
 		if (parser.hasField("content")) {
 			parser.getRelation("content", (recNr, idx) -> {
-				Iterator<Record> iterator = getUpRecord().getUpRecord().getRecords().iterator();
+				Iterator<Record> iterator = up().up().getRecords().iterator();
 				Record relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
-				setRec(recNr);
-				setContent(relRec);
-				return found;
-			}, getRec());
+				if (relRec != null)
+					relRec = relRec.parseKey(parser);
+				ChangeField old = copy(recNr);
+				old.setContent(relRec);
+				return relRec != null;
+			}, rec());
 		}
 		if (parser.hasField("child")) {
 			parser.getRelation("child", (recNr, idx) -> {
-				Iterator<Record> iterator = getUpRecord().getUpRecord().getRecords().iterator();
+				Iterator<Record> iterator = up().up().getRecords().iterator();
 				Record relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
-				setRec(recNr);
-				setChild(relRec);
-				return found;
-			}, getRec());
+				if (relRec != null)
+					relRec = relRec.parseKey(parser);
+				ChangeField old = copy(recNr);
+				old.setChild(relRec);
+				return relRec != null;
+			}, rec());
 		}
 		if (parser.hasField("to")) {
 			parser.getRelation("to", (recNr, idx) -> {
-				Iterator<Record> iterator = getUpRecord().getUpRecord().getRecords().iterator();
+				Iterator<Record> iterator = up().up().getRecords().iterator();
 				Record relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				boolean found = relRec != null && relRec.parseKey(parser);
-				setRec(recNr);
-				setTo(relRec);
-				return found;
-			}, getRec());
+				if (relRec != null)
+					relRec = relRec.parseKey(parser);
+				ChangeField old = copy(recNr);
+				old.setTo(relRec);
+				return relRec != null;
+			}, rec());
 		}
 		if (parser.hasSub("order")) {
 			try (OrderArray sub = new OrderArray(this, -1)) {
@@ -256,12 +261,13 @@ public class ChangeField extends Field implements ChangeInterface {
 
 	@Override
 	public void close() {
-		getUpRecord().new IndexFieldName(this).insert(getRec());
-		getUpRecord().new IndexFields(this).insert(getRec());
+		up().new IndexFieldName().insert(rec());
+		up().new IndexFields().insert(rec());
 	}
 
 	@Override
-	public boolean set(int field, Object value) {
+	public boolean java(Object value) {
+		int field = 0;
 		switch (field) {
 		case 1:
 			if (value instanceof String)
@@ -299,35 +305,35 @@ public class ChangeField extends Field implements ChangeInterface {
 			if (value instanceof Record)
 				setTo((Record) value);
 			return value instanceof Record;
-		case 13:
+		case 12:
 			if (value instanceof Boolean)
 				setMandatory((Boolean) value);
 			return value instanceof Boolean;
-		case 14:
+		case 13:
 			if (value instanceof Long)
 				setMinimum((Long) value);
 			return value instanceof Long;
-		case 15:
+		case 14:
 			if (value instanceof Long)
 				setMaximum((Long) value);
 			return value instanceof Long;
-		case 16:
+		case 15:
 			if (value instanceof String)
 				setFormat((String) value);
 			return value instanceof String;
-		case 17:
+		case 16:
 			if (value instanceof Byte)
 				setDecimals((Byte) value);
 			return value instanceof Byte;
-		case 18:
+		case 17:
 			if (value instanceof String)
 				setDefault((String) value);
 			return value instanceof String;
-		case 19:
+		case 18:
 			if (value instanceof String)
 				setCondition((String) value);
 			return value instanceof String;
-		case 20:
+		case 19:
 			if (value instanceof String)
 				setDescription((String) value);
 			return value instanceof String;
@@ -337,7 +343,8 @@ public class ChangeField extends Field implements ChangeInterface {
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
+	public ChangeInterface add() {
+		int field = 0;
 		switch (field) {
 		case 5:
 			return addValues();
@@ -346,5 +353,11 @@ public class ChangeField extends Field implements ChangeInterface {
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public ChangeField copy(int rec) {
+		assert store.validate(rec);
+		return new ChangeField(up(), rec);
 	}
 }

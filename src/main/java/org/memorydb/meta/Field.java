@@ -1,7 +1,5 @@
 package org.memorydb.meta;
 
-import java.io.IOException;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
@@ -15,13 +13,11 @@ import java.util.Map;
 /**
  * Automatically generated record class for table Field
  */
-@RecordData(
-	name = "Field",
-	keyFields = {"name"})
+@RecordData(name = "Field")
 public class Field implements MemoryRecord, RecordInterface {
-	/* package private */ Store store;
-	protected int rec;
-	/* package private */ static final int RECORD_SIZE = 98;
+	/* package private */ final Store store;
+	protected final int rec;
+	/* package private */ static final int RECORD_SIZE = 55;
 
 	public Field(Store store) {
 		this.store = store;
@@ -35,18 +31,12 @@ public class Field implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return rec;
 	}
 
 	@Override
-	public void setRec(int rec) {
-		assert store.validate(rec);
-		this.rec = rec;
-	}
-
-	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
@@ -55,20 +45,12 @@ public class Field implements MemoryRecord, RecordInterface {
 		return new ChangeField(this);
 	}
 
-	@FieldData(
-		name = "name",
-		type = "STRING",
-		mandatory = false
-	)
+	@FieldData(name = "name", type = "STRING", mandatory = false)
 	public String getName() {
 		return rec == 0 ? null : store.getString(store.getInt(rec, 4));
 	}
 
-	@FieldData(
-		name = "nr",
-		type = "INTEGER",
-		mandatory = false
-	)
+	@FieldData(name = "nr", type = "INTEGER", mandatory = false)
 	public int getNr() {
 		return rec == 0 ? Integer.MIN_VALUE : store.getInt(rec, 8);
 	}
@@ -89,13 +71,7 @@ public class Field implements MemoryRecord, RecordInterface {
 		}
 	}
 
-	@FieldData(
-		name = "type",
-		type = "ENUMERATE",
-		enumerate = {"ARRAY", "BOOLEAN", "BYTE", "DATE", "ENUMERATE", "FLOAT", "INCLUDE", "INDEX", "INTEGER", "LONG", "NULL_BOOLEAN", "RELATION", "SUB", "STRING"},
-		condition = true,
-		mandatory = false
-	)
+	@FieldData(name = "type", type = "ENUMERATE", enumerate = { "ARRAY", "BOOLEAN", "BYTE", "DATE", "ENUMERATE", "FLOAT", "INCLUDE", "INDEX", "INTEGER", "LONG", "NULL_BOOLEAN", "RELATION", "SUB", "STRING" }, condition = true, mandatory = false)
 	public Field.Type getType() {
 		int data = rec == 0 ? 0 : store.getByte(rec, 12) & 31;
 		if (data <= 0 || data > Type.values().length)
@@ -103,22 +79,12 @@ public class Field implements MemoryRecord, RecordInterface {
 		return Type.values()[data - 1];
 	}
 
-	@FieldData(
-		name = "key",
-		type = "BOOLEAN",
-		mandatory = false
-	)
+	@FieldData(name = "key", type = "BOOLEAN", mandatory = false)
 	public boolean isKey() {
 		return rec == 0 ? false : (store.getByte(rec, 13) & 1) > 0;
 	}
 
-	@FieldData(
-		name = "values",
-		type = "ARRAY",
-		related = ValuesArray.class,
-		when = "ENUMERATE",
-		mandatory = false
-	)
+	@FieldData(name = "values", type = "ARRAY", related = ValuesArray.class, when = "ENUMERATE", mandatory = false)
 	public ValuesArray getValues() {
 		return new ValuesArray(this, -1);
 	}
@@ -131,68 +97,32 @@ public class Field implements MemoryRecord, RecordInterface {
 		return getType() != Type.ENUMERATE ? new ValuesArray(store, 0, -1) : getValues().add();
 	}
 
-	@FieldData(
-		name = "related",
-		type = "RELATION",
-		related = Record.class,
-		when = "RELATION",
-		mandatory = false
-	)
+	@FieldData(name = "related", type = "RELATION", related = Record.class, when = "RELATION", mandatory = false)
 	public Record getRelated() {
-		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 40));
+		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 13));
 	}
 
-	@FieldData(
-		name = "record",
-		type = "RELATION",
-		related = Record.class,
-		when = "INCLUDE",
-		mandatory = false
-	)
+	@FieldData(name = "record", type = "RELATION", related = Record.class, when = "INCLUDE", mandatory = false)
 	public Record getRecord() {
-		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 44));
+		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 13));
 	}
 
-	@FieldData(
-		name = "content",
-		type = "RELATION",
-		related = Record.class,
-		when = "ARRAY",
-		mandatory = false
-	)
+	@FieldData(name = "content", type = "RELATION", related = Record.class, when = "ARRAY", mandatory = false)
 	public Record getContent() {
-		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 48));
+		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 13));
 	}
 
-	@FieldData(
-		name = "child",
-		type = "RELATION",
-		related = Record.class,
-		when = "SUB",
-		mandatory = false
-	)
+	@FieldData(name = "child", type = "RELATION", related = Record.class, when = "SUB", mandatory = false)
 	public Record getChild() {
-		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 52));
+		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 13));
 	}
 
-	@FieldData(
-		name = "to",
-		type = "RELATION",
-		related = Record.class,
-		when = "INDEX",
-		mandatory = false
-	)
+	@FieldData(name = "to", type = "RELATION", related = Record.class, when = "INDEX", mandatory = false)
 	public Record getTo() {
-		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 56));
+		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 13));
 	}
 
-	@FieldData(
-		name = "order",
-		type = "ARRAY",
-		related = OrderArray.class,
-		when = "INDEX",
-		mandatory = false
-	)
+	@FieldData(name = "order", type = "ARRAY", related = OrderArray.class, when = "INDEX", mandatory = false)
 	public OrderArray getOrder() {
 		return new OrderArray(this, -1);
 	}
@@ -205,91 +135,53 @@ public class Field implements MemoryRecord, RecordInterface {
 		return getType() != Type.INDEX ? new OrderArray(store, 0, -1) : getOrder().add();
 	}
 
+	@FieldData(name = "mandatory", type = "BOOLEAN", mandatory = false)
+	public boolean isMandatory() {
+		return rec == 0 ? false : (store.getByte(rec, 21) & 1) > 0;
+	}
+
+	@FieldData(name = "minimum", type = "LONG", mandatory = false)
+	public long getMinimum() {
+		return rec == 0 ? Long.MIN_VALUE : store.getLong(rec, 22);
+	}
+
+	@FieldData(name = "maximum", type = "LONG", mandatory = false)
+	public long getMaximum() {
+		return rec == 0 ? Long.MIN_VALUE : store.getLong(rec, 30);
+	}
+
+	@FieldData(name = "format", type = "STRING", mandatory = false)
+	public String getFormat() {
+		return rec == 0 ? null : store.getString(store.getInt(rec, 38));
+	}
+
+	@FieldData(name = "decimals", type = "BYTE", mandatory = false)
+	public byte getDecimals() {
+		return rec == 0 ? 0 : store.getByte(rec, 42);
+	}
+
+	@FieldData(name = "default", type = "STRING", mandatory = false)
+	public String getDefault() {
+		return rec == 0 ? null : store.getString(store.getInt(rec, 43));
+	}
+
+	@FieldData(name = "condition", type = "STRING", mandatory = false)
+	public String getCondition() {
+		return rec == 0 ? null : store.getString(store.getInt(rec, 47));
+	}
+
+	@FieldData(name = "description", type = "STRING", mandatory = false)
+	public String getDescription() {
+		return rec == 0 ? null : store.getString(store.getInt(rec, 51));
+	}
+
 	@Override
-	@FieldData(
-		name = "upRecord",
-		type = "RELATION",
-		related = Record.class,
-		mandatory = false
-	)
-	public Record getUpRecord() {
+	public Record up() {
 		return new Record(store, rec == 0 ? 0 : store.getInt(rec, 23));
 	}
 
-	@FieldData(
-		name = "mandatory",
-		type = "BOOLEAN",
-		mandatory = false
-	)
-	public boolean isMandatory() {
-		return rec == 0 ? false : (store.getByte(rec, 64) & 1) > 0;
-	}
-
-	@FieldData(
-		name = "minimum",
-		type = "LONG",
-		mandatory = false
-	)
-	public long getMinimum() {
-		return rec == 0 ? Long.MIN_VALUE : store.getLong(rec, 65);
-	}
-
-	@FieldData(
-		name = "maximum",
-		type = "LONG",
-		mandatory = false
-	)
-	public long getMaximum() {
-		return rec == 0 ? Long.MIN_VALUE : store.getLong(rec, 73);
-	}
-
-	@FieldData(
-		name = "format",
-		type = "STRING",
-		mandatory = false
-	)
-	public String getFormat() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 81));
-	}
-
-	@FieldData(
-		name = "decimals",
-		type = "BYTE",
-		mandatory = false
-	)
-	public byte getDecimals() {
-		return rec == 0 ? 0 : store.getByte(rec, 85);
-	}
-
-	@FieldData(
-		name = "default",
-		type = "STRING",
-		mandatory = false
-	)
-	public String getDefault() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 86));
-	}
-
-	@FieldData(
-		name = "condition",
-		type = "STRING",
-		mandatory = false
-	)
-	public String getCondition() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 90));
-	}
-
-	@FieldData(
-		name = "description",
-		type = "STRING",
-		mandatory = false
-	)
-	public String getDescription() {
-		return rec == 0 ? null : store.getString(store.getInt(rec, 94));
-	}
-
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (rec == 0 || iterate <= 0)
 			return;
 		write.field("name", getName());
@@ -327,11 +219,11 @@ public class Field implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public String keys() throws IOException {
+	public String keys() {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
-		res.append("Record").append("{").append(getUpRecord().keys()).append("}");
+		res.append("Record").append("{").append(up().keys()).append("}");
 		res.append(", ");
 		res.append("Name").append("=").append(getName());
 		return res.toString();
@@ -340,22 +232,17 @@ public class Field implements MemoryRecord, RecordInterface {
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			output(write, 4);
-		} catch (IOException e) {
-			return "";
-		}
+		output(write, 4);
 		return write.toString();
 	}
 
 	public Field parse(Parser parser, Record parent) {
 		while (parser.getSub()) {
 			String name = parser.getString("name");
-			int nextRec = parent.new IndexFieldName(this, name).search();
+			int nextRec = parent.new IndexFieldName(name).search();
 			if (parser.isDelete(nextRec)) {
 				try (ChangeField record = new ChangeField(this)) {
-					store.free(record.getRec());
-					record.setRec(0);
+					store.free(record.rec());
 				}
 				continue;
 			}
@@ -363,10 +250,8 @@ public class Field implements MemoryRecord, RecordInterface {
 				try (ChangeField record = new ChangeField(parent, 0)) {
 					record.setName(name);
 					record.parseFields(parser);
-					rec = record.rec;
 				}
 			} else {
-				rec = nextRec;
 				try (ChangeField record = new ChangeField(this)) {
 					record.parseFields(parser);
 				}
@@ -375,23 +260,22 @@ public class Field implements MemoryRecord, RecordInterface {
 		return this;
 	}
 
-	public boolean parseKey(Parser parser) {
-		Record parent = getUpRecord();
+	public Field parseKey(Parser parser) {
+		int rec[] = new int[1];
 		parser.getRelation("Record", (recNr, idx) -> {
-			parent.setRec(recNr);
-			parent.parseKey(parser);
+			rec[0] = up().parseKey(parser).rec();
 			return true;
-		}, getRec());
+		}, rec());
+		Record parent = rec[0] > 0 ? up().copy(rec[0]) : up();
 		String name = parser.getString("name");
-		int nextRec = parent.new IndexFieldName(this, name).search();
+		int nextRec = parent.new IndexFieldName(name).search();
 		parser.finishRelation();
-		if (nextRec != 0)
-			rec = nextRec;
-		return nextRec != 0;
+		return nextRec == 0 ? null: new Field(store, nextRec);
 	}
 
 	@Override
-	public Object get(int field) {
+	public Object java() {
+		int field = 0;
 		switch (field) {
 		case 1:
 			return getName();
@@ -411,21 +295,21 @@ public class Field implements MemoryRecord, RecordInterface {
 			return getChild();
 		case 10:
 			return getTo();
-		case 13:
+		case 12:
 			return isMandatory();
-		case 14:
+		case 13:
 			return getMinimum();
-		case 15:
+		case 14:
 			return getMaximum();
-		case 16:
+		case 15:
 			return getFormat();
-		case 17:
+		case 16:
 			return getDecimals();
-		case 18:
+		case 17:
 			return getDefault();
-		case 19:
+		case 18:
 			return getCondition();
-		case 20:
+		case 19:
 			return getDescription();
 		default:
 			return null;
@@ -433,19 +317,8 @@ public class Field implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		switch (field) {
-		case 5:
-			return getValues();
-		case 11:
-			return getOrder();
-		default:
-			return null;
-		}
-	}
-
-	@Override
-	public FieldType type(int field) {
+	public FieldType type() {
+		int field = 0;
 		switch (field) {
 		case 1:
 			return FieldType.STRING;
@@ -469,21 +342,21 @@ public class Field implements MemoryRecord, RecordInterface {
 			return FieldType.OBJECT;
 		case 11:
 			return FieldType.ARRAY;
-		case 13:
+		case 12:
 			return FieldType.BOOLEAN;
+		case 13:
+			return FieldType.LONG;
 		case 14:
 			return FieldType.LONG;
 		case 15:
-			return FieldType.LONG;
-		case 16:
 			return FieldType.STRING;
-		case 17:
+		case 16:
 			return FieldType.INTEGER;
+		case 17:
+			return FieldType.STRING;
 		case 18:
 			return FieldType.STRING;
 		case 19:
-			return FieldType.STRING;
-		case 20:
 			return FieldType.STRING;
 		default:
 			return null;
@@ -491,7 +364,8 @@ public class Field implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public String name(int field) {
+	public String name() {
+		int field = 0;
 		switch (field) {
 		case 1:
 			return "name";
@@ -515,21 +389,21 @@ public class Field implements MemoryRecord, RecordInterface {
 			return "to";
 		case 11:
 			return "order";
-		case 13:
+		case 12:
 			return "mandatory";
-		case 14:
+		case 13:
 			return "minimum";
-		case 15:
+		case 14:
 			return "maximum";
-		case 16:
+		case 15:
 			return "format";
-		case 17:
+		case 16:
 			return "decimals";
-		case 18:
+		case 17:
 			return "default";
-		case 19:
+		case 18:
 			return "condition";
-		case 20:
+		case 19:
 			return "description";
 		default:
 			return null;
@@ -537,7 +411,18 @@ public class Field implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
+	public Field next() {
+		return null;
+	}
+
+	@Override
+	public Field copy() {
+		return new Field(store, rec);
+	}
+
+	@Override
+	public Field copy(int rec) {
+		assert store.validate(rec);
+		return new Field(store, rec);
 	}
 }

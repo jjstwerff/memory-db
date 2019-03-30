@@ -10,5 +10,6 @@ public class NormalCheck {
 	@Before
 	public void init() {
 		((Logger) LoggerFactory.getLogger("ROOT")).setLevel(Level.INFO);
+		// ((Logger) LoggerFactory.getLogger(Store.class)).setLevel(Level.DEBUG);
 	}
 }

@@ -7,5 +7,4 @@ import java.lang.annotation.Target;
 public @interface RecordData {
 	String name();
 	String description() default "";
-	String[] keyFields() default {};
 }

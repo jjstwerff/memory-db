@@ -8,8 +8,8 @@ public interface MemoryRecord {
 	default int index() {
 		return -1;
 	}
-
-	void rec(int rec);
+	
+	MemoryRecord copy(int rec);
 
 	Store store();
 

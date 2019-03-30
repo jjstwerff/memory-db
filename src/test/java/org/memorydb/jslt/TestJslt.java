@@ -150,7 +150,7 @@ public class TestJslt extends MemoryTests {
 			JsltAnalyzer.analyze(jsltStore);
 			StringBuilder code = new StringBuilder();
 			if (!result.equals(""))
-				for (Macro m : new Macro(jsltStore).new IndexMacros())
+				for (Macro m : new Macro.IndexMacros(jsltStore))
 					code.append(m.toString());
 			compare(result, code.toString());
 			List<String> errors = new ArrayList<>();

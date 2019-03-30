@@ -13,30 +13,30 @@ public interface ChangePart extends ChangeInterface, Part {
 	}
 
 	default void setType(Type value) {
-		if (getRec() != 0) {
+		if (rec() != 0) {
 			if (value == null) {
-				getStore().setByte(getRec(), partPosition() + 0, (getStore().getByte(getRec(), partPosition() + 0) & 224) + 0);
+				store().setByte(rec(), partPosition() + 0, (store().getByte(rec(), partPosition() + 0) & 224) + 0);
 				return;
 			}
-			getStore().setByte(getRec(), partPosition() + 0, (getStore().getByte(getRec(), partPosition() + 0) & 224) + 1 + value.ordinal());
+			store().setByte(rec(), partPosition() + 0, (store().getByte(rec(), partPosition() + 0) & 224) + 1 + value.ordinal());
 			switch (value) {
 			case ARRAY:
-				getStore().setInt(getRec(), partPosition() + 1, 0);
+				store().setInt(rec(), partPosition() + 1, 0);
 				break;
 			case BOOLEAN:
-				getStore().setByte(getRec(), partPosition() + 1, getStore().getByte(getRec(), partPosition() + 1) & 254);
+				store().setByte(rec(), partPosition() + 1, store().getByte(rec(), partPosition() + 1) & 254);
 				break;
 			case FLOAT:
-				getStore().setLong(getRec(), partPosition() + 1, Double.doubleToLongBits(0.0));
+				store().setLong(rec(), partPosition() + 1, Double.doubleToLongBits(0.0));
 				break;
 			case NUMBER:
-				getStore().setLong(getRec(), partPosition() + 1, 0L);
+				store().setLong(rec(), partPosition() + 1, 0L);
 				break;
 			case OBJECT:
-				getStore().setInt(getRec(), partPosition() + 1, 0);
+				store().setInt(rec(), partPosition() + 1, 0);
 				break;
 			case STRING:
-				getStore().setInt(getRec(), partPosition() + 1, 0);
+				store().setInt(rec(), partPosition() + 1, 0);
 				break;
 			default:
 				break;
@@ -45,31 +45,31 @@ public interface ChangePart extends ChangeInterface, Part {
 	}
 
 	default void moveArray(ChangePart other) {
-		getStore().setInt(getRec(), partPosition() + 1, getStore().getInt(other.getRec(), other.partPosition() + 1));
-		getStore().setInt(other.getRec(), other.partPosition() + 1, 0);
+		store().setInt(rec(), partPosition() + 1, store().getInt(other.rec(), other.partPosition() + 1));
+		store().setInt(other.rec(), other.partPosition() + 1, 0);
 	}
 
 	default void setBoolean(boolean value) {
 		if (getType() == Type.BOOLEAN) {
-			getStore().setByte(getRec(), partPosition() + 1, (getStore().getByte(getRec(), partPosition() + 1) & 254) + (value ? 1 : 0));
+			store().setByte(rec(), partPosition() + 1, (store().getByte(rec(), partPosition() + 1) & 254) + (value ? 1 : 0));
 		}
 	}
 
 	default void setFloat(double value) {
 		if (getType() == Type.FLOAT) {
-			getStore().setLong(getRec(), partPosition() + 1, Double.doubleToLongBits(value));
+			store().setLong(rec(), partPosition() + 1, Double.doubleToLongBits(value));
 		}
 	}
 
 	default void setNumber(long value) {
 		if (getType() == Type.NUMBER) {
-			getStore().setLong(getRec(), partPosition() + 1, value);
+			store().setLong(rec(), partPosition() + 1, value);
 		}
 	}
 
 	default void setValue(String value) {
 		if (getType() == Type.STRING) {
-			getStore().setInt(getRec(), partPosition() + 1, getStore().putString(value));
+			store().setInt(rec(), partPosition() + 1, store().putString(value));
 		}
 	}
 
@@ -102,7 +102,7 @@ public interface ChangePart extends ChangeInterface, Part {
 			setNumber(parser.getLong("number"));
 		}
 		if (parser.hasSub("object")) {
-			new Field(getStore()).parse(parser, this);
+			new Field(store()).parse(parser, this);
 		}
 		if (parser.hasField("value")) {
 			setValue(parser.getString("value"));

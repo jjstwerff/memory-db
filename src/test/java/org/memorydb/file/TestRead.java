@@ -108,8 +108,8 @@ public class TestRead extends ErrorCheck {
 					+ "free: 154kb spaces:2\n" //
 					+ "strings number:6 average:6\n" //
 					+ "data:0kb total:0kb\n" //
-					+ "hash:0kb total:0kb", project.getStore().analyze());
-			Assert.assertEquals("{Moment=18, Name=26, Timeline=8, Value=45, fields=0, maintenance=32}", project.getStore().getStrings().toString());
+					+ "hash:0kb total:0kb", project.store().analyze());
+			Assert.assertEquals("{Moment=18, Name=26, Timeline=8, Value=45, fields=0, maintenance=32}", project.store().getStrings().toString());
 		}
 	}
 

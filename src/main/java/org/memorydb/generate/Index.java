@@ -158,7 +158,7 @@ public class Index {
 		String parent = table.getParent() == null ? "0" : "rec";
 		if (included) {
 			String lname = on.getName().toLowerCase();
-			return lname + ".getStore().getInt(" + lname + ".getRec(), " + lname + "." + lname + "Position() + " + parentPos + ")";
+			return lname + ".store().getInt(" + lname + ".rec(), " + lname + "." + lname + "Position() + " + parentPos + ")";
 		}
 		return "store.getInt(" + parent + ", " + parentPos + ")";
 	}
@@ -168,7 +168,7 @@ public class Index {
 		String parent = table.getParent() == null ? "0" : "rec";
 		if (included) {
 			String lname = on.getName().toLowerCase();
-			return lname + ".getStore().setInt(" + lname + ".getRec(), " + lname + "." + lname + "Position() + " + parentPos + ", value)";
+			return lname + ".store().setInt(" + lname + ".rec(), " + lname + "." + lname + "Position() + " + parentPos + ", value)";
 		}
 		return "store.setInt(" + parent + ", " + parentPos + ", value)";
 	}

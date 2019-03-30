@@ -85,7 +85,7 @@ public class Variable implements ResultType {
 	}
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (rec == 0 || iterate <= 0)
 			return;
 		write.field("name", getName());
@@ -96,7 +96,7 @@ public class Variable implements ResultType {
 	}
 
 	@Override
-	public String keys() throws IOException {
+	public String keys() {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";

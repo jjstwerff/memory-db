@@ -42,11 +42,7 @@ public class MemoryTests extends NormalCheck {
 	protected void jslt(RecordInterface source, String jslt, String result) {
 		Macro macro = parse(jslt);
 		Write write = new Write(new StringBuilder());
-		try {
-			macro.output(write, 20);
-		} catch (IOException e) {
-			throw new InputOutputException(e);
-		}
+		macro.output(write, 20);
 		StringBuilder code = new StringBuilder();
 		code.append("Test:\n").append(jslt).append("\n\n");
 		if (source != null)
@@ -84,13 +80,11 @@ public class MemoryTests extends NormalCheck {
 		Store jsltStore = new Store(3);
 		JsltParser.parse(jslt, jsltStore);
 		JsltAnalyzer.analyze(jsltStore);
-		Macro macro = new Macro(jsltStore);
-		macro.setRec(macro.new IndexMacros("main").search());
-		return macro;
+		return new Macro(jsltStore, new Macro.IndexMacros(jsltStore, "main").search());
 	}
 
 	private static void jslt(RecordInterface source, Macro macro, String result) {
-		Store jsltStore = macro.getStore();
+		Store jsltStore = macro.store();
 		String into = JsltInterpreter.interpret(jsltStore, source, null);
 		if (!into.equals(result)) {
 			Assert.assertEquals(result, into);

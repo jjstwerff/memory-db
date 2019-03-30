@@ -15,9 +15,9 @@ import ${import};
 public class Change${table.name} extends ${table.name} implements <#if table.includes?size == 0>ChangeInterface</#if><#list table.includes as incl>Change${incl.name}<#if incl?has_next>, </#if></#list> {
 <#if table.parent??>
 	/* package private */ Change${table.name}(${table.parent.name} parent, int rec) {
-		super(parent.getStore(), rec);
+		super(parent.store(), rec);
 		if (rec == 0) {
-			setRec(getStore().allocate(${table.name}.RECORD_SIZE));
+			rec(store().allocate(${table.name}.RECORD_SIZE));
 <#list table.includes as incl>
 			default${incl.name}();
 </#list>
@@ -25,13 +25,14 @@ public class Change${table.name} extends ${table.name} implements <#if table.inc
 <#list table.fields as field><#if field.default??>
 		set${field.name?cap_first}(${field.default});
 </#if><#if field.type == "SET" || field.type == "ARRAY">
-		store.setInt(getRec(), ${field.pos / 8}, 0); // ${field.type} ${field.name}
+		store.setInt(rec(), ${field.pos / 8}, 0); // ${field.type} ${field.name}
 </#if></#list>
+		up(parent);
 		if (rec != 0) {
 <#list table.indexes as index><#if table.parent.included?size gt 0>
-			new ${table.parent.name}.Index${index.name?cap_first}(getUpRecord(), this).remove(rec);
+			new ${table.parent.name}.Index${index.name?cap_first}(up(), this).remove(rec);
 <#else>
-			getUpRecord().new Index${index.name?cap_first}(this).remove(rec);
+			up().new Index${index.name?cap_first}(this).remove(rec);
 </#if></#list>
 		}
 	}
@@ -40,9 +41,9 @@ public class Change${table.name} extends ${table.name} implements <#if table.inc
 		super(current.store, current.rec);
 		if (rec != 0) {
 <#list table.indexes as index><#if table.parent.included?size gt 0>
-			new ${table.parent.name}.Index${index.name?cap_first}(getUpRecord(), this).remove(rec);
+			new ${table.parent.name}.Index${index.name?cap_first}(up(), this).remove(rec);
 <#else>
-			getUpRecord().new Index${index.name?cap_first}(this).remove(rec);
+			up().new Index${index.name?cap_first}(this).remove(rec);
 </#if></#list>
 		}
 	}
@@ -63,9 +64,9 @@ public class Change${table.name} extends ${table.name} implements <#if table.inc
 	}
 
 	public Change${table.name}(${table.name} current) {
-		super(current.getStore(), current.getRec());
+		super(current.store(), current.rec());
 <#list table.indexes as index>
-		new Index${index.name?cap_first}().remove(getRec());
+		new Index${index.name?cap_first}().remove(rec());
 </#list>
 	}
 </#if>
@@ -73,8 +74,8 @@ public class Change${table.name} extends ${table.name} implements <#if table.inc
 <#if fld.type == "ARRAY">
 
 	public void move${fld.name?cap_first}(Change${table.name} other) {
-		getStore().setInt(getRec(), ${fld.pos / 8}, getStore().getInt(other.getRec(), ${fld.pos / 8}));
-		getStore().setInt(other.getRec(), ${fld.pos / 8}, 0);
+		store().setInt(rec(), ${fld.pos / 8}, store().getInt(other.rec(), ${fld.pos / 8}));
+		store().setInt(other.rec(), ${fld.pos / 8}, 0);
 	}
 </#if><#if fld.setter??>
 
@@ -82,6 +83,25 @@ public class Change${table.name} extends ${table.name} implements <#if table.inc
 		${fld.setter}
 	}
 </#if></#list>
+<#if table.parent??>
+
+	private void up(${table.parent.name?cap_first} value) {
+		store.setInt(rec, ${table.upPos}, value == null ? 0 : value.rec());
+		store.setInt(rec, ${5 + table.upPos}, value == null ? 0 : value.index());
+<#if table.parent.included?size gt 0>
+		byte type = 0;
+<#assign nr=1>
+<#list table.parent.included as incl><#if incl.full>
+		if (value instanceof ${incl.name})
+			type = ${nr};<#assign nr=nr+1>
+<#else><#list incl.linked as link>
+		if (value instanceof ${link.upperName}Array)
+			type = ${nr};<#assign nr=nr+1>
+</#list></#if></#list>
+		store.setByte(rec, ${4 + table.upPos}, type);
+</#if>
+	}
+</#if>
 
 	/* package private */ void parseFields(<#if table.noFields>@SuppressWarnings("unused") </#if>Parser parser) {
 <#if table.noFields>
@@ -96,9 +116,9 @@ ${table.otherFields}<#rt>
 	@Override
 	public void close() {
 <#list table.indexes as index><#if table.parent?? && table.parent.included?size gt 0>
-		new Part.Index${index.name?cap_first}(getUpRecord(), <#if table.parent??>this</#if>).insert(getRec());
+		new Part.Index${index.name?cap_first}(up(), <#if table.parent??>this</#if>).insert(rec());
 <#else>
-		<#if table.parent??>getUpRecord().</#if>new Index${index.name?cap_first}(<#if table.parent??>this</#if>).insert(getRec());
+		<#if table.parent??>up().</#if>new Index${index.name?cap_first}(<#if table.parent??>this</#if>).insert(rec());
 </#if></#list>
 <#if table.indexes?size == 0>
 		// nothing yet
@@ -106,11 +126,12 @@ ${table.otherFields}<#rt>
 	}
 
 	@Override
-	public boolean set(int field, Object value) {
+	public boolean java(Object value) {
+		int field = 0;
 <#assign max = table.fields?size>
 <#list table.includes as incl>
 <#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
+		if (field > ${max} && field <= ${nmax})
 			return Change${incl.name}.super.set${incl.name}(field - ${max}, value);
 <#assign max = nmax>
 </#list>
@@ -128,11 +149,12 @@ ${table.otherFields}<#rt>
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
+	public ChangeInterface add() {
+		int field = 0;
 <#assign max = table.fields?size>
 <#list table.includes as incl>
 <#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
+		if (field > ${max} && field <= ${nmax})
 			return Change${incl.name}.super.add${incl.name}(field - ${max});
 <#assign max = nmax>
 </#list>

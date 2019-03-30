@@ -13,7 +13,6 @@ package ${project.package};
 <#if rfield.isMandatory()><#assign hasMandatory=true></#if>
 </#list>
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -32,9 +31,11 @@ import org.memorydb.structure.FieldData;
 <#if hasIndexes>
 import org.memorydb.structure.IndexOperation;
 import org.memorydb.structure.Key;
+</#if>
+import org.memorydb.structure.MemoryRecord;
+<#if hasIndexes>
 import org.memorydb.structure.RedBlackTree;
 </#if>
-import org.memorydb.structure.InputOutputException;
 import org.memorydb.structure.RecordData;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
@@ -47,7 +48,7 @@ import ${import};
  */
 
 @RecordData(name = "${rec.name}"<#if field.description??>, description = "${rec.description}"</#if>)
-public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0>ChangeInterface, </#if><#list rec.includes as incl>Change${incl.name}, </#list>Iterable<${field.name?cap_first}Array> {
+public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.includes?size == 0>ChangeInterface, </#if><#list rec.includes as incl>Change${incl.name}, </#list>Iterable<${field.name?cap_first}Array> {
 	private final Store store;
 	private final ${table.name} parent;
 	private int idx;
@@ -55,17 +56,17 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 	private int size;
 
 	/* package private */ ${field.name?cap_first}Array(${table.name} parent, int idx) {
-		this.store = parent.getStore();
+		this.store = parent.store();
 		this.parent = parent;
 		this.idx = idx;
-		if (parent.getRec() != 0) {
+		if (parent.rec() != 0) {
 <#if table.included?size gt 0>
-			this.alloc = store.getInt(parent.getRec(), parent.${table.name?lower_case}Position() + ${(field.pos / 8)});
+			this.alloc = store.getInt(parent.rec(), parent.${table.name?lower_case}Position() + ${(field.pos / 8)});
 <#else>
-			this.alloc = store.getInt(parent.getRec(), ${(field.pos / 8)});
+			this.alloc = store.getInt(parent.rec(), ${(field.pos / 8)});
 </#if>
 			if (alloc != 0) {
-				setUpRecord(parent);
+				up(parent);
 				this.size = store.getInt(alloc, 4);
 			} else
 				this.size = 0;
@@ -89,27 +90,27 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 		this.store = store;
 		this.alloc = rec;
 		this.idx = idx;
-		this.parent = getUpRecord();
+		this.parent = up();
 		this.size = alloc == 0 ? 0 : store.getInt(alloc, 4);
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return alloc;
 	}
 
 	@Override
-	public int getArrayIndex() {
+	public int index() {
 		return idx;
 	}
 
 	@Override
-	public void setRec(int rec) {
+	public void rec(int rec) {
 		this.alloc = rec;
 	}
 
-	/* package private */ void setUpRecord(${table.name} record) {
-		store.setInt(alloc, 8, record.getRec());
+	private void up(${table.name} record) {
+		store.setInt(alloc, 8, record.rec());
 <#if table.included?size gt 0>
 <#assign nr=1>
 <#list table.included as incl><#if incl.full>
@@ -125,7 +126,7 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 	}
 
 	@Override
-	public ${table.name} getUpRecord() {
+	public ${table.name} up() {
 <#if table.included?size gt 0>
 		if (alloc == 0)
 			return null;
@@ -147,12 +148,12 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 	}
 
 	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return size;
 	}
 
@@ -161,19 +162,20 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 		store.setInt(alloc, 4, size);
 	}
 
-	/* package private */ ${field.name?cap_first}Array add() {
-		if (parent.getRec() == 0)
+	@Override
+	public ${field.name?cap_first}Array add() {
+		if (parent.rec() == 0)
 			return this;
 		idx = size;
 		if (alloc == 0) {
 			alloc = store.allocate(${rec.totalSize?c} + ${table.reserve()});
-			setUpRecord(parent);
+			up(parent);
 		} else
 			alloc = store.resize(alloc, (${table.reserve()} + (idx + 1) * ${rec.totalSize?c}) / 8);
 <#if table.included?size gt 0>
-		store.setInt(parent.getRec(), parent.${table.name?lower_case}Position() + ${field.pos / 8}, alloc);
+		store.setInt(parent.rec(), parent.${table.name?lower_case}Position() + ${field.pos / 8}, alloc);
 <#else>
-		store.setInt(parent.getRec(), ${field.pos / 8}, alloc);
+		store.setInt(parent.rec(), ${field.pos / 8}, alloc);
 </#if>
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
@@ -222,32 +224,7 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 	};
 </#if>
 
-	@FieldData(
-		name = "${field.name}",
-		type = "${field.type}",
-<#if field.type == "ENUMERATE">
-		enumerate = {<#list field.values as val>"${val}"<#if val?has_next>, </#if></#list>},
-</#if><#if field.type == "SET">
-		keyNames = {<#list field.index.keys as key>"${key.name}"<#if key?has_next>, </#if></#list>},
-		keyTypes = {<#list field.index.keys as key>"${key.type}"<#if key?has_next>, </#if></#list>},
-</#if>
-<#if field.related??><#if field.type == "ARRAY">
-		related = ${field.javaType}.class,
-<#else>
-		related = ${field.related}.class,
-</#if></#if>
-<#if field.isCondition()>
-		condition = true,
-</#if>
-<#if field.getWhen()??>
-		when = "${field.getWhen()}",
-</#if>
-<#if field.description??>
-		description = "${field.description}",
-</#if>
-		mandatory = ${field.isMandatory()?string("true", "false")}
-	)
-
+	@FieldData(name = "${field.name}", type = "${field.type}", <#if field.type == "ENUMERATE">enumerate = { <#list field.values as val>"${val}"<#if val?has_next>, </#if></#list> }, </#if><#if field.related??><#if field.type == "ARRAY">related = ${field.javaType}.class, <#else>related = ${field.related}.class, </#if></#if><#if field.isCondition()>condition = true, </#if><#if field.getWhen()??>when = "${field.getWhen()}", </#if><#if field.description??>description = "${field.description}", </#if>mandatory = ${field.isMandatory()?string("true", "false")})
 	public ${rfld.javaType} <#if rfld.type == "BOOLEAN" || rfld.type == "NULL_BOOLEAN">is<#else>get</#if>${rfld.name?cap_first}() {
 		${rfld.getGetter(table)}
 	}
@@ -259,7 +236,7 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 </#if></#list>
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (alloc == 0 || iterate <= 0)
 			return;
 <#list rec.fields as rfld><#if rfld.type == "RELATION"><#if rfld.name != "upRecord">
@@ -287,7 +264,7 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 		}
 <#elseif rfld.type == "OBJECT">
 		${rfld.related.name} fld${rfld.name?cap_first} = get${rfld.name?cap_first}();
-		if (fld${rfld.name?cap_first} != null && fld${rfld.name?cap_first}.getRec() != 0) {
+		if (fld${rfld.name?cap_first} != null && fld${rfld.name?cap_first}.rec() != 0) {
 			write.sub("${rfld.name}");
 			fld${rfld.name?cap_first}.output(write, iterate);
 			write.endSub();
@@ -302,16 +279,12 @@ public class ${field.name?cap_first}Array implements <#if rec.includes?size == 0
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			if (idx == -1)
-				for (${field.name?cap_first}Array a : this) {
-					a.output(write, 4);
-				}
-			else
-				output(write, 4);
-		} catch (IOException e) {
-			throw new InputOutputException(e);
-		}
+		if (idx == -1)
+			for (${field.name?cap_first}Array a : this) {
+				a.output(write, 4);
+			}
+		else
+			output(write, 4);
 		return write.toString();
 	}
 
@@ -352,12 +325,8 @@ ${field.arrayFields}<#rt>
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
-	}
-
-	@Override
-	public String name(int field) {
+	public String name() {
+		int field = 0;
 		if (idx == -1)
 			return null;
 <#assign max = rec.fields?size>
@@ -379,7 +348,8 @@ ${field.arrayFields}<#rt>
 	}
 
 	@Override
-	public FieldType type(int field) {
+	public FieldType type() {
+		int field = 0;
 		if (idx == -1)
 			return field < 1 || field > size ? null : FieldType.OBJECT;
 <#assign max = rec.fields?size>
@@ -411,7 +381,8 @@ ${field.arrayFields}<#rt>
 	}
 
 	@Override
-	public Object get(int field) {
+	public Object java() {
+		int field = 0;
 		if (idx == -1)
 			return field < 1 || field > size ? null : new ${field.name?cap_first}Array(parent, field - 1);
 <#assign max = rec.fields?size>
@@ -435,7 +406,6 @@ ${field.arrayFields}<#rt>
 		}
 	}
 
-	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
 <#assign max = rec.fields?size>
 <#list rec.includes as incl>
@@ -463,7 +433,8 @@ ${field.arrayFields}<#rt>
 	}
 
 	@Override
-	public boolean set(int field, Object value) {
+	public boolean java(Object value) {
+		int field = 0;
 <#assign max = rec.fields?size>
 <#list rec.includes as incl>
 <#assign nmax = max + incl.fields?size>
@@ -485,22 +456,12 @@ ${field.arrayFields}<#rt>
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
-<#assign max = rec.fields?size>
-<#list rec.includes as incl>
-<#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
-			return add${incl.name}(field - ${max});
-<#assign max = nmax>
-</#list>
-		switch (field) {
-<#list rec.fields as field>
-<#if field.type == "SET" || field.type == "ARRAY">
-		case ${field?index + 1}:
-			return add${field.name?cap_first}();
-</#if></#list>
-		default:
-			return null;
-		}
+	public RecordInterface next() {
+		return null;
+	}
+
+	@Override
+	public ${field.name?cap_first}Array copy() {
+		return new ${field.name?cap_first}Array(parent, idx);
 	}
 }

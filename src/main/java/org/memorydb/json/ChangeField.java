@@ -7,23 +7,21 @@ import org.memorydb.structure.ChangeInterface;
  * Automatically generated record class for table Field
  */
 public class ChangeField extends Field implements ChangePart {
-	/* package private */ ChangeField(Part parent, int rec) {
-		super(parent.getStore(), rec);
-		if (rec == 0) {
-			setRec(getStore().allocate(Field.RECORD_SIZE));
-			defaultPart();
+	/* package private */ ChangeField(Part parent, int recNr) {
+		super(parent.store(), recNr == 0 ? parent.store().allocate(Field.RECORD_SIZE) : recNr);
+		if (recNr == 0) {
+			setName(null);
+			up(parent);
 		}
-		setName(null);
-		setUpRecord(parent);
-		if (rec != 0) {
-			new Part.IndexObject(getUpRecord(), this).remove(rec);
+		if (recNr != 0) {
+			new Part.IndexObject(this).remove(rec);
 		}
 	}
 
 	/* package private */ ChangeField(Field current) {
 		super(current.store, current.rec);
 		if (rec != 0) {
-			new Part.IndexObject(getUpRecord(), this).remove(rec);
+			new Part.IndexObject(this).remove(rec);
 		}
 	}
 
@@ -31,9 +29,9 @@ public class ChangeField extends Field implements ChangePart {
 		store.setInt(rec, 4, store.putString(value));
 	}
 
-	public void setUpRecord(Part value) {
-		store.setInt(rec, 17, value == null ? 0 : value.getRec());
-		store.setInt(rec, 22, value == null ? 0 : value.getArrayIndex());
+	private void up(Part value) {
+		store.setInt(rec, 17, value == null ? 0 : value.rec());
+		store.setInt(rec, 22, value == null ? 0 : value.index());
 		byte type = 0;
 		if (value instanceof Field)
 			type = 1;
@@ -50,13 +48,14 @@ public class ChangeField extends Field implements ChangePart {
 
 	@Override
 	public void close() {
-		new Part.IndexObject(getUpRecord(), this).insert(getRec());
+		new Part.IndexObject(up()).insert(rec());
 	}
 
 	@Override
-	public boolean set(int field, Object value) {
-		if (field >= 2 && field <= 9)
-			return ChangePart.super.setPart(field - 2, value);
+	public boolean java(Object value) {
+		int field = 0;
+		if (field > 1 && field <= 8)
+			return ChangePart.super.setPart(field - 1, value);
 		switch (field) {
 		case 1:
 			if (value instanceof String)
@@ -68,9 +67,10 @@ public class ChangeField extends Field implements ChangePart {
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
-		if (field >= 2 && field <= 9)
-			return ChangePart.super.addPart(field - 2);
+	public ChangeInterface add() {
+		int field = 0;
+		if (field > 1 && field <= 8)
+			return ChangePart.super.addPart(field - 1);
 		switch (field) {
 		default:
 			return null;

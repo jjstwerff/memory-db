@@ -17,9 +17,7 @@ import org.memorydb.structure.TreeIndex;
 /**
  * Automatically generated record class for table Source
  */
-@RecordData(
-	name = "Source",
-	keyFields = {"name"})
+@RecordData(name = "Source")
 public class Source implements MemoryRecord, RecordInterface {
 	/* package private */ Store store;
 	protected int rec;
@@ -57,11 +55,7 @@ public class Source implements MemoryRecord, RecordInterface {
 		return new ChangeSource(this);
 	}
 
-	@FieldData(
-		name = "name",
-		type = "STRING",
-		mandatory = false
-	)
+	@FieldData(name = "name", type = "STRING", mandatory = false)
 	public String getName() {
 		return rec == 0 ? null : store.getString(store.getInt(rec, 4));
 	}

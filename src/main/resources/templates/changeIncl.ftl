@@ -28,8 +28,8 @@ public interface Change${table.name} extends <#if table.includes?size == 0>Chang
 <#if fld.type == "ARRAY">
 
 	default void move${fld.name?cap_first}(Change${table.name} other) {
-		getStore().setInt(getRec(), ${table.name?lower_case}Position() + ${fld.pos / 8}, getStore().getInt(other.getRec(), other.${table.name?lower_case}Position() + ${fld.pos / 8}));
-		getStore().setInt(other.getRec(), other.${table.name?lower_case}Position() + ${fld.pos / 8}, 0);
+		store().setInt(rec(), ${table.name?lower_case}Position() + ${fld.pos / 8}, store().getInt(other.rec(), other.${table.name?lower_case}Position() + ${fld.pos / 8}));
+		store().setInt(other.rec(), other.${table.name?lower_case}Position() + ${fld.pos / 8}, 0);
 	}
 </#if><#if fld.setter??>
 
@@ -51,7 +51,7 @@ ${table.otherFields}<#rt>
 <#assign max = table.fields?size>
 <#list table.includes as incl>
 <#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
+		if (field > ${max} && field <= ${nmax})
 			return set${incl.name}(field - ${max}, value);
 <#assign max = nmax>
 </#list>
@@ -72,7 +72,7 @@ ${table.otherFields}<#rt>
 <#assign max = table.fields?size>
 <#list table.includes as incl>
 <#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
+		if (field > ${max} && field <= ${nmax})
 			return add${incl.name}(field - ${max});
 <#assign max = nmax>
 </#list>

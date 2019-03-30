@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.memorydb.jslt.ChangeMacro;
 import org.memorydb.jslt.MatchStep.Type;
 import org.memorydb.jslt.MatchingArray;
+import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 public class TestStructure extends MemoryTests {
@@ -23,8 +24,13 @@ public class TestStructure extends MemoryTests {
 			Assert.assertEquals("name=main, alternatives=[\n], matching=[\n  type=JUMP, jump=10\n  type=TEST_BOOLEAN, mboolean=true, mbfalse=0\n]\n", macro.toString());
 			StringBuilder bld = new StringBuilder();
 			MatchingArray matchArray = macro.getMatching();
-			for (int pos = matchArray.next(-1); pos > -2; pos = matchArray.next(pos))
+			RecordInterface elm = matchArray.start();
+			int pos = 0;
+			while (elm != null) {
 				bld.append(pos + ":" + matchArray.type(pos) + " " + matchArray.get(pos));
+				elm = elm.next();
+				pos++;
+			}
 			Assert.assertEquals("1:OBJECT type=JUMP, jump=10\n2:OBJECT type=TEST_BOOLEAN, mboolean=true, mbfalse=0\n", bld.toString());
 		}
 	}

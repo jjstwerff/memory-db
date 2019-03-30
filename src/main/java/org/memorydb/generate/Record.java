@@ -29,6 +29,7 @@ public class Record implements Comparable<Record> {
 	private final Map<Record, Integer> includes; // includes the fields of these other records
 	private final List<Record> included; // included in these records
 	private int conditionSize = -1;
+	private int upPos = -1;
 
 	public Record(String name, Project project, boolean full) {
 		this.name = name;
@@ -59,13 +60,7 @@ public class Record implements Comparable<Record> {
 		if (onName.containsKey(fieldName))
 			throw new GenerateException("Duplicate field name " + fieldName + " on table " + getName());
 		Field field = new Field(this, fieldName, type, relatedRecord);
-		if (fields.size() > 0 && fields.get(fields.size() -1).getName().equals("upRecord")) {
-			Field up = fields.get(fields.size() - 1);
-			fields.set(fields.size() - 1, field);
-			fields.add(up);
-		} else {
-			fields.add(field);
-		}
+		fields.add(field);
 		onName.put(fieldName, field);
 		if (type == Type.RELATION) {
 			if (!relatedRecord.full && !relatedRecord.content)
@@ -92,10 +87,6 @@ public class Record implements Comparable<Record> {
 			throw new GenerateException("No support for multiple hierarchical paths oo " + relatedRecord.getName() + " from " + getName() + "." + fieldName);
 		if (relatedRecord.getParent() == null) {
 			relatedRecord.setParent(this);
-			if (full || content)
-				relatedRecord.field("upRecord", Type.RELATION, this).defaultValue("parent");
-			else
-				relatedRecord.field("upRecord", Type.ELEMENT, this);
 			if (content)
 				relatedRecord.addSize(5); // type 1 byte, index 4 bytes
 		} else if (!relatedRecord.getParent().equals(this))
@@ -255,7 +246,7 @@ public class Record implements Comparable<Record> {
 				res.add("org.memorydb.handler.MutationException");
 			if (fld.getType() == Type.STRING_POINTER)
 				res.add("org.memorydb.structure.StringPointer");
-			if (full && !fld.isKey() && !fld.getName().equals("upRecord") && fld.getType() == Type.RELATION && fld.getRelated().getParent() != null)
+			if (full && !fld.isKey() && fld.getType() == Type.RELATION && fld.getRelated().getParent() != null)
 				res.add("java.util.Iterator");
 		}
 		return res;
@@ -274,13 +265,13 @@ public class Record implements Comparable<Record> {
 	public String getParseKeys() {
 		if (parent != null) {
 			StringBuilder bld = new StringBuilder();
-			bld.append("\t\t").append(parent.name).append(" parent = getUpRecord();\n");
+			bld.append("\t\t").append(parent.name).append(" parent = up();\n");
 			if (parent.parent != null) {
 				bld.append("\t\tparser.getRelation(\"").append(parent.name).append("\", (recNr, idx) -> {\n");
-				bld.append("\t\t\tparent.setRec(recNr);\n");
+				bld.append("\t\t\tparent.rec(recNr);\n");
 				bld.append("\t\t\tparent.parseKey(parser);\n");
 				bld.append("\t\t\treturn true;\n");
-				bld.append("\t\t}, getRec());\n");
+				bld.append("\t\t}, rec());\n");
 			}
 			bld.append(keyFields(2));
 			return bld.toString();
@@ -380,7 +371,7 @@ public class Record implements Comparable<Record> {
 		if (!includes.isEmpty())
 			return false;
 		for (Field field : fields)
-			if (!field.isKey() && !field.getName().equals("upRecord"))
+			if (!field.isKey())
 				return false;
 		return true;
 	}
@@ -396,11 +387,11 @@ public class Record implements Comparable<Record> {
 	}
 
 	public String setFields(String indent, Record table) {
-		String store = included.isEmpty() ? "store" : "getStore()";
+		String store = included.isEmpty() ? "store" : "store()";
 		StringBuilder bld = new StringBuilder();
 		String thisRec = table == null ? "this" : "record";
 		for (Field field : fields) {
-			if (field.isKey() || field.getName().equals("upRecord"))
+			if (field.isKey())
 				continue;
 			boolean normal = field.getType() != Type.ARRAY && field.getType() != Type.SET && field.getType() != Type.OBJECT;
 			String fldUpper = field.getUpperName();
@@ -476,11 +467,10 @@ public class Record implements Comparable<Record> {
 			bld.append(indent).append("}\n");
 		}
 		return bld.toString();
-
 	}
 
 	private void getRelData(String indent, Record table, StringBuilder bld, Field field) {
-		String store = included.isEmpty() ? "store" : "getStore()";
+		String store = included.isEmpty() ? "store" : "store()";
 		bld.append(indent).append("\tparser.getRelation(\"").append(field.getName()).append("\", (recNr, idx) -> {\n");
 		if (field.getRelated().getParent() == null) {
 			bld.append(indent).append("\t\t").append(field.getRelated().getName()).append(" relRec = new ").append(field.getRelated().getName()).append("(").append(store)
@@ -490,7 +480,7 @@ public class Record implements Comparable<Record> {
 			if (table != null && field.getRelated().getParent() == table) {
 				for (Field back : table.getFields()) {
 					if (back.getType() == Type.SET && back.getRelated() == field.getRelated()) {
-						bld.append(indent).append("\t\tIterator<").append(field.getRelated().getName()).append("> iterator = getUpRecord().get").append(back.getUpperName())
+						bld.append(indent).append("\t\tIterator<").append(field.getRelated().getName()).append("> iterator = up().get").append(back.getUpperName())
 								.append("().iterator();\n");
 						break;
 					}
@@ -498,7 +488,7 @@ public class Record implements Comparable<Record> {
 			} else if (field.getRelated().getParent() == parent) {
 				for (Field back : parent.getFields()) {
 					if (back.getType() == Type.SET && back.getRelated() == field.getRelated()) {
-						bld.append(indent).append("\t\tIterator<").append(field.getRelated().getName()).append("> iterator = getUpRecord().get").append(back.getUpperName())
+						bld.append(indent).append("\t\tIterator<").append(field.getRelated().getName()).append("> iterator = up().get").append(back.getUpperName())
 								.append("().iterator();\n");
 						break;
 					}
@@ -506,7 +496,7 @@ public class Record implements Comparable<Record> {
 			} else if (parent != null && field.getRelated().getParent() == parent.getParent()) {
 				for (Field back : parent.getParent().getFields()) {
 					if (back.getType() == Type.SET && back.getRelated() == field.getRelated()) {
-						bld.append(indent).append("\t\tIterator<").append(field.getRelated().getName()).append("> iterator = getUpRecord().getUpRecord().get")
+						bld.append(indent).append("\t\tIterator<").append(field.getRelated().getName()).append("> iterator = up().up().get")
 								.append(back.getUpperName()).append("().iterator();\n");
 						break;
 					}
@@ -518,13 +508,13 @@ public class Record implements Comparable<Record> {
 			bld.append(indent).append("\t\tboolean found = relRec != null && relRec.parseKey(parser);\n");
 		}
 		if (isFull()) {
-			bld.append(indent).append("\t\t").append("setRec(recNr);\n");
+			bld.append(indent).append("\t\t").append("rec(recNr);\n");
 		}
 		bld.append(indent).append("\t\t").append("set").append(field.getUpperName()).append("(relRec);\n");
 		bld.append(indent).append("\t\treturn found;\n");
 		bld.append(indent).append("\t}, ");
 		if (isFull() || !included.isEmpty())
-			bld.append("getRec());\n");
+			bld.append("rec());\n");
 		else
 			bld.append("idx);\n");
 	}
@@ -541,8 +531,14 @@ public class Record implements Comparable<Record> {
 		return parent;
 	}
 
-	public void setParent(Record parent) {
+	private void setParent(Record parent) {
 		this.parent = parent;
+		this.upPos = size;
+		size += 4;
+	}
+
+	public int getUpPos() {
+		return upPos;
 	}
 
 	public int getSize() {

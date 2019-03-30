@@ -1,7 +1,5 @@
 package org.memorydb.json;
 
-import java.io.IOException;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
@@ -14,6 +12,7 @@ import org.memorydb.structure.TreeIndex;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -24,7 +23,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 	int partPosition();
 
 	@Override
-	Store getStore();
+	Store store();
 
 	boolean parseKey(Parser parser);
 
@@ -54,113 +53,77 @@ public interface Part extends MemoryRecord, RecordInterface {
 		}
 	}
 
-	@FieldData(
-		name = "type",
-		type = "ENUMERATE",
-		enumerate = {"ARRAY", "BOOLEAN", "FLOAT", "NUMBER", "NULL", "OBJECT", "STRING"},
-		condition = true,
-		mandatory = false
-	)
+	@FieldData(name = "type", type = "ENUMERATE", enumerate = { "ARRAY", "BOOLEAN", "FLOAT", "NUMBER", "NULL", "OBJECT",
+			"STRING" }, condition = true, mandatory = false)
 	default Type getType() {
-		int data = getRec() == 0 ? 0 : getStore().getByte(getRec(), partPosition() + 0) & 31;
+		int data = rec() == 0 ? 0 : store().getByte(rec(), partPosition() + 0) & 31;
 		if (data <= 0)
 			return null;
 		return Type.values()[data - 1];
 	}
 
-	@FieldData(
-		name = "array",
-		type = "ARRAY",
-		related = ArrayArray.class,
-		when = "ARRAY",
-		mandatory = false
-	)
+	@FieldData(name = "array", type = "ARRAY", related = ArrayArray.class, when = "ARRAY", mandatory = false)
 	default ArrayArray getArray() {
 		return getType() != Type.ARRAY ? null : new ArrayArray(this, -1);
 	}
 
 	default ArrayArray getArray(int index) {
-		return getType() != Type.ARRAY ? new ArrayArray(getStore(), 0, -1) : this instanceof ArrayArray ? new ArrayArray((ArrayArray)this, index) : new ArrayArray(this, index);
+		return getType() != Type.ARRAY ? new ArrayArray(store(), 0, -1)
+				: this instanceof ArrayArray ? new ArrayArray((ArrayArray) this, index) : new ArrayArray(this, index);
 	}
 
 	default ArrayArray addArray() {
-		return getType() != Type.ARRAY ? new ArrayArray(getStore(), 0, -1) : getArray().add();
+		return getType() != Type.ARRAY ? new ArrayArray(store(), 0, -1) : getArray().add();
 	}
 
-	@FieldData(
-		name = "boolean",
-		type = "BOOLEAN",
-		when = "BOOLEAN",
-		mandatory = false
-	)
+	@FieldData(name = "boolean", type = "BOOLEAN", when = "BOOLEAN", mandatory = false)
 	default boolean isBoolean() {
-		return getType() != Type.BOOLEAN ? false : (getStore().getByte(getRec(), partPosition() + 1) & 1) > 0;
+		return getType() != Type.BOOLEAN ? false : (store().getByte(rec(), partPosition() + 1) & 1) > 0;
 	}
 
-	@FieldData(
-		name = "float",
-		type = "FLOAT",
-		when = "FLOAT",
-		mandatory = false
-	)
+	@FieldData(name = "float", type = "FLOAT", when = "FLOAT", mandatory = false)
 	default double getFloat() {
-		return getType() != Type.FLOAT ? Double.NaN : Double.longBitsToDouble(getStore().getLong(getRec(), partPosition() + 1));
+		return getType() != Type.FLOAT ? Double.NaN : Double.longBitsToDouble(store().getLong(rec(), partPosition() + 1));
 	}
 
-	@FieldData(
-		name = "number",
-		type = "LONG",
-		when = "NUMBER",
-		mandatory = false
-	)
+	@FieldData(name = "number", type = "LONG", when = "NUMBER", mandatory = false)
 	default long getNumber() {
-		return getType() != Type.NUMBER ? Long.MIN_VALUE : getStore().getLong(getRec(), partPosition() + 1);
+		return getType() != Type.NUMBER ? Long.MIN_VALUE : store().getLong(rec(), partPosition() + 1);
 	}
 
-	@FieldData(
-		name = "object",
-		type = "SET",
-		keyNames = {"name"},
-		keyTypes = {"STRING"},
-		related = Field.class,
-		when = "OBJECT",
-		mandatory = false
-	)
+	@FieldData(name = "object", type = "SET", related = Field.class, when = "OBJECT", mandatory = false)
 	default IndexObject getObject() {
-		return getType() != Type.OBJECT ? null : new IndexObject(this, new Field(getStore()));
+		return getType() != Type.OBJECT ? null : new IndexObject(this);
 	}
 
 	default Field getObject(String key1) {
-		Field resultRec = new Field(getStore());
-		IndexObject idx = new IndexObject(this, resultRec, key1);
+		IndexObject idx = new IndexObject(this, key1);
 		int res = idx.search();
-		if (res == 0)
-			return resultRec;
-		return new Field(getStore(), res);
+		return new Field(store(), res);
 	}
 
 	default ChangeField addObject() {
 		return new ChangeField(this, 0);
 	}
 
-	/* package private */ class IndexObject extends TreeIndex<Field> {
-		private final Part part;
+	/* package private */ class IndexObject extends TreeIndex implements Iterable<Field> {
+		private Part record;
 
-		public IndexObject(Part part, Field record) {
-			super(record, null, 64, 9);
-			this.part = part;
+		public IndexObject(Part record) {
+			super(record.store(), null, 64, 9);
+			this.record = record;
 		}
 
-		public IndexObject(Part part, Field record, String key1) {
-			super(record, new Key() {
+		public IndexObject(Part record, String key1) {
+			super(record.store(), new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert record.getStore().validate(recNr);
-					record.setRec(recNr);
+					assert record.store().validate(recNr);
+					Field rec = new Field(record.store(), recNr);
 					int o = 0;
-					o = RedBlackTree.compare(key1, record.getName());
+					o = RedBlackTree.compare(key1, rec.getName());
 					return o;
 				}
 
@@ -169,7 +132,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 					return IndexOperation.EQ;
 				}
 			}, 64, 9);
-			this.part = part;
+			this.record = record;
 		}
 
 		@Override
@@ -184,41 +147,52 @@ public interface Part extends MemoryRecord, RecordInterface {
 
 		@Override
 		protected int readTop() {
-			return part.getStore().getInt(part.getRec(), part.partPosition() + 1);
+			return store.getInt(record.rec(), record.partPosition() + 1);
 		}
 
 		@Override
 		protected void changeTop(int value) {
-			part.getStore().setInt(part.getRec(), part.partPosition() + 1, value);
+			record.store().setInt(record.rec(), record.partPosition() + 1, value);
 		}
 
 		@Override
 		protected int compareTo(int a, int b) {
-			Field recA = new Field(part.getStore(), a);
-			Field recB = new Field(part.getStore(), b);
+			Field recA = new Field(record.store(), a);
+			Field recB = new Field(record.store(), b);
 			int o = 0;
 			o = compare(recA.getName(), recB.getName());
 			return o;
 		}
 
 		@Override
-		public Object get(int field) {
-			return new Field(part.getStore(), field);
+		public Iterator<Field> iterator() {
+			return new Iterator<>() {
+				int nextRec = search();
+
+				@Override
+				public boolean hasNext() {
+					return nextRec > 0;
+				}
+
+				@Override
+				public Field next() {
+					int n = nextRec;
+					if (n <= 0)
+						return null;
+					nextRec = toNext(nextRec);
+					return new Field(record.store(), n);
+				}
+			};
 		}
 	}
 
-	@FieldData(
-		name = "value",
-		type = "STRING",
-		when = "STRING",
-		mandatory = false
-	)
+	@FieldData(name = "value", type = "STRING", when = "STRING", mandatory = false)
 	default String getValue() {
-		return getType() != Type.STRING ? null : getStore().getString(getStore().getInt(getRec(), partPosition() + 1));
+		return getType() != Type.STRING ? null : store().getString(store().getInt(rec(), partPosition() + 1));
 	}
 
-	default void outputPart(Write write, int iterate) throws IOException {
-		if (getRec() == 0 || iterate <= 0)
+	default void outputPart(Write write, int iterate) {
+		if (rec() == 0 || iterate <= 0)
 			return;
 		write.field("type", getType());
 		ArrayArray fldArray = getArray();
@@ -242,7 +216,8 @@ public interface Part extends MemoryRecord, RecordInterface {
 		write.field("value", getValue());
 	}
 
-	default Object getContent() {
+	@Override
+	default Object java() {
 		Type type = getType();
 		if (type == null)
 			return null;
@@ -267,15 +242,45 @@ public interface Part extends MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	default int next(int field) {
-		if (getType() == Type.ARRAY)
-			return field < 0 ? 1 : (field >= getSize() ? -2 : field + 1);
-		if (getType() != Type.OBJECT)
-			return field == 0 ? -2 : 0;
-		if (field < 0)
-			return getObject().first();
-		int res = getObject().next(field);
-		return res <= 0 ? -2 : res;
+	default Part start() {
+		Type type = getType();
+		if (type == null)
+			return null;
+		switch (type) {
+		case ARRAY:
+			return new ArrayArray(this, 0);
+		case OBJECT:
+			return new Field(store(), new IndexObject(this).first());
+		default:
+			return null;
+		}
+	}
+
+	@Override
+	default Part next() {
+		Part parent = (Part) up();
+		if (parent == null)
+			return null;
+		Type type = parent.getType();
+		if (type == null)
+			return null;
+		switch (type) {
+		case ARRAY:
+			if (!(this instanceof ArrayArray))
+				throw new RuntimeException("Incorrect current type");
+			ArrayArray cur = (ArrayArray) this;
+			int idx = cur.index();
+			if (idx + 1 >= cur.size())
+				return null;
+			return new ArrayArray(parent, idx + 1);
+		case OBJECT:
+			int pos = rec();
+			if (pos < 0)
+				return null;
+			return new Field(store(), new IndexObject(parent).next(pos));
+		default:
+			return null;
+		}
 	}
 
 	default FieldType getFieldType() {
@@ -303,13 +308,13 @@ public interface Part extends MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	default int getSize() {
+	default int size() {
 		if (getType() != Type.ARRAY)
 			return 0;
 		ArrayArray array = getArray();
 		if (array == null)
 			return 0;
-		return array.getSize();
+		return array.size();
 	}
 
 	default FieldType typePart() {
@@ -323,34 +328,26 @@ public interface Part extends MemoryRecord, RecordInterface {
 			if (field == 0)
 				return FieldType.ARRAY;
 			ArrayArray array = getArray(field - 1);
-			return array == null || !array.exists() ? null : array.getFieldType();
+			return array == null ? null : array.getFieldType();
 		}
 		if (getType() != Type.OBJECT && field == 0)
 			return getFieldType();
-		return new Field(getStore(), field).getFieldType();
+		return new Field(store(), field).getFieldType();
 	}
 
 	default String namePart(int field) {
 		if (field < 0 || getType() != Type.OBJECT)
 			return null;
-		return new Field(getStore(), field).getName();
+		return new Field(store(), field).getName();
 	}
 
 	default Object getPart(int field) {
 		if (field < 0)
 			return null;
 		if (getType() == Type.ARRAY)
-			return getArray(field - 1).getContent();
+			return getArray(field - 1).java();
 		if (getType() != Type.OBJECT)
-			return getContent();
-		return new Field(getStore(), field).getContent();
-	}
-
-	default Iterable<? extends RecordInterface> iteratePart(int field, @SuppressWarnings("unused") Object... key) {
-		if (field < 0)
-			return null;
-		if (getType() == Type.ARRAY)
-			return getArray();
-		return new Field(getStore(), field).getArray();
+			return java();
+		return new Field(store(), field).java();
 	}
 }

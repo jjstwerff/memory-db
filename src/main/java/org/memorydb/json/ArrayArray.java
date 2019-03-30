@@ -1,14 +1,11 @@
 package org.memorydb.json;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.handler.CorruptionException;
-import org.memorydb.structure.ChangeInterface;
-import org.memorydb.structure.InputOutputException;
 import org.memorydb.structure.RecordData;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
@@ -21,18 +18,18 @@ import org.memorydb.structure.Store;
 public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 	private final Store store;
 	private final Part parent;
-	private int idx;
+	private final int idx;
 	private int alloc;
 	private int size;
 
 	/* package private */ ArrayArray(Part parent, int idx) {
-		this.store = parent.getStore();
+		this.store = parent.store();
 		this.parent = parent;
 		this.idx = idx;
-		if (parent.getRec() != 0) {
-			this.alloc = store.getInt(parent.getRec(), parent.partPosition() + 1);
+		if (parent.rec() != 0) {
+			this.alloc = store.getInt(parent.rec(), parent.partPosition() + 1);
 			if (alloc != 0) {
-				setUpRecord(parent);
+				up(parent);
 				this.size = store.getInt(alloc, 4);
 			} else
 				this.size = 0;
@@ -56,39 +53,40 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 		this.store = store;
 		this.alloc = rec;
 		this.idx = idx;
-		this.parent = getUpRecord();
+		this.parent = up();
 		this.size = alloc == 0 ? 0 : store.getInt(alloc, 4);
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return alloc;
 	}
 
 	@Override
-	public int getArrayIndex() {
+	public int index() {
 		return idx;
 	}
 
 	@Override
-	public void setRec(int rec) {
-		this.alloc = rec;
+	public ArrayArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new ArrayArray(store, newRec, -1);
 	}
 
-	/* package private */ void setUpRecord(Part record) {
-		store.setInt(alloc, 8, record.getRec());
+	private void up(Part record) {
+		store.setInt(alloc, 8, record.rec());
 		if (record instanceof Field)
 			store.setByte(alloc, 12, 1);
 		if (record instanceof ArrayArray) {
 			store.setByte(alloc, 12, 2);
-			store.setInt(alloc, 13, record.getArrayIndex());
+			store.setInt(alloc, 13, record.index());
 		}
 		if (record instanceof Json)
 			store.setByte(alloc, 12, 3);
 	}
 
 	@Override
-	public Part getUpRecord() {
+	public Part up() {
 		if (alloc == 0)
 			return null;
 		switch (store.getByte(alloc, 12)) {
@@ -104,28 +102,25 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 	}
 
 	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return size;
 	}
 
-	/* package private */ ArrayArray add() {
-		if (parent.getRec() == 0)
+	@Override
+	public ArrayArray add() {
+		if (parent.rec() == 0)
 			return this;
-		idx = size;
-		if (alloc == 0) {
-			alloc = store.allocate(9 + 17);
-			setUpRecord(parent);
-		} else
-			alloc = store.resize(alloc, (17 + (idx + 1) * 9) / 8);
-		store.setInt(parent.getRec(), parent.partPosition() + 1, alloc);
-		size = idx + 1;
-		store.setInt(alloc, 4, size);
-		return this;
+		alloc = alloc == 0 ? store.allocate(9 + 17) : store.resize(alloc, (17 + (idx + 1) * 9) / 8);
+		store.setInt(parent.rec(), parent.partPosition() + 1, alloc);
+		store.setInt(alloc, 4, size + 1);
+		ArrayArray res = new ArrayArray(parent, size);
+		size++;
+		return res;
 	}
 
 	@Override
@@ -149,7 +144,7 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 	}
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (alloc == 0 || iterate <= 0)
 			return;
 		outputPart(write, iterate);
@@ -159,16 +154,12 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			if (idx == -1)
-				for (ArrayArray a : this) {
-					a.output(write, 4);
-				}
-			else
-				output(write, 4);
-		} catch (IOException e) {
-			throw new InputOutputException(e);
-		}
+		if (idx == -1)
+			for (ArrayArray a : this) {
+				a.output(write, 4);
+			}
+		else
+			output(write, 4);
 		return write.toString();
 	}
 
@@ -186,31 +177,16 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 		return false;
 	}
 
-	public void setIdx(int idx) {
-		if (idx >= 0 && idx < size)
-			this.idx = idx;
-	}
-
 	@Override
 	public void close() {
 		// nothing
 	}
 
 	@Override
-	public Object get(int field) {
-		return getPart(field);
-	}
-
-	@Override
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		return iteratePart(field, key);
-	}
-
-	@Override
 	public Type getType() {
 		if (idx == -1)
 			return parent.getType();
-		int data = getRec() == 0 ? 0 : getStore().getByte(getRec(), partPosition() + 0) & 31;
+		int data = rec() == 0 ? 0 : store().getByte(rec(), partPosition() + 0) & 31;
 		if (data <= 0 || data > Type.values().length)
 			return null;
 		return Type.values()[data - 1];
@@ -222,27 +198,17 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 	}
 
 	@Override
-	public FieldType type(int field) {
-		return typePart(field);
+	public String name() {
+		return namePart(0);
 	}
 
 	@Override
-	public String name(int field) {
-		return namePart(field);
+	public boolean java(Object val) {
+		return setPart(0, val);
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
-	}
-
-	@Override
-	public boolean set(int field, Object val) {
-		return setPart(field, val);
-	}
-
-	@Override
-	public ChangeInterface add(int field) {
-		return addPart(field);
+	public RecordInterface copy() {
+		return new ArrayArray(parent, idx);
 	}
 }

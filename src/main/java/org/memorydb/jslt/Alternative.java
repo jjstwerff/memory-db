@@ -124,12 +124,12 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		related = Macro.class,
 		mandatory = false
 	)
-	public Macro getUpRecord() {
+	public Macro up() {
 		return new Macro(store, rec == 0 ? 0 : store.getInt(rec, 30));
 	}
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (rec == 0 || iterate <= 0)
 			return;
 		write.field("nr", getNr());

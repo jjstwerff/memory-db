@@ -1,10 +1,9 @@
-Abstract Array / Object element
-- knows its place in the array/object
-- can move to the next state
-- can be cloned
-
-Instead of normal RecordInterface. Prevent current errors with indexes.
-
+Fix code generation for new model:
+- fix first unit tests
+	allocate space again
+- simple iterators
+- add non-boxing methods
+- add a couple of more unit tests for edge cases
 
 MatchMacro:
 - validate that the stack is empty

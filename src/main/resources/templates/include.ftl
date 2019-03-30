@@ -7,8 +7,6 @@ package ${project.package};
 <#if field.type == "SET"><#assign hasIndexes=true></#if>
 </#list>
 
-import java.io.IOException;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
@@ -38,7 +36,7 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 	int ${table.name?lower_case}Position();
 
 	@Override
-	Store getStore();
+	Store store();
 <#list table.includes as incl>
 
 	@Override
@@ -84,28 +82,7 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 	}
 </#if>
 
-	@FieldData(
-		name = "${field.name}",
-		type = "${field.type}",
-<#if field.type == "ENUMERATE">
-		enumerate = {<#list field.values as val>"${val}"<#if val?has_next>, </#if></#list>},
-</#if><#if field.type == "SET">
-		keyNames = {<#list field.index.keys as key>"${key.name}"<#if key?has_next>, </#if></#list>},
-		keyTypes = {<#list field.index.keys as key>"${key.type}"<#if key?has_next>, </#if></#list>},
-</#if>
-<#if field.related??><#if field.type == "ARRAY">
-		related = ${field.javaType}.class,
-<#else>
-		related = ${field.related}.class,
-</#if></#if>
-<#if field.isCondition()>
-		condition = true,
-</#if>
-<#if field.getWhen()??>
-		when = "${field.getWhen()}",
-</#if>
-		mandatory = ${field.isMandatory()?string("true", "false")}
-	)
+	@FieldData(name = "${field.name}", type = "${field.type}", <#if field.type == "ENUMERATE">enumerate = { <#list field.values as val>"${val}"<#if val?has_next>, </#if></#list> }, </#if><#if field.related??><#if field.type == "ARRAY">related = ${field.javaType}.class, <#else>related = ${field.related}.class, </#if></#if><#if field.isCondition()>condition = true, </#if><#if field.getWhen()??>when = "${field.getWhen()}", </#if>mandatory = ${field.isMandatory()?string("true", "false")})
 	default ${field.javaType} <#if field.type == "BOOLEAN" || field.type == "NULL_BOOLEAN">is<#else>get</#if>${field.name?cap_first}() {
 		${field.getter}
 	}
@@ -113,7 +90,7 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 
 	default ${field.javaType} get${field.name?cap_first}(int index) {
 <#if field.whenCond??>
-		return get${table.condition.name?cap_first}() != ${table.condition.name?cap_first}.${field.whenCond} ? new ${field.name?cap_first}Array(getStore(), 0, -1) : new ${field.name?cap_first}Array(this, index);
+		return get${table.condition.name?cap_first}() != ${table.condition.name?cap_first}.${field.whenCond} ? new ${field.name?cap_first}Array(store(), 0, -1) : new ${field.name?cap_first}Array(this, index);
 <#else>
 		return new ${field.name?cap_first}Array(this, index);
 </#if>
@@ -121,7 +98,7 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 
 	default ${field.javaType} add${field.name?cap_first}() {
 <#if field.whenCond??>
-		return get${table.condition.name?cap_first}() != ${table.condition.name?cap_first}.${field.whenCond} ? new ${field.name?cap_first}Array(getStore(), 0, -1) : get${field.name?cap_first}().add();
+		return get${table.condition.name?cap_first}() != ${table.condition.name?cap_first}.${field.whenCond} ? new ${field.name?cap_first}Array(store(), 0, -1) : get${field.name?cap_first}().add();
 <#else>
 		return get${field.name?cap_first}().add();
 </#if>
@@ -129,19 +106,19 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 <#elseif field.type == "SET"><#assign index=field.index>
 
 	default ${field.related.name} get${field.name?cap_first}(<#list index.javaTypes[0..*index.javaTypes?size] as t>${t} key${t?index + 1}<#if t?has_next>, </#if></#list>) {
-		${field.related.name} resultRec = new ${field.related.name}(getStore());
+		${field.related.name} resultRec = new ${field.related.name}(store());
 		Index${index.name?cap_first} idx = new Index${index.name?cap_first}(this, resultRec<#list index.javaTypes[0..*index.javaTypes?size] as t>, key${t?index + 1}</#list>);
 		int res = idx.search();
 		if (res == 0)
 			return resultRec;
-		return new ${field.related.name}(getStore(), res);
+		return new ${field.related.name}(store(), res);
 	}
 
 	default Change${field.related.name?cap_first} add${field.name?cap_first}() {
 		return new Change${field.related.name}(this, 0);
 	}
 
-	/* package private */ class Index${index.name?cap_first} extends TreeIndex<${field.related.name}> {
+	/* package private */ class Index${index.name?cap_first} extends TreeIndex<${field.related.name}> implements RecordInterface {
 		private final ${table.name} ${table.name?lower_case};
 
 		public Index${index.name?cap_first}(${table.name} ${table.name?lower_case}, ${field.related.name} record) {
@@ -156,8 +133,8 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert record.getStore().validate(recNr);
-					record.setRec(recNr);
+					assert record.store().validate(recNr);
+					record.rec(recNr);
 					int o = 0;
 <#list index.javaTypes[0..*i] as t>
 					o = RedBlackTree.compare(key${t?index + 1}, record.${index.retrieve[t?index]});
@@ -199,8 +176,8 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 
 		@Override
 		protected int compareTo(int a, int b) {
-			${field.related.name} recA = new ${field.related.name}(${table.name?lower_case}.getStore(), a);
-			${field.related.name} recB = new ${field.related.name}(${table.name?lower_case}.getStore(), b);
+			${field.related.name} recA = new ${field.related.name}(${table.name?lower_case}.store(), a);
+			${field.related.name} recB = new ${field.related.name}(${table.name?lower_case}.store(), b);
 			int o = 0;
 <#list index.retrieve as retrieve>
 			o = compare(recA.${retrieve}, recB.${retrieve});
@@ -213,13 +190,13 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 
 		@Override
 		protected String toString(int rec) {
-			return new ${field.related.name}(${table.name?lower_case}.getStore(), rec).toString();
+			return new ${field.related.name}(${table.name?lower_case}.store(), rec).toString();
 		}
 	}
 </#if></#list>
 
-	default void output${table.name}(Write write, int iterate) throws IOException {
-		if (getRec() == 0 || iterate <= 0)
+	default void output${table.name}(Write write, int iterate) {
+		if (rec() == 0 || iterate <= 0)
 			return;
 <#list table.fields as field><#if field.type == "RELATION"><#if field.name != "upRecord">
 		write.field("${field.name}", get${field.name?cap_first}());
@@ -246,7 +223,7 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 		}
 <#elseif field.type == "OBJECT">
 		${field.related.name} fld${field.name?cap_first} = get${field.name?cap_first}();
-		if (fld${field.name?cap_first} != null && fld${field.name?cap_first}.getRec() != 0) {
+		if (fld${field.name?cap_first} != null && fld${field.name?cap_first}.rec() != 0) {
 			write.sub("${field.name}");
 			fld${field.name?cap_first}.output(write, iterate);
 			write.endSub();
@@ -290,7 +267,7 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 		case ${1 + field?index}:
 <#list 1..field.index.keys?size as i>
 			if (key.length > ${index.javaTypes?size - i})
-				return new Index${field.index.name?cap_first}(this, new ${field.related.name}(getStore())<#list field.index.javaTypes[0..*i] as t>, (${t}) key[${t?index}]</#list>);
+				return new Index${field.index.name?cap_first}(this, new ${field.related.name}(store())<#list field.index.javaTypes[0..*i] as t>, (${t}) key[${t?index}]</#list>);
 </#list>
 			return get${field.name?cap_first}();
 <#elseif field.type == 'ARRAY'>
