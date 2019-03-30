@@ -36,8 +36,6 @@ public class TestJson extends NormalCheck {
 
 	@Test
 	public void testIterate() {
-		Assert.assertEquals("{\"a\":1,\"b\":12.3,\"c\":\"d\",\"d\":false}", iterate("{\"a\":1, \"b\":12.3, \"c\":\"d\", \"d\":false}"));
-
 		Assert.assertEquals("123", iterate("123"));
 		Assert.assertEquals("\"123 4\"", iterate("\"123 4\""));
 		Assert.assertEquals("true", iterate("true"));

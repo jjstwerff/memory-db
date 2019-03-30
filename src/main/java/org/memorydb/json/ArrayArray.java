@@ -199,7 +199,7 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 
 	@Override
 	public String name() {
-		return namePart(0);
+		return null;
 	}
 
 	@Override

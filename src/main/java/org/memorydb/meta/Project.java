@@ -79,7 +79,7 @@ public class Project implements MemoryRecord, RecordInterface {
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert Project.this.store.validate(recNr);
+					assert store().validate(recNr);
 					Record rec = new Record(store(), recNr);
 					int o = 0;
 					o = RedBlackTree.compare(key1, rec.getName());

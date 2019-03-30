@@ -2,7 +2,7 @@ package org.memorydb.structure;
 
 public abstract class TreeIndex extends RedBlackTree {
 	private final Key key;
-	protected final Store store;
+	private final Store store;
 	private final int flag; // position of flag bit inside record
 	private final int field; // position of left/right field in bytes
 

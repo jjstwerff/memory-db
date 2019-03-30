@@ -97,9 +97,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 	}
 
 	default Field getObject(String key1) {
-		IndexObject idx = new IndexObject(this, key1);
-		int res = idx.search();
-		return new Field(store(), res);
+		return new Field(store(), new IndexObject(this, key1).search());
 	}
 
 	default ChangeField addObject() {
@@ -147,7 +145,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 
 		@Override
 		protected int readTop() {
-			return store.getInt(record.rec(), record.partPosition() + 1);
+			return record.store().getInt(record.rec(), record.partPosition() + 1);
 		}
 
 		@Override
@@ -277,7 +275,8 @@ public interface Part extends MemoryRecord, RecordInterface {
 			int pos = rec();
 			if (pos < 0)
 				return null;
-			return new Field(store(), new IndexObject(parent).next(pos));
+			int next = new IndexObject(parent).next(pos);
+			return next > 0 ? new Field(store(), next) : null;
 		default:
 			return null;
 		}
@@ -319,35 +318,5 @@ public interface Part extends MemoryRecord, RecordInterface {
 
 	default FieldType typePart() {
 		return getFieldType();
-	}
-
-	default FieldType typePart(int field) {
-		if (field < 0)
-			return null;
-		if (getType() == Type.ARRAY) {
-			if (field == 0)
-				return FieldType.ARRAY;
-			ArrayArray array = getArray(field - 1);
-			return array == null ? null : array.getFieldType();
-		}
-		if (getType() != Type.OBJECT && field == 0)
-			return getFieldType();
-		return new Field(store(), field).getFieldType();
-	}
-
-	default String namePart(int field) {
-		if (field < 0 || getType() != Type.OBJECT)
-			return null;
-		return new Field(store(), field).getName();
-	}
-
-	default Object getPart(int field) {
-		if (field < 0)
-			return null;
-		if (getType() == Type.ARRAY)
-			return getArray(field - 1).java();
-		if (getType() != Type.OBJECT)
-			return java();
-		return new Field(store(), field).java();
 	}
 }

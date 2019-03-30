@@ -141,7 +141,7 @@ public class Field implements Part {
 
 	@Override
 	public String name() {
-		return Part.super.namePart(0);
+		return getName();
 	}
 
 	@Override
