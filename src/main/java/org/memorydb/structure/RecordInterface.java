@@ -78,7 +78,7 @@ public interface RecordInterface {
 	/**
 	 * When this is an ARRAY return the requested element.
 	 * Otherwise return null.
-	 * @param index the array position to jump to.
+	 * @param index the array position to jump to 0 is the first element.
 	 */
 	default RecordInterface index(int index) {
 		return null;

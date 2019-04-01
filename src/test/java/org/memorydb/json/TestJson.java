@@ -45,6 +45,25 @@ public class TestJson extends NormalCheck {
 		Assert.assertEquals("{\"a\":[true]}", iterate("{\"a\":[true]}"));
 	}
 
+	@Test
+	public void testArray() {
+		Json res = json("[\"a\",1,[],[true],{\"b\":1}]");
+		Assert.assertEquals("[\"a\",1,[],[true],{\"b\":1}]", iterate(res));
+		Assert.assertEquals(5, res.size());
+		Assert.assertEquals("1", iterate(res.index(1)));
+		Assert.assertEquals("[]", iterate(res.index(2)));
+		Assert.assertEquals("[true]", iterate(res.index(3)));
+		Assert.assertEquals("{\"b\":1}", iterate(res.index(4)));
+		Assert.assertEquals(null, iterate(res.index(5)));
+	}
+
+	@Test
+	public void testObject() {
+		Json res = json("{\"a\":1, \"b\":12.3, \"c\":[], \"d\":[false]}");
+		Assert.assertEquals("{\"a\":1,\"b\":12.3,\"c\":[],\"d\":[false]}", iterate(res));
+		Assert.assertEquals("[]", iterate(res.field("c")));
+	}
+
 	private String parse(String json) {
 		Json res = json(json);
 		StringBuilder wr = new StringBuilder();
@@ -60,9 +79,17 @@ public class TestJson extends NormalCheck {
 		return write.getWriter().toString();
 	}
 
+	private String iterate(RecordInterface data) {
+		if (data == null)
+			return null;
+		JsonWriter write = new JsonWriter();
+		iterate(write, null, data);
+		return write.getWriter().toString();
+	}
+
 	private void iterate(JsonWriter write, String name, RecordInterface rec) {
 		if (rec.type() != FieldType.OBJECT) {
-			nonObject(write, rec);
+			nonObject(write, name, rec);
 			return;
 		}
 		if (name == null)
@@ -74,18 +101,18 @@ public class TestJson extends NormalCheck {
 			if (elm.type() == FieldType.OBJECT)
 				iterate(write, elm.name(), (RecordInterface) elm.java());
 			else
-				nonObject(write, elm);
+				nonObject(write, elm.name(), elm);
 			elm = elm.next();
 		}
 		write.end();
 	}
 
-	private void nonObject(JsonWriter write, RecordInterface rec) {
+	private void nonObject(JsonWriter write, String name, RecordInterface rec) {
 		if (rec.type() == FieldType.ARRAY) {
-			if (rec.name() == null)
+			if (name == null)
 				write.startArray();
 			else
-				write.startArray(rec.name());
+				write.startArray(name);
 			RecordInterface elm = rec.start();
 			while (elm != null) {
 				iterate(write, null, elm);

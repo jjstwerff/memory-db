@@ -67,13 +67,21 @@ public interface Part extends MemoryRecord, RecordInterface {
 		return getType() != Type.ARRAY ? null : new ArrayArray(this, -1);
 	}
 
-	default ArrayArray getArray(int index) {
-		return getType() != Type.ARRAY ? new ArrayArray(store(), 0, -1)
-				: this instanceof ArrayArray ? new ArrayArray((ArrayArray) this, index) : new ArrayArray(this, index);
-	}
-
 	default ArrayArray addArray() {
 		return getType() != Type.ARRAY ? new ArrayArray(store(), 0, -1) : getArray().add();
+	}
+
+	default RecordInterface index(int index) {
+		if (index < 0 || index >= size() || getType() != Type.ARRAY)
+			return null;
+		return new ArrayArray(this, index);
+	}
+
+	default RecordInterface field(String name) {
+		if (name == null || getType() != Type.OBJECT)
+			return null;
+		int pos = new IndexObject(this, name).search();
+		return pos <= 0 ? null : new Field(store(), pos);
 	}
 
 	@FieldData(name = "boolean", type = "BOOLEAN", when = "BOOLEAN", mandatory = false)
@@ -94,10 +102,6 @@ public interface Part extends MemoryRecord, RecordInterface {
 	@FieldData(name = "object", type = "SET", related = Field.class, when = "OBJECT", mandatory = false)
 	default IndexObject getObject() {
 		return getType() != Type.OBJECT ? null : new IndexObject(this);
-	}
-
-	default Field getObject(String key1) {
-		return new Field(store(), new IndexObject(this, key1).search());
 	}
 
 	default ChangeField addObject() {
@@ -246,7 +250,8 @@ public interface Part extends MemoryRecord, RecordInterface {
 			return null;
 		switch (type) {
 		case ARRAY:
-			return new ArrayArray(this, 0);
+			ArrayArray elm = new ArrayArray(this, 0);
+			return  elm.size() == 0 ? null : elm;
 		case OBJECT:
 			return new Field(store(), new IndexObject(this).first());
 		default:
