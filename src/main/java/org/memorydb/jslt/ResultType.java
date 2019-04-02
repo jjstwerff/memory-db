@@ -1,7 +1,5 @@
 package org.memorydb.jslt;
 
-import java.io.IOException;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
@@ -20,7 +18,7 @@ public interface ResultType extends MemoryRecord, RecordInterface {
 	int resulttypePosition();
 
 	@Override
-	Store getStore();
+	Store store();
 
 	boolean parseKey(Parser parser);
 
@@ -46,30 +44,21 @@ public interface ResultType extends MemoryRecord, RecordInterface {
 		}
 	}
 
-	@FieldData(
-		name = "type",
-		type = "ENUMERATE",
-		enumerate = {"ARRAY", "BOOLEAN", "FLOAT", "NUMBER", "NULL", "OBJECT", "STRING", "STRUCTURE"},
-		mandatory = true
-	)
+	@FieldData(name = "type", type = "ENUMERATE", enumerate = { "ARRAY", "BOOLEAN", "FLOAT", "NUMBER", "NULL", "OBJECT", "STRING", "STRUCTURE" }, mandatory = true)
 	default Type getType() {
-		int data = getRec() == 0 ? 0 : getStore().getByte(getRec(), resulttypePosition() + 0) & 31;
+		int data = rec() == 0 ? 0 : store().getByte(rec(), resulttypePosition() + 0) & 31;
 		if (data <= 0)
 			return null;
 		return Type.values()[data - 1];
 	}
 
-	@FieldData(
-		name = "record",
-		type = "STRING",
-		mandatory = false
-	)
+	@FieldData(name = "record", type = "STRING", mandatory = false)
 	default String getRecord() {
-		return getRec() == 0 ? null : getStore().getString(getStore().getInt(getRec(), resulttypePosition() + 1));
+		return rec() == 0 ? null : store().getString(store().getInt(rec(), resulttypePosition() + 1));
 	}
 
-	default void outputResultType(Write write, int iterate) throws IOException {
-		if (getRec() == 0 || iterate <= 0)
+	default void outputResultType(Write write, int iterate) {
+		if (rec() == 0 || iterate <= 0)
 			return;
 		write.field("type", getType());
 		write.field("record", getRecord());

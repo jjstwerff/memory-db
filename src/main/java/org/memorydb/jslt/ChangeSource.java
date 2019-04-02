@@ -14,8 +14,8 @@ public class ChangeSource extends Source implements ChangeInterface {
 	}
 
 	public ChangeSource(Source current) {
-		super(current.getStore(), current.getRec());
-		new IndexSources().remove(getRec());
+		super(current.store(), current.rec());
+		new IndexSources().remove(rec());
 	}
 
 	public void setName(String value) {
@@ -28,11 +28,12 @@ public class ChangeSource extends Source implements ChangeInterface {
 
 	@Override
 	public void close() {
-		new IndexSources().insert(getRec());
+		new IndexSources().insert(rec());
 	}
 
 	@Override
-	public boolean set(int field, Object value) {
+	public boolean java(Object value) {
+		int field = 0;
 		switch (field) {
 		case 1:
 			if (value instanceof String)
@@ -44,7 +45,8 @@ public class ChangeSource extends Source implements ChangeInterface {
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
+	public ChangeInterface add() {
+		int field = 0;
 		switch (field) {
 		default:
 			return null;

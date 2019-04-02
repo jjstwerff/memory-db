@@ -11,7 +11,6 @@ import org.memorydb.handler.Dir;
 import org.memorydb.handler.StringWriter;
 import org.memorydb.handler.Text;
 import org.memorydb.handler.Writer;
-import org.memorydb.jslt.Macro.IndexMacros;
 import org.memorydb.jslt.Operator.Function;
 import org.memorydb.jslt.Operator.Operation;
 import org.memorydb.structure.RecordInterface;
@@ -41,10 +40,7 @@ public class JsltInterpreter {
 		inter.dir = dir;
 		inter.data = data;
 		Writer write = new StringWriter();
-		Macro macro = new Macro(jsltStore);
-		IndexMacros macros = macro.new IndexMacros("main");
-		macro.setRec(macros.search());
-		for (CodeArray code : macro.getAlternatives(0).getCode())
+		for (CodeArray code : Macro.get(jsltStore, "main").getAlternatives(0).getCode())
 			inter.show(write, inter.inter(code));
 		if (errors != null)
 			for (MatchError err : inter.errors)
@@ -150,8 +146,8 @@ public class JsltInterpreter {
 
 	private String subString(Text text, CallParmsArray callParms) {
 		int startPos = text.addPos();
-		long[] parms = new long[callParms.getSize() - 1];
-		for (int p = 0; p < callParms.getSize() - 1; p++)
+		long[] parms = new long[callParms.size() - 1];
+		for (int p = 0; p < callParms.size() - 1; p++)
 			parms[p] = getNumber(inter(new CallParmsArray(callParms, p + 1)));
 		StringBuilder res = new StringBuilder();
 		int pos = 0;
@@ -184,8 +180,8 @@ public class JsltInterpreter {
 	}
 
 	private String subString(String str, CallParmsArray callParms) {
-		long[] parms = new long[callParms.getSize() - 1];
-		for (int p = 0; p < callParms.getSize() - 1; p++)
+		long[] parms = new long[callParms.size() - 1];
+		for (int p = 0; p < callParms.size() - 1; p++)
 			parms[p] = getNumber(inter(new CallParmsArray(callParms, p + 1)));
 		StringBuilder res = new StringBuilder();
 		int size = str.length();
@@ -243,7 +239,8 @@ public class JsltInterpreter {
 		if (maxDepth <= 0 || rec == null)
 			return;
 		write.startObject();
-		for (RecordInterface elm : rec) {
+		RecordInterface elm = rec.start();
+		while (elm != null) {
 			write.field(elm.name());
 			if (elm.type() == FieldType.OBJECT)
 				iterateObject(maxDepth - 1, write, elm);
@@ -251,19 +248,22 @@ public class JsltInterpreter {
 				iterateArray(maxDepth, write, elm);
 			else
 				write.element(elm);
+			elm = elm.next();
 		}
 		write.endObject();
 	}
 
 	private void iterateArray(int maxDepth, Writer write, RecordInterface rec) {
 		write.startArray();
-		for (RecordInterface elm : rec) {
+		RecordInterface elm = rec.start();
+		while (elm != null) {
 			if (elm.type() == FieldType.OBJECT)
 				iterateObject(maxDepth, write, elm);
 			else if (elm.type() == FieldType.ARRAY)
 				iterateArray(maxDepth, write, elm);
 			else
 				write.element(elm);
+			elm = elm.next();
 		}
 		write.endArray();
 	}
@@ -279,11 +279,13 @@ public class JsltInterpreter {
 		if (name != null)
 			write.field(name);
 		write.startObject();
-		for (RecordInterface elm : rec) {
+		RecordInterface elm = rec.start();
+		while (elm != null) {
 			if (elm.type() == FieldType.OBJECT)
 				iterate(maxDepth - 1, write, elm.name(), elm, ops);
 			else
 				nonObject(maxDepth, write, elm, ops);
+			elm = elm.next();
 		}
 		write.endObject();
 	}
@@ -294,7 +296,7 @@ public class JsltInterpreter {
 			write.field(name);
 		if (elm.type() == FieldType.ARRAY) {
 			write.startArray();
-			while (!elm.isLast())
+			while (!elm.testLast())
 				iterate(maxDepth, write, null, elm, ops);
 			write.endArray();
 		} else {
@@ -330,9 +332,9 @@ public class JsltInterpreter {
 					int c = compare(e1, e2);
 					if (c != 0)
 						return c;
-					if (e1.isLast())
+					if (e1.testLast())
 						return -1;
-					if (e2.isLast())
+					if (e2.testLast())
 						return 1;
 					e1.next();
 					e2.next();
@@ -347,7 +349,7 @@ public class JsltInterpreter {
 		Object p2 = null;
 		Function function = code.getFunction();
 		if (function != Function.EACH && function != Function.FOR && function != Function.PER && function != Function.OR && function != Function.AND
-				&& code.getFnParm2().getRec() != 0)
+				&& code.getFnParm2().rec() != 0)
 			p2 = inter(code.getFnParm2());
 		switch (function) {
 		case ADD:
@@ -378,11 +380,13 @@ public class JsltInterpreter {
 			return resObj;
 		case EACH:
 			running = p1;
-			for (RecordInterface elm : curFor) {
+			RecordInterface elm = curFor.start();
+			while (elm != null) {
 				current = elm;
 				RecordInterface remFor = curFor;
 				running = inter(code.getFnParm2());
 				curFor = remFor;
+				elm = elm.next();
 			}
 			return running;
 		case DIV:
@@ -416,13 +420,13 @@ public class JsltInterpreter {
 					if (s == Long.MIN_VALUE || Math.abs(s) > Integer.MAX_VALUE)
 						return null;
 					if (s < 0)
-						s += rec.getSize();
-					return rec.get((int) s);
+						s += rec.size();
+					return rec.index((int) s);
 				} else if (p2 instanceof String) {
 					String name = getString(p2);
 					if (name == null)
 						return null;
-					return rec.get(name);
+					return rec.field(name);
 				}
 			} else if (p1 instanceof String) {
 				long s = getNumber(p2);
@@ -496,11 +500,11 @@ public class JsltInterpreter {
 			return null;
 		case LENGTH:
 			if (p1 == null && code.getFnParm1().getOperation() == Operation.ARRAY)
-				return Long.valueOf(code.getFnParm1().getArray().getSize());
+				return Long.valueOf(code.getFnParm1().getArray().size());
 			if (p1 instanceof String)
 				return Long.valueOf(((String) p1).length());
 			if (p1 instanceof RecordInterface)
-				return Long.valueOf(((RecordInterface) p1).getSize());
+				return Long.valueOf(((RecordInterface) p1).size());
 			return null;
 		case NAME:
 			return curName;
@@ -616,18 +620,20 @@ public class JsltInterpreter {
 			return formatNumber(layout, obj);
 		int width = -1;
 		String align = "L";
-		for (RecordInterface fld : layout) {
+		RecordInterface fld = layout.start();
+		while (fld != null) {
 			switch (fld.name()) {
 			case "width":
 				if (fld instanceof Operator)
 					width = ((Long) inter((Operator) fld)).intValue();
 				else
-					width = (int) getNumber(fld.get());
+					width = (int) getNumber(fld.java());
 				break;
 			case "align":
-				align = getString(fld.get());
+				align = getString(fld.java());
 				break;
 			}
+			fld = fld.next();
 		}
 		String res = getString(obj);
 		if (align.equals("H")) {
@@ -663,30 +669,31 @@ public class JsltInterpreter {
 		String separator = null;
 		boolean alternative = false;
 		boolean leadingZero = false;
-		for (RecordInterface fld : layout) {
+		RecordInterface fld = layout.start();
+		while (fld != null) {
 			switch (fld.name()) {
 			case "width":
-				Object w = layout.get();
+				Object w = layout.java();
 				if (w instanceof Operator)
 					width = ((Long) inter((Operator) w)).intValue();
 				else
 					width = ((Long) w).intValue();
 				break;
 			case "precision":
-				Object p = layout.get();
+				Object p = layout.java();
 				if (p instanceof Operator)
 					precision = ((Long) inter((Operator) p)).intValue();
 				else
 					precision = ((Long) p).intValue();
 				break;
 			case "align":
-				align = (String) layout.get();
+				align = (String) layout.java();
 				break;
 			case "type":
-				type = (String) layout.get();
+				type = (String) layout.java();
 				break;
 			case "separator":
-				separator = (String) layout.get();
+				separator = (String) layout.java();
 				break;
 			case "leadingZero":
 				leadingZero = true;
@@ -695,6 +702,7 @@ public class JsltInterpreter {
 				alternative = true;
 				break;
 			}
+			fld = fld.next();
 		}
 		switch (type) {
 		case "b": {

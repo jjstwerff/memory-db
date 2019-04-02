@@ -1,6 +1,6 @@
 package org.memorydb.jslt;
 
-import java.io.IOException;
+import java.util.Iterator;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
@@ -13,12 +13,10 @@ import org.memorydb.structure.Store;
 /**
  * Automatically generated record class for table Alternative
  */
-@RecordData(
-	name = "Alternative",
-	keyFields = {"nr"})
+@RecordData(name = "Alternative")
 public class Alternative implements MemoryRecord, RecordInterface {
-	/* package private */ Store store;
-	protected int rec;
+	/* package private */ final Store store;
+	protected final int rec;
 	/* package private */ static final int RECORD_SIZE = 34;
 
 	public Alternative(Store store) {
@@ -33,18 +31,18 @@ public class Alternative implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return rec;
 	}
 
 	@Override
-	public void setRec(int rec) {
+	public Alternative copy(int newRec) {
 		assert store.validate(rec);
-		this.rec = rec;
+		return new Alternative(store, newRec);
 	}
 
 	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
@@ -53,21 +51,12 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		return new ChangeAlternative(this);
 	}
 
-	@FieldData(
-		name = "nr",
-		type = "INTEGER",
-		mandatory = false
-	)
+	@FieldData(name = "nr", type = "INTEGER", mandatory = false)
 	public int getNr() {
 		return rec == 0 ? Integer.MIN_VALUE : store.getInt(rec, 4);
 	}
 
-	@FieldData(
-		name = "parameters",
-		type = "ARRAY",
-		related = ParametersArray.class,
-		mandatory = false
-	)
+	@FieldData(name = "parameters", type = "ARRAY", related = ParametersArray.class, mandatory = false)
 	public ParametersArray getParameters() {
 		return new ParametersArray(this, -1);
 	}
@@ -80,31 +69,17 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		return getParameters().add();
 	}
 
-	@FieldData(
-		name = "anyParm",
-		type = "BOOLEAN",
-		mandatory = false
-	)
+	@FieldData(name = "anyParm", type = "BOOLEAN", mandatory = false)
 	public boolean isAnyParm() {
 		return rec == 0 ? false : (store.getByte(rec, 12) & 1) > 0;
 	}
 
-	@FieldData(
-		name = "if",
-		type = "OBJECT",
-		related = Expr.class,
-		mandatory = false
-	)
+	@FieldData(name = "if", type = "OBJECT", related = Expr.class, mandatory = false)
 	public Expr getIf() {
 		return new Expr(store, rec == 0 ? 0 : store.getInt(rec, 13));
 	}
 
-	@FieldData(
-		name = "code",
-		type = "ARRAY",
-		related = CodeArray.class,
-		mandatory = false
-	)
+	@FieldData(name = "code", type = "ARRAY", related = CodeArray.class, mandatory = false)
 	public CodeArray getCode() {
 		return new CodeArray(this, -1);
 	}
@@ -118,12 +93,6 @@ public class Alternative implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	@FieldData(
-		name = "upRecord",
-		type = "RELATION",
-		related = Macro.class,
-		mandatory = false
-	)
 	public Macro up() {
 		return new Macro(store, rec == 0 ? 0 : store.getInt(rec, 30));
 	}
@@ -142,7 +111,7 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		}
 		write.field("anyParm", isAnyParm());
 		Expr fldIf = getIf();
-		if (fldIf != null && fldIf.getRec() != 0) {
+		if (fldIf != null && fldIf.rec() != 0) {
 			write.sub("if");
 			fldIf.output(write, iterate);
 			write.endSub();
@@ -158,11 +127,11 @@ public class Alternative implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public String keys() throws IOException {
+	public String keys() {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
-		res.append("Macro").append("{").append(getUpRecord().keys()).append("}");
+		res.append("Macro").append("{").append(up().keys()).append("}");
 		res.append(", ");
 		res.append("Nr").append("=").append(getNr());
 		return res.toString();
@@ -171,11 +140,7 @@ public class Alternative implements MemoryRecord, RecordInterface {
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			output(write, 4);
-		} catch (IOException e) {
-			return "";
-		}
+		output(write, 4);
 		return write.toString();
 	}
 
@@ -185,8 +150,7 @@ public class Alternative implements MemoryRecord, RecordInterface {
 			int nextRec = parent.new IndexAlternatives(this, nr).search();
 			if (parser.isDelete(nextRec)) {
 				try (ChangeAlternative record = new ChangeAlternative(this)) {
-					store.free(record.getRec());
-					record.setRec(0);
+					store.free(record.rec());
 				}
 				continue;
 			}
@@ -194,7 +158,6 @@ public class Alternative implements MemoryRecord, RecordInterface {
 				try (ChangeAlternative record = new ChangeAlternative(parent, 0)) {
 					record.setNr(nr);
 					record.parseFields(parser);
-					rec = record.rec;
 				}
 			} else {
 				rec = nextRec;
@@ -207,7 +170,7 @@ public class Alternative implements MemoryRecord, RecordInterface {
 	}
 
 	public boolean parseKey(Parser parser) {
-		Macro parent = getUpRecord();
+		Macro parent = up();
 		int nr = parser.getInt("nr");
 		int nextRec = parent.new IndexAlternatives(this, nr).search();
 		parser.finishRelation();
@@ -217,7 +180,8 @@ public class Alternative implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public Object get(int field) {
+	public Object java() {
+		int field = 0;
 		switch (field) {
 		case 1:
 			return getNr();
@@ -230,7 +194,6 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		}
 	}
 
-	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
 		switch (field) {
 		case 2:
@@ -243,7 +206,8 @@ public class Alternative implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public FieldType type(int field) {
+	public FieldType type() {
+		int field = 0;
 		switch (field) {
 		case 1:
 			return FieldType.INTEGER;
@@ -261,7 +225,8 @@ public class Alternative implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public String name(int field) {
+	public String name() {
+		int field = 0;
 		switch (field) {
 		case 1:
 			return "nr";
@@ -279,7 +244,12 @@ public class Alternative implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
+	public Alternative next() {
+		return null;
+	}
+
+	@Override
+	public Alternative copy() {
+		return new Alternative(store, rec);
 	}
 }

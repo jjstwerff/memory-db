@@ -14,7 +14,7 @@ public class ChangeMatchObject extends MatchObject implements ChangeMatch {
 	}
 
 	public ChangeMatchObject(MatchObject current) {
-		super(current.getStore(), current.getRec());
+		super(current.store(), current.rec());
 	}
 
 	/* package private */ void parseFields(Parser parser) {
@@ -27,8 +27,9 @@ public class ChangeMatchObject extends MatchObject implements ChangeMatch {
 	}
 
 	@Override
-	public boolean set(int field, Object value) {
-		if (field >= 0 && field <= 15)
+	public boolean java(Object value) {
+		int field = 0;
+		if (field > 0 && field <= 15)
 			return ChangeMatch.super.setMatch(field - 0, value);
 		switch (field) {
 		default:
@@ -37,8 +38,9 @@ public class ChangeMatchObject extends MatchObject implements ChangeMatch {
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
-		if (field >= 0 && field <= 15)
+	public ChangeInterface add() {
+		int field = 0;
+		if (field > 0 && field <= 15)
 			return ChangeMatch.super.addMatch(field - 0);
 		switch (field) {
 		default:

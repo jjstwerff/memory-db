@@ -1,4 +1,8 @@
 Fix code generation for new model:
+- fix code generation on Meta data
+	remove rec assignments or rec(..) calls
+- fix game world
+	array names duplicates
 - fix first unit tests
 	allocate space again
 - simple iterators

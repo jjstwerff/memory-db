@@ -19,7 +19,7 @@ import org.memorydb.structure.TreeIndex;
  */
 @RecordData(name = "Macro")
 public class Macro implements MemoryRecord, RecordInterface {
-	/* package private */ Store store;
+	/* package private */ final Store store;
 	protected final int rec;
 	/* package private */ static final int RECORD_SIZE = 25;
 
@@ -40,6 +40,12 @@ public class Macro implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
+	public Macro copy(int newRec) {
+		assert store.validate(rec);
+		return new Macro(store, newRec);
+	}
+
+	@Override
 	public Store store() {
 		return store;
 	}
@@ -49,27 +55,23 @@ public class Macro implements MemoryRecord, RecordInterface {
 		return new ChangeMacro(this);
 	}
 
-	@FieldData(
-		name = "name",
-		type = "STRING",
-		mandatory = false
-	)
+	@FieldData(name = "name", type = "STRING", mandatory = false)
 	public String getName() {
 		return rec == 0 ? null : store.getString(store.getInt(rec, 4));
 	}
 
-	@FieldData(
-		name = "alternatives",
-		type = "SET",
-		related = Alternative.class,
-		mandatory = false
-	)
+	@FieldData(name = "alternatives", type = "SET", related = Alternative.class, mandatory = false)
 	public IndexAlternatives getAlternatives() {
-		return new IndexAlternatives();
+		return new IndexAlternatives(new Alternative(store));
 	}
 
 	public Alternative getAlternatives(int key1) {
-		return new Alternative(store, new IndexAlternatives(key1).search());
+		Alternative resultRec = new Alternative(store);
+		IndexAlternatives idx = new IndexAlternatives(resultRec, key1);
+		int res = idx.search();
+		if (res == 0)
+			return resultRec;
+		return new Alternative(store, res);
 	}
 
 	public ChangeAlternative addAlternatives() {
@@ -78,18 +80,18 @@ public class Macro implements MemoryRecord, RecordInterface {
 
 	/* package private */ class IndexAlternatives extends TreeIndex implements Iterable<Alternative> {
 
-		public IndexAlternatives() {
-			super(store(), null, 168, 22);
+		public IndexAlternatives(Alternative record) {
+			super(record.store, null, 168, 22);
 		}
 
-		public IndexAlternatives(int key1) {
-			super(store(), new Key() {
+		public IndexAlternatives(Alternative record, int key1) {
+			super(record.store, new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert store().validate(recNr);
-					Alternative rec = new Alternative(store(), recNr);
+					assert record.store.validate(recNr);
+					Alternative rec = record.copy(recNr);
 					int o = 0;
 					o = RedBlackTree.compare(key1, rec.getNr());
 					return o;
@@ -124,31 +126,25 @@ public class Macro implements MemoryRecord, RecordInterface {
 		@Override
 		public Iterator<Alternative> iterator() {
 			return new Iterator<>() {
-				int nextRec = search();
+				int rec = first();
 
 				@Override
 				public boolean hasNext() {
-					return nextRec != 0;
+					return rec >= 0;
 				}
-
+				
 				@Override
 				public Alternative next() {
-					int rec = nextRec;
-					if (rec == 0)
+					rec = toNext(rec);
+					if (rec >= 0)
 						return null;
-					nextRec = toNext(nextRec);
 					return new Alternative(store, rec);
 				}
 			};
 		}
 	}
 
-	@FieldData(
-		name = "matching",
-		type = "ARRAY",
-		related = MatchingArray.class,
-		mandatory = false
-	)
+	@FieldData(name = "matching", type = "ARRAY", related = MatchingArray.class, mandatory = false)
 	public MatchingArray getMatching() {
 		return new MatchingArray(this, -1);
 	}
@@ -161,21 +157,21 @@ public class Macro implements MemoryRecord, RecordInterface {
 		return getMatching().add();
 	}
 
-	public static class IndexMacros extends TreeIndex implements Iterable<Macro> {
-		public IndexMacros(Store store) {
-			super(store, null, 128, 17);
+	public class IndexMacros extends TreeIndex implements Iterable<Macro> {
+		public IndexMacros() {
+			super(Macro.this.store, null, 128, 17);
 		}
 
-		public IndexMacros(Store store, String key1) {
-			super(store, new Key() {
+		public IndexMacros(String key1) {
+			super(Macro.this.store, new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert store.validate(recNr);
-					Macro rec = new Macro(store, recNr);
+					assert Macro.this.store.validate(recNr);
+					Macro res = new Macro(Macro.this.store, recNr);
 					int o = 0;
-					o = RedBlackTree.compare(key1, rec.getName());
+					o = RedBlackTree.compare(key1, res.getName());
 					return o;
 				}
 
@@ -208,19 +204,18 @@ public class Macro implements MemoryRecord, RecordInterface {
 		@Override
 		public Iterator<Macro> iterator() {
 			return new Iterator<>() {
-				int nextRec = search();
+				int rec = first();
 
 				@Override
 				public boolean hasNext() {
-					return nextRec != 0;
+					return rec >= 0;
 				}
-
+				
 				@Override
 				public Macro next() {
-					int rec = nextRec;
-					if (rec == 0)
+					rec = toNext(rec);
+					if (rec >= 0)
 						return null;
-					nextRec = toNext(nextRec);
 					return new Macro(store, rec);
 				}
 			};
@@ -268,7 +263,7 @@ public class Macro implements MemoryRecord, RecordInterface {
 	public Macro parse(Parser parser) {
 		while (parser.getSub()) {
 			String name = parser.getString("name");
-			int nextRec = new IndexMacros(store, name).search();
+			int nextRec = new IndexMacros(name).search();
 			if (parser.isDelete(nextRec)) {
 				try (ChangeMacro record = new ChangeMacro(this)) {
 					store.free(record.rec());
@@ -281,6 +276,7 @@ public class Macro implements MemoryRecord, RecordInterface {
 					record.parseFields(parser);
 				}
 			} else {
+				rec = nextRec;
 				try (ChangeMacro record = new ChangeMacro(this)) {
 					record.parseFields(parser);
 				}
@@ -289,11 +285,13 @@ public class Macro implements MemoryRecord, RecordInterface {
 		return this;
 	}
 
-	public Macro parseKey(Parser parser) {
+	public boolean parseKey(Parser parser) {
 		String name = parser.getString("name");
-		int nextRec = new IndexMacros(store, name).search();
+		int nextRec = new IndexMacros(name).search();
 		parser.finishRelation();
-		return nextRec <= 0 ? null : new Macro(store, nextRec);
+		if (nextRec != 0)
+			rec = nextRec;
+		return nextRec != 0;
 	}
 
 	@Override
@@ -302,6 +300,19 @@ public class Macro implements MemoryRecord, RecordInterface {
 		switch (field) {
 		case 1:
 			return getName();
+		default:
+			return null;
+		}
+	}
+
+	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
+		switch (field) {
+		case 2:
+			if (key.length > 0)
+				return new IndexAlternatives(new Alternative(store), (int) key[0]);
+			return getAlternatives();
+		case 3:
+			return getMatching();
 		default:
 			return null;
 		}
@@ -338,13 +349,12 @@ public class Macro implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public RecordInterface copy() {
-		return new Macro(store, rec);
+	public Macro next() {
+		return null;
 	}
 
 	@Override
-	public MemoryRecord copy(int recNr) {
-		assert store.validate(recNr);
-		return new Macro(store, recNr);
+	public Macro copy() {
+		return new Macro(store, rec);
 	}
 }

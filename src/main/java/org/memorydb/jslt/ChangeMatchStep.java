@@ -13,80 +13,80 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 	}
 
 	default void setType(Type value) {
-		if (getRec() != 0) {
+		if (rec() != 0) {
 			if (value == null) {
-				getStore().setByte(getRec(), matchstepPosition() + 0, (getStore().getByte(getRec(), matchstepPosition() + 0) & 192) + 0);
+				store().setByte(rec(), matchstepPosition() + 0, (store().getByte(rec(), matchstepPosition() + 0) & 192) + 0);
 				return;
 			}
-			getStore().setByte(getRec(), matchstepPosition() + 0, (getStore().getByte(getRec(), matchstepPosition() + 0) & 192) + 1 + value.ordinal());
+			store().setByte(rec(), matchstepPosition() + 0, (store().getByte(rec(), matchstepPosition() + 0) & 192) + 1 + value.ordinal());
 			switch (value) {
 			case STACK:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
 				break;
 			case PARM:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 5, 0);
 				break;
 			case FIELD:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 5, 0);
 				break;
 			case ALT:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 9, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 5, 0);
+				store().setInt(rec(), matchstepPosition() + 9, 0);
 				break;
 			case TEST_STACK:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 5, 0);
 				break;
 			case TEST_CALL:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 5, 0);
 				break;
 			case JUMP:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
 				break;
 			case TEST_BOOLEAN:
-				getStore().setByte(getRec(), matchstepPosition() + 1, getStore().getByte(getRec(), matchstepPosition() + 1) & 254);
-				getStore().setInt(getRec(), matchstepPosition() + 2, 0);
+				store().setByte(rec(), matchstepPosition() + 1, store().getByte(rec(), matchstepPosition() + 1) & 254);
+				store().setInt(rec(), matchstepPosition() + 2, 0);
 				break;
 			case TEST_STRING:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 5, 0);
 				break;
 			case TEST_NUMBER:
-				getStore().setLong(getRec(), matchstepPosition() + 1, 0L);
-				getStore().setInt(getRec(), matchstepPosition() + 9, 0);
+				store().setLong(rec(), matchstepPosition() + 1, 0L);
+				store().setInt(rec(), matchstepPosition() + 9, 0);
 				break;
 			case TEST_FLOAT:
-				getStore().setLong(getRec(), matchstepPosition() + 1, Double.doubleToLongBits(0.0));
-				getStore().setInt(getRec(), matchstepPosition() + 9, 0);
+				store().setLong(rec(), matchstepPosition() + 1, Double.doubleToLongBits(0.0));
+				store().setInt(rec(), matchstepPosition() + 9, 0);
 				break;
 			case TEST_TYPE:
-				getStore().setByte(getRec(), matchstepPosition() + 1, (getStore().getByte(getRec(), matchstepPosition() + 1) & 224) + 0);
-				getStore().setInt(getRec(), matchstepPosition() + 2, 0);
+				store().setByte(rec(), matchstepPosition() + 1, (store().getByte(rec(), matchstepPosition() + 1) & 224) + 0);
+				store().setInt(rec(), matchstepPosition() + 2, 0);
 				break;
 			case VAR_WRITE:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 5, 0);
 				break;
 			case VAR_START:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
 				break;
 			case VAR_ADD:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 5, 0);
 				break;
 			case ERROR:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
-				getStore().setInt(getRec(), matchstepPosition() + 5, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 5, 0);
 				break;
 			case START:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
 				break;
 			case FINISH:
-				getStore().setInt(getRec(), matchstepPosition() + 1, 0);
+				store().setInt(rec(), matchstepPosition() + 1, 0);
 				break;
 			default:
 				break;
@@ -96,197 +96,197 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 
 	default void setStack(int value) {
 		if (getType() == Type.STACK) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, value);
+			store().setInt(rec(), matchstepPosition() + 1, value);
 		}
 	}
 
 	default void setParm(int value) {
 		if (getType() == Type.PARM) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, value);
+			store().setInt(rec(), matchstepPosition() + 1, value);
 		}
 	}
 
 	default void setPfalse(int value) {
 		if (getType() == Type.PARM) {
-			getStore().setInt(getRec(), matchstepPosition() + 5, value);
+			store().setInt(rec(), matchstepPosition() + 5, value);
 		}
 	}
 
 	default void setField(String value) {
 		if (getType() == Type.FIELD) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, getStore().putString(value));
+			store().setInt(rec(), matchstepPosition() + 1, store().putString(value));
 		}
 	}
 
 	default void setFfalse(int value) {
 		if (getType() == Type.FIELD) {
-			getStore().setInt(getRec(), matchstepPosition() + 5, value);
+			store().setInt(rec(), matchstepPosition() + 5, value);
 		}
 	}
 
 	default void setAltnr(int value) {
 		if (getType() == Type.ALT) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, value);
+			store().setInt(rec(), matchstepPosition() + 1, value);
 		}
 	}
 
 	default void setAfalse(int value) {
 		if (getType() == Type.ALT) {
-			getStore().setInt(getRec(), matchstepPosition() + 5, value);
+			store().setInt(rec(), matchstepPosition() + 5, value);
 		}
 	}
 
 	default void setAvar(Variable value) {
 		if (getType() == Type.ALT) {
-			getStore().setInt(getRec(), matchstepPosition() + 9, value == null ? 0 : value.getRec());
+			store().setInt(rec(), matchstepPosition() + 9, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void setTstack(int value) {
 		if (getType() == Type.TEST_STACK) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, value);
+			store().setInt(rec(), matchstepPosition() + 1, value);
 		}
 	}
 
 	default void setTsfalse(int value) {
 		if (getType() == Type.TEST_STACK) {
-			getStore().setInt(getRec(), matchstepPosition() + 5, value);
+			store().setInt(rec(), matchstepPosition() + 5, value);
 		}
 	}
 
 	default void setTmacro(Macro value) {
 		if (getType() == Type.TEST_CALL) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, value == null ? 0 : value.getRec());
+			store().setInt(rec(), matchstepPosition() + 1, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void setTfalse(int value) {
 		if (getType() == Type.TEST_CALL) {
-			getStore().setInt(getRec(), matchstepPosition() + 5, value);
+			store().setInt(rec(), matchstepPosition() + 5, value);
 		}
 	}
 
 	default void setJump(int value) {
 		if (getType() == Type.JUMP) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, value);
+			store().setInt(rec(), matchstepPosition() + 1, value);
 		}
 	}
 
 	default void setMboolean(boolean value) {
 		if (getType() == Type.TEST_BOOLEAN) {
-			getStore().setByte(getRec(), matchstepPosition() + 1, (getStore().getByte(getRec(), matchstepPosition() + 1) & 254) + (value ? 1 : 0));
+			store().setByte(rec(), matchstepPosition() + 1, (store().getByte(rec(), matchstepPosition() + 1) & 254) + (value ? 1 : 0));
 		}
 	}
 
 	default void setMbfalse(int value) {
 		if (getType() == Type.TEST_BOOLEAN) {
-			getStore().setInt(getRec(), matchstepPosition() + 2, value);
+			store().setInt(rec(), matchstepPosition() + 2, value);
 		}
 	}
 
 	default void setMstring(String value) {
 		if (getType() == Type.TEST_STRING) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, getStore().putString(value));
+			store().setInt(rec(), matchstepPosition() + 1, store().putString(value));
 		}
 	}
 
 	default void setMsfalse(int value) {
 		if (getType() == Type.TEST_STRING) {
-			getStore().setInt(getRec(), matchstepPosition() + 5, value);
+			store().setInt(rec(), matchstepPosition() + 5, value);
 		}
 	}
 
 	default void setMnumber(long value) {
 		if (getType() == Type.TEST_NUMBER) {
-			getStore().setLong(getRec(), matchstepPosition() + 1, value);
+			store().setLong(rec(), matchstepPosition() + 1, value);
 		}
 	}
 
 	default void setMnfalse(int value) {
 		if (getType() == Type.TEST_NUMBER) {
-			getStore().setInt(getRec(), matchstepPosition() + 9, value);
+			store().setInt(rec(), matchstepPosition() + 9, value);
 		}
 	}
 
 	default void setMfloat(double value) {
 		if (getType() == Type.TEST_FLOAT) {
-			getStore().setLong(getRec(), matchstepPosition() + 1, Double.doubleToLongBits(value));
+			store().setLong(rec(), matchstepPosition() + 1, Double.doubleToLongBits(value));
 		}
 	}
 
 	default void setMffalse(int value) {
 		if (getType() == Type.TEST_FLOAT) {
-			getStore().setInt(getRec(), matchstepPosition() + 9, value);
+			store().setInt(rec(), matchstepPosition() + 9, value);
 		}
 	}
 
 	default void setTtype(Ttype value) {
 		if (getType() == Type.TEST_TYPE) {
 			if (value == null) {
-				getStore().setByte(getRec(), matchstepPosition() + 1, (getStore().getByte(getRec(), matchstepPosition() + 1) & 224) + 0);
+				store().setByte(rec(), matchstepPosition() + 1, (store().getByte(rec(), matchstepPosition() + 1) & 224) + 0);
 				return;
 			}
-			getStore().setByte(getRec(), matchstepPosition() + 1, (getStore().getByte(getRec(), matchstepPosition() + 1) & 224) + 1 + value.ordinal());
+			store().setByte(rec(), matchstepPosition() + 1, (store().getByte(rec(), matchstepPosition() + 1) & 224) + 1 + value.ordinal());
 		}
 	}
 
 	default void setTtfalse(int value) {
 		if (getType() == Type.TEST_TYPE) {
-			getStore().setInt(getRec(), matchstepPosition() + 2, value);
+			store().setInt(rec(), matchstepPosition() + 2, value);
 		}
 	}
 
 	default void setVwrite(Variable value) {
 		if (getType() == Type.VAR_WRITE) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, value == null ? 0 : value.getRec());
+			store().setInt(rec(), matchstepPosition() + 1, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void setVwrange(int value) {
 		if (getType() == Type.VAR_WRITE) {
-			getStore().setInt(getRec(), matchstepPosition() + 5, value);
+			store().setInt(rec(), matchstepPosition() + 5, value);
 		}
 	}
 
 	default void setVstart(Variable value) {
 		if (getType() == Type.VAR_START) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, value == null ? 0 : value.getRec());
+			store().setInt(rec(), matchstepPosition() + 1, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void setVadd(Variable value) {
 		if (getType() == Type.VAR_ADD) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, value == null ? 0 : value.getRec());
+			store().setInt(rec(), matchstepPosition() + 1, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void setVarange(int value) {
 		if (getType() == Type.VAR_ADD) {
-			getStore().setInt(getRec(), matchstepPosition() + 5, value);
+			store().setInt(rec(), matchstepPosition() + 5, value);
 		}
 	}
 
 	default void setError(String value) {
 		if (getType() == Type.ERROR) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, getStore().putString(value));
+			store().setInt(rec(), matchstepPosition() + 1, store().putString(value));
 		}
 	}
 
 	default void setErange(int value) {
 		if (getType() == Type.ERROR) {
-			getStore().setInt(getRec(), matchstepPosition() + 5, value);
+			store().setInt(rec(), matchstepPosition() + 5, value);
 		}
 	}
 
 	default void setNotstarted(int value) {
 		if (getType() == Type.START) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, value);
+			store().setInt(rec(), matchstepPosition() + 1, value);
 		}
 	}
 
 	default void setNotfinished(int value) {
 		if (getType() == Type.FINISH) {
-			getStore().setInt(getRec(), matchstepPosition() + 1, value);
+			store().setInt(rec(), matchstepPosition() + 1, value);
 		}
 	}
 
@@ -320,7 +320,7 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 			setAfalse(parser.getInt("afalse"));
 		}
 		if (parser.hasSub("avar")) {
-			setAvar(new Variable(getStore()).parse(parser));
+			setAvar(new Variable(store()).parse(parser));
 		}
 		if (parser.hasField("tstack")) {
 			setTstack(parser.getInt("tstack"));
@@ -330,11 +330,11 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 		}
 		if (parser.hasField("tmacro")) {
 			parser.getRelation("tmacro", (recNr, idx) -> {
-				Macro relRec = new Macro(getStore());
+				Macro relRec = new Macro(store());
 				boolean found = relRec.parseKey(parser);
 				setTmacro(relRec);
 				return found;
-			}, getRec());
+			}, rec());
 		}
 		if (parser.hasField("tfalse")) {
 			setTfalse(parser.getInt("tfalse"));
@@ -380,16 +380,16 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 			setTtfalse(parser.getInt("ttfalse"));
 		}
 		if (parser.hasSub("vwrite")) {
-			setVwrite(new Variable(getStore()).parse(parser));
+			setVwrite(new Variable(store()).parse(parser));
 		}
 		if (parser.hasField("vwrange")) {
 			setVwrange(parser.getInt("vwrange"));
 		}
 		if (parser.hasSub("vstart")) {
-			setVstart(new Variable(getStore()).parse(parser));
+			setVstart(new Variable(store()).parse(parser));
 		}
 		if (parser.hasSub("vadd")) {
-			setVadd(new Variable(getStore()).parse(parser));
+			setVadd(new Variable(store()).parse(parser));
 		}
 		if (parser.hasField("varange")) {
 			setVarange(parser.getInt("varange"));

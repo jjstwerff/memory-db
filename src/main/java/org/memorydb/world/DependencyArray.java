@@ -1,4 +1,4 @@
-package org.memorydb.jslt;
+package org.memorydb.world;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -6,29 +6,30 @@ import java.util.NoSuchElementException;
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.ChangeInterface;
+import org.memorydb.structure.FieldData;
 import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RecordData;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
- * Automatically generated record class for parameters
+ * Automatically generated record class for dependency
  */
 
-@RecordData(name = "Parameter")
-public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<ParametersArray> {
+@RecordData(name = "Dependency")
+public class DependencyArray implements MemoryRecord, ChangeInterface, Iterable<DependencyArray> {
 	private final Store store;
-	private final Alternative parent;
+	private final Category parent;
 	private final int idx;
 	private int alloc;
 	private int size;
 
-	/* package private */ ParametersArray(Alternative parent, int idx) {
+	/* package private */ DependencyArray(Category parent, int idx) {
 		this.store = parent.store();
 		this.parent = parent;
 		this.idx = idx;
 		if (parent.rec() != 0) {
-			this.alloc = store.getInt(parent.rec(), 8);
+			this.alloc = store.getInt(parent.rec(), 13);
 			if (alloc != 0) {
 				up(parent);
 				this.size = store.getInt(alloc, 4);
@@ -42,7 +43,7 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 			idx = -1;
 	}
 
-	/* package private */ ParametersArray(ParametersArray other, int idx) {
+	/* package private */ DependencyArray(DependencyArray other, int idx) {
 		this.store = other.store;
 		this.parent = other.parent;
 		this.idx = idx;
@@ -50,7 +51,7 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 		this.size = other.size;
 	}
 
-	/* package private */ ParametersArray(Store store, int rec, int idx) {
+	/* package private */ DependencyArray(Store store, int rec, int idx) {
 		this.store = store;
 		this.alloc = rec;
 		this.idx = idx;
@@ -73,13 +74,13 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 		this.alloc = rec;
 	}
 
-	private void up(Alternative record) {
+	private void up(Category record) {
 		store.setInt(alloc, 8, record.rec());
 	}
 
 	@Override
-	public Alternative up() {
-		return new Alternative(store, store.getInt(alloc, 8));
+	public Category up() {
+		return new Category(store, store.getInt(alloc, 8));
 	}
 
 	@Override
@@ -98,23 +99,25 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 	}
 
 	@Override
-	public ParametersArray add() {
+	public DependencyArray add() {
 		if (parent.rec() == 0)
 			return this;
 		idx = size;
 		if (alloc == 0) {
-			alloc = store.allocate(13 + 12);
+			alloc = store.allocate(5 + 12);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (12 + (idx + 1) * 13) / 8);
-		store.setInt(parent.rec(), 8, alloc);
+			alloc = store.resize(alloc, (12 + (idx + 1) * 5) / 8);
+		store.setInt(parent.rec(), 13, alloc);
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
+		setOn(null);
+		setNumber((byte) 0);
 		return this;
 	}
 
 	@Override
-	public Iterator<ParametersArray> iterator() {
+	public Iterator<DependencyArray> iterator() {
 		return new Iterator<>() {
 			int element = -1;
 
@@ -124,18 +127,18 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 			}
 
 			@Override
-			public ParametersArray next() {
+			public DependencyArray next() {
 				if (alloc == 0 || element > size)
 					throw new NoSuchElementException();
 				element++;
-				return new ParametersArray(ParametersArray.this, element);
+				return new DependencyArray(DependencyArray.this, element);
 			}
 
 			@Override
 			public void remove() {
 				if (alloc == 0 || element > size || element < 0)
 					throw new NoSuchElementException();
-				store.copy(alloc, (element + 1) * 13 + 12, element * 13 + 12, size * 17);
+				store.copy(alloc, (element + 1) * 5 + 12, element * 5 + 12, size * 17);
 				element--;
 				size--;
 				store.setInt(alloc, 4, size);
@@ -143,11 +146,34 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 		};
 	}
 
+	@FieldData(name = "dependency", type = "ARRAY", related = DependencyArray.class, mandatory = false)
+	public Category getOn() {
+		return new Category(store, alloc == 0 || idx < 0 || idx >= size ? 0 : store.getInt(alloc, idx * 5 + 12));
+	}
+
+	public void setOn(Category value) {
+		if (alloc != 0 && idx >= 0 && idx < size) {
+			store.setInt(alloc, idx * 5 + 12, value == null ? 0 : value.rec());
+		}
+	}
+
+	@FieldData(name = "dependency", type = "ARRAY", related = DependencyArray.class, mandatory = false)
+	public byte getNumber() {
+		return alloc == 0 || idx < 0 || idx >= size ? 0 : store.getByte(alloc, idx * 5 + 16);
+	}
+
+	public void setNumber(byte value) {
+		if (alloc != 0 && idx >= 0 && idx < size) {
+			store.setByte(alloc, idx * 5 + 16, value);
+		}
+	}
+
 	@Override
 	public void output(Write write, int iterate) {
 		if (alloc == 0 || iterate <= 0)
 			return;
-		outputMatch(write, iterate);
+		write.strField("on", "{" + getOn().keys() + "}");
+		write.field("number", getNumber());
 		write.endRecord();
 	}
 
@@ -155,7 +181,7 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 	public String toString() {
 		Write write = new Write(new StringBuilder());
 		if (idx == -1)
-			for (ParametersArray a : this) {
+			for (DependencyArray a : this) {
 				a.output(write, 4);
 			}
 		else
@@ -164,22 +190,19 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 	}
 
 	public void parse(Parser parser) {
-		parseMatch(parser);
-	}
-
-	@Override
-	public int matchPosition() {
-		return idx * 13 + 12;
-	}
-
-	@Override
-	public boolean parseKey(Parser parser) {
-		return false;
-	}
-
-	public void setIdx(int idx) {
-		if (idx >= 0 && idx < size)
-			this.idx = idx;
+		setOn(null);
+		setNumber((byte) 0);
+		if (parser.hasField("on")) {
+			parser.getRelation("on", (recNr, idx) -> {
+				Category relRec = new Category(store);
+				boolean found = relRec.parseKey(parser);
+				setOn(relRec);
+				return found;
+			}, idx);
+		}
+		if (parser.hasField("number")) {
+			setNumber((byte) parser.getInt("number"));
+		}
 	}
 
 	@Override
@@ -192,9 +215,11 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 		int field = 0;
 		if (idx == -1)
 			return null;
-		if (field >= 0 && field <= 15)
-			return nameMatch(field - 0);
 		switch (field) {
+		case 1:
+			return "on";
+		case 2:
+			return "number";
 		default:
 			return null;
 		}
@@ -205,9 +230,11 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 		int field = 0;
 		if (idx == -1)
 			return field < 1 || field > size ? null : FieldType.OBJECT;
-		if (field >= 0 && field <= 15)
-			return typeMatch(field - 0);
 		switch (field) {
+		case 1:
+			return FieldType.OBJECT;
+		case 2:
+			return FieldType.INTEGER;
 		default:
 			return null;
 		}
@@ -217,10 +244,12 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 	public Object java() {
 		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new ParametersArray(parent, field - 1);
-		if (field >= 0 && field <= 15)
-			return getMatch(field - 0);
+			return field < 1 || field > size ? null : new DependencyArray(parent, field - 1);
 		switch (field) {
+		case 1:
+			return getOn();
+		case 2:
+			return getNumber();
 		default:
 			return null;
 		}
@@ -229,9 +258,15 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 	@Override
 	public boolean java(Object value) {
 		int field = 0;
-		if (field >= 0 && field <= 15)
-			return setMatch(field - 0, value);
 		switch (field) {
+		case 1:
+			if (value instanceof Category)
+				setOn((Category) value);
+			return value instanceof Category;
+		case 2:
+			if (value instanceof Byte)
+				setNumber((Byte) value);
+			return value instanceof Byte;
 		default:
 			return false;
 		}
@@ -243,7 +278,7 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 	}
 
 	@Override
-	public ParametersArray copy() {
-		return new ParametersArray(parent, idx);
+	public DependencyArray copy() {
+		return new DependencyArray(parent, idx);
 	}
 }

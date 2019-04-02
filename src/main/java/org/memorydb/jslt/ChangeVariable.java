@@ -18,7 +18,7 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 	}
 
 	public ChangeVariable(Variable current) {
-		super(current.getStore(), current.getRec());
+		super(current.store(), current.rec());
 	}
 
 	public void setName(String value) {
@@ -55,8 +55,9 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 	}
 
 	@Override
-	public boolean set(int field, Object value) {
-		if (field >= 3 && field <= 5)
+	public boolean java(Object value) {
+		int field = 0;
+		if (field > 3 && field <= 5)
 			return ChangeResultType.super.setResultType(field - 3, value);
 		switch (field) {
 		case 1:
@@ -77,8 +78,9 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
-		if (field >= 3 && field <= 5)
+	public ChangeInterface add() {
+		int field = 0;
+		if (field > 3 && field <= 5)
 			return ChangeResultType.super.addResultType(field - 3);
 		switch (field) {
 		default:

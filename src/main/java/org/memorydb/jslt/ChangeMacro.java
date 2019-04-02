@@ -17,8 +17,8 @@ public class ChangeMacro extends Macro implements ChangeInterface {
 	}
 
 	public ChangeMacro(Macro current) {
-		super(current.getStore(), current.getRec());
-		new IndexMacros().remove(getRec());
+		super(current.store(), current.rec());
+		new IndexMacros().remove(rec());
 	}
 
 	public void setName(String value) {
@@ -26,8 +26,8 @@ public class ChangeMacro extends Macro implements ChangeInterface {
 	}
 
 	public void moveMatching(ChangeMacro other) {
-		getStore().setInt(getRec(), 12, getStore().getInt(other.getRec(), 12));
-		getStore().setInt(other.getRec(), 12, 0);
+		store().setInt(rec(), 12, store().getInt(other.rec(), 12));
+		store().setInt(other.rec(), 12, 0);
 	}
 
 	/* package private */ void parseFields(Parser parser) {
@@ -46,11 +46,12 @@ public class ChangeMacro extends Macro implements ChangeInterface {
 
 	@Override
 	public void close() {
-		new IndexMacros().insert(getRec());
+		new IndexMacros().insert(rec());
 	}
 
 	@Override
-	public boolean set(int field, Object value) {
+	public boolean java(Object value) {
+		int field = 0;
 		switch (field) {
 		case 1:
 			if (value instanceof String)
@@ -62,7 +63,8 @@ public class ChangeMacro extends Macro implements ChangeInterface {
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
+	public ChangeInterface add() {
+		int field = 0;
 		switch (field) {
 		case 2:
 			return addAlternatives();

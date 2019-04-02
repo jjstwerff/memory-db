@@ -1,7 +1,5 @@
 package org.memorydb.jslt;
 
-import java.io.IOException;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
@@ -20,7 +18,7 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	int matchstepPosition();
 
 	@Override
-	Store getStore();
+	Store store();
 
 	boolean parseKey(Parser parser);
 
@@ -46,230 +44,117 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 		}
 	}
 
-	@FieldData(
-		name = "type",
-		type = "ENUMERATE",
-		enumerate = {"STACK", "PARM", "FIELD", "ALT", "TEST_CALL", "JUMP", "TEST_STACK", "TEST_BOOLEAN", "TEST_STRING", "TEST_NUMBER", "TEST_FLOAT", "TEST_TYPE", "PUSH", "POP", "VAR_WRITE", "VAR_START", "VAR_ADD", "ERROR", "START", "FINISH"},
-		condition = true,
-		mandatory = false
-	)
+	@FieldData(name = "type", type = "ENUMERATE", enumerate = { "STACK", "PARM", "FIELD", "ALT", "TEST_CALL", "JUMP", "TEST_STACK", "TEST_BOOLEAN", "TEST_STRING", "TEST_NUMBER", "TEST_FLOAT", "TEST_TYPE", "PUSH", "POP", "VAR_WRITE", "VAR_START", "VAR_ADD", "ERROR", "START", "FINISH" }, condition = true, mandatory = false)
 	default Type getType() {
-		int data = getRec() == 0 ? 0 : getStore().getByte(getRec(), matchstepPosition() + 0) & 63;
+		int data = rec() == 0 ? 0 : store().getByte(rec(), matchstepPosition() + 0) & 63;
 		if (data <= 0)
 			return null;
 		return Type.values()[data - 1];
 	}
 
-	@FieldData(
-		name = "stack",
-		type = "INTEGER",
-		when = "STACK",
-		mandatory = false
-	)
+	@FieldData(name = "stack", type = "INTEGER", when = "STACK", mandatory = false)
 	default int getStack() {
-		return getType() != Type.STACK ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 1);
+		return getType() != Type.STACK ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 1);
 	}
 
-	@FieldData(
-		name = "parm",
-		type = "INTEGER",
-		when = "PARM",
-		mandatory = false
-	)
+	@FieldData(name = "parm", type = "INTEGER", when = "PARM", mandatory = false)
 	default int getParm() {
-		return getType() != Type.PARM ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 1);
+		return getType() != Type.PARM ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 1);
 	}
 
-	@FieldData(
-		name = "pfalse",
-		type = "INTEGER",
-		when = "PARM",
-		mandatory = false
-	)
+	@FieldData(name = "pfalse", type = "INTEGER", when = "PARM", mandatory = false)
 	default int getPfalse() {
-		return getType() != Type.PARM ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
+		return getType() != Type.PARM ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 5);
 	}
 
-	@FieldData(
-		name = "field",
-		type = "STRING",
-		when = "FIELD",
-		mandatory = false
-	)
+	@FieldData(name = "field", type = "STRING", when = "FIELD", mandatory = false)
 	default String getField() {
-		return getType() != Type.FIELD ? null : getStore().getString(getStore().getInt(getRec(), matchstepPosition() + 1));
+		return getType() != Type.FIELD ? null : store().getString(store().getInt(rec(), matchstepPosition() + 1));
 	}
 
-	@FieldData(
-		name = "ffalse",
-		type = "INTEGER",
-		when = "FIELD",
-		mandatory = false
-	)
+	@FieldData(name = "ffalse", type = "INTEGER", when = "FIELD", mandatory = false)
 	default int getFfalse() {
-		return getType() != Type.FIELD ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
+		return getType() != Type.FIELD ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 5);
 	}
 
-	@FieldData(
-		name = "altnr",
-		type = "INTEGER",
-		when = "ALT",
-		mandatory = false
-	)
+	@FieldData(name = "altnr", type = "INTEGER", when = "ALT", mandatory = false)
 	default int getAltnr() {
-		return getType() != Type.ALT ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 1);
+		return getType() != Type.ALT ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 1);
 	}
 
-	@FieldData(
-		name = "afalse",
-		type = "INTEGER",
-		when = "ALT",
-		mandatory = false
-	)
+	@FieldData(name = "afalse", type = "INTEGER", when = "ALT", mandatory = false)
 	default int getAfalse() {
-		return getType() != Type.ALT ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
+		return getType() != Type.ALT ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 5);
 	}
 
-	@FieldData(
-		name = "avar",
-		type = "OBJECT",
-		related = Variable.class,
-		when = "ALT",
-		mandatory = false
-	)
+	@FieldData(name = "avar", type = "OBJECT", related = Variable.class, when = "ALT", mandatory = false)
 	default Variable getAvar() {
-		return new Variable(getStore(), getType() != Type.ALT ? 0 : getStore().getInt(getRec(), matchstepPosition() + 9));
+		return new Variable(store(), getType() != Type.ALT ? 0 : store().getInt(rec(), matchstepPosition() + 9));
 	}
 
-	@FieldData(
-		name = "tstack",
-		type = "INTEGER",
-		when = "TEST_STACK",
-		mandatory = false
-	)
+	@FieldData(name = "tstack", type = "INTEGER", when = "TEST_STACK", mandatory = false)
 	default int getTstack() {
-		return getType() != Type.TEST_STACK ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 1);
+		return getType() != Type.TEST_STACK ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 1);
 	}
 
-	@FieldData(
-		name = "tsfalse",
-		type = "INTEGER",
-		when = "TEST_STACK",
-		mandatory = false
-	)
+	@FieldData(name = "tsfalse", type = "INTEGER", when = "TEST_STACK", mandatory = false)
 	default int getTsfalse() {
-		return getType() != Type.TEST_STACK ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
+		return getType() != Type.TEST_STACK ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 5);
 	}
 
-	@FieldData(
-		name = "tmacro",
-		type = "RELATION",
-		related = Macro.class,
-		when = "TEST_CALL",
-		mandatory = false
-	)
+	@FieldData(name = "tmacro", type = "RELATION", related = Macro.class, when = "TEST_CALL", mandatory = false)
 	default Macro getTmacro() {
-		return new Macro(getStore(), getType() != Type.TEST_CALL ? 0 : getStore().getInt(getRec(), matchstepPosition() + 1));
+		return new Macro(store(), getType() != Type.TEST_CALL ? 0 : store().getInt(rec(), matchstepPosition() + 1));
 	}
 
-	@FieldData(
-		name = "tfalse",
-		type = "INTEGER",
-		when = "TEST_CALL",
-		mandatory = false
-	)
+	@FieldData(name = "tfalse", type = "INTEGER", when = "TEST_CALL", mandatory = false)
 	default int getTfalse() {
-		return getType() != Type.TEST_CALL ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
+		return getType() != Type.TEST_CALL ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 5);
 	}
 
-	@FieldData(
-		name = "jump",
-		type = "INTEGER",
-		when = "JUMP",
-		mandatory = false
-	)
+	@FieldData(name = "jump", type = "INTEGER", when = "JUMP", mandatory = false)
 	default int getJump() {
-		return getType() != Type.JUMP ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 1);
+		return getType() != Type.JUMP ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 1);
 	}
 
-	@FieldData(
-		name = "mboolean",
-		type = "BOOLEAN",
-		when = "TEST_BOOLEAN",
-		mandatory = false
-	)
+	@FieldData(name = "mboolean", type = "BOOLEAN", when = "TEST_BOOLEAN", mandatory = false)
 	default boolean isMboolean() {
-		return getType() != Type.TEST_BOOLEAN ? false : (getStore().getByte(getRec(), matchstepPosition() + 1) & 1) > 0;
+		return getType() != Type.TEST_BOOLEAN ? false : (store().getByte(rec(), matchstepPosition() + 1) & 1) > 0;
 	}
 
-	@FieldData(
-		name = "mbfalse",
-		type = "INTEGER",
-		when = "TEST_BOOLEAN",
-		mandatory = false
-	)
+	@FieldData(name = "mbfalse", type = "INTEGER", when = "TEST_BOOLEAN", mandatory = false)
 	default int getMbfalse() {
-		return getType() != Type.TEST_BOOLEAN ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 2);
+		return getType() != Type.TEST_BOOLEAN ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 2);
 	}
 
-	@FieldData(
-		name = "mstring",
-		type = "STRING",
-		when = "TEST_STRING",
-		mandatory = false
-	)
+	@FieldData(name = "mstring", type = "STRING", when = "TEST_STRING", mandatory = false)
 	default String getMstring() {
-		return getType() != Type.TEST_STRING ? null : getStore().getString(getStore().getInt(getRec(), matchstepPosition() + 1));
+		return getType() != Type.TEST_STRING ? null : store().getString(store().getInt(rec(), matchstepPosition() + 1));
 	}
 
-	@FieldData(
-		name = "msfalse",
-		type = "INTEGER",
-		when = "TEST_STRING",
-		mandatory = false
-	)
+	@FieldData(name = "msfalse", type = "INTEGER", when = "TEST_STRING", mandatory = false)
 	default int getMsfalse() {
-		return getType() != Type.TEST_STRING ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
+		return getType() != Type.TEST_STRING ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 5);
 	}
 
-	@FieldData(
-		name = "mnumber",
-		type = "LONG",
-		when = "TEST_NUMBER",
-		mandatory = false
-	)
+	@FieldData(name = "mnumber", type = "LONG", when = "TEST_NUMBER", mandatory = false)
 	default long getMnumber() {
-		return getType() != Type.TEST_NUMBER ? Long.MIN_VALUE : getStore().getLong(getRec(), matchstepPosition() + 1);
+		return getType() != Type.TEST_NUMBER ? Long.MIN_VALUE : store().getLong(rec(), matchstepPosition() + 1);
 	}
 
-	@FieldData(
-		name = "mnfalse",
-		type = "INTEGER",
-		when = "TEST_NUMBER",
-		mandatory = false
-	)
+	@FieldData(name = "mnfalse", type = "INTEGER", when = "TEST_NUMBER", mandatory = false)
 	default int getMnfalse() {
-		return getType() != Type.TEST_NUMBER ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 9);
+		return getType() != Type.TEST_NUMBER ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 9);
 	}
 
-	@FieldData(
-		name = "mfloat",
-		type = "FLOAT",
-		when = "TEST_FLOAT",
-		mandatory = false
-	)
+	@FieldData(name = "mfloat", type = "FLOAT", when = "TEST_FLOAT", mandatory = false)
 	default double getMfloat() {
-		return getType() != Type.TEST_FLOAT ? Double.NaN : Double.longBitsToDouble(getStore().getLong(getRec(), matchstepPosition() + 1));
+		return getType() != Type.TEST_FLOAT ? Double.NaN : Double.longBitsToDouble(store().getLong(rec(), matchstepPosition() + 1));
 	}
 
-	@FieldData(
-		name = "mffalse",
-		type = "INTEGER",
-		when = "TEST_FLOAT",
-		mandatory = false
-	)
+	@FieldData(name = "mffalse", type = "INTEGER", when = "TEST_FLOAT", mandatory = false)
 	default int getMffalse() {
-		return getType() != Type.TEST_FLOAT ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 9);
+		return getType() != Type.TEST_FLOAT ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 9);
 	}
 
 	public enum Ttype {
@@ -288,121 +173,62 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 		}
 	}
 
-	@FieldData(
-		name = "ttype",
-		type = "ENUMERATE",
-		enumerate = {"TYPE_NULL", "TYPE_BOOLEAN", "TYPE_STRING", "TYPE_NUMBER", "TYPE_FLOAT", "TYPE_ARRAY", "TYPE_OBJECT", "SKIP"},
-		when = "TEST_TYPE",
-		mandatory = false
-	)
+	@FieldData(name = "ttype", type = "ENUMERATE", enumerate = { "TYPE_NULL", "TYPE_BOOLEAN", "TYPE_STRING", "TYPE_NUMBER", "TYPE_FLOAT", "TYPE_ARRAY", "TYPE_OBJECT", "SKIP" }, when = "TEST_TYPE", mandatory = false)
 	default Ttype getTtype() {
-		int data = getType() != Type.TEST_TYPE ? 0 : getStore().getByte(getRec(), matchstepPosition() + 1) & 31;
+		int data = getType() != Type.TEST_TYPE ? 0 : store().getByte(rec(), matchstepPosition() + 1) & 31;
 		if (data <= 0)
 			return null;
 		return Ttype.values()[data - 1];
 	}
 
-	@FieldData(
-		name = "ttfalse",
-		type = "INTEGER",
-		when = "TEST_TYPE",
-		mandatory = false
-	)
+	@FieldData(name = "ttfalse", type = "INTEGER", when = "TEST_TYPE", mandatory = false)
 	default int getTtfalse() {
-		return getType() != Type.TEST_TYPE ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 2);
+		return getType() != Type.TEST_TYPE ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 2);
 	}
 
-	@FieldData(
-		name = "vwrite",
-		type = "OBJECT",
-		related = Variable.class,
-		when = "VAR_WRITE",
-		mandatory = false
-	)
+	@FieldData(name = "vwrite", type = "OBJECT", related = Variable.class, when = "VAR_WRITE", mandatory = false)
 	default Variable getVwrite() {
-		return new Variable(getStore(), getType() != Type.VAR_WRITE ? 0 : getStore().getInt(getRec(), matchstepPosition() + 1));
+		return new Variable(store(), getType() != Type.VAR_WRITE ? 0 : store().getInt(rec(), matchstepPosition() + 1));
 	}
 
-	@FieldData(
-		name = "vwrange",
-		type = "INTEGER",
-		when = "VAR_WRITE",
-		mandatory = false
-	)
+	@FieldData(name = "vwrange", type = "INTEGER", when = "VAR_WRITE", mandatory = false)
 	default int getVwrange() {
-		return getType() != Type.VAR_WRITE ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
+		return getType() != Type.VAR_WRITE ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 5);
 	}
 
-	@FieldData(
-		name = "vstart",
-		type = "OBJECT",
-		related = Variable.class,
-		when = "VAR_START",
-		mandatory = false
-	)
+	@FieldData(name = "vstart", type = "OBJECT", related = Variable.class, when = "VAR_START", mandatory = false)
 	default Variable getVstart() {
-		return new Variable(getStore(), getType() != Type.VAR_START ? 0 : getStore().getInt(getRec(), matchstepPosition() + 1));
+		return new Variable(store(), getType() != Type.VAR_START ? 0 : store().getInt(rec(), matchstepPosition() + 1));
 	}
 
-	@FieldData(
-		name = "vadd",
-		type = "OBJECT",
-		related = Variable.class,
-		when = "VAR_ADD",
-		mandatory = false
-	)
+	@FieldData(name = "vadd", type = "OBJECT", related = Variable.class, when = "VAR_ADD", mandatory = false)
 	default Variable getVadd() {
-		return new Variable(getStore(), getType() != Type.VAR_ADD ? 0 : getStore().getInt(getRec(), matchstepPosition() + 1));
+		return new Variable(store(), getType() != Type.VAR_ADD ? 0 : store().getInt(rec(), matchstepPosition() + 1));
 	}
 
-	@FieldData(
-		name = "varange",
-		type = "INTEGER",
-		when = "VAR_ADD",
-		mandatory = false
-	)
+	@FieldData(name = "varange", type = "INTEGER", when = "VAR_ADD", mandatory = false)
 	default int getVarange() {
-		return getType() != Type.VAR_ADD ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
+		return getType() != Type.VAR_ADD ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 5);
 	}
 
-	@FieldData(
-		name = "error",
-		type = "STRING",
-		when = "ERROR",
-		mandatory = false
-	)
+	@FieldData(name = "error", type = "STRING", when = "ERROR", mandatory = false)
 	default String getError() {
-		return getType() != Type.ERROR ? null : getStore().getString(getStore().getInt(getRec(), matchstepPosition() + 1));
+		return getType() != Type.ERROR ? null : store().getString(store().getInt(rec(), matchstepPosition() + 1));
 	}
 
-	@FieldData(
-		name = "erange",
-		type = "INTEGER",
-		when = "ERROR",
-		mandatory = false
-	)
+	@FieldData(name = "erange", type = "INTEGER", when = "ERROR", mandatory = false)
 	default int getErange() {
-		return getType() != Type.ERROR ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 5);
+		return getType() != Type.ERROR ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 5);
 	}
 
-	@FieldData(
-		name = "notstarted",
-		type = "INTEGER",
-		when = "START",
-		mandatory = false
-	)
+	@FieldData(name = "notstarted", type = "INTEGER", when = "START", mandatory = false)
 	default int getNotstarted() {
-		return getType() != Type.START ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 1);
+		return getType() != Type.START ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 1);
 	}
 
-	@FieldData(
-		name = "notfinished",
-		type = "INTEGER",
-		when = "FINISH",
-		mandatory = false
-	)
+	@FieldData(name = "notfinished", type = "INTEGER", when = "FINISH", mandatory = false)
 	default int getNotfinished() {
-		return getType() != Type.FINISH ? Integer.MIN_VALUE : getStore().getInt(getRec(), matchstepPosition() + 1);
+		return getType() != Type.FINISH ? Integer.MIN_VALUE : store().getInt(rec(), matchstepPosition() + 1);
 	}
 
 	default void outputMatchStep(Write write, int iterate) {
@@ -417,7 +243,7 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 		write.field("altnr", getAltnr());
 		write.field("afalse", getAfalse());
 		Variable fldAvar = getAvar();
-		if (fldAvar != null && fldAvar.getRec() != 0) {
+		if (fldAvar != null && fldAvar.rec() != 0) {
 			write.sub("avar");
 			fldAvar.output(write, iterate);
 			write.endSub();
@@ -439,20 +265,20 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 		write.field("ttype", getTtype());
 		write.field("ttfalse", getTtfalse());
 		Variable fldVwrite = getVwrite();
-		if (fldVwrite != null && fldVwrite.getRec() != 0) {
+		if (fldVwrite != null && fldVwrite.rec() != 0) {
 			write.sub("vwrite");
 			fldVwrite.output(write, iterate);
 			write.endSub();
 		}
 		write.field("vwrange", getVwrange());
 		Variable fldVstart = getVstart();
-		if (fldVstart != null && fldVstart.getRec() != 0) {
+		if (fldVstart != null && fldVstart.rec() != 0) {
 			write.sub("vstart");
 			fldVstart.output(write, iterate);
 			write.endSub();
 		}
 		Variable fldVadd = getVadd();
-		if (fldVadd != null && fldVadd.getRec() != 0) {
+		if (fldVadd != null && fldVadd.rec() != 0) {
 			write.sub("vadd");
 			fldVadd.output(write, iterate);
 			write.endSub();

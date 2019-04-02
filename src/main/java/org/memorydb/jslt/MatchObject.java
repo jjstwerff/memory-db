@@ -1,6 +1,6 @@
 package org.memorydb.jslt;
 
-import java.io.IOException;
+import java.util.Iterator;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
@@ -11,12 +11,10 @@ import org.memorydb.structure.Store;
 /**
  * Automatically generated record class for table MatchObject
  */
-@RecordData(
-	name = "MatchObject",
-	keyFields = {})
+@RecordData(name = "MatchObject")
 public class MatchObject implements Match {
-	/* package private */ Store store;
-	protected int rec;
+	/* package private */ final Store store;
+	protected final int rec;
 	/* package private */ static final int RECORD_SIZE = 17;
 
 	public MatchObject(Store store) {
@@ -31,18 +29,18 @@ public class MatchObject implements Match {
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return rec;
 	}
 
 	@Override
-	public void setRec(int rec) {
+	public MatchObject copy(int newRec) {
 		assert store.validate(rec);
-		this.rec = rec;
+		return new MatchObject(store, newRec);
 	}
 
 	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
@@ -57,7 +55,7 @@ public class MatchObject implements Match {
 	}
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (rec == 0 || iterate <= 0)
 			return;
 		outputMatch(write, iterate);
@@ -65,7 +63,7 @@ public class MatchObject implements Match {
 	}
 
 	@Override
-	public String keys() throws IOException {
+	public String keys() {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
@@ -75,11 +73,7 @@ public class MatchObject implements Match {
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			output(write, 4);
-		} catch (IOException e) {
-			return "";
-		}
+		output(write, 4);
 		return write.toString();
 	}
 
@@ -88,8 +82,7 @@ public class MatchObject implements Match {
 			int nextRec = 0;
 			if (parser.isDelete(nextRec)) {
 				try (ChangeMatchObject record = new ChangeMatchObject(this)) {
-					store.free(record.getRec());
-					record.setRec(0);
+					store.free(record.rec());
 				}
 				continue;
 			}
@@ -97,7 +90,6 @@ public class MatchObject implements Match {
 				try (ChangeMatchObject record = new ChangeMatchObject(store)) {
 
 					record.parseFields(parser);
-					rec = record.rec;
 				}
 			} else {
 				rec = nextRec;
@@ -119,16 +111,11 @@ public class MatchObject implements Match {
 	}
 
 	@Override
-	public Object get(int field) {
-		if (field >= 0 && field <= 15)
-			return Match.super.getMatch(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+	public Object java() {
+		int field = 0;
+		return Match.super.getMatch(field);
 	}
 
-	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
 		if (field >= 0 && field <= 15)
 			return Match.super.iterateMatch(field - 0);
@@ -139,27 +126,24 @@ public class MatchObject implements Match {
 	}
 
 	@Override
-	public FieldType type(int field) {
-		if (field >= 0 && field <= 15)
-			return Match.super.typeMatch(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+	public FieldType type() {
+		int field = 0;
+		return Match.super.typeMatch(field);
 	}
 
 	@Override
-	public String name(int field) {
-		if (field >= 0 && field <= 15)
-			return Match.super.nameMatch(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+	public String name() {
+		int field = 0;
+		return Match.super.nameMatch(field);
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
+	public MatchObject next() {
+		return null;
+	}
+
+	@Override
+	public MatchObject copy() {
+		return new MatchObject(store, rec);
 	}
 }

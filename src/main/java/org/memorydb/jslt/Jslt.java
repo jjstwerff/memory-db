@@ -18,7 +18,7 @@ public class Jslt implements AutoCloseable {
 		this.store = new Store(2);
 	}
 
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
@@ -27,13 +27,7 @@ public class Jslt implements AutoCloseable {
 		return store.toString();
 	}
 
-	@FieldData(
-		name = "sources",
-		type = "SET",
-		keyNames = {"name"},
-		keyTypes = {"STRING"},
-		related = Source.class
-	)
+	@FieldData(name = "sources", type = "SET", related = Source.class)
 	public Source getSources(String key1) {
 		Source rec = new Source(store);
 		Source.IndexSources idx = rec.new IndexSources(key1);
@@ -43,13 +37,7 @@ public class Jslt implements AutoCloseable {
 		return new Source(store, res);
 	}
 
-	@FieldData(
-		name = "macros",
-		type = "SET",
-		keyNames = {"name"},
-		keyTypes = {"STRING"},
-		related = Macro.class
-	)
+	@FieldData(name = "macros", type = "SET", related = Macro.class)
 	public Macro getMacros(String key1) {
 		Macro rec = new Macro(store);
 		Macro.IndexMacros idx = rec.new IndexMacros(key1);

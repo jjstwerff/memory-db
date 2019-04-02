@@ -1,6 +1,4 @@
-package org.memorydb.jslt;
-
-import java.util.Iterator;
+package org.memorydb.world;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
@@ -15,20 +13,20 @@ import org.memorydb.structure.Store;
 import org.memorydb.structure.TreeIndex;
 
 /**
- * Automatically generated record class for table Source
+ * Automatically generated record class for table Special
  */
-@RecordData(name = "Source")
-public class Source implements MemoryRecord, RecordInterface {
+@RecordData(name = "Special")
+public class Special implements MemoryRecord, RecordInterface {
 	/* package private */ final Store store;
 	protected final int rec;
-	/* package private */ static final int RECORD_SIZE = 17;
+	/* package private */ static final int RECORD_SIZE = 26;
 
-	public Source(Store store) {
+	public Special(Store store) {
 		this.store = store;
 		this.rec = 0;
 	}
 
-	public Source(Store store, int rec) {
+	public Special(Store store, int rec) {
 		rec = store.correct(rec);
 		this.store = store;
 		this.rec = rec;
@@ -40,9 +38,9 @@ public class Source implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public Source copy(int newRec) {
+	public Special copy(int newRec) {
 		assert store.validate(rec);
-		return new Source(store, newRec);
+		return new Special(store, newRec);
 	}
 
 	@Override
@@ -51,8 +49,8 @@ public class Source implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public ChangeSource change() {
-		return new ChangeSource(this);
+	public ChangeSpecial change() {
+		return new ChangeSpecial(this);
 	}
 
 	@FieldData(name = "name", type = "STRING", mandatory = false)
@@ -60,21 +58,36 @@ public class Source implements MemoryRecord, RecordInterface {
 		return rec == 0 ? null : store.getString(store.getInt(rec, 4));
 	}
 
-	public class IndexSources extends TreeIndex implements Iterable<Source> {
-		public IndexSources() {
-			super(Source.this.store, null, 64, 9);
+	@FieldData(name = "opposite", type = "STRING", mandatory = false)
+	public String getOpposite() {
+		return rec == 0 ? null : store.getString(store.getInt(rec, 8));
+	}
+
+	@FieldData(name = "description", type = "STRING", mandatory = false)
+	public String getDescription() {
+		return rec == 0 ? null : store.getString(store.getInt(rec, 12));
+	}
+
+	@FieldData(name = "taste", type = "BOOLEAN", mandatory = false)
+	public boolean isTaste() {
+		return rec == 0 ? false : (store.getByte(rec, 16) & 1) > 0;
+	}
+
+	public class IndexSpecials extends TreeIndex implements Iterable<Special> {
+		public IndexSpecials() {
+			super(Special.this, null, 136, 18);
 		}
 
-		public IndexSources(String key1) {
-			super(Source.this.store, new Key() {
+		public IndexSpecials(String key1) {
+			super(Special.this, new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert Source.this.store.validate(recNr);
-					Source res = new Source(Source.this.store, recNr);
+					assert store.validate(recNr);
+					rec(recNr);
 					int o = 0;
-					o = RedBlackTree.compare(key1, res.getName());
+					o = RedBlackTree.compare(key1, Special.this.getName());
 					return o;
 				}
 
@@ -82,7 +95,7 @@ public class Source implements MemoryRecord, RecordInterface {
 				public IndexOperation oper() {
 					return IndexOperation.EQ;
 				}
-			}, 64, 9);
+			}, 136, 18);
 		}
 
 		@Override
@@ -97,31 +110,11 @@ public class Source implements MemoryRecord, RecordInterface {
 
 		@Override
 		protected int compareTo(int a, int b) {
-			Source recA = new Source(store, a);
-			Source recB = new Source(store, b);
+			Special recA = new Special(store, a);
+			Special recB = new Special(store, b);
 			int o = 0;
 			o = compare(recA.getName(), recB.getName());
 			return o;
-		}
-
-		@Override
-		public Iterator<Source> iterator() {
-			return new Iterator<>() {
-				int rec = first();
-
-				@Override
-				public boolean hasNext() {
-					return rec >= 0;
-				}
-				
-				@Override
-				public Source next() {
-					rec = toNext(rec);
-					if (rec >= 0)
-						return null;
-					return new Source(store, rec);
-				}
-			};
 		}
 	}
 
@@ -130,6 +123,9 @@ public class Source implements MemoryRecord, RecordInterface {
 		if (rec == 0 || iterate <= 0)
 			return;
 		write.field("name", getName());
+		write.field("opposite", getOpposite());
+		write.field("description", getDescription());
+		write.field("taste", isTaste());
 		write.endRecord();
 	}
 
@@ -149,24 +145,26 @@ public class Source implements MemoryRecord, RecordInterface {
 		return write.toString();
 	}
 
-	public Source parse(Parser parser) {
+	public Special parse(Parser parser) {
 		while (parser.getSub()) {
 			String name = parser.getString("name");
-			int nextRec = new IndexSources(name).search();
+			int nextRec = new IndexSpecials(name).search();
 			if (parser.isDelete(nextRec)) {
-				try (ChangeSource record = new ChangeSource(this)) {
+				try (ChangeSpecial record = new ChangeSpecial(this)) {
 					store.free(record.rec());
+					record.rec(0);
 				}
 				continue;
 			}
 			if (nextRec == 0) {
-				try (ChangeSource record = new ChangeSource(store)) {
+				try (ChangeSpecial record = new ChangeSpecial(store)) {
 					record.setName(name);
 					record.parseFields(parser);
+					rec = record.rec;
 				}
 			} else {
 				rec = nextRec;
-				try (ChangeSource record = new ChangeSource(this)) {
+				try (ChangeSpecial record = new ChangeSpecial(this)) {
 					record.parseFields(parser);
 				}
 			}
@@ -176,7 +174,7 @@ public class Source implements MemoryRecord, RecordInterface {
 
 	public boolean parseKey(Parser parser) {
 		String name = parser.getString("name");
-		int nextRec = new IndexSources(name).search();
+		int nextRec = new IndexSpecials(name).search();
 		parser.finishRelation();
 		if (nextRec != 0)
 			rec = nextRec;
@@ -189,6 +187,12 @@ public class Source implements MemoryRecord, RecordInterface {
 		switch (field) {
 		case 1:
 			return getName();
+		case 2:
+			return getOpposite();
+		case 3:
+			return getDescription();
+		case 4:
+			return isTaste();
 		default:
 			return null;
 		}
@@ -207,6 +211,12 @@ public class Source implements MemoryRecord, RecordInterface {
 		switch (field) {
 		case 1:
 			return FieldType.STRING;
+		case 2:
+			return FieldType.STRING;
+		case 3:
+			return FieldType.STRING;
+		case 4:
+			return FieldType.BOOLEAN;
 		default:
 			return null;
 		}
@@ -218,18 +228,24 @@ public class Source implements MemoryRecord, RecordInterface {
 		switch (field) {
 		case 1:
 			return "name";
+		case 2:
+			return "opposite";
+		case 3:
+			return "description";
+		case 4:
+			return "taste";
 		default:
 			return null;
 		}
 	}
 
 	@Override
-	public Source next() {
+	public Special next() {
 		return null;
 	}
 
 	@Override
-	public Source copy() {
-		return new Source(store, rec);
+	public Special copy() {
+		return new Special(store, rec);
 	}
 }

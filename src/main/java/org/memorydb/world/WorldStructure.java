@@ -18,21 +18,39 @@ public class WorldStructure {
 
 		Record effect = project.record("Effect"); // effect on the rules
 
-		Record item = project.record("Item"); // abstract item definition
-		item.field("name", Type.STRING);
-		item.field("type", Type.ENUMERATE, "TERRAIN", "NODE", "PERSON", "GOOD", "STRUCTURE", "VEHICLE", "ANIMAL");
-		item.field("nr", Type.INTEGER);
-		item.field("dependency", Type.ARRAY, dependency);
-		item.field("effect", Type.ARRAY, effect);
-		item.field("description", Type.STRING);
+		Record special = project.table("Special"); // attributes to items / persons to describe how people perceive them
+		special.field("name", Type.STRING);
+		special.field("opposite", Type.STRING);
+		special.field("description", Type.STRING);
+		special.field("taste", Type.BOOLEAN);
+		special.index("Specials", "name");
 
-		dependency.field("item", Type.RELATION, item);
+		Record specials = project.record("Specials");
+		specials.field("special", Type.RELATION, special);
+		specials.field("known", Type.BOOLEAN);
+		specials.field("level", Type.BYTE);
+
+		Record category = project.table("Category"); // different types of things in the world with general specials (actual instances can differ)
+		category.field("type", Type.ENUMERATE, "RACE", "ORGANISATION", "PROJECT", "JOB", "PERSON", "BUILDING", "ITEM", "COUNTRY", "TOWN", "GROUP", "ANIMAL", "PLANT", "VEHICLE",
+				"BLUEPRINT", "PAPERS", "POWER", "ACTION", "TERRAIN", "NODE");
+		category.field("name", Type.STRING);
+		category.field("specials", Type.ARRAY, specials);
+		category.field("dependency", Type.ARRAY, dependency);
+		category.field("effect", Type.ARRAY, effect);
+		category.field("description", Type.STRING);
+
+		dependency.field("on", Type.RELATION, category);
 		dependency.field("number", Type.BYTE);
-		dependency.field("optional", Type.BOOLEAN);
 
-		effect.field("item", Type.RELATION, item);
+		effect.field("item", Type.RELATION, category);
 		effect.field("number", Type.BYTE);
 
+		Record relation = project.record("State"); // possible states between things in the world
+		relation.field("type", Type.ENUMERATE, "OWNER", "FAMILY", "ROMANCE", "MEMBER", "FRIENDSHIP", "FAVOR", "FACT", "JOB", "POLITICS");
+		relation.field("level", Type.BYTE);
+		relation.field("name", Type.STRING);
+
+		/* FUTURE... map of the world
 		Record point = project.record("Point"); // single point on the map
 		point.field("type", Type.BYTE); // terrain type of this area.. is a TERRAIN style item
 		point.field("height", Type.INTEGER); // height in the center of the tile
@@ -45,67 +63,32 @@ public class WorldStructure {
 
 		Record world = project.record("world");
 		world.field("map", tile, "position");
+		*/
 
-		Record good = project.record("Good"); // things in transport
-		good.field("item", Type.RELATION, item);
-		good.field("number", Type.INTEGER);
-		good.field("quality", Type.BYTE);
-		good.field("state", Type.ENUMERATE, "EQUIPPED", "STORED");
+		Record relations = project.record("Relations");
 
-		Record nation = project.record("Nation");
-		nation.field("name", Type.STRING);
+		Record item = project.table("Item"); // actual things in the world (items, persons, organizations, nations)
+		item.field("category", Type.RELATION, category);
+		item.field("number", Type.INTEGER);
+		item.field("specials", Type.ARRAY, specials);
+		item.field("relation", Type.ARRAY, relations);
+		item.field("position", Type.INTEGER); // position on the world
 
-		Record spot = project.record("Spot");
+		relations.field("type", relation);
+		relations.field("with", item);
+		relations.field("started", Type.INTEGER); // actual started or planned to start
+		relations.field("stopped", Type.INTEGER); // actual stopped or planned to stop
+		relations.field("specials", Type.ARRAY, specials);
 
-		Record guild = project.record("Guild");
-		guild.field("name", Type.STRING);
-		guild.field("seat", Type.RELATION, spot);
-		guild.field("nation", Type.RELATION, nation);
-
-		Record moment = project.record("Moment"); // Memory of a group or a location
-
-		spot.field("position", Type.INTEGER);
-		spot.field("height", Type.INTEGER);
-		spot.field("goods", Type.ARRAY, good);
-		spot.field("owner", Type.RELATION, guild); // who claims ownership on this spot
-		spot.field("history", Type.ARRAY, moment);
-
-		Record member = project.record("Member"); // Member list of a group
-		member.field("item", Type.RELATION, item);
-		member.field("number", Type.INTEGER);
-		member.field("quality", Type.BYTE);
-		member.field("gear", Type.ARRAY, good);
-
+		/* FUTURE.. movement of groups in action
 		Record step = project.record("Step"); // A step on the route
 		step.field("position", Type.INTEGER);
 		step.field("duration", Type.INTEGER); // duration to move to this position from the last
-
-		Record group = project.record("Group"); // Group of people and vehicles moving along the work
-		group.field("members", Type.ARRAY, member);
-		group.field("goods", Type.ARRAY, good);
-		group.field("route", Type.ARRAY, step);
-		group.field("duration", Type.INTEGER); // duration already along the current route
-		group.field("leader", Type.BYTE); // leader skill in the group
-		group.field("size", Type.INTEGER); // size of the group
-		group.field("capacity", Type.INTEGER); // carrying capacity of this group
-		group.field("movement", Type.INTEGER); // actual movement speed
-		group.field("owner", Type.RELATION, guild);
-		group.field("history", Type.ARRAY, moment);
-
-		moment.field("time", Type.INTEGER); // can be negative to indicate planning priority instead of historic fact
-		moment.field("type", Type.ENUMERATE, "CREATE", "FIGHT", "VISITED", "SAW", "INTERACTION", "DESTROY", "CLAIM");
-		moment.field("with", Type.RELATION, group);
-
-		Record perk = project.record("Perk"); // Learned skills
-		perk.field("skill", Type.RELATION, item);
-		perk.field("double", Type.BOOLEAN);
+		*/
 
 		Record player = project.record("Player"); // Player driven character
 		player.field("name", Type.STRING);
-		player.field("group", Type.RELATION, group);
-		player.field("perks", Type.ARRAY, perk);
-		player.field("allience", Type.RELATION, guild);
-		player.field("history", Type.ARRAY, moment);
+		player.field("character", Type.RELATION, item); // current character played in the world
 
 		return project;
 	}

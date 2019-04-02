@@ -13,69 +13,69 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 	}
 
 	default void setOperation(Operation value) {
-		if (getRec() != 0) {
+		if (rec() != 0) {
 			if (value == null) {
-				getStore().setByte(getRec(), operatorPosition() + 0, (getStore().getByte(getRec(), operatorPosition() + 0) & 192) + 0);
+				store().setByte(rec(), operatorPosition() + 0, (store().getByte(rec(), operatorPosition() + 0) & 192) + 0);
 				return;
 			}
-			getStore().setByte(getRec(), operatorPosition() + 0, (getStore().getByte(getRec(), operatorPosition() + 0) & 192) + 1 + value.ordinal());
+			store().setByte(rec(), operatorPosition() + 0, (store().getByte(rec(), operatorPosition() + 0) & 192) + 1 + value.ordinal());
 			switch (value) {
 			case FUNCTION:
-				getStore().setByte(getRec(), operatorPosition() + 1, (getStore().getByte(getRec(), operatorPosition() + 1) & 128) + 1 + Function.NEG.ordinal());
-				getStore().setInt(getRec(), operatorPosition() + 2, 0);
-				getStore().setInt(getRec(), operatorPosition() + 6, 0);
+				store().setByte(rec(), operatorPosition() + 1, (store().getByte(rec(), operatorPosition() + 1) & 128) + 1 + Function.NEG.ordinal());
+				store().setInt(rec(), operatorPosition() + 2, 0);
+				store().setInt(rec(), operatorPosition() + 6, 0);
 				break;
 			case CONDITION:
-				getStore().setInt(getRec(), operatorPosition() + 1, 0);
-				getStore().setInt(getRec(), operatorPosition() + 5, 0);
-				getStore().setInt(getRec(), operatorPosition() + 9, 0);
+				store().setInt(rec(), operatorPosition() + 1, 0);
+				store().setInt(rec(), operatorPosition() + 5, 0);
+				store().setInt(rec(), operatorPosition() + 9, 0);
 				break;
 			case NUMBER:
-				getStore().setLong(getRec(), operatorPosition() + 1, 0L);
+				store().setLong(rec(), operatorPosition() + 1, 0L);
 				break;
 			case FLOAT:
-				getStore().setLong(getRec(), operatorPosition() + 1, Double.doubleToLongBits(0.0));
+				store().setLong(rec(), operatorPosition() + 1, Double.doubleToLongBits(0.0));
 				break;
 			case STRING:
-				getStore().setInt(getRec(), operatorPosition() + 1, 0);
+				store().setInt(rec(), operatorPosition() + 1, 0);
 				break;
 			case ARRAY:
-				getStore().setInt(getRec(), operatorPosition() + 1, 0);
+				store().setInt(rec(), operatorPosition() + 1, 0);
 				break;
 			case APPEND:
-				getStore().setInt(getRec(), operatorPosition() + 1, 0);
+				store().setInt(rec(), operatorPosition() + 1, 0);
 				break;
 			case OBJECT:
-				getStore().setInt(getRec(), operatorPosition() + 1, 0);
+				store().setInt(rec(), operatorPosition() + 1, 0);
 				break;
 			case BOOLEAN:
-				getStore().setByte(getRec(), operatorPosition() + 1, getStore().getByte(getRec(), operatorPosition() + 1) & 254);
+				store().setByte(rec(), operatorPosition() + 1, store().getByte(rec(), operatorPosition() + 1) & 254);
 				break;
 			case CALL:
-				getStore().setInt(getRec(), operatorPosition() + 1, 0);
-				getStore().setInt(getRec(), operatorPosition() + 5, 0);
+				store().setInt(rec(), operatorPosition() + 1, 0);
+				store().setInt(rec(), operatorPosition() + 5, 0);
 				break;
 			case FILTER:
-				getStore().setInt(getRec(), operatorPosition() + 1, 0);
-				getStore().setByte(getRec(), operatorPosition() + 5, getStore().getByte(getRec(), operatorPosition() + 5) & 254);
-				getStore().setInt(getRec(), operatorPosition() + 6, 0);
+				store().setInt(rec(), operatorPosition() + 1, 0);
+				store().setByte(rec(), operatorPosition() + 5, store().getByte(rec(), operatorPosition() + 5) & 254);
+				store().setInt(rec(), operatorPosition() + 6, 0);
 				break;
 			case SORT:
-				getStore().setInt(getRec(), operatorPosition() + 1, 0);
-				getStore().setInt(getRec(), operatorPosition() + 5, 0);
+				store().setInt(rec(), operatorPosition() + 1, 0);
+				store().setInt(rec(), operatorPosition() + 5, 0);
 				break;
 			case IF:
-				getStore().setInt(getRec(), operatorPosition() + 1, 0);
-				getStore().setInt(getRec(), operatorPosition() + 5, 0);
-				getStore().setInt(getRec(), operatorPosition() + 9, 0);
+				store().setInt(rec(), operatorPosition() + 1, 0);
+				store().setInt(rec(), operatorPosition() + 5, 0);
+				store().setInt(rec(), operatorPosition() + 9, 0);
 				break;
 			case READ:
-				getStore().setInt(getRec(), operatorPosition() + 1, 0);
-				getStore().setInt(getRec(), operatorPosition() + 5, 0);
+				store().setInt(rec(), operatorPosition() + 1, 0);
+				store().setInt(rec(), operatorPosition() + 5, 0);
 				break;
 			case VARIABLE:
-				getStore().setInt(getRec(), operatorPosition() + 1, 0);
-				getStore().setInt(getRec(), operatorPosition() + 5, 0);
+				store().setInt(rec(), operatorPosition() + 1, 0);
+				store().setInt(rec(), operatorPosition() + 5, 0);
 				break;
 			default:
 				break;
@@ -87,156 +87,156 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 		if (value == null)
 			throw new MutationException("Mandatory 'function' field");
 		if (getOperation() == Operation.FUNCTION) {
-			getStore().setByte(getRec(), operatorPosition() + 1, (getStore().getByte(getRec(), operatorPosition() + 1) & 128) + 1 + value.ordinal());
+			store().setByte(rec(), operatorPosition() + 1, (store().getByte(rec(), operatorPosition() + 1) & 128) + 1 + value.ordinal());
 		}
 	}
 
 	default void setFnParm1(Expr value) {
 		if (getOperation() == Operation.FUNCTION) {
-			getStore().setInt(getRec(), operatorPosition() + 2, value == null ? 0 : value.getRec());
+			store().setInt(rec(), operatorPosition() + 2, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void setFnParm2(Expr value) {
 		if (getOperation() == Operation.FUNCTION) {
-			getStore().setInt(getRec(), operatorPosition() + 6, value == null ? 0 : value.getRec());
+			store().setInt(rec(), operatorPosition() + 6, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void setConExpr(Expr value) {
 		if (getOperation() == Operation.CONDITION) {
-			getStore().setInt(getRec(), operatorPosition() + 1, value == null ? 0 : value.getRec());
+			store().setInt(rec(), operatorPosition() + 1, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void setConTrue(Expr value) {
 		if (getOperation() == Operation.CONDITION) {
-			getStore().setInt(getRec(), operatorPosition() + 5, value == null ? 0 : value.getRec());
+			store().setInt(rec(), operatorPosition() + 5, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void setConFalse(Expr value) {
 		if (getOperation() == Operation.CONDITION) {
-			getStore().setInt(getRec(), operatorPosition() + 9, value == null ? 0 : value.getRec());
+			store().setInt(rec(), operatorPosition() + 9, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void setNumber(long value) {
 		if (getOperation() == Operation.NUMBER) {
-			getStore().setLong(getRec(), operatorPosition() + 1, value);
+			store().setLong(rec(), operatorPosition() + 1, value);
 		}
 	}
 
 	default void setFloat(double value) {
 		if (getOperation() == Operation.FLOAT) {
-			getStore().setLong(getRec(), operatorPosition() + 1, Double.doubleToLongBits(value));
+			store().setLong(rec(), operatorPosition() + 1, Double.doubleToLongBits(value));
 		}
 	}
 
 	default void setString(String value) {
 		if (getOperation() == Operation.STRING) {
-			getStore().setInt(getRec(), operatorPosition() + 1, getStore().putString(value));
+			store().setInt(rec(), operatorPosition() + 1, store().putString(value));
 		}
 	}
 
 	default void moveArray(ChangeOperator other) {
-		getStore().setInt(getRec(), operatorPosition() + 1, getStore().getInt(other.getRec(), other.operatorPosition() + 1));
-		getStore().setInt(other.getRec(), other.operatorPosition() + 1, 0);
+		store().setInt(rec(), operatorPosition() + 1, store().getInt(other.rec(), other.operatorPosition() + 1));
+		store().setInt(other.rec(), other.operatorPosition() + 1, 0);
 	}
 
 	default void moveAppend(ChangeOperator other) {
-		getStore().setInt(getRec(), operatorPosition() + 1, getStore().getInt(other.getRec(), other.operatorPosition() + 1));
-		getStore().setInt(other.getRec(), other.operatorPosition() + 1, 0);
+		store().setInt(rec(), operatorPosition() + 1, store().getInt(other.rec(), other.operatorPosition() + 1));
+		store().setInt(other.rec(), other.operatorPosition() + 1, 0);
 	}
 
 	default void moveObject(ChangeOperator other) {
-		getStore().setInt(getRec(), operatorPosition() + 1, getStore().getInt(other.getRec(), other.operatorPosition() + 1));
-		getStore().setInt(other.getRec(), other.operatorPosition() + 1, 0);
+		store().setInt(rec(), operatorPosition() + 1, store().getInt(other.rec(), other.operatorPosition() + 1));
+		store().setInt(other.rec(), other.operatorPosition() + 1, 0);
 	}
 
 	default void setBoolean(boolean value) {
 		if (getOperation() == Operation.BOOLEAN) {
-			getStore().setByte(getRec(), operatorPosition() + 1, (getStore().getByte(getRec(), operatorPosition() + 1) & 254) + (value ? 1 : 0));
+			store().setByte(rec(), operatorPosition() + 1, (store().getByte(rec(), operatorPosition() + 1) & 254) + (value ? 1 : 0));
 		}
 	}
 
 	default void setMacro(Macro value) {
 		if (getOperation() == Operation.CALL) {
-			getStore().setInt(getRec(), operatorPosition() + 1, value == null ? 0 : value.getRec());
+			store().setInt(rec(), operatorPosition() + 1, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void moveCallParms(ChangeOperator other) {
-		getStore().setInt(getRec(), operatorPosition() + 5, getStore().getInt(other.getRec(), other.operatorPosition() + 5));
-		getStore().setInt(other.getRec(), other.operatorPosition() + 5, 0);
+		store().setInt(rec(), operatorPosition() + 5, store().getInt(other.rec(), other.operatorPosition() + 5));
+		store().setInt(other.rec(), other.operatorPosition() + 5, 0);
 	}
 
 	default void setFilter(Expr value) {
 		if (getOperation() == Operation.FILTER) {
-			getStore().setInt(getRec(), operatorPosition() + 1, value == null ? 0 : value.getRec());
+			store().setInt(rec(), operatorPosition() + 1, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void setFilterDeep(boolean value) {
 		if (getOperation() == Operation.FILTER) {
-			getStore().setByte(getRec(), operatorPosition() + 5, (getStore().getByte(getRec(), operatorPosition() + 5) & 254) + (value ? 1 : 0));
+			store().setByte(rec(), operatorPosition() + 5, (store().getByte(rec(), operatorPosition() + 5) & 254) + (value ? 1 : 0));
 		}
 	}
 
 	default void setFilterExpr(Expr value) {
 		if (getOperation() == Operation.FILTER) {
-			getStore().setInt(getRec(), operatorPosition() + 6, value == null ? 0 : value.getRec());
+			store().setInt(rec(), operatorPosition() + 6, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void setSort(Expr value) {
 		if (getOperation() == Operation.SORT) {
-			getStore().setInt(getRec(), operatorPosition() + 1, value == null ? 0 : value.getRec());
+			store().setInt(rec(), operatorPosition() + 1, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void moveSortParms(ChangeOperator other) {
-		getStore().setInt(getRec(), operatorPosition() + 5, getStore().getInt(other.getRec(), other.operatorPosition() + 5));
-		getStore().setInt(other.getRec(), other.operatorPosition() + 5, 0);
+		store().setInt(rec(), operatorPosition() + 5, store().getInt(other.rec(), other.operatorPosition() + 5));
+		store().setInt(other.rec(), other.operatorPosition() + 5, 0);
 	}
 
 	default void setIf(Expr value) {
 		if (getOperation() == Operation.IF) {
-			getStore().setInt(getRec(), operatorPosition() + 1, value == null ? 0 : value.getRec());
+			store().setInt(rec(), operatorPosition() + 1, value == null ? 0 : value.rec());
 		}
 	}
 
 	default void moveIfTrue(ChangeOperator other) {
-		getStore().setInt(getRec(), operatorPosition() + 5, getStore().getInt(other.getRec(), other.operatorPosition() + 5));
-		getStore().setInt(other.getRec(), other.operatorPosition() + 5, 0);
+		store().setInt(rec(), operatorPosition() + 5, store().getInt(other.rec(), other.operatorPosition() + 5));
+		store().setInt(other.rec(), other.operatorPosition() + 5, 0);
 	}
 
 	default void moveIfFalse(ChangeOperator other) {
-		getStore().setInt(getRec(), operatorPosition() + 9, getStore().getInt(other.getRec(), other.operatorPosition() + 9));
-		getStore().setInt(other.getRec(), other.operatorPosition() + 9, 0);
+		store().setInt(rec(), operatorPosition() + 9, store().getInt(other.rec(), other.operatorPosition() + 9));
+		store().setInt(other.rec(), other.operatorPosition() + 9, 0);
 	}
 
 	default void setListenSource(String value) {
 		if (getOperation() == Operation.READ) {
-			getStore().setInt(getRec(), operatorPosition() + 1, getStore().putString(value));
+			store().setInt(rec(), operatorPosition() + 1, store().putString(value));
 		}
 	}
 
 	default void setListemNr(int value) {
 		if (getOperation() == Operation.READ) {
-			getStore().setInt(getRec(), operatorPosition() + 5, value);
+			store().setInt(rec(), operatorPosition() + 5, value);
 		}
 	}
 
 	default void setVarName(String value) {
 		if (getOperation() == Operation.VARIABLE) {
-			getStore().setInt(getRec(), operatorPosition() + 1, getStore().putString(value));
+			store().setInt(rec(), operatorPosition() + 1, store().putString(value));
 		}
 	}
 
 	default void setVarNr(int value) {
 		if (getOperation() == Operation.VARIABLE) {
-			getStore().setInt(getRec(), operatorPosition() + 5, value);
+			store().setInt(rec(), operatorPosition() + 5, value);
 		}
 	}
 
@@ -256,19 +256,19 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 			setFunction(valueFunction == null ? null : function);
 		}
 		if (parser.hasSub("fnParm1")) {
-			setFnParm1(new Expr(getStore()).parse(parser));
+			setFnParm1(new Expr(store()).parse(parser));
 		}
 		if (parser.hasSub("fnParm2")) {
-			setFnParm2(new Expr(getStore()).parse(parser));
+			setFnParm2(new Expr(store()).parse(parser));
 		}
 		if (parser.hasSub("conExpr")) {
-			setConExpr(new Expr(getStore()).parse(parser));
+			setConExpr(new Expr(store()).parse(parser));
 		}
 		if (parser.hasSub("conTrue")) {
-			setConTrue(new Expr(getStore()).parse(parser));
+			setConTrue(new Expr(store()).parse(parser));
 		}
 		if (parser.hasSub("conFalse")) {
-			setConFalse(new Expr(getStore()).parse(parser));
+			setConFalse(new Expr(store()).parse(parser));
 		}
 		if (parser.hasField("number")) {
 			setNumber(parser.getLong("number"));
@@ -311,11 +311,11 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 		}
 		if (parser.hasField("macro")) {
 			parser.getRelation("macro", (recNr, idx) -> {
-				Macro relRec = new Macro(getStore());
+				Macro relRec = new Macro(store());
 				boolean found = relRec.parseKey(parser);
 				setMacro(relRec);
 				return found;
-			}, getRec());
+			}, rec());
 		}
 		if (parser.hasSub("callParms")) {
 			try (CallParmsArray sub = new CallParmsArray(this, -1)) {
@@ -326,7 +326,7 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 			}
 		}
 		if (parser.hasSub("filter")) {
-			setFilter(new Expr(getStore()).parse(parser));
+			setFilter(new Expr(store()).parse(parser));
 		}
 		if (parser.hasField("filterDeep")) {
 			Boolean valueFilterDeep = parser.getBoolean("filterDeep");
@@ -335,10 +335,10 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 			setFilterDeep(valueFilterDeep);
 		}
 		if (parser.hasSub("filterExpr")) {
-			setFilterExpr(new Expr(getStore()).parse(parser));
+			setFilterExpr(new Expr(store()).parse(parser));
 		}
 		if (parser.hasSub("sort")) {
-			setSort(new Expr(getStore()).parse(parser));
+			setSort(new Expr(store()).parse(parser));
 		}
 		if (parser.hasSub("sortParms")) {
 			try (SortParmsArray sub = new SortParmsArray(this, -1)) {
@@ -349,7 +349,7 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 			}
 		}
 		if (parser.hasSub("if")) {
-			setIf(new Expr(getStore()).parse(parser));
+			setIf(new Expr(store()).parse(parser));
 		}
 		if (parser.hasSub("ifTrue")) {
 			try (IfTrueArray sub = new IfTrueArray(this, -1)) {
@@ -387,7 +387,7 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 	}
 
 	default boolean setOperator(int field, Object value) {
-		if (field >= 28 && field <= 30)
+		if (field > 28 && field <= 30)
 			return setResultType(field - 28, value);
 		switch (field) {
 		case 1:
@@ -480,7 +480,7 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 	}
 
 	default ChangeInterface addOperator(int field) {
-		if (field >= 28 && field <= 30)
+		if (field > 28 && field <= 30)
 			return addResultType(field - 28);
 		switch (field) {
 		case 11:

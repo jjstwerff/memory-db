@@ -1,6 +1,6 @@
 package org.memorydb.jslt;
 
-import java.io.IOException;
+import java.util.Iterator;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
@@ -12,12 +12,10 @@ import org.memorydb.structure.Store;
 /**
  * Automatically generated record class for table Variable
  */
-@RecordData(
-	name = "Variable",
-	keyFields = {})
+@RecordData(name = "Variable")
 public class Variable implements ResultType {
-	/* package private */ Store store;
-	protected int rec;
+	/* package private */ final Store store;
+	protected final int rec;
 	/* package private */ static final int RECORD_SIZE = 18;
 
 	public Variable(Store store) {
@@ -32,18 +30,18 @@ public class Variable implements ResultType {
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return rec;
 	}
 
 	@Override
-	public void setRec(int rec) {
+	public Variable copy(int newRec) {
 		assert store.validate(rec);
-		this.rec = rec;
+		return new Variable(store, newRec);
 	}
 
 	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
@@ -57,29 +55,17 @@ public class Variable implements ResultType {
 		return new ChangeVariable(this);
 	}
 
-	@FieldData(
-		name = "name",
-		type = "STRING",
-		mandatory = true
-	)
+	@FieldData(name = "name", type = "STRING", mandatory = true)
 	public String getName() {
 		return rec == 0 ? null : store.getString(store.getInt(rec, 4));
 	}
 
-	@FieldData(
-		name = "nr",
-		type = "INTEGER",
-		mandatory = false
-	)
+	@FieldData(name = "nr", type = "INTEGER", mandatory = false)
 	public int getNr() {
 		return rec == 0 ? Integer.MIN_VALUE : store.getInt(rec, 8);
 	}
 
-	@FieldData(
-		name = "multiple",
-		type = "BOOLEAN",
-		mandatory = false
-	)
+	@FieldData(name = "multiple", type = "BOOLEAN", mandatory = false)
 	public boolean isMultiple() {
 		return rec == 0 ? false : (store.getByte(rec, 12) & 1) > 0;
 	}
@@ -106,11 +92,7 @@ public class Variable implements ResultType {
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			output(write, 4);
-		} catch (IOException e) {
-			return "";
-		}
+		output(write, 4);
 		return write.toString();
 	}
 
@@ -119,8 +101,7 @@ public class Variable implements ResultType {
 			int nextRec = 0;
 			if (parser.isDelete(nextRec)) {
 				try (ChangeVariable record = new ChangeVariable(this)) {
-					store.free(record.getRec());
-					record.setRec(0);
+					store.free(record.rec());
 				}
 				continue;
 			}
@@ -128,7 +109,6 @@ public class Variable implements ResultType {
 				try (ChangeVariable record = new ChangeVariable(store)) {
 
 					record.parseFields(parser);
-					rec = record.rec;
 				}
 			} else {
 				rec = nextRec;
@@ -150,8 +130,9 @@ public class Variable implements ResultType {
 	}
 
 	@Override
-	public Object get(int field) {
-		if (field >= 3 && field <= 5)
+	public Object java() {
+		int field = 0;
+		if (field > 3 && field <= 5)
 			return ResultType.super.getResultType(field - 3);
 		switch (field) {
 		case 1:
@@ -165,7 +146,6 @@ public class Variable implements ResultType {
 		}
 	}
 
-	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
 		if (field >= 3 && field <= 5)
 			return ResultType.super.iterateResultType(field - 3);
@@ -176,8 +156,9 @@ public class Variable implements ResultType {
 	}
 
 	@Override
-	public FieldType type(int field) {
-		if (field >= 3 && field <= 5)
+	public FieldType type() {
+		int field = 0;
+		if (field > 3 && field <= 5)
 			return ResultType.super.typeResultType(field - 3);
 		switch (field) {
 		case 1:
@@ -192,8 +173,9 @@ public class Variable implements ResultType {
 	}
 
 	@Override
-	public String name(int field) {
-		if (field >= 3 && field <= 5)
+	public String name() {
+		int field = 0;
+		if (field > 3 && field <= 5)
 			return ResultType.super.nameResultType(field - 3);
 		switch (field) {
 		case 1:
@@ -208,7 +190,12 @@ public class Variable implements ResultType {
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
+	public Variable next() {
+		return null;
+	}
+
+	@Override
+	public Variable copy() {
+		return new Variable(store, rec);
 	}
 }

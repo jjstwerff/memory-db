@@ -9,25 +9,25 @@ import org.memorydb.handler.MutationException;
  */
 public class ChangeAlternative extends Alternative implements ChangeInterface {
 	/* package private */ ChangeAlternative(Macro parent, int rec) {
-		super(parent.getStore(), rec);
+		super(parent.store(), rec);
 		if (rec == 0) {
-			setRec(getStore().allocate(Alternative.RECORD_SIZE));
+			rec(store().allocate(Alternative.RECORD_SIZE));
 		}
 		setNr(0);
-		store.setInt(getRec(), 8, 0); // ARRAY parameters
+		store.setInt(rec(), 8, 0); // ARRAY parameters
 		setAnyParm(false);
 		setIf(null);
-		store.setInt(getRec(), 17, 0); // ARRAY code
-		setUpRecord(parent);
+		store.setInt(rec(), 17, 0); // ARRAY code
+		up(parent);
 		if (rec != 0) {
-			getUpRecord().new IndexAlternatives(this).remove(rec);
+			up().new IndexAlternatives(this).remove(rec);
 		}
 	}
 
 	/* package private */ ChangeAlternative(Alternative current) {
 		super(current.store, current.rec);
 		if (rec != 0) {
-			getUpRecord().new IndexAlternatives(this).remove(rec);
+			up().new IndexAlternatives(this).remove(rec);
 		}
 	}
 
@@ -36,8 +36,8 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 	}
 
 	public void moveParameters(ChangeAlternative other) {
-		getStore().setInt(getRec(), 8, getStore().getInt(other.getRec(), 8));
-		getStore().setInt(other.getRec(), 8, 0);
+		store().setInt(rec(), 8, store().getInt(other.rec(), 8));
+		store().setInt(other.rec(), 8, 0);
 	}
 
 	public void setAnyParm(boolean value) {
@@ -45,16 +45,17 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 	}
 
 	public void setIf(Expr value) {
-		store.setInt(rec, 13, value == null ? 0 : value.getRec());
+		store.setInt(rec, 13, value == null ? 0 : value.rec());
 	}
 
 	public void moveCode(ChangeAlternative other) {
-		getStore().setInt(getRec(), 17, getStore().getInt(other.getRec(), 17));
-		getStore().setInt(other.getRec(), 17, 0);
+		store().setInt(rec(), 17, store().getInt(other.rec(), 17));
+		store().setInt(other.rec(), 17, 0);
 	}
 
-	public void setUpRecord(Macro value) {
-		store.setInt(rec, 30, value == null ? 0 : value.getRec());
+	private void up(Macro value) {
+		store.setInt(rec, 30, value == null ? 0 : value.rec());
+		store.setInt(rec, 35, value == null ? 0 : value.index());
 	}
 
 	/* package private */ void parseFields(Parser parser) {
@@ -87,11 +88,12 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 
 	@Override
 	public void close() {
-		getUpRecord().new IndexAlternatives(this).insert(getRec());
+		up().new IndexAlternatives(this).insert(rec());
 	}
 
 	@Override
-	public boolean set(int field, Object value) {
+	public boolean java(Object value) {
+		int field = 0;
 		switch (field) {
 		case 1:
 			if (value instanceof Integer)
@@ -111,7 +113,8 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
+	public ChangeInterface add() {
+		int field = 0;
 		switch (field) {
 		case 2:
 			return addParameters();

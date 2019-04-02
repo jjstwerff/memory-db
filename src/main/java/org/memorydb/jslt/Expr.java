@@ -1,6 +1,6 @@
 package org.memorydb.jslt;
 
-import java.io.IOException;
+import java.util.Iterator;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
@@ -11,12 +11,10 @@ import org.memorydb.structure.Store;
 /**
  * Automatically generated record class for table Expr
  */
-@RecordData(
-	name = "Expr",
-	keyFields = {})
+@RecordData(name = "Expr")
 public class Expr implements Operator {
-	/* package private */ Store store;
-	protected int rec;
+	/* package private */ final Store store;
+	protected final int rec;
 	/* package private */ static final int RECORD_SIZE = 22;
 
 	public Expr(Store store) {
@@ -31,18 +29,18 @@ public class Expr implements Operator {
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return rec;
 	}
 
 	@Override
-	public void setRec(int rec) {
+	public Expr copy(int newRec) {
 		assert store.validate(rec);
-		this.rec = rec;
+		return new Expr(store, newRec);
 	}
 
 	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
@@ -57,7 +55,7 @@ public class Expr implements Operator {
 	}
 
 	@Override
-	public void output(Write write, int iterate) throws IOException {
+	public void output(Write write, int iterate) {
 		if (rec == 0 || iterate <= 0)
 			return;
 		outputOperator(write, iterate);
@@ -65,7 +63,7 @@ public class Expr implements Operator {
 	}
 
 	@Override
-	public String keys() throws IOException {
+	public String keys() {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
 			return "";
@@ -75,11 +73,7 @@ public class Expr implements Operator {
 	@Override
 	public String toString() {
 		Write write = new Write(new StringBuilder());
-		try {
-			output(write, 4);
-		} catch (IOException e) {
-			return "";
-		}
+		output(write, 4);
 		return write.toString();
 	}
 
@@ -88,8 +82,7 @@ public class Expr implements Operator {
 			int nextRec = 0;
 			if (parser.isDelete(nextRec)) {
 				try (ChangeExpr record = new ChangeExpr(this)) {
-					store.free(record.getRec());
-					record.setRec(0);
+					store.free(record.rec());
 				}
 				continue;
 			}
@@ -97,7 +90,6 @@ public class Expr implements Operator {
 				try (ChangeExpr record = new ChangeExpr(store)) {
 
 					record.parseFields(parser);
-					rec = record.rec;
 				}
 			} else {
 				rec = nextRec;
@@ -119,16 +111,11 @@ public class Expr implements Operator {
 	}
 
 	@Override
-	public Object get(int field) {
-		if (field >= 0 && field <= 28)
-			return Operator.super.getOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+	public Object java() {
+		int field = 0;
+		return Operator.super.getOperator(field);
 	}
 
-	@Override
 	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
 		if (field >= 0 && field <= 28)
 			return Operator.super.iterateOperator(field - 0);
@@ -139,27 +126,24 @@ public class Expr implements Operator {
 	}
 
 	@Override
-	public FieldType type(int field) {
-		if (field >= 0 && field <= 28)
-			return Operator.super.typeOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+	public FieldType type() {
+		int field = 0;
+		return Operator.super.typeOperator(field);
 	}
 
 	@Override
-	public String name(int field) {
-		if (field >= 0 && field <= 28)
-			return Operator.super.nameOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+	public String name() {
+		int field = 0;
+		return Operator.super.nameOperator(field);
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
+	public Expr next() {
+		return null;
+	}
+
+	@Override
+	public Expr copy() {
+		return new Expr(store, rec);
 	}
 }

@@ -64,7 +64,7 @@ public class Record implements Comparable<Record> {
 		onName.put(fieldName, field);
 		if (type == Type.RELATION) {
 			if (!relatedRecord.full && !relatedRecord.content)
-				throw new GenerateException("Cannot create a relation to a non full record");
+				throw new GenerateException("Cannot create relation " + name + "." + fieldName + " to a non full record " + relatedRecord.name);
 			relatedRecord.related = true;
 		}
 		if (type == Type.ARRAY) {
@@ -377,7 +377,7 @@ public class Record implements Comparable<Record> {
 	}
 
 	public boolean isFieldIndex() {
-		for (Field fld: fields) {
+		for (Field fld : fields) {
 			if (fld.getIndex() == null)
 				continue;
 			if (!fld.getIndex().getKeys().isEmpty())
@@ -496,8 +496,8 @@ public class Record implements Comparable<Record> {
 			} else if (parent != null && field.getRelated().getParent() == parent.getParent()) {
 				for (Field back : parent.getParent().getFields()) {
 					if (back.getType() == Type.SET && back.getRelated() == field.getRelated()) {
-						bld.append(indent).append("\t\tIterator<").append(field.getRelated().getName()).append("> iterator = up().up().get")
-								.append(back.getUpperName()).append("().iterator();\n");
+						bld.append(indent).append("\t\tIterator<").append(field.getRelated().getName()).append("> iterator = up().up().get").append(back.getUpperName())
+								.append("().iterator();\n");
 						break;
 					}
 				}
@@ -664,7 +664,8 @@ public class Record implements Comparable<Record> {
 			bld.append(sub ? "& " : ", ");
 			bld.append("indexes=\n");
 			for (Entry<String, Index> fld : indexes.entrySet())
-				bld.append("  index=").append(fld.getKey()).append(", pos=").append(fld.getValue().getFieldPos()).append(", parentPos=").append(fld.getValue().getParentPos()).append("\n");
+				bld.append("  index=").append(fld.getKey()).append(", pos=").append(fld.getValue().getFieldPos()).append(", parentPos=").append(fld.getValue().getParentPos())
+						.append("\n");
 			sub = true;
 		}
 		if (!sub)

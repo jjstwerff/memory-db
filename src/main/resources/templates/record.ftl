@@ -7,6 +7,8 @@ package ${project.package};
 <#if field.type == "SET"><#assign hasIndexes=true></#if>
 </#list>
 
+import java.util.Iterator;
+
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 <#if table.fields?size gt 0>
@@ -37,8 +39,8 @@ import ${import};
  */
 @RecordData(name = "${table.name}"<#if table.description??>, description = "${table.description}"</#if>)
 public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord, RecordInterface<#else><#list table.includes as incl>${incl.name}<#if incl?has_next>, </#if></#list></#if> {
-	/* package private */ Store store;
-	protected int rec;
+	/* package private */ final Store store;
+	protected final int rec;
 	/* package private */ static final int RECORD_SIZE = ${table.totalSize};
 
 	public ${table.name}(Store store) {
@@ -58,9 +60,9 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 	}
 
 	@Override
-	public void rec(int rec) {
+	public ${table.name?cap_first} copy(int newRec) {
 		assert store.validate(rec);
-		this.rec = rec;
+		return new ${table.name?cap_first}(store, newRec);
 	}
 
 	@Override
@@ -135,24 +137,24 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		return new Change${field.related.name}(this, 0);
 	}
 
-	/* package private */ class Index${index.name?cap_first} extends TreeIndex<${field.related.name}> implements RecordInterface {
+	/* package private */ class Index${index.name?cap_first} extends TreeIndex implements Iterable<${field.related.name}> {
 
 		public Index${index.name?cap_first}(${field.related.name} record) {
-			super(record, null, ${index.flagPos}, ${index.fieldPos});
+			super(record.store, null, ${index.flagPos}, ${index.fieldPos});
 		}
 <#list 1..index.javaTypes?size as i>
 
 		public Index${index.name?cap_first}(${field.related.name} record<#list index.javaTypes[0..*i] as t>, ${t} key${t?index + 1}</#list>) {
-			super(record, new Key() {
+			super(record.store, new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert store.validate(recNr);
-					record.rec(recNr);
+					assert record.store.validate(recNr);
+					${field.related.name} rec = record.copy(recNr);
 					int o = 0;
 <#list index.javaTypes[0..*i] as t>
-					o = RedBlackTree.compare(key${t?index + 1}, record.${index.retrieve[t?index]});
+					o = RedBlackTree.compare(key${t?index + 1}, rec.${index.retrieve[t?index]});
 <#if t?has_next>
 					if (o != 0)
 						return o;
@@ -193,18 +195,23 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		}
 
 		@Override
-		public Object java() {
-			return new ${field.related.name}(store, 0);
-		}
+		public Iterator<${field.related.name}> iterator() {
+			return new Iterator<>() {
+				int rec = first();
 
-		@Override
-		public RecordInterface next() {
-			return null;
-		}
-
-		@Override
-		public RecordInterface copy() {
-			return null;
+				@Override
+				public boolean hasNext() {
+					return rec >= 0;
+				}
+				
+				@Override
+				public ${field.related.name} next() {
+					rec = toNext(rec);
+					if (rec >= 0)
+						return null;
+					return new ${field.related.name}(store, rec);
+				}
+			};
 		}
 	}
 </#if></#list>
@@ -217,23 +224,23 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 </#if>
 <#list table.indexes as index><#if !table.parent??>
 
-	public class Index${index.name?cap_first} extends TreeIndex<${table.name}> implements RecordInterface {
+	public class Index${index.name?cap_first} extends TreeIndex implements Iterable<${table.name}> {
 		public Index${index.name?cap_first}() {
-			super(${table.name}.this, null, ${index.flagPos}, ${index.fieldPos});
+			super(${table.name}.this.store, null, ${index.flagPos}, ${index.fieldPos});
 		}
 <#list 1..index.javaTypes?size as i>
 
 		public Index${index.name?cap_first}(<#list index.javaTypes[0..*i] as t>${t} key${t?index + 1}<#if t?has_next>, </#if></#list>) {
-			super(${table.name}.this, new Key() {
+			super(${table.name}.this.store, new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert store.validate(recNr);
-					rec(recNr);
+					assert ${table.name}.this.store.validate(recNr);
+					${table.name} res = new ${table.name}(${table.name}.this.store, recNr);
 					int o = 0;
 <#list index.javaTypes[0..*i] as t>
-					o = RedBlackTree.compare(key${t?index + 1}, ${table.name}.this.${index.retrieve[t?index]});
+					o = RedBlackTree.compare(key${t?index + 1}, res.${index.retrieve[t?index]});
 <#if t?has_next>
 					if (o != 0)
 						return o;
@@ -274,18 +281,23 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		}
 
 		@Override
-		public Object java() {
-			return new ${table.name}(store, 0);
-		}
+		public Iterator<${table.name}> iterator() {
+			return new Iterator<>() {
+				int rec = first();
 
-		@Override
-		public RecordInterface next() {
-			return null;
-		}
-
-		@Override
-		public RecordInterface copy() {
-			return null;
+				@Override
+				public boolean hasNext() {
+					return rec >= 0;
+				}
+				
+				@Override
+				public ${table.name} next() {
+					rec = toNext(rec);
+					if (rec >= 0)
+						return null;
+					return new ${table.name}(store, rec);
+				}
+			};
 		}
 	}
 </#if></#list>
@@ -319,7 +331,7 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		}
 <#elseif field.type == "OBJECT">
 		${field.related.name} fld${field.name?cap_first} = get${field.name?cap_first}();
-		if (fld${field.name?cap_first} != null && fld${field.name?cap_first}.getRec() != 0) {
+		if (fld${field.name?cap_first} != null && fld${field.name?cap_first}.rec() != 0) {
 			write.sub("${field.name}");
 			fld${field.name?cap_first}.output(write, iterate);
 			write.endSub();
@@ -361,7 +373,6 @@ ${table.keyFields}<#rt>
 			if (parser.isDelete(nextRec)) {
 				try (Change${table.name} record = new Change${table.name}(this)) {
 					store.free(record.rec());
-					record.rec(0);
 				}
 				continue;
 			}
@@ -369,10 +380,8 @@ ${table.keyFields}<#rt>
 				try (Change${table.name} record = new Change${table.name}(<#if table.parent??>parent, 0<#else>store</#if>)) {
 ${table.setKeys}
 					record.parseFields(parser);
-					rec = record.rec;
 				}
 			} else {
-				rec = nextRec;
 				try (Change${table.name} record = new Change${table.name}(this)) {
 					record.parseFields(parser);
 				}

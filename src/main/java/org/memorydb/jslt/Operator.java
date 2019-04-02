@@ -1,7 +1,5 @@
 package org.memorydb.jslt;
 
-import java.io.IOException;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
@@ -19,7 +17,7 @@ public interface Operator extends ResultType {
 	int operatorPosition();
 
 	@Override
-	Store getStore();
+	Store store();
 
 	@Override
 	default int resulttypePosition() {
@@ -69,15 +67,9 @@ public interface Operator extends ResultType {
 		}
 	}
 
-	@FieldData(
-		name = "operation",
-		type = "ENUMERATE",
-		enumerate = {"FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT", "BOOLEAN", "APPEND", "NULL", "CALL", "FILTER", "SORT", "IF", "CURRENT", "RUNNING", "READ", "VARIABLE"},
-		condition = true,
-		mandatory = false
-	)
+	@FieldData(name = "operation", type = "ENUMERATE", enumerate = { "FUNCTION", "CONDITION", "NUMBER", "FLOAT", "STRING", "ARRAY", "OBJECT", "BOOLEAN", "APPEND", "NULL", "CALL", "FILTER", "SORT", "IF", "CURRENT", "RUNNING", "READ", "VARIABLE" }, condition = true, mandatory = false)
 	default Operation getOperation() {
-		int data = getRec() == 0 ? 0 : getStore().getByte(getRec(), operatorPosition() + 0) & 63;
+		int data = rec() == 0 ? 0 : store().getByte(rec(), operatorPosition() + 0) & 63;
 		if (data <= 0)
 			return null;
 		return Operation.values()[data - 1];
@@ -99,385 +91,231 @@ public interface Operator extends ResultType {
 		}
 	}
 
-	@FieldData(
-		name = "function",
-		type = "ENUMERATE",
-		enumerate = {"NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT", "LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT", "PER", "FOR", "EACH", "LAYOUT"},
-		when = "FUNCTION",
-		mandatory = true
-	)
+	@FieldData(name = "function", type = "ENUMERATE", enumerate = { "NEG", "ADD", "MIN", "MUL", "DIV", "MOD", "POW", "EQ", "NE", "LT", "GT", "LE", "GE", "AND", "OR", "NOT", "FIRST", "LAST", "INDEX", "LENGTH", "NUMBER", "FLOAT", "STRING", "BOOLEAN", "NAME", "TYPE", "ELEMENT", "PER", "FOR", "EACH", "LAYOUT" }, when = "FUNCTION", mandatory = true)
 	default Function getFunction() {
-		int data = getOperation() != Operation.FUNCTION ? 0 : getStore().getByte(getRec(), operatorPosition() + 1) & 127;
+		int data = getOperation() != Operation.FUNCTION ? 0 : store().getByte(rec(), operatorPosition() + 1) & 127;
 		if (data <= 0)
 			return null;
 		return Function.values()[data - 1];
 	}
 
-	@FieldData(
-		name = "fnParm1",
-		type = "OBJECT",
-		related = Expr.class,
-		when = "FUNCTION",
-		mandatory = false
-	)
+	@FieldData(name = "fnParm1", type = "OBJECT", related = Expr.class, when = "FUNCTION", mandatory = false)
 	default Expr getFnParm1() {
-		return new Expr(getStore(), getOperation() != Operation.FUNCTION ? 0 : getStore().getInt(getRec(), operatorPosition() + 2));
+		return new Expr(store(), getOperation() != Operation.FUNCTION ? 0 : store().getInt(rec(), operatorPosition() + 2));
 	}
 
-	@FieldData(
-		name = "fnParm2",
-		type = "OBJECT",
-		related = Expr.class,
-		when = "FUNCTION",
-		mandatory = false
-	)
+	@FieldData(name = "fnParm2", type = "OBJECT", related = Expr.class, when = "FUNCTION", mandatory = false)
 	default Expr getFnParm2() {
-		return new Expr(getStore(), getOperation() != Operation.FUNCTION ? 0 : getStore().getInt(getRec(), operatorPosition() + 6));
+		return new Expr(store(), getOperation() != Operation.FUNCTION ? 0 : store().getInt(rec(), operatorPosition() + 6));
 	}
 
-	@FieldData(
-		name = "conExpr",
-		type = "OBJECT",
-		related = Expr.class,
-		when = "CONDITION",
-		mandatory = false
-	)
+	@FieldData(name = "conExpr", type = "OBJECT", related = Expr.class, when = "CONDITION", mandatory = false)
 	default Expr getConExpr() {
-		return new Expr(getStore(), getOperation() != Operation.CONDITION ? 0 : getStore().getInt(getRec(), operatorPosition() + 1));
+		return new Expr(store(), getOperation() != Operation.CONDITION ? 0 : store().getInt(rec(), operatorPosition() + 1));
 	}
 
-	@FieldData(
-		name = "conTrue",
-		type = "OBJECT",
-		related = Expr.class,
-		when = "CONDITION",
-		mandatory = false
-	)
+	@FieldData(name = "conTrue", type = "OBJECT", related = Expr.class, when = "CONDITION", mandatory = false)
 	default Expr getConTrue() {
-		return new Expr(getStore(), getOperation() != Operation.CONDITION ? 0 : getStore().getInt(getRec(), operatorPosition() + 5));
+		return new Expr(store(), getOperation() != Operation.CONDITION ? 0 : store().getInt(rec(), operatorPosition() + 5));
 	}
 
-	@FieldData(
-		name = "conFalse",
-		type = "OBJECT",
-		related = Expr.class,
-		when = "CONDITION",
-		mandatory = false
-	)
+	@FieldData(name = "conFalse", type = "OBJECT", related = Expr.class, when = "CONDITION", mandatory = false)
 	default Expr getConFalse() {
-		return new Expr(getStore(), getOperation() != Operation.CONDITION ? 0 : getStore().getInt(getRec(), operatorPosition() + 9));
+		return new Expr(store(), getOperation() != Operation.CONDITION ? 0 : store().getInt(rec(), operatorPosition() + 9));
 	}
 
-	@FieldData(
-		name = "number",
-		type = "LONG",
-		when = "NUMBER",
-		mandatory = false
-	)
+	@FieldData(name = "number", type = "LONG", when = "NUMBER", mandatory = false)
 	default long getNumber() {
-		return getOperation() != Operation.NUMBER ? Long.MIN_VALUE : getStore().getLong(getRec(), operatorPosition() + 1);
+		return getOperation() != Operation.NUMBER ? Long.MIN_VALUE : store().getLong(rec(), operatorPosition() + 1);
 	}
 
-	@FieldData(
-		name = "float",
-		type = "FLOAT",
-		when = "FLOAT",
-		mandatory = false
-	)
+	@FieldData(name = "float", type = "FLOAT", when = "FLOAT", mandatory = false)
 	default double getFloat() {
-		return getOperation() != Operation.FLOAT ? Double.NaN : Double.longBitsToDouble(getStore().getLong(getRec(), operatorPosition() + 1));
+		return getOperation() != Operation.FLOAT ? Double.NaN : Double.longBitsToDouble(store().getLong(rec(), operatorPosition() + 1));
 	}
 
-	@FieldData(
-		name = "string",
-		type = "STRING",
-		when = "STRING",
-		mandatory = false
-	)
+	@FieldData(name = "string", type = "STRING", when = "STRING", mandatory = false)
 	default String getString() {
-		return getOperation() != Operation.STRING ? null : getStore().getString(getStore().getInt(getRec(), operatorPosition() + 1));
+		return getOperation() != Operation.STRING ? null : store().getString(store().getInt(rec(), operatorPosition() + 1));
 	}
 
-	@FieldData(
-		name = "array",
-		type = "ARRAY",
-		related = ArrayArray.class,
-		when = "ARRAY",
-		mandatory = false
-	)
+	@FieldData(name = "array", type = "ARRAY", related = ArrayArray.class, when = "ARRAY", mandatory = false)
 	default ArrayArray getArray() {
 		return getOperation() != Operation.ARRAY ? null : new ArrayArray(this, -1);
 	}
 
 	default ArrayArray getArray(int index) {
-		return getOperation() != Operation.ARRAY ? new ArrayArray(getStore(), 0, -1) : new ArrayArray(this, index);
+		return getOperation() != Operation.ARRAY ? new ArrayArray(store(), 0, -1) : new ArrayArray(this, index);
 	}
 
 	default ArrayArray addArray() {
-		return getOperation() != Operation.ARRAY ? new ArrayArray(getStore(), 0, -1) : getArray().add();
+		return getOperation() != Operation.ARRAY ? new ArrayArray(store(), 0, -1) : getArray().add();
 	}
 
-	@FieldData(
-		name = "append",
-		type = "ARRAY",
-		related = AppendArray.class,
-		when = "APPEND",
-		mandatory = false
-	)
+	@FieldData(name = "append", type = "ARRAY", related = AppendArray.class, when = "APPEND", mandatory = false)
 	default AppendArray getAppend() {
 		return getOperation() != Operation.APPEND ? null : new AppendArray(this, -1);
 	}
 
 	default AppendArray getAppend(int index) {
-		return getOperation() != Operation.APPEND ? new AppendArray(getStore(), 0, -1) : new AppendArray(this, index);
+		return getOperation() != Operation.APPEND ? new AppendArray(store(), 0, -1) : new AppendArray(this, index);
 	}
 
 	default AppendArray addAppend() {
-		return getOperation() != Operation.APPEND ? new AppendArray(getStore(), 0, -1) : getAppend().add();
+		return getOperation() != Operation.APPEND ? new AppendArray(store(), 0, -1) : getAppend().add();
 	}
 
-	@FieldData(
-		name = "object",
-		type = "ARRAY",
-		related = ObjectArray.class,
-		when = "OBJECT",
-		mandatory = false
-	)
+	@FieldData(name = "object", type = "ARRAY", related = ObjectArray.class, when = "OBJECT", mandatory = false)
 	default ObjectArray getObject() {
 		return getOperation() != Operation.OBJECT ? null : new ObjectArray(this, -1);
 	}
 
 	default ObjectArray getObject(int index) {
-		return getOperation() != Operation.OBJECT ? new ObjectArray(getStore(), 0, -1) : new ObjectArray(this, index);
+		return getOperation() != Operation.OBJECT ? new ObjectArray(store(), 0, -1) : new ObjectArray(this, index);
 	}
 
 	default ObjectArray addObject() {
-		return getOperation() != Operation.OBJECT ? new ObjectArray(getStore(), 0, -1) : getObject().add();
+		return getOperation() != Operation.OBJECT ? new ObjectArray(store(), 0, -1) : getObject().add();
 	}
 
-	@FieldData(
-		name = "boolean",
-		type = "BOOLEAN",
-		when = "BOOLEAN",
-		mandatory = false
-	)
+	@FieldData(name = "boolean", type = "BOOLEAN", when = "BOOLEAN", mandatory = false)
 	default boolean isBoolean() {
-		return getOperation() != Operation.BOOLEAN ? false : (getStore().getByte(getRec(), operatorPosition() + 1) & 1) > 0;
+		return getOperation() != Operation.BOOLEAN ? false : (store().getByte(rec(), operatorPosition() + 1) & 1) > 0;
 	}
 
-	@FieldData(
-		name = "macro",
-		type = "RELATION",
-		related = Macro.class,
-		when = "CALL",
-		mandatory = false
-	)
+	@FieldData(name = "macro", type = "RELATION", related = Macro.class, when = "CALL", mandatory = false)
 	default Macro getMacro() {
-		return new Macro(getStore(), getOperation() != Operation.CALL ? 0 : getStore().getInt(getRec(), operatorPosition() + 1));
+		return new Macro(store(), getOperation() != Operation.CALL ? 0 : store().getInt(rec(), operatorPosition() + 1));
 	}
 
-	@FieldData(
-		name = "callParms",
-		type = "ARRAY",
-		related = CallParmsArray.class,
-		when = "CALL",
-		mandatory = false
-	)
+	@FieldData(name = "callParms", type = "ARRAY", related = CallParmsArray.class, when = "CALL", mandatory = false)
 	default CallParmsArray getCallParms() {
 		return getOperation() != Operation.CALL ? null : new CallParmsArray(this, -1);
 	}
 
 	default CallParmsArray getCallParms(int index) {
-		return getOperation() != Operation.CALL ? new CallParmsArray(getStore(), 0, -1) : new CallParmsArray(this, index);
+		return getOperation() != Operation.CALL ? new CallParmsArray(store(), 0, -1) : new CallParmsArray(this, index);
 	}
 
 	default CallParmsArray addCallParms() {
-		return getOperation() != Operation.CALL ? new CallParmsArray(getStore(), 0, -1) : getCallParms().add();
+		return getOperation() != Operation.CALL ? new CallParmsArray(store(), 0, -1) : getCallParms().add();
 	}
 
-	@FieldData(
-		name = "filter",
-		type = "OBJECT",
-		related = Expr.class,
-		when = "FILTER",
-		mandatory = false
-	)
+	@FieldData(name = "filter", type = "OBJECT", related = Expr.class, when = "FILTER", mandatory = false)
 	default Expr getFilter() {
-		return new Expr(getStore(), getOperation() != Operation.FILTER ? 0 : getStore().getInt(getRec(), operatorPosition() + 1));
+		return new Expr(store(), getOperation() != Operation.FILTER ? 0 : store().getInt(rec(), operatorPosition() + 1));
 	}
 
-	@FieldData(
-		name = "filterDeep",
-		type = "BOOLEAN",
-		related = Expr.class,
-		when = "FILTER",
-		mandatory = false
-	)
+	@FieldData(name = "filterDeep", type = "BOOLEAN", related = Expr.class, when = "FILTER", mandatory = false)
 	default boolean isFilterDeep() {
-		return getOperation() != Operation.FILTER ? false : (getStore().getByte(getRec(), operatorPosition() + 5) & 1) > 0;
+		return getOperation() != Operation.FILTER ? false : (store().getByte(rec(), operatorPosition() + 5) & 1) > 0;
 	}
 
-	@FieldData(
-		name = "filterExpr",
-		type = "OBJECT",
-		related = Expr.class,
-		when = "FILTER",
-		mandatory = false
-	)
+	@FieldData(name = "filterExpr", type = "OBJECT", related = Expr.class, when = "FILTER", mandatory = false)
 	default Expr getFilterExpr() {
-		return new Expr(getStore(), getOperation() != Operation.FILTER ? 0 : getStore().getInt(getRec(), operatorPosition() + 6));
+		return new Expr(store(), getOperation() != Operation.FILTER ? 0 : store().getInt(rec(), operatorPosition() + 6));
 	}
 
-	@FieldData(
-		name = "sort",
-		type = "OBJECT",
-		related = Expr.class,
-		when = "SORT",
-		mandatory = false
-	)
+	@FieldData(name = "sort", type = "OBJECT", related = Expr.class, when = "SORT", mandatory = false)
 	default Expr getSort() {
-		return new Expr(getStore(), getOperation() != Operation.SORT ? 0 : getStore().getInt(getRec(), operatorPosition() + 1));
+		return new Expr(store(), getOperation() != Operation.SORT ? 0 : store().getInt(rec(), operatorPosition() + 1));
 	}
 
-	@FieldData(
-		name = "sortParms",
-		type = "ARRAY",
-		related = SortParmsArray.class,
-		when = "SORT",
-		mandatory = false
-	)
+	@FieldData(name = "sortParms", type = "ARRAY", related = SortParmsArray.class, when = "SORT", mandatory = false)
 	default SortParmsArray getSortParms() {
 		return getOperation() != Operation.SORT ? null : new SortParmsArray(this, -1);
 	}
 
 	default SortParmsArray getSortParms(int index) {
-		return getOperation() != Operation.SORT ? new SortParmsArray(getStore(), 0, -1) : new SortParmsArray(this, index);
+		return getOperation() != Operation.SORT ? new SortParmsArray(store(), 0, -1) : new SortParmsArray(this, index);
 	}
 
 	default SortParmsArray addSortParms() {
-		return getOperation() != Operation.SORT ? new SortParmsArray(getStore(), 0, -1) : getSortParms().add();
+		return getOperation() != Operation.SORT ? new SortParmsArray(store(), 0, -1) : getSortParms().add();
 	}
 
-	@FieldData(
-		name = "if",
-		type = "OBJECT",
-		related = Expr.class,
-		when = "IF",
-		mandatory = false
-	)
+	@FieldData(name = "if", type = "OBJECT", related = Expr.class, when = "IF", mandatory = false)
 	default Expr getIf() {
-		return new Expr(getStore(), getOperation() != Operation.IF ? 0 : getStore().getInt(getRec(), operatorPosition() + 1));
+		return new Expr(store(), getOperation() != Operation.IF ? 0 : store().getInt(rec(), operatorPosition() + 1));
 	}
 
-	@FieldData(
-		name = "ifTrue",
-		type = "ARRAY",
-		related = IfTrueArray.class,
-		when = "IF",
-		mandatory = false
-	)
+	@FieldData(name = "ifTrue", type = "ARRAY", related = IfTrueArray.class, when = "IF", mandatory = false)
 	default IfTrueArray getIfTrue() {
 		return getOperation() != Operation.IF ? null : new IfTrueArray(this, -1);
 	}
 
 	default IfTrueArray getIfTrue(int index) {
-		return getOperation() != Operation.IF ? new IfTrueArray(getStore(), 0, -1) : new IfTrueArray(this, index);
+		return getOperation() != Operation.IF ? new IfTrueArray(store(), 0, -1) : new IfTrueArray(this, index);
 	}
 
 	default IfTrueArray addIfTrue() {
-		return getOperation() != Operation.IF ? new IfTrueArray(getStore(), 0, -1) : getIfTrue().add();
+		return getOperation() != Operation.IF ? new IfTrueArray(store(), 0, -1) : getIfTrue().add();
 	}
 
-	@FieldData(
-		name = "ifFalse",
-		type = "ARRAY",
-		related = IfFalseArray.class,
-		when = "IF",
-		mandatory = false
-	)
+	@FieldData(name = "ifFalse", type = "ARRAY", related = IfFalseArray.class, when = "IF", mandatory = false)
 	default IfFalseArray getIfFalse() {
 		return getOperation() != Operation.IF ? null : new IfFalseArray(this, -1);
 	}
 
 	default IfFalseArray getIfFalse(int index) {
-		return getOperation() != Operation.IF ? new IfFalseArray(getStore(), 0, -1) : new IfFalseArray(this, index);
+		return getOperation() != Operation.IF ? new IfFalseArray(store(), 0, -1) : new IfFalseArray(this, index);
 	}
 
 	default IfFalseArray addIfFalse() {
-		return getOperation() != Operation.IF ? new IfFalseArray(getStore(), 0, -1) : getIfFalse().add();
+		return getOperation() != Operation.IF ? new IfFalseArray(store(), 0, -1) : getIfFalse().add();
 	}
 
-	@FieldData(
-		name = "listenSource",
-		type = "STRING",
-		when = "READ",
-		mandatory = false
-	)
+	@FieldData(name = "listenSource", type = "STRING", when = "READ", mandatory = false)
 	default String getListenSource() {
-		return getOperation() != Operation.READ ? null : getStore().getString(getStore().getInt(getRec(), operatorPosition() + 1));
+		return getOperation() != Operation.READ ? null : store().getString(store().getInt(rec(), operatorPosition() + 1));
 	}
 
-	@FieldData(
-		name = "listemNr",
-		type = "INTEGER",
-		when = "READ",
-		mandatory = false
-	)
+	@FieldData(name = "listemNr", type = "INTEGER", when = "READ", mandatory = false)
 	default int getListemNr() {
-		return getOperation() != Operation.READ ? Integer.MIN_VALUE : getStore().getInt(getRec(), operatorPosition() + 5);
+		return getOperation() != Operation.READ ? Integer.MIN_VALUE : store().getInt(rec(), operatorPosition() + 5);
 	}
 
-	@FieldData(
-		name = "varName",
-		type = "STRING",
-		when = "VARIABLE",
-		mandatory = false
-	)
+	@FieldData(name = "varName", type = "STRING", when = "VARIABLE", mandatory = false)
 	default String getVarName() {
-		return getOperation() != Operation.VARIABLE ? null : getStore().getString(getStore().getInt(getRec(), operatorPosition() + 1));
+		return getOperation() != Operation.VARIABLE ? null : store().getString(store().getInt(rec(), operatorPosition() + 1));
 	}
 
-	@FieldData(
-		name = "varNr",
-		type = "INTEGER",
-		when = "VARIABLE",
-		mandatory = false
-	)
+	@FieldData(name = "varNr", type = "INTEGER", when = "VARIABLE", mandatory = false)
 	default int getVarNr() {
-		return getOperation() != Operation.VARIABLE ? Integer.MIN_VALUE : getStore().getInt(getRec(), operatorPosition() + 5);
+		return getOperation() != Operation.VARIABLE ? Integer.MIN_VALUE : store().getInt(rec(), operatorPosition() + 5);
 	}
 
-	default void outputOperator(Write write, int iterate) throws IOException {
-		if (getRec() == 0 || iterate <= 0)
+	default void outputOperator(Write write, int iterate) {
+		if (rec() == 0 || iterate <= 0)
 			return;
 		write.field("operation", getOperation());
 		write.field("function", getFunction());
 		Expr fldFnParm1 = getFnParm1();
-		if (fldFnParm1 != null && fldFnParm1.getRec() != 0) {
+		if (fldFnParm1 != null && fldFnParm1.rec() != 0) {
 			write.sub("fnParm1");
 			fldFnParm1.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldFnParm2 = getFnParm2();
-		if (fldFnParm2 != null && fldFnParm2.getRec() != 0) {
+		if (fldFnParm2 != null && fldFnParm2.rec() != 0) {
 			write.sub("fnParm2");
 			fldFnParm2.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldConExpr = getConExpr();
-		if (fldConExpr != null && fldConExpr.getRec() != 0) {
+		if (fldConExpr != null && fldConExpr.rec() != 0) {
 			write.sub("conExpr");
 			fldConExpr.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldConTrue = getConTrue();
-		if (fldConTrue != null && fldConTrue.getRec() != 0) {
+		if (fldConTrue != null && fldConTrue.rec() != 0) {
 			write.sub("conTrue");
 			fldConTrue.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldConFalse = getConFalse();
-		if (fldConFalse != null && fldConFalse.getRec() != 0) {
+		if (fldConFalse != null && fldConFalse.rec() != 0) {
 			write.sub("conFalse");
 			fldConFalse.output(write, iterate);
 			write.endSub();
@@ -517,7 +355,7 @@ public interface Operator extends ResultType {
 			write.endSub();
 		}
 		Expr fldFilter = getFilter();
-		if (fldFilter != null && fldFilter.getRec() != 0) {
+		if (fldFilter != null && fldFilter.rec() != 0) {
 			write.sub("filter");
 			fldFilter.output(write, iterate);
 			write.endSub();
@@ -525,13 +363,13 @@ public interface Operator extends ResultType {
 		if (getOperation() == Operation.FILTER)
 			write.field("filterDeep", isFilterDeep());
 		Expr fldFilterExpr = getFilterExpr();
-		if (fldFilterExpr != null && fldFilterExpr.getRec() != 0) {
+		if (fldFilterExpr != null && fldFilterExpr.rec() != 0) {
 			write.sub("filterExpr");
 			fldFilterExpr.output(write, iterate);
 			write.endSub();
 		}
 		Expr fldSort = getSort();
-		if (fldSort != null && fldSort.getRec() != 0) {
+		if (fldSort != null && fldSort.rec() != 0) {
 			write.sub("sort");
 			fldSort.output(write, iterate);
 			write.endSub();
@@ -544,7 +382,7 @@ public interface Operator extends ResultType {
 			write.endSub();
 		}
 		Expr fldIf = getIf();
-		if (fldIf != null && fldIf.getRec() != 0) {
+		if (fldIf != null && fldIf.rec() != 0) {
 			write.sub("if");
 			fldIf.output(write, iterate);
 			write.endSub();

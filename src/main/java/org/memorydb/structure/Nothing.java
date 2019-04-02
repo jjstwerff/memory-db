@@ -1,5 +1,7 @@
 package org.memorydb.structure;
 
+import java.util.Iterator;
+
 import org.memorydb.file.Write;
 
 // class to indicate no related type.

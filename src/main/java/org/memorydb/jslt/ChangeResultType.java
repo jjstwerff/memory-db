@@ -16,14 +16,14 @@ public interface ChangeResultType extends ChangeInterface, ResultType {
 	default void setType(Type value) {
 		if (value == null)
 			throw new MutationException("Mandatory 'type' field");
-		if (getRec() != 0) {
-			getStore().setByte(getRec(), resulttypePosition() + 0, (getStore().getByte(getRec(), resulttypePosition() + 0) & 224) + 1 + value.ordinal());
+		if (rec() != 0) {
+			store().setByte(rec(), resulttypePosition() + 0, (store().getByte(rec(), resulttypePosition() + 0) & 224) + 1 + value.ordinal());
 		}
 	}
 
 	default void setRecord(String value) {
-		if (getRec() != 0) {
-			getStore().setInt(getRec(), resulttypePosition() + 1, getStore().putString(value));
+		if (rec() != 0) {
+			store().setInt(rec(), resulttypePosition() + 1, store().putString(value));
 		}
 	}
 

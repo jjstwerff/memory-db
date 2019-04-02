@@ -1,13 +1,12 @@
 package org.memorydb.jslt;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.ChangeInterface;
-import org.memorydb.structure.InputOutputException;
+import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RecordData;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
@@ -17,21 +16,21 @@ import org.memorydb.structure.Store;
  */
 
 @RecordData(name = "MStep")
-public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
+public class MatchingArray implements MemoryRecord, ChangeMatchStep, Iterable<MatchingArray> {
 	private final Store store;
 	private final Macro parent;
-	private int idx;
+	private final int idx;
 	private int alloc;
 	private int size;
 
 	/* package private */ MatchingArray(Macro parent, int idx) {
-		this.store = parent.getStore();
+		this.store = parent.store();
 		this.parent = parent;
 		this.idx = idx;
-		if (parent.getRec() != 0) {
-			this.alloc = store.getInt(parent.getRec(), 12);
+		if (parent.rec() != 0) {
+			this.alloc = store.getInt(parent.rec(), 12);
 			if (alloc != 0) {
-				setUpRecord(parent);
+				up(parent);
 				this.size = store.getInt(alloc, 4);
 			} else
 				this.size = 0;
@@ -55,41 +54,41 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 		this.store = store;
 		this.alloc = rec;
 		this.idx = idx;
-		this.parent = getUpRecord();
+		this.parent = up();
 		this.size = alloc == 0 ? 0 : store.getInt(alloc, 4);
 	}
 
 	@Override
-	public int getRec() {
+	public int rec() {
 		return alloc;
 	}
 
 	@Override
-	public int getArrayIndex() {
+	public int index() {
 		return idx;
 	}
 
 	@Override
-	public void setRec(int rec) {
+	public void rec(int rec) {
 		this.alloc = rec;
 	}
 
-	/* package private */ void setUpRecord(Macro record) {
-		store.setInt(alloc, 8, record.getRec());
+	private void up(Macro record) {
+		store.setInt(alloc, 8, record.rec());
 	}
 
 	@Override
-	public Macro getUpRecord() {
+	public Macro up() {
 		return new Macro(store, store.getInt(alloc, 8));
 	}
 
 	@Override
-	public Store getStore() {
+	public Store store() {
 		return store;
 	}
 
 	@Override
-	public int getSize() {
+	public int size() {
 		return size;
 	}
 
@@ -98,16 +97,17 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 		store.setInt(alloc, 4, size);
 	}
 
-	/* package private */ MatchingArray add() {
-		if (parent.getRec() == 0)
+	@Override
+	public MatchingArray add() {
+		if (parent.rec() == 0)
 			return this;
 		idx = size;
 		if (alloc == 0) {
 			alloc = store.allocate(13 + 12);
-			setUpRecord(parent);
+			up(parent);
 		} else
 			alloc = store.resize(alloc, (12 + (idx + 1) * 13) / 8);
-		store.setInt(parent.getRec(), 12, alloc);
+		store.setInt(parent.rec(), 12, alloc);
 		size = idx + 1;
 		store.setInt(alloc, 4, size);
 		return this;
@@ -188,12 +188,8 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 	}
 
 	@Override
-	public boolean exists() {
-		return getRec() != 0;
-	}
-
-	@Override
-	public String name(int field) {
+	public String name() {
+		int field = 0;
 		if (idx == -1)
 			return null;
 		if (field >= 0 && field <= 33)
@@ -205,7 +201,8 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 	}
 
 	@Override
-	public FieldType type(int field) {
+	public FieldType type() {
+		int field = 0;
 		if (idx == -1)
 			return field < 1 || field > size ? null : FieldType.OBJECT;
 		if (field >= 0 && field <= 33)
@@ -217,7 +214,8 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 	}
 
 	@Override
-	public Object get(int field) {
+	public Object java() {
+		int field = 0;
 		if (idx == -1)
 			return field < 1 || field > size ? null : new MatchingArray(parent, field - 1);
 		if (field >= 0 && field <= 33)
@@ -229,17 +227,8 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 	}
 
 	@Override
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 33)
-			return iterateMatchStep(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
-	}
-
-	@Override
-	public boolean set(int field, Object value) {
+	public boolean java(Object value) {
+		int field = 0;
 		if (field >= 0 && field <= 33)
 			return setMatchStep(field - 0, value);
 		switch (field) {
@@ -249,12 +238,12 @@ public class MatchingArray implements ChangeMatchStep, Iterable<MatchingArray> {
 	}
 
 	@Override
-	public ChangeInterface add(int field) {
-		if (field >= 0 && field <= 33)
-			return addMatchStep(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+	public RecordInterface next() {
+		return null;
+	}
+
+	@Override
+	public MatchingArray copy() {
+		return new MatchingArray(parent, idx);
 	}
 }

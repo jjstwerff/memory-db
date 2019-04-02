@@ -51,7 +51,7 @@ import ${import};
 public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.includes?size == 0>ChangeInterface, </#if><#list rec.includes as incl>Change${incl.name}, </#list>Iterable<${field.name?cap_first}Array> {
 	private final Store store;
 	private final ${table.name} parent;
-	private int idx;
+	private final int idx;
 	private int alloc;
 	private int size;
 
@@ -241,7 +241,7 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 			return;
 <#list rec.fields as rfld><#if rfld.type == "RELATION"><#if rfld.name != "upRecord">
 		write.strField("${rfld.name}", "{" + get${rfld.name?cap_first}().keys() + "}");
-</#if><#elseif rfld.type == "BYTE" && rfld.when??>
+</#if><#elseif rfld.type == "BYTE" && rfld.when?? && table.condition??>
 		if (get${table.condition.name?cap_first}() == ${table.condition.name?cap_first}.${rfld.when})
 			write.field("${rfld.name}", get${rfld.name?cap_first}());
 <#elseif rfld.type != "SET" && rfld.type != "ARRAY" && rfld.type != "OBJECT">
@@ -398,32 +398,6 @@ ${field.arrayFields}<#rt>
 		case ${1 + field?index}:
 			return is${field.name?cap_first}();
 <#elseif field.type != "SET" && field.type != "ARRAY" && field.name != "upRecord">
-		case ${1 + field?index}:
-			return get${field.name?cap_first}();
-</#if></#list>
-		default:
-			return null;
-		}
-	}
-
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-<#assign max = rec.fields?size>
-<#list rec.includes as incl>
-<#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
-			return iterate${incl.name}(field - ${max});
-<#assign max = nmax>
-</#list>
-		switch (field) {
-<#list rec.fields as field>
-<#if field.type == 'SET'>
-		case ${1 + field?index}:
-<#list 1..field.index.keys?size as i>
-			if (key.length > ${index.javaTypes?size - i})
-				return new Index${field.index.name?cap_first}(new ${field.related.name}(store)<#list field.index.javaTypes[0..*i] as t>, (${t}) key[${t?index}]</#list>);
-</#list>
-			return get${field.name?cap_first}();
-<#elseif field.type == 'ARRAY'>
 		case ${1 + field?index}:
 			return get${field.name?cap_first}();
 </#if></#list>
