@@ -29,42 +29,34 @@ public class Jslt implements AutoCloseable {
 
 	@FieldData(name = "sources", type = "SET", related = Source.class)
 	public Source getSources(String key1) {
-		Source rec = new Source(store);
-		Source.IndexSources idx = rec.new IndexSources(key1);
-		int res = idx.search();
-		if (res == 0)
-			return rec;
-		return new Source(store, res);
+		int res = new Source.IndexSources(store, key1).search();
+		return res <= 0 ? null : new Source(store, res);
 	}
 
 	@FieldData(name = "macros", type = "SET", related = Macro.class)
 	public Macro getMacros(String key1) {
-		Macro rec = new Macro(store);
-		Macro.IndexMacros idx = rec.new IndexMacros(key1);
-		int res = idx.search();
-		if (res == 0)
-			return rec;
-		return new Macro(store, res);
+		int res = new Macro.IndexMacros(store, key1).search();
+		return res <= 0 ? null : new Macro(store, res);
 	}
 
 	public ChangeExpr addExpr() {
-		return new ChangeExpr(store);
+		return new ChangeExpr(store, 0);
 	}
 
 	public ChangeMacro addMacro() {
-		return new ChangeMacro(store);
+		return new ChangeMacro(store, 0);
 	}
 
 	public ChangeMatchObject addMatchObject() {
-		return new ChangeMatchObject(store);
+		return new ChangeMatchObject(store, 0);
 	}
 
 	public ChangeSource addSource() {
-		return new ChangeSource(store);
+		return new ChangeSource(store, 0);
 	}
 
 	public ChangeVariable addVariable() {
-		return new ChangeVariable(store);
+		return new ChangeVariable(store, 0);
 	}
 
 	@Override

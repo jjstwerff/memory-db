@@ -20,7 +20,7 @@ public interface Match extends MemoryRecord, RecordInterface {
 	@Override
 	Store store();
 
-	boolean parseKey(Parser parser);
+	Match parseKey(Parser parser);
 
 	default ChangeMatch changeMatch() {
 		if (this instanceof MobjectArray)

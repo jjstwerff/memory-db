@@ -2,29 +2,49 @@ package org.memorydb.jslt;
 
 import org.memorydb.structure.RecordInterface;
 
+/**
+ * TODO:
+ * - start: skip to first needed element
+ * - next: if not after last step over 'n' elements
+ * -       after last.. go to next parms set
+ */
 public class InterSlice implements RecordInterface {
-	private RecordInterface data;
-	private long[] parms;
+	private final RecordInterface data;
+	private final RecordInterface cur;
+	private final long[] parms;
 
 	public InterSlice(JsltInterpreter interpreter, RecordInterface data, CallParmsArray parms) {
 		this.data = data;
-		this.parms = new long[parms.getSize() - 1];
-		for (int p = 0; p < parms.getSize() - 1; p++)
+		this.parms = new long[parms.size() - 1];
+		this.cur = null;
+		for (int p = 0; p < parms.size() - 1; p++)
 			this.parms[p] = interpreter.getNumber(interpreter.inter(new CallParmsArray(parms, p + 1)));
 	}
 
+	public InterSlice(RecordInterface data, RecordInterface cur, long[] parms) {
+		this.data = data;
+		this.cur = cur;
+		this.parms = parms;
+	}
+
 	@Override
-	public String name(int field) {
+	public String name() {
+		return cur == null ? data.name() : cur.name();
+	}
+
+	@Override
+	public FieldType type() {
+		return cur == null ? data.type() : cur.type();
+	}
+
+	@Override
+	public InterSlice start() {
 		return null;
 	}
 
 	@Override
-	public FieldType type(int field) {
-		int size = data.getSize();
-		int idx = calc(field, size);
-		if (idx < 0 || idx > size)
-			return null;
-		return JsltInterpreter.type(data.get(idx + 1));
+	public InterSlice next() {
+		return null;
 	}
 
 	private int calc(int field, int size) {
@@ -66,22 +86,13 @@ public class InterSlice implements RecordInterface {
 	}
 
 	@Override
-	public Object get(int field) {
-		int size = data.getSize();
-		int idx = calc(field, size);
-		if (idx < 0 || idx > size)
-			return null;
-		return data.get(idx + 1);
+	public Object java() {
+		return data.java();
 	}
 
 	@Override
-	public boolean exists() {
-		return true;
-	}
-
-	@Override
-	public int getSize() {
-		int size = data.getSize();
+	public int size() {
+		int size = data.size();
 		int result = 0;
 		for (int p = 0; p < parms.length; p += 3) {
 			long start = this.parms[p];
@@ -117,7 +128,7 @@ public class InterSlice implements RecordInterface {
 	}
 
 	@Override
-	public FieldType type() {
-		return FieldType.ARRAY;
+	public RecordInterface copy() {
+		return new InterSlice(data, cur, parms);
 	}
 }

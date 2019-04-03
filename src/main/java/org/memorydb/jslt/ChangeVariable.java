@@ -9,12 +9,15 @@ import org.memorydb.handler.MutationException;
  * Automatically generated record class for table Variable
  */
 public class ChangeVariable extends Variable implements ChangeResultType {
-	public ChangeVariable(Store store) {
-		super(store, store.allocate(Variable.RECORD_SIZE));
-		setName(null);
-		setNr(0);
-		setMultiple(false);
-		defaultResultType();
+	public ChangeVariable(Store store, int rec) {
+		super(store, rec == 0 ? store.allocate(Variable.RECORD_SIZE) : rec);
+		if (rec == 0) {
+			setName(null);
+			setNr(0);
+			setMultiple(false);
+			defaultResultType();
+		} else {
+		}
 	}
 
 	public ChangeVariable(Variable current) {
@@ -86,5 +89,11 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public ChangeVariable copy(int newRec) {
+		assert store.validate(newRec);
+		return new ChangeVariable(store, newRec);
 	}
 }

@@ -2,91 +2,98 @@ package org.memorydb.jslt;
 
 import org.memorydb.structure.RecordInterface;
 
+/**
+ * Iterate along an Array or Object, a String or count numbers till a specific value.
+ *
+ * Set the following interpreter fields:
+ * . setIndex() = the number of steps taken
+ * . setFirst() = boolean if it is the first element
+ * . setLast() = boolean if it is the last element
+ * . setCurrent() = the java presentation of the current element
+ * . setCurName() = the java presentation fo the current name
+ */
 public class InterMap implements RecordInterface {
-
 	private final JsltInterpreter interpreter;
 	private final Expr expr;
 	private final Object data;
-	private int lastField;
 	private Object lastValue;
+	private final int index;
 
-	public InterMap(JsltInterpreter interpreter, Expr expr, Object data) {
+	public InterMap(JsltInterpreter interpreter, Expr expr, Object data, int index) {
 		this.interpreter = interpreter;
 		this.expr = expr;
 		this.data = data;
-		this.lastField = -1;
 		this.lastValue = null;
+		this.index = index;
 	}
 
 	@Override
-	public int next(int field) {
-		if (data instanceof RecordInterface)
-			return ((RecordInterface) data).next(field);
-		if (data instanceof String) {
-			field++;
-			if (field >= ((String) data).length())
-				return -2;
-			interpreter.setIndex(field);
-			interpreter.setFirst(field == 0);
-			interpreter.setLast(field + 1 == ((String) data).length());
-			return field;
-		}
-		if (data instanceof Long) {
-			field++;
-			if (field >= (Long) data)
-				return -2;
-			interpreter.setIndex(field);
-			interpreter.setFirst(field == 0);
-			interpreter.setLast(field + 1 == (Long) data);
-			return field;
-		}
-		return -2;
+	public RecordInterface start() {
+		return step();
 	}
 
 	@Override
-	public String name(int field) {
+	public RecordInterface next() {
+		return step();
+	}
+
+	private RecordInterface step() {
+		if (data instanceof RecordInterface) {
+			RecordInterface rec = (RecordInterface) data;
+			RecordInterface next = index == 0 ? rec.start() : rec.next();
+			fill(next == null, rec.java());
+			return new InterMap(interpreter, expr, next, index + 1);
+		} else if (data instanceof String) {
+			String str = (String) data;
+			fill(index >= str.length(), str.substring(index, index + 1));
+			return new InterMap(interpreter, expr, str, index + 1);
+		} else if (data instanceof Long) {
+			Long val = (Long) data;
+			fill(index >= val, index);
+			return new InterMap(interpreter, expr, val, index + 1);
+		}
 		return null;
 	}
 
-	@Override
-	public FieldType type(int field) {
-		if (lastField != field)
-			fill(field);
-		return JsltInterpreter.type(lastValue);
-	}
-
-	@Override
-	public Object get(int field) {
-		if (lastField != field)
-			fill(field);
-		return lastValue;
-	}
-
-	private void fill(int field) {
-		lastField = field;
+	private void fill(boolean last, Object data) {
+		interpreter.setIndex(index);
+		interpreter.setFirst(index == 0);
+		interpreter.setLast(last);
 		if (data instanceof RecordInterface) {
 			RecordInterface rec = (RecordInterface) data;
-			interpreter.setCurrent(rec.get(field));
-			interpreter.setCurName(rec.name(field));
+			interpreter.setCurrent(rec.java());
+			interpreter.setCurName(rec.name());
 		} else if (data instanceof String) {
-			interpreter.setCurrent(((String) data).substring(field, field + 1));
+			interpreter.setCurrent(((String) data));
 			interpreter.setCurName(null);
 		} else if (data instanceof Long) {
-			interpreter.setCurrent((long) field);
+			interpreter.setCurrent(data);
 			interpreter.setCurName(null);
 		}
 		lastValue = interpreter.inter(expr);
 	}
 
 	@Override
-	public boolean exists() {
-		return true;
+	public String name() {
+		return null;
 	}
 
 	@Override
-	public int getSize() {
+	public FieldType type() {
+		if (lastValue == null && index == 0)
+			return FieldType.ARRAY;
+		return JsltInterpreter.type(lastValue);
+	}
+
+	@Override
+	public Object java() {
+		return lastValue;
+	}
+
+	@Override
+	public int size() {
 		if (data instanceof RecordInterface)
-			return ((RecordInterface) data).getSize();
+			return ((RecordInterface) data).size();
 		else if (data instanceof String)
 			return ((String) data).length();
 		else if (data instanceof Long)
@@ -95,7 +102,7 @@ public class InterMap implements RecordInterface {
 	}
 
 	@Override
-	public FieldType type() {
-		return FieldType.ARRAY;
+	public InterMap copy() {
+		return new InterMap(interpreter, expr, data, index);
 	}
 }

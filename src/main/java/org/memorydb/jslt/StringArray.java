@@ -3,41 +3,51 @@ package org.memorydb.jslt;
 import org.memorydb.structure.RecordInterface;
 
 public class StringArray implements RecordInterface {
-	private String string;
+	private final String string;
+	private final int pos;
 
-	public StringArray(String string) {
+	public StringArray(String string, int pos) {
 		this.string = string;
+		this.pos = pos;
 	}
 
 	@Override
-	public FieldType type() {
-		return FieldType.ARRAY;
-	}
-
-	@Override
-	public String name(int field) {
+	public String name() {
 		return null;
 	}
 
 	@Override
-	public FieldType type(int field) {
-		if (field <= 0 || field > string.length())
-			return null;
-		return FieldType.STRING;
+	public StringArray start() {
+		return new StringArray(string, 0);
 	}
 
 	@Override
-	public Object get(int field) {
-		return string.substring(field - 1, field);
+	public StringArray index(int idx) {
+		return idx < 0 || idx >= string.length() ? null : new StringArray(string, idx);
 	}
 
 	@Override
-	public boolean exists() {
-		return string != null;
+	public StringArray next() {
+		return pos + 1 >= string.length() ? null : new StringArray(string, pos + 1);
+	}
+
+	@Override
+	public FieldType type() {
+		return pos < 0 ? FieldType.ARRAY : FieldType.STRING;
+	}
+
+	@Override
+	public Object java() {
+		return string.substring(pos, pos + 1);
 	}
 
 	@Override
 	public String toString() {
 		return string;
+	}
+
+	@Override
+	public StringArray copy() {
+		return new StringArray(string, pos);
 	}
 }

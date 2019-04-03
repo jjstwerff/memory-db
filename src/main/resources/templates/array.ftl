@@ -105,8 +105,9 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 	}
 
 	@Override
-	public void rec(int rec) {
-		this.alloc = rec;
+	public ${field.name?cap_first}Array copy(int rec) {
+		assert store.validate(rec);
+		return new ${field.name?cap_first}Array(store, rec, -1);
 	}
 
 	private void up(${table.name} record) {
@@ -119,7 +120,7 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 <#else><#list incl.linked as link>
 		if (record instanceof ${link.upperName}Array) {
 			store.setByte(alloc, 12, ${nr});<#assign nr=nr+1>
-			store.setInt(alloc, 13, record.getArrayIndex());
+			store.setInt(alloc, 13, record.index());
 		}
 </#list></#if></#list>
 </#if>
@@ -166,7 +167,6 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 	public ${field.name?cap_first}Array add() {
 		if (parent.rec() == 0)
 			return this;
-		idx = size;
 		if (alloc == 0) {
 			alloc = store.allocate(${rec.totalSize?c} + ${table.reserve()});
 			up(parent);
@@ -177,14 +177,15 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 <#else>
 		store.setInt(parent.rec(), ${field.pos / 8}, alloc);
 </#if>
-		size = idx + 1;
+		size++;
 		store.setInt(alloc, 4, size);
+		${field.name?cap_first}Array res = new ${field.name?cap_first}Array(parent, size - 1);
 <#list rec.fields as field><#if field.default??>
-		set${field.name?cap_first}(${field.default});
+		res.set${field.name?cap_first}(${field.default});
 </#if><#if field.type == "SET" || field.type == "ARRAY">
 		store.setInt(rec, ${field.pos / 8}, 0); // ${field.type} ${field.name}
 </#if></#list>
-		return this;
+		return res;
 	}
 
 	@Override
@@ -309,13 +310,8 @@ ${field.arrayFields}<#rt>
 <#if rec.includes?size gt 0>
 
 	@Override
-	public boolean parseKey(Parser parser) {
-		return false;
-	}
-
-	public void setIdx(int idx) {
-		if (idx >= 0 && idx < size)
-			this.idx = idx;
+	public ${field.name?cap_first}Array parseKey(Parser parser) {
+		return null;
 	}
 </#if>
 

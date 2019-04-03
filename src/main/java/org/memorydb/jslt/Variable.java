@@ -1,7 +1,5 @@
 package org.memorydb.jslt;
 
-import java.util.Iterator;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
@@ -36,7 +34,7 @@ public class Variable implements ResultType {
 
 	@Override
 	public Variable copy(int newRec) {
-		assert store.validate(rec);
+		assert store.validate(newRec);
 		return new Variable(store, newRec);
 	}
 
@@ -96,37 +94,33 @@ public class Variable implements ResultType {
 		return write.toString();
 	}
 
-	public Variable parse(Parser parser) {
+	public static void parse(Parser parser, Store store) {
 		while (parser.getSub()) {
 			int nextRec = 0;
 			if (parser.isDelete(nextRec)) {
-				try (ChangeVariable record = new ChangeVariable(this)) {
+				try (ChangeVariable record = new ChangeVariable(store, nextRec)) {
 					store.free(record.rec());
 				}
 				continue;
 			}
 			if (nextRec == 0) {
-				try (ChangeVariable record = new ChangeVariable(store)) {
+				try (ChangeVariable record = new ChangeVariable(store, 0)) {
 
 					record.parseFields(parser);
 				}
 			} else {
-				rec = nextRec;
-				try (ChangeVariable record = new ChangeVariable(this)) {
+				try (ChangeVariable record = new ChangeVariable(store, nextRec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
-		return this;
 	}
 
 	@Override
-	public boolean parseKey(Parser parser) {
+	public Variable parseKey(Parser parser) {
 		int nextRec = 0;
 		parser.finishRelation();
-		if (nextRec != 0)
-			rec = nextRec;
-		return nextRec != 0;
+		return nextRec <= 0 ? null : new Variable(store, nextRec);
 	}
 
 	@Override
@@ -141,15 +135,6 @@ public class Variable implements ResultType {
 			return getNr();
 		case 3:
 			return isMultiple();
-		default:
-			return null;
-		}
-	}
-
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 3 && field <= 5)
-			return ResultType.super.iterateResultType(field - 3);
-		switch (field) {
 		default:
 			return null;
 		}

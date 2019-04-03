@@ -18,10 +18,9 @@ public class InterObject implements RecordInterface {
 	}
 
 	@Override
-	public String name(int field) {
-		if (lastField != field) {
-			lastField = field;
-			ObjectArray code = new ObjectArray(data, field - 1);
+	public String name() {
+		if (lastField != 1) {
+			ObjectArray code = new ObjectArray(data, 1 - 1);
 			lastObject = interpreter.inter(code);
 			lastName = code.getName().getString();
 		}
@@ -29,12 +28,9 @@ public class InterObject implements RecordInterface {
 	}
 
 	@Override
-	public FieldType type(int field) {
-		if (field < 1 || field > data.getSize())
-			return null;
-		if (lastField != field) {
-			lastField = field;
-			ObjectArray code = new ObjectArray(data, field - 1);
+	public FieldType type() {
+		if (lastField != 1) {
+			ObjectArray code = new ObjectArray(data, 1 - 1);
 			lastObject = interpreter.inter(code);
 			lastName = code.getName().getString();
 		}
@@ -42,33 +38,17 @@ public class InterObject implements RecordInterface {
 	}
 
 	@Override
-	public Object get(int field) {
-		if (lastField != field) {
-			lastField = field;
-			ObjectArray code = new ObjectArray(data, field - 1);
-			lastObject = interpreter.inter(code);
-			lastName = code.getName().getString();
-		}
+	public Object java() {
 		return lastObject;
 	}
 
 	@Override
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		return data.iterate(field, key);
+	public int size() {
+		return data.size();
 	}
 
 	@Override
-	public boolean exists() {
-		return true;
-	}
-
-	@Override
-	public int getSize() {
-		return data.getSize();
-	}
-
-	@Override
-	public FieldType type() {
-		return FieldType.OBJECT;
+	public InterObject copy() {
+		return new InterObject(interpreter, data);
 	}
 }

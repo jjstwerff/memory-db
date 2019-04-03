@@ -1,7 +1,5 @@
 package org.memorydb.jslt;
 
-import java.util.Iterator;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.RecordData;
@@ -35,7 +33,7 @@ public class Expr implements Operator {
 
 	@Override
 	public Expr copy(int newRec) {
-		assert store.validate(rec);
+		assert store.validate(newRec);
 		return new Expr(store, newRec);
 	}
 
@@ -77,52 +75,39 @@ public class Expr implements Operator {
 		return write.toString();
 	}
 
-	public Expr parse(Parser parser) {
+	public static void parse(Parser parser, Store store) {
 		while (parser.getSub()) {
 			int nextRec = 0;
 			if (parser.isDelete(nextRec)) {
-				try (ChangeExpr record = new ChangeExpr(this)) {
+				try (ChangeExpr record = new ChangeExpr(store, nextRec)) {
 					store.free(record.rec());
 				}
 				continue;
 			}
 			if (nextRec == 0) {
-				try (ChangeExpr record = new ChangeExpr(store)) {
+				try (ChangeExpr record = new ChangeExpr(store, 0)) {
 
 					record.parseFields(parser);
 				}
 			} else {
-				rec = nextRec;
-				try (ChangeExpr record = new ChangeExpr(this)) {
+				try (ChangeExpr record = new ChangeExpr(store, nextRec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
-		return this;
 	}
 
 	@Override
-	public boolean parseKey(Parser parser) {
+	public Expr parseKey(Parser parser) {
 		int nextRec = 0;
 		parser.finishRelation();
-		if (nextRec != 0)
-			rec = nextRec;
-		return nextRec != 0;
+		return nextRec <= 0 ? null : new Expr(store, nextRec);
 	}
 
 	@Override
 	public Object java() {
 		int field = 0;
 		return Operator.super.getOperator(field);
-	}
-
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 28)
-			return Operator.super.iterateOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
 	}
 
 	@Override

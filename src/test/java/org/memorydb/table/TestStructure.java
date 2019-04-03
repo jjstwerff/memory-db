@@ -12,7 +12,7 @@ public class TestStructure extends MemoryTests {
 	@Test
 	public void testArray() {
 		Store store = new Store(12);
-		try (ChangeMacro macro = new ChangeMacro(store)) {
+		try (ChangeMacro macro = new ChangeMacro(store, 0)) {
 			macro.setName("main");
 			MatchingArray match = macro.addMatching();
 			match.setType(Type.JUMP);
@@ -27,7 +27,7 @@ public class TestStructure extends MemoryTests {
 			RecordInterface elm = matchArray.start();
 			int pos = 0;
 			while (elm != null) {
-				bld.append(pos + ":" + matchArray.type(pos) + " " + matchArray.get(pos));
+				bld.append(pos + ":" + elm.type() + " " + elm.java());
 				elm = elm.next();
 				pos++;
 			}

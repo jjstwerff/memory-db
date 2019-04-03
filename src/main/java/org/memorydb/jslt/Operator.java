@@ -25,7 +25,7 @@ public interface Operator extends ResultType {
 	}
 
 	@Override
-	boolean parseKey(Parser parser);
+	Operator parseKey(Parser parser);
 
 	default ChangeOperator changeOperator() {
 		if (this instanceof ObjectArray)

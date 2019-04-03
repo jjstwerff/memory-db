@@ -41,7 +41,7 @@ public class Source implements MemoryRecord, RecordInterface {
 
 	@Override
 	public Source copy(int newRec) {
-		assert store.validate(rec);
+		assert store.validate(newRec);
 		return new Source(store, newRec);
 	}
 
@@ -60,21 +60,21 @@ public class Source implements MemoryRecord, RecordInterface {
 		return rec == 0 ? null : store.getString(store.getInt(rec, 4));
 	}
 
-	public class IndexSources extends TreeIndex implements Iterable<Source> {
-		public IndexSources() {
-			super(Source.this.store, null, 64, 9);
+	public static class IndexSources extends TreeIndex implements Iterable<Source> {
+		public IndexSources(Store store) {
+			super(store, null, 64, 9);
 		}
 
-		public IndexSources(String key1) {
-			super(Source.this.store, new Key() {
+		public IndexSources(Store store, String key1) {
+			super(store, new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert Source.this.store.validate(recNr);
-					Source res = new Source(Source.this.store, recNr);
+					assert store.validate(recNr);
+					Source rec = new Source(store, recNr);
 					int o = 0;
-					o = RedBlackTree.compare(key1, res.getName());
+					o = RedBlackTree.compare(key1, rec.getName());
 					return o;
 				}
 
@@ -107,19 +107,18 @@ public class Source implements MemoryRecord, RecordInterface {
 		@Override
 		public Iterator<Source> iterator() {
 			return new Iterator<>() {
-				int rec = first();
+				int nextRec = search();
 
 				@Override
 				public boolean hasNext() {
-					return rec >= 0;
+					return nextRec > 0;
 				}
-				
+
 				@Override
 				public Source next() {
-					rec = toNext(rec);
-					if (rec >= 0)
-						return null;
-					return new Source(store, rec);
+					int n = nextRec;
+					nextRec = toNext(nextRec);
+					return n <= 0 ? null : new Source(store, n);
 				}
 			};
 		}
@@ -149,38 +148,34 @@ public class Source implements MemoryRecord, RecordInterface {
 		return write.toString();
 	}
 
-	public Source parse(Parser parser) {
+	public static void parse(Parser parser, Store store) {
 		while (parser.getSub()) {
 			String name = parser.getString("name");
-			int nextRec = new IndexSources(name).search();
+			int nextRec = new IndexSources(store, name).search();
 			if (parser.isDelete(nextRec)) {
-				try (ChangeSource record = new ChangeSource(this)) {
+				try (ChangeSource record = new ChangeSource(store, nextRec)) {
 					store.free(record.rec());
 				}
 				continue;
 			}
 			if (nextRec == 0) {
-				try (ChangeSource record = new ChangeSource(store)) {
+				try (ChangeSource record = new ChangeSource(store, 0)) {
 					record.setName(name);
 					record.parseFields(parser);
 				}
 			} else {
-				rec = nextRec;
-				try (ChangeSource record = new ChangeSource(this)) {
+				try (ChangeSource record = new ChangeSource(store, nextRec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
-		return this;
 	}
 
-	public boolean parseKey(Parser parser) {
+	public Source parseKey(Parser parser) {
 		String name = parser.getString("name");
-		int nextRec = new IndexSources(name).search();
+		int nextRec = new IndexSources(store, name).search();
 		parser.finishRelation();
-		if (nextRec != 0)
-			rec = nextRec;
-		return nextRec != 0;
+		return nextRec <= 0 ? null : new Source(store, nextRec);
 	}
 
 	@Override
@@ -189,13 +184,6 @@ public class Source implements MemoryRecord, RecordInterface {
 		switch (field) {
 		case 1:
 			return getName();
-		default:
-			return null;
-		}
-	}
-
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		switch (field) {
 		default:
 			return null;
 		}

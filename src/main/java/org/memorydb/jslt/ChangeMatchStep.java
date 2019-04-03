@@ -331,7 +331,7 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 		if (parser.hasField("tmacro")) {
 			parser.getRelation("tmacro", (recNr, idx) -> {
 				Macro relRec = new Macro(store());
-				boolean found = relRec.parseKey(parser);
+				boolean found = relRec.parseKey(parser) != null;
 				setTmacro(relRec);
 				return found;
 			}, rec());

@@ -5,97 +5,98 @@ import org.memorydb.structure.RecordInterface;
 public class AddArray implements RecordInterface {
 	private final RecordInterface array;
 	private final Object elm;
+	private final boolean structure;
 
-	public AddArray(RecordInterface array, Object elm) {
+	public AddArray(RecordInterface array, Object elm, boolean structure) {
 		this.array = array;
 		this.elm = elm;
+		this.structure = structure;
 	}
 
-	/**
-	 * return the next field defined on this record: -2 means unknown field -1 means
-	 * end of fields found 0 is a special value.. this is not an object but a single
-	 * value >0 is a field pointer
-	 */
 	@Override
-	public int next(int field) {
-		int res = field < 0 ? 1: field + 1;
-		if (type(res) == null)
-			return -2;
-		if (array instanceof InterObject) {
-			InterObject ad = (InterObject) elm;
-			while (res <= array.getSize()) {
-				String n = name(res);
-				boolean found = false;
-				for (int f = ad.next(-1); f > -2; f = ad.next(f)) {
-					if (ad.name(f).equals(n)) {
-						found = true;
-						break;
-					}
-				}
-				if (!found)
-					break;
-				res++;
-				if (type(res) == null)
-					return -2;
+	public AddArray start() {
+		RecordInterface start = array == null ? null : array.start();
+		if (start != null)
+			return new AddArray(start, elm, structure);
+		if (structure) {
+			RecordInterface rest = (RecordInterface) elm;
+			return new AddArray(rest.start(), null, false);
+		}
+		return new AddArray(null, elm, false);
+	}
+
+	@Override
+	public AddArray next() {
+		if (array == null)
+			return null;
+		RecordInterface next = array.next();
+		if (next == null) {
+			if (elm == null)
+				return null;
+			if (structure) {
+				RecordInterface rest = (RecordInterface) elm;
+				return new AddArray(rest.start(), null, false);
 			}
+			return new AddArray(null, elm, false);
 		}
-		return res;
+		return new AddArray(next, elm, structure);
 	}
 
 	@Override
-	public String name(int field) {
-		int size = array.getSize();
-		if (size < field && elm instanceof RecordInterface)
-			return ((RecordInterface) elm).name(field - size);
-		return array.name(field);
-	}
-
-	@Override
-	public FieldType type(int field) {
-		int size = array.getSize();
-		if (size < field) {
-			if (elm instanceof RecordInterface)
-				return ((RecordInterface) elm).type(field - size);
-			else if (size + 1 == field)
-				return JsltInterpreter.type(elm);
-		}
-		return array.type(field);
-	}
-
-	@Override
-	public int getSize() {
-		return array.getSize() + (elm instanceof RecordInterface ? ((RecordInterface) elm).getSize() : 1);
-	}
-
-	@Override
-	public Object get(int field) {
-		int size = array.getSize();
-		if (size < field) {
-			if (elm instanceof RecordInterface)
-				return ((RecordInterface) elm).get(field - size);
-			else if (size + 1 == field)
-				return elm;
-		}
-		return array.get(field);
+	public String name() {
+		return array == null ? null : array.name();
 	}
 
 	@Override
 	public FieldType type() {
-		return array.type();
+		return array == null ? JsltInterpreter.type(elm) : array.type();
+	}
+
+	@Override
+	public int size() {
+		if (array != null) {
+			if (structure)
+				return array.size() + ((RecordInterface) elm).size();
+			return array.size() + (elm == null ? 0 : 1);
+		}
+		if (structure)
+			return ((RecordInterface) elm).size();
+		return elm == null ? 0 : 1;
+	}
+
+	@Override
+	public Object java() {
+		return array == null ? elm : array.java();
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder bld = new StringBuilder();
 		bld.append("[");
-		int pos = 1;
-		while (type(pos) != null) {
-			if (pos != 1)
-				bld.append(",");
-			bld.append(get(pos));
-			pos = next(pos);
+		RecordInterface rec = array.start();
+		while (rec != null) {
+			bld.append(rec.java());
+			rec = rec.next();
+			bld.append(",");
 		}
+		bld.append(elm);
 		bld.append("]");
 		return bld.toString();
+	}
+
+	@Override
+	public RecordInterface index(int idx) {
+		int aSize = array != null ? array.size() : 0; 
+		if (idx >= aSize) {
+			if (structure)
+				return ((RecordInterface) elm).index(idx - aSize);
+			return new AddArray(null, elm, false);
+		}
+		return array.index(idx);
+	}
+
+	@Override
+	public RecordInterface copy() {
+		return new AddArray(array, elm, structure);
 	}
 }

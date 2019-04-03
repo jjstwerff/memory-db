@@ -8,9 +8,12 @@ import org.memorydb.structure.ChangeInterface;
  * Automatically generated record class for table MatchObject
  */
 public class ChangeMatchObject extends MatchObject implements ChangeMatch {
-	public ChangeMatchObject(Store store) {
-		super(store, store.allocate(MatchObject.RECORD_SIZE));
-		defaultMatch();
+	public ChangeMatchObject(Store store, int rec) {
+		super(store, rec == 0 ? store.allocate(MatchObject.RECORD_SIZE) : rec);
+		if (rec == 0) {
+			defaultMatch();
+		} else {
+		}
 	}
 
 	public ChangeMatchObject(MatchObject current) {
@@ -46,5 +49,11 @@ public class ChangeMatchObject extends MatchObject implements ChangeMatch {
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public ChangeMatchObject copy(int newRec) {
+		assert store.validate(newRec);
+		return new ChangeMatchObject(store, newRec);
 	}
 }

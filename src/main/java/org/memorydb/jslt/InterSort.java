@@ -1,97 +1,93 @@
 package org.memorydb.jslt;
 
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.memorydb.jslt.Operator.Operation;
 import org.memorydb.structure.RecordInterface;
 
-public class InterSort implements RecordInterface, Comparator<Integer> {
+public class InterSort implements RecordInterface, Comparator<RecordInterface> {
 	private final JsltInterpreter interpreter;
 	private final RecordInterface data;
-	private int[] mapping;
+	private RecordInterface[] mapping;
 	private SortParmsArray parms;
+	private final int position;
 
 	@Override
-	public int compare(Integer o1, Integer o2) {
+	public int compare(RecordInterface o1, RecordInterface o2) {
 		boolean desc = false;
-		for (int i = 0; i < parms.getSize(); i++) {
+		for (int i = 0; i < parms.size(); i++) {
 			try (SortParmsArray parm = new SortParmsArray(parms, i)) {
 				if (parm.getOperation() == Operation.BOOLEAN) {
 					desc = parm.isBoolean();
 					continue;
 				}
-				interpreter.setCurrent(data.get(o1));
+				interpreter.setCurrent(o1.java());
 				Object r1 = interpreter.inter(parm);
-				interpreter.setCurrent(data.get(o2));
+				interpreter.setCurrent(o2.java());
 				Object r2 = interpreter.inter(parm);
 				int r = interpreter.compare(r1, r2);
 				if (r != 0)
 					return desc ? -r : r;
 			}
 		}
-		return Integer.compare(o1, o2);
+		return 0;
 	}
 
 	public InterSort(JsltInterpreter interpreter, SortParmsArray parms, RecordInterface data) {
-		this.mapping = new int[data.getSize()];
+		this.mapping = new RecordInterface[data.size()];
 		this.interpreter = interpreter;
 		this.parms = parms;
 		this.data = data;
-		Set<Integer> set = new TreeSet<>(this);
-		int field = -1;
-		while ((field = data.next(field)) > 0)
-			set.add(field);
-		int i = 0;
-		for (Integer f : set)
-			mapping[i++] = f;
+		this.position = -1;
+		RecordInterface rec = data.start();
+		int pos = 0;
+		while (rec != null) {
+			mapping[pos++] = rec;
+			rec = rec.next();
+		}
+		Arrays.sort(mapping, this);
+	}
+
+	public InterSort(RecordInterface[] mapping, int position) {
+		this.interpreter = null;
+		this.data = null;
+		this.mapping = mapping;
+		this.position = position;
 	}
 
 	@Override
-	public int next(int field) {
-		field++;
-		if (field >= mapping.length)
-			return -2;
-		return field;
+	public InterSort start() {
+		return mapping.length == 0 ? null : new InterSort(mapping, 0);
 	}
 
 	@Override
-	public String name(int field) {
-		return null;
+	public InterSort next() {
+		return position >= mapping.length ? null : new InterSort(mapping, position + 1);
 	}
 
 	@Override
-	public FieldType type(int field) {
-		if (field >= mapping.length || field < 0)
-			return null;
-		return data.type(mapping[field]);
-	}
-
-	@Override
-	public Object get(int field) {
-		if (field >= mapping.length || field < 0)
-			return null;
-		return data.get(mapping[field]);
-	}
-
-	@Override
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		return null;
-	}
-
-	@Override
-	public boolean exists() {
-		return true;
-	}
-
-	@Override
-	public int getSize() {
-		return data.getSize();
+	public String name() {
+		return position < 0 || position >= mapping.length ? null : mapping[position].name();
 	}
 
 	@Override
 	public FieldType type() {
-		return FieldType.ARRAY;
+		return position >= mapping.length ? null : position < 0 ? FieldType.ARRAY : mapping[position].type();
+	}
+
+	@Override
+	public Object java() {
+		return position < 0 || position >= mapping.length ? null : mapping[position].java();
+	}
+
+	@Override
+	public int size() {
+		return position >= mapping.length ? 0 : position < 0 ? data.size() : mapping[position].size();
+	}
+
+	@Override
+	public InterSort copy() {
+		return new InterSort(mapping, position);
 	}
 }

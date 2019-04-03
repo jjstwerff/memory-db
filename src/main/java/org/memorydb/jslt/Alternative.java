@@ -1,7 +1,5 @@
 package org.memorydb.jslt;
 
-import java.util.Iterator;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
@@ -37,7 +35,7 @@ public class Alternative implements MemoryRecord, RecordInterface {
 
 	@Override
 	public Alternative copy(int newRec) {
-		assert store.validate(rec);
+		assert store.validate(newRec);
 		return new Alternative(store, newRec);
 	}
 
@@ -144,13 +142,13 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		return write.toString();
 	}
 
-	public Alternative parse(Parser parser, Macro parent) {
+	public static void parse(Parser parser, Macro parent) {
 		while (parser.getSub()) {
 			int nr = parser.getInt("nr");
-			int nextRec = parent.new IndexAlternatives(this, nr).search();
+			int nextRec = parent.new IndexAlternatives(nr).search();
 			if (parser.isDelete(nextRec)) {
-				try (ChangeAlternative record = new ChangeAlternative(this)) {
-					store.free(record.rec());
+				try (ChangeAlternative record = new ChangeAlternative(parent, nextRec)) {
+					parent.store.free(record.rec());
 				}
 				continue;
 			}
@@ -160,23 +158,19 @@ public class Alternative implements MemoryRecord, RecordInterface {
 					record.parseFields(parser);
 				}
 			} else {
-				rec = nextRec;
-				try (ChangeAlternative record = new ChangeAlternative(this)) {
+				try (ChangeAlternative record = new ChangeAlternative(parent, nextRec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
-		return this;
 	}
 
-	public boolean parseKey(Parser parser) {
+	public Alternative parseKey(Parser parser) {
 		Macro parent = up();
 		int nr = parser.getInt("nr");
-		int nextRec = parent.new IndexAlternatives(this, nr).search();
+		int nextRec = parent.new IndexAlternatives(nr).search();
 		parser.finishRelation();
-		if (nextRec != 0)
-			rec = nextRec;
-		return nextRec != 0;
+		return nextRec <= 0 ? null : new Alternative(store, nextRec);
 	}
 
 	@Override
@@ -189,17 +183,6 @@ public class Alternative implements MemoryRecord, RecordInterface {
 			return isAnyParm();
 		case 4:
 			return getIf();
-		default:
-			return null;
-		}
-	}
-
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		switch (field) {
-		case 2:
-			return getParameters();
-		case 5:
-			return getCode();
 		default:
 			return null;
 		}

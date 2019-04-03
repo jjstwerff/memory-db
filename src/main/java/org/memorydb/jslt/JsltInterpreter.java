@@ -40,7 +40,8 @@ public class JsltInterpreter {
 		inter.dir = dir;
 		inter.data = data;
 		Writer write = new StringWriter();
-		for (CodeArray code : Macro.get(jsltStore, "main").getAlternatives(0).getCode())
+		int main = new Macro.IndexMacros(jsltStore, "main").search();;
+		for (CodeArray code : new Macro(jsltStore, main).getAlternatives(0).getCode())
 			inter.show(write, inter.inter(code));
 		if (errors != null)
 			for (MatchError err : inter.errors)
@@ -360,7 +361,7 @@ public class JsltInterpreter {
 			} else if (p1 instanceof Double) {
 				return ((Double) p1) + getFloat(p2);
 			} else if (p1 instanceof RecordInterface) {
-				return new AddArray((RecordInterface) p1, p2);
+				return new AddArray((RecordInterface) p1, p2, p2 instanceof RecordInterface && ((RecordInterface) p2).type() == FieldType.ARRAY);
 			}
 			return null;
 		case AND:
@@ -370,10 +371,10 @@ public class JsltInterpreter {
 		case BOOLEAN:
 			return getBoolean(p1);
 		case PER:
-			return new InterMap(this, code.getFnParm2(), p1);
+			return new InterMap(this, code.getFnParm2(), p1, 0);
 		case FOR:
 			if (p1 instanceof String)
-				curFor = new StringArray((String) p1);
+				curFor = new StringArray((String) p1, -1);
 			else
 				curFor = (RecordInterface) p1;
 			Object resObj = inter(code.getFnParm2());
@@ -570,7 +571,7 @@ public class JsltInterpreter {
 			} else if (p1 instanceof Double) {
 				return (Double) p1 * getFloat(p2);
 			} else if (p1 instanceof RecordInterface) {
-				return new InterMult((RecordInterface) p1, getNumber(p2));
+				return new InterMult((RecordInterface) p1, null, getNumber(p2));
 			}
 			return null;
 		case NE:

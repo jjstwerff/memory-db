@@ -9,25 +9,23 @@ import org.memorydb.handler.MutationException;
  */
 public class ChangeAlternative extends Alternative implements ChangeInterface {
 	/* package private */ ChangeAlternative(Macro parent, int rec) {
-		super(parent.store(), rec);
+		super(parent.store(), rec == 0 ? parent.store.allocate(Alternative.RECORD_SIZE) : rec);
 		if (rec == 0) {
-			rec(store().allocate(Alternative.RECORD_SIZE));
-		}
-		setNr(0);
-		store.setInt(rec(), 8, 0); // ARRAY parameters
-		setAnyParm(false);
-		setIf(null);
-		store.setInt(rec(), 17, 0); // ARRAY code
-		up(parent);
-		if (rec != 0) {
-			up().new IndexAlternatives(this).remove(rec);
+			setNr(0);
+			store.setInt(rec(), 8, 0); // ARRAY parameters
+			setAnyParm(false);
+			setIf(null);
+			store.setInt(rec(), 17, 0); // ARRAY code
+			up(parent);
+		} else {
+			up().new IndexAlternatives().remove(rec);
 		}
 	}
 
 	/* package private */ ChangeAlternative(Alternative current) {
 		super(current.store, current.rec);
 		if (rec != 0) {
-			up().new IndexAlternatives(this).remove(rec);
+			up().new IndexAlternatives().remove(rec);
 		}
 	}
 
@@ -88,7 +86,7 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 
 	@Override
 	public void close() {
-		up().new IndexAlternatives(this).insert(rec());
+		up().new IndexAlternatives().insert(rec());
 	}
 
 	@Override
@@ -123,5 +121,11 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public ChangeAlternative copy(int newRec) {
+		assert store.validate(newRec);
+		return new ChangeAlternative(up(), newRec);
 	}
 }

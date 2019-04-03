@@ -312,7 +312,7 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 		if (parser.hasField("macro")) {
 			parser.getRelation("macro", (recNr, idx) -> {
 				Macro relRec = new Macro(store());
-				boolean found = relRec.parseKey(parser);
+				boolean found = relRec.parseKey(parser) != null;
 				setMacro(relRec);
 				return found;
 			}, rec());

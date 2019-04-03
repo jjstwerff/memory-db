@@ -20,7 +20,7 @@ public interface ResultType extends MemoryRecord, RecordInterface {
 	@Override
 	Store store();
 
-	boolean parseKey(Parser parser);
+	ResultType parseKey(Parser parser);
 
 	default ChangeResultType changeResultType() {
 		if (this instanceof Variable)

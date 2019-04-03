@@ -5,10 +5,8 @@ import java.util.NoSuchElementException;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
-import org.memorydb.structure.ChangeInterface;
 import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
@@ -69,8 +67,9 @@ public class MatchingArray implements MemoryRecord, ChangeMatchStep, Iterable<Ma
 	}
 
 	@Override
-	public void rec(int rec) {
-		this.alloc = rec;
+	public MatchingArray copy(int rec) {
+		assert store.validate(rec);
+		return new MatchingArray(store, rec, -1);
 	}
 
 	private void up(Macro record) {
@@ -101,16 +100,16 @@ public class MatchingArray implements MemoryRecord, ChangeMatchStep, Iterable<Ma
 	public MatchingArray add() {
 		if (parent.rec() == 0)
 			return this;
-		idx = size;
 		if (alloc == 0) {
 			alloc = store.allocate(13 + 12);
 			up(parent);
 		} else
 			alloc = store.resize(alloc, (12 + (idx + 1) * 13) / 8);
 		store.setInt(parent.rec(), 12, alloc);
-		size = idx + 1;
+		size++;
 		store.setInt(alloc, 4, size);
-		return this;
+		MatchingArray res = new MatchingArray(parent, size - 1);
+		return res;
 	}
 
 	@Override
@@ -173,13 +172,8 @@ public class MatchingArray implements MemoryRecord, ChangeMatchStep, Iterable<Ma
 	}
 
 	@Override
-	public boolean parseKey(Parser parser) {
-		return false;
-	}
-
-	public void setIdx(int idx) {
-		if (idx >= 0 && idx < size)
-			this.idx = idx;
+	public MatchingArray parseKey(Parser parser) {
+		return null;
 	}
 
 	@Override
@@ -238,7 +232,17 @@ public class MatchingArray implements MemoryRecord, ChangeMatchStep, Iterable<Ma
 	}
 
 	@Override
-	public RecordInterface next() {
+	public MatchingArray index(int pos) {
+		return null;
+	}
+
+	@Override
+	public MatchingArray start() {
+		return null;
+	}
+
+	@Override
+	public MatchingArray next() {
 		return null;
 	}
 

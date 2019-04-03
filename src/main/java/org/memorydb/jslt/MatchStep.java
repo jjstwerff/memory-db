@@ -20,7 +20,7 @@ public interface MatchStep extends MemoryRecord, RecordInterface {
 	@Override
 	Store store();
 
-	boolean parseKey(Parser parser);
+	MatchStep parseKey(Parser parser);
 
 	default ChangeMatchStep changeMatchStep() {
 		if (this instanceof MatchingArray)

@@ -1,7 +1,5 @@
 package org.memorydb.jslt;
 
-import java.util.Iterator;
-
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.RecordData;
@@ -35,7 +33,7 @@ public class MatchObject implements Match {
 
 	@Override
 	public MatchObject copy(int newRec) {
-		assert store.validate(rec);
+		assert store.validate(newRec);
 		return new MatchObject(store, newRec);
 	}
 
@@ -77,52 +75,39 @@ public class MatchObject implements Match {
 		return write.toString();
 	}
 
-	public MatchObject parse(Parser parser) {
+	public static void parse(Parser parser, Store store) {
 		while (parser.getSub()) {
 			int nextRec = 0;
 			if (parser.isDelete(nextRec)) {
-				try (ChangeMatchObject record = new ChangeMatchObject(this)) {
+				try (ChangeMatchObject record = new ChangeMatchObject(store, nextRec)) {
 					store.free(record.rec());
 				}
 				continue;
 			}
 			if (nextRec == 0) {
-				try (ChangeMatchObject record = new ChangeMatchObject(store)) {
+				try (ChangeMatchObject record = new ChangeMatchObject(store, 0)) {
 
 					record.parseFields(parser);
 				}
 			} else {
-				rec = nextRec;
-				try (ChangeMatchObject record = new ChangeMatchObject(this)) {
+				try (ChangeMatchObject record = new ChangeMatchObject(store, nextRec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
-		return this;
 	}
 
 	@Override
-	public boolean parseKey(Parser parser) {
+	public MatchObject parseKey(Parser parser) {
 		int nextRec = 0;
 		parser.finishRelation();
-		if (nextRec != 0)
-			rec = nextRec;
-		return nextRec != 0;
+		return nextRec <= 0 ? null : new MatchObject(store, nextRec);
 	}
 
 	@Override
 	public Object java() {
 		int field = 0;
 		return Match.super.getMatch(field);
-	}
-
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		if (field >= 0 && field <= 15)
-			return Match.super.iterateMatch(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
 	}
 
 	@Override

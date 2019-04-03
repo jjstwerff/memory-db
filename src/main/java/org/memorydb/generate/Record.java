@@ -265,13 +265,15 @@ public class Record implements Comparable<Record> {
 	public String getParseKeys() {
 		if (parent != null) {
 			StringBuilder bld = new StringBuilder();
-			bld.append("\t\t").append(parent.name).append(" parent = up();\n");
 			if (parent.parent != null) {
+				bld.append("\t\t").append("int rec[] = new int[1];\n");
 				bld.append("\t\tparser.getRelation(\"").append(parent.name).append("\", (recNr, idx) -> {\n");
-				bld.append("\t\t\tparent.rec(recNr);\n");
-				bld.append("\t\t\tparent.parseKey(parser);\n");
+				bld.append("\t\t\trec[0] = up().parseKey(parser).rec();\n");
 				bld.append("\t\t\treturn true;\n");
 				bld.append("\t\t}, rec());\n");
+				bld.append("\t\t").append(parent.name).append(" parent = rec[0] > 0 ? up().copy(rec[0]) : up();\n");
+			} else {
+				bld.append("\t\t").append(parent.name).append(" parent = up();\n");
 			}
 			bld.append(keyFields(2));
 			return bld.toString();
@@ -328,9 +330,9 @@ public class Record implements Comparable<Record> {
 			bld.append(ind).append("int nextRec = new " + parent.getName() + ".Index").append(index.getName().substring(0, 1).toUpperCase()).append(index.getName().substring(1));
 			bld.append("(parent, this, ");
 		} else if (parent != null) {
-			bld.append(ind).append("int nextRec = parent.new Index").append(index.getName().substring(0, 1).toUpperCase()).append(index.getName().substring(1)).append("(this, ");
+			bld.append(ind).append("int nextRec = parent.new Index").append(index.getName().substring(0, 1).toUpperCase()).append(index.getName().substring(1)).append("(");
 		} else {
-			bld.append(ind).append("int nextRec = new Index").append(index.getName().substring(0, 1).toUpperCase()).append(index.getName().substring(1)).append("(");
+			bld.append(ind).append("int nextRec = new Index").append(index.getName().substring(0, 1).toUpperCase()).append(index.getName().substring(1)).append("(store, ");
 		}
 		bld.append(index.getKeyData()).append(").search();\n");
 		return bld.toString();
@@ -390,6 +392,7 @@ public class Record implements Comparable<Record> {
 		String store = included.isEmpty() ? "store" : "store()";
 		StringBuilder bld = new StringBuilder();
 		String thisRec = table == null ? "this" : "record";
+		String parseObj = table == null ? "store" : "record";
 		for (Field field : fields) {
 			if (field.isKey())
 				continue;
@@ -445,7 +448,7 @@ public class Record implements Comparable<Record> {
 				getRelData(indent, table, bld, field);
 				break;
 			case SET:
-				bld.append(indent).append("\tnew ").append(field.getRelated().getName()).append("(").append(store).append(").parse(parser, ").append(thisRec).append(");\n");
+				bld.append(indent).append("\t").append(name).append(".parse(parser, ").append(parseObj).append(");\n");
 				break;
 			case ARRAY:
 				bld.append(indent).append("\ttry (").append(fldUpper).append("Array sub = new ").append(fldUpper).append("Array(").append(thisRec).append(", -1)) {\n");
@@ -505,13 +508,18 @@ public class Record implements Comparable<Record> {
 				bld.append(indent).append("\t\tIterator<").append(field.getRelated().getName()).append("> iterator = null;\n");
 			}
 			bld.append(indent).append("\t\t").append(field.getRelated().getName()).append(" relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;\n");
-			bld.append(indent).append("\t\tboolean found = relRec != null && relRec.parseKey(parser);\n");
+			bld.append(indent).append("\t\tif (relRec != null)\n");
+			bld.append(indent).append("\t\t\trelRec = relRec.parseKey(parser);\n");
 		}
 		if (isFull()) {
-			bld.append(indent).append("\t\t").append("rec(recNr);\n");
-		}
-		bld.append(indent).append("\t\t").append("set").append(field.getUpperName()).append("(relRec);\n");
-		bld.append(indent).append("\t\treturn found;\n");
+			bld.append(indent).append("\t\tChange").append(name).append(" old = copy(recNr);\n");
+			bld.append(indent).append("\t\t").append("old.set").append(field.getUpperName()).append("(relRec);\n");
+		} else
+			bld.append(indent).append("\t\t").append("set").append(field.getUpperName()).append("(relRec);\n");
+		if (field.getRelated().getParent() == null)
+			bld.append(indent).append("\t\treturn found;\n");
+		else
+			bld.append(indent).append("\t\treturn relRec != null;\n");
 		bld.append(indent).append("\t}, ");
 		if (isFull() || !included.isEmpty())
 			bld.append("rec());\n");

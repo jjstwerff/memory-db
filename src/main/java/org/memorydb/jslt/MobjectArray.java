@@ -71,25 +71,26 @@ public class MobjectArray implements MemoryRecord, ChangeMatch, Iterable<Mobject
 	}
 
 	@Override
-	public void rec(int rec) {
-		this.alloc = rec;
+	public MobjectArray copy(int rec) {
+		assert store.validate(rec);
+		return new MobjectArray(store, rec, -1);
 	}
 
 	private void up(Match record) {
 		store.setInt(alloc, 8, record.rec());
 		if (record instanceof MobjectArray) {
 			store.setByte(alloc, 12, 1);
-			store.setInt(alloc, 13, record.getArrayIndex());
+			store.setInt(alloc, 13, record.index());
 		}
 		if (record instanceof MatchObject)
 			store.setByte(alloc, 12, 2);
 		if (record instanceof ParametersArray) {
 			store.setByte(alloc, 12, 3);
-			store.setInt(alloc, 13, record.getArrayIndex());
+			store.setInt(alloc, 13, record.index());
 		}
 		if (record instanceof MarrayArray) {
 			store.setByte(alloc, 12, 4);
-			store.setInt(alloc, 13, record.getArrayIndex());
+			store.setInt(alloc, 13, record.index());
 		}
 	}
 
@@ -130,17 +131,17 @@ public class MobjectArray implements MemoryRecord, ChangeMatch, Iterable<Mobject
 	public MobjectArray add() {
 		if (parent.rec() == 0)
 			return this;
-		idx = size;
 		if (alloc == 0) {
 			alloc = store.allocate(17 + 17);
 			up(parent);
 		} else
 			alloc = store.resize(alloc, (17 + (idx + 1) * 17) / 8);
 		store.setInt(parent.rec(), parent.matchPosition() + 5, alloc);
-		size = idx + 1;
+		size++;
 		store.setInt(alloc, 4, size);
-		setName(null);
-		return this;
+		MobjectArray res = new MobjectArray(parent, size - 1);
+		res.setName(null);
+		return res;
 	}
 
 	@Override
@@ -219,13 +220,8 @@ public class MobjectArray implements MemoryRecord, ChangeMatch, Iterable<Mobject
 	}
 
 	@Override
-	public boolean parseKey(Parser parser) {
-		return false;
-	}
-
-	public void setIdx(int idx) {
-		if (idx >= 0 && idx < size)
-			this.idx = idx;
+	public MobjectArray parseKey(Parser parser) {
+		return null;
 	}
 
 	@Override

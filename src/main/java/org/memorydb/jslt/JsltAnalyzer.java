@@ -18,8 +18,7 @@ public class JsltAnalyzer {
 
 	public static void analyze(Store data) {
 		JsltAnalyzer analyze = new JsltAnalyzer();
-		Macro macros = new Macro(data);
-		for (Macro macro : macros.new IndexMacros()) {
+		for (Macro macro : new Macro.IndexMacros(data)) {
 			analyze.macro = macro;
 			analyze.analyze();
 		}
@@ -33,7 +32,7 @@ public class JsltAnalyzer {
 		for (Alternative alt : macro.getAlternatives()) {
 			// showAlt(alt);
 			resolve("NextAlternative");
-			int size = alt.getParameters().getSize();
+			int size = alt.getParameters().size();
 			if (parms != size) {
 				if (parms != -1)
 					resolve("NextParmSize");
@@ -49,7 +48,7 @@ public class JsltAnalyzer {
 					testType(parm);
 			else if (checkContinuesAsIs(alt) >= 0) {
 				for (ParametersArray parm : alt.getParameters()) {
-					if (parm.getVariable().getRec() != 0)
+					if (parm.getVariable().rec() != 0)
 						testType(parm);
 					else {
 						setParm(parm);
@@ -63,14 +62,14 @@ public class JsltAnalyzer {
 				}
 			} else {
 				MatchingArray stackSkip = addStep(MatchingArray.Type.STACK);
-				stackSkip.setStack(alt.getParameters().getSize());
+				stackSkip.setStack(alt.getParameters().size());
 				for (ParametersArray parm : alt.getParameters()) {
 					setParm(parm);
 					testConst(parm, true);
 				}
 			}
 			MatchingArray call = addStep(MatchingArray.Type.ALT);
-			call.setAltnr(alt.getRec());
+			call.setAltnr(alt.rec());
 			jump(call, (e, s) -> e.setAfalse(s), "NextAlternative");
 		}
 		resolve("NextAlternative");
@@ -116,7 +115,7 @@ public class JsltAnalyzer {
 
 	private void setParm(Match match) {
 		MatchingArray setParm = addStep(MatchingArray.Type.PARM);
-		setParm.setParm(match.getArrayIndex());
+		setParm.setParm(match.index());
 		jump(setParm, (e, s) -> e.setPfalse(s), "NextAlternative");
 	}
 
@@ -176,14 +175,14 @@ public class JsltAnalyzer {
 		System.out.println("macro:" + macro.getName());
 		MatchingArray matching = macro.getMatching();
 		for (MatchingArray elm : matching) {
-			System.out.print((elm.getArrayIndex() + 1) + ":[" + elm.getRec() + "] " + elm);
+			System.out.print((elm.index() + 1) + ":[" + elm.rec() + "] " + elm);
 		}
 		System.out.println();
 	}
 
 	/* package private */ static void showAlt(Alternative alt) {
 		StringBuilder bld = new StringBuilder();
-		bld.append(alt.getUpRecord().getName()).append("(");
+		bld.append(alt.up().getName()).append("(");
 		boolean first = true;
 		for (ParametersArray p : alt.getParameters()) {
 			if (first)
@@ -215,14 +214,14 @@ public class JsltAnalyzer {
 
 	private void jump(MatchingArray elm, Setter setter, String name) {
 		validateName(name);
-		jumpto.get(name).put(elm.getArrayIndex(), setter);
+		jumpto.get(name).put(elm.index(), setter);
 	}
 
 	private void resolve(String name) {
 		validateName(name);
 		Map<Integer, Setter> elms = jumpto.get(name);
 		for (Entry<Integer, Setter> s : elms.entrySet())
-			s.getValue().set(macro.getMatching(s.getKey()), macro.getMatching().getSize() + 1);
+			s.getValue().set(macro.getMatching(s.getKey()), macro.getMatching().size() + 1);
 		elms.clear();
 	}
 
@@ -242,7 +241,7 @@ public class JsltAnalyzer {
 		int startContinues = 0;
 		int any = 0;
 		for (ParametersArray parm : alt.getParameters()) {
-			int idx = parm.getArrayIndex();
+			int idx = parm.index();
 			if (parm.getType() != Match.Type.ANY) {
 				if (hasVariable(parm))
 					return -1;
@@ -257,7 +256,7 @@ public class JsltAnalyzer {
 	}
 
 	private boolean hasVariable(Match match) {
-		if (match.getVariable().getRec() != 0)
+		if (match.getVariable().rec() != 0)
 			return true;
 		switch (match.getType()) {
 		case ARRAY:

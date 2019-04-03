@@ -8,9 +8,12 @@ import org.memorydb.structure.ChangeInterface;
  * Automatically generated record class for table Expr
  */
 public class ChangeExpr extends Expr implements ChangeOperator {
-	public ChangeExpr(Store store) {
-		super(store, store.allocate(Expr.RECORD_SIZE));
-		defaultOperator();
+	public ChangeExpr(Store store, int rec) {
+		super(store, rec == 0 ? store.allocate(Expr.RECORD_SIZE) : rec);
+		if (rec == 0) {
+			defaultOperator();
+		} else {
+		}
 	}
 
 	public ChangeExpr(Expr current) {
@@ -46,5 +49,11 @@ public class ChangeExpr extends Expr implements ChangeOperator {
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public ChangeExpr copy(int newRec) {
+		assert store.validate(newRec);
+		return new ChangeExpr(store, newRec);
 	}
 }

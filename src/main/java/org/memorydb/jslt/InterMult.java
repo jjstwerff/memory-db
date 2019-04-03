@@ -4,79 +4,60 @@ import org.memorydb.structure.RecordInterface;
 
 public class InterMult implements RecordInterface {
 	private final RecordInterface data;
+	private final RecordInterface cur;
 	private final long number;
 
-	public InterMult(RecordInterface data, long number) {
+	public InterMult(RecordInterface data, RecordInterface cur, long number) {
 		this.data = data;
+		this.cur = cur;
 		this.number = number;
 	}
 
 	@Override
-	public int next(int field) {
-		field++;
-		if (data.type() == FieldType.ARRAY) {
-			if (field >= number * data.getSize())
-				return -2;
-			return field;
-		}
-		if (field >= number)
-			return -2;
-		return field;
+	public InterMult start() {
+		return new InterMult(data, data.start(), number);
 	}
 
 	@Override
-	public String name(int field) {
-		return null;
-	}
-
-	@Override
-	public FieldType type(int field) {
-		if (data.type() == FieldType.ARRAY) {
-			if (field < 0 || field >= number * data.getSize())
+	public InterMult next() {
+		RecordInterface next = cur.next();
+		if (next == null) {
+			if (number == 0)
 				return null;
-			int m = field % data.getSize();
-			int pos = data.next(-1);
-			for(int i=0; i<m; i++) {
-				pos = data.next(pos);
-			}
-			return JsltInterpreter.type(data.get(pos));
+			return new InterMult(data, data.start(), number - 1);
 		}
-		if (field < 0 || field >= number)
-			return null;
-		return JsltInterpreter.type(data);
+		return new InterMult(data, next, number);
 	}
 
 	@Override
-	public Object get(int field) {
-		if (data.type() == FieldType.ARRAY) {
-			if (field < 0 || field >= number * data.getSize())
-				return null;
-			int m = field % data.getSize();
-			int pos = data.next(-1);
-			for(int i=0; i<m; i++) {
-				pos = data.next(pos);
-			}
-			return data.get(pos);
-		}
-		if (field < 0 || field >= number)
-			return null;
-		return data;
-	}
-
-	@Override
-	public boolean exists() {
-		return true;
-	}
-
-	@Override
-	public int getSize() {
-		if (data.type() == FieldType.ARRAY)
-			return data.getSize() * (int) number;
-		return (int) number;
+	public String name() {
+		return cur.name();
 	}
 
 	@Override
 	public FieldType type() {
-		return FieldType.ARRAY;
+		if (cur == null)
+			return data.type();
+		return cur.type();
+	}
+
+	@Override
+	public Object java() {
+		return cur == null ? null : cur.java();
+	}
+
+	@Override
+	public int size() {
+		if (cur == null) {
+			if (data.type() == FieldType.ARRAY)
+				return data.size() * (int) number;
+			return (int) number;
+		}
+		return cur.size();
+	}
+
+	@Override
+	public RecordInterface copy() {
+		return new InterMult(data, cur, number);
 	}
 }

@@ -48,7 +48,7 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 <#if table.includes?size &gt; 0>
 	@Override
 </#if>
-	boolean parseKey(Parser parser);
+	${table.name} parseKey(Parser parser);
 
 	default Change${table.name?cap_first} change${table.name}() {
 <#list table.included as ext>
@@ -107,11 +107,8 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 
 	default ${field.related.name} get${field.name?cap_first}(<#list index.javaTypes[0..*index.javaTypes?size] as t>${t} key${t?index + 1}<#if t?has_next>, </#if></#list>) {
 		${field.related.name} resultRec = new ${field.related.name}(store());
-		Index${index.name?cap_first} idx = new Index${index.name?cap_first}(this, resultRec<#list index.javaTypes[0..*index.javaTypes?size] as t>, key${t?index + 1}</#list>);
-		int res = idx.search();
-		if (res == 0)
-			return resultRec;
-		return new ${field.related.name}(store(), res);
+		int res = new Index${index.name?cap_first}(this, resultRec<#list index.javaTypes[0..*index.javaTypes?size] as t>, key${t?index + 1}</#list>).search();
+		return res <= 0 ? null : new ${field.related.name}(store(), res);
 	}
 
 	default Change${field.related.name?cap_first} add${field.name?cap_first}() {

@@ -21,54 +21,49 @@ public class InterFilter implements RecordInterface {
 	}
 
 	@Override
-	public int next(int field) {
+	public InterFilter next() {
 		if (data == null)
-			return -2;
-		curField = field;
+			return null;
 		boolean found = false;
 		while (!found) {
-			curField = data.next(curField);
+			data.next();
 			if (curField < 0)
 				break;
-			curType = data.type(curField);
-			curValue = data.get(curField);
+			curType = data.type();
+			curValue = data.java();
 			interpreter.setCurrent(curValue);
 			found = interpreter.getBoolean(interpreter.inter(expr));
 		}
-		return curField;
+		return new InterFilter(interpreter, expr, data);
 	}
 
 	@Override
-	public String name(int field) {
+	public String name() {
 		return null;
 	}
 
 	@Override
-	public FieldType type(int field) {
+	public FieldType type() {
+		int field = 0;
 		if (field == curField)
 			return curType;
-		return data.type(field);
+		return data.type();
 	}
 
 	@Override
-	public Object get(int field) {
-		if (field == curField)
+	public Object java() {
+		if (curValue != null)
 			return curValue;
-		return data.get(field);
+		return data.java();
 	}
 
 	@Override
-	public boolean exists() {
-		return true;
+	public int size() {
+		return data.size();
 	}
 
 	@Override
-	public int getSize() {
-		return data.getSize();
-	}
-
-	@Override
-	public FieldType type() {
-		return FieldType.ARRAY;
+	public RecordInterface copy() {
+		return new InterFilter(interpreter, expr, data);
 	}
 }

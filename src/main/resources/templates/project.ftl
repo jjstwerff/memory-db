@@ -35,18 +35,14 @@ public class ${project.name} implements AutoCloseable {
 
 	@FieldData(name = "${index.name}", type = "SET", related = ${index.table.name}.class)
 	public ${index.table.name} get${index.name?cap_first}(<#list index.javaTypes[0..*index.javaTypes?size] as t>${t} key${t?index + 1}<#if t?has_next>, </#if></#list>) {
-		${index.table.name} rec = new ${index.table.name}(store);
-		${index.table.name}.Index${index.name?cap_first} idx = rec.new Index${index.name?cap_first}(<#list index.javaTypes[0..*index.javaTypes?size] as t>key${t?index + 1}<#if t?has_next>, </#if></#list>);
-		int res = idx.search();
-		if (res == 0)
-			return rec;
-		return new ${index.table.name}(store, res);
+		int res = new ${index.table.name}.Index${index.name?cap_first}(store<#list index.javaTypes[0..*index.javaTypes?size] as t>, key${t?index + 1}</#list>).search();
+		return res <= 0 ? null : new ${index.table.name}(store, res);
 	}
 </#list>
 <#list project.tableList as table><#if table.full && !table.parent??>
 
 	public Change${table.name} add${table.name}() {
-		return new Change${table.name}(store);
+		return new Change${table.name}(store, 0);
 	}
 </#if></#list>
 

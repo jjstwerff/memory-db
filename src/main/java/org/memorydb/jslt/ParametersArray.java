@@ -69,8 +69,9 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 	}
 
 	@Override
-	public void rec(int rec) {
-		this.alloc = rec;
+	public ParametersArray copy(int rec) {
+		assert store.validate(rec);
+		return new ParametersArray(store, rec, -1);
 	}
 
 	private void up(Alternative record) {
@@ -101,16 +102,16 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 	public ParametersArray add() {
 		if (parent.rec() == 0)
 			return this;
-		idx = size;
 		if (alloc == 0) {
 			alloc = store.allocate(13 + 12);
 			up(parent);
 		} else
 			alloc = store.resize(alloc, (12 + (idx + 1) * 13) / 8);
 		store.setInt(parent.rec(), 8, alloc);
-		size = idx + 1;
+		size++;
 		store.setInt(alloc, 4, size);
-		return this;
+		ParametersArray res = new ParametersArray(parent, size - 1);
+		return res;
 	}
 
 	@Override
@@ -173,13 +174,8 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 	}
 
 	@Override
-	public boolean parseKey(Parser parser) {
-		return false;
-	}
-
-	public void setIdx(int idx) {
-		if (idx >= 0 && idx < size)
-			this.idx = idx;
+	public ParametersArray parseKey(Parser parser) {
+		return null;
 	}
 
 	@Override

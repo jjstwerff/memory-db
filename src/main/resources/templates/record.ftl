@@ -6,8 +6,10 @@ package ${project.package};
 <#list table.fields as field>
 <#if field.type == "SET"><#assign hasIndexes=true></#if>
 </#list>
+<#if hasIndexes>
 
 import java.util.Iterator;
+</#if>
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
@@ -61,7 +63,7 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 
 	@Override
 	public ${table.name?cap_first} copy(int newRec) {
-		assert store.validate(rec);
+		assert store.validate(newRec);
 		return new ${table.name?cap_first}(store, newRec);
 	}
 
@@ -125,12 +127,8 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 <#elseif field.type == "SET"><#assign index=field.index>
 
 	public ${field.related.name} get${field.name?cap_first}(<#list index.javaTypes[0..*index.javaTypes?size] as t>${t} key${t?index + 1}<#if t?has_next>, </#if></#list>) {
-		${field.related.name} resultRec = new ${field.related.name}(store);
-		Index${index.name?cap_first} idx = new Index${index.name?cap_first}(resultRec<#list index.javaTypes[0..*index.javaTypes?size] as t>, key${t?index + 1}</#list>);
-		int res = idx.search();
-		if (res == 0)
-			return resultRec;
-		return new ${field.related.name}(store, res);
+		int res = new Index${index.name?cap_first}(<#list index.javaTypes[0..*index.javaTypes?size] as t>key${t?index + 1}<#if t?has_next>, </#if></#list>).search();
+		return res <= 0 ? null : new ${field.related.name}(store, res);
 	}
 
 	public Change${field.related.name?cap_first} add${field.name?cap_first}() {
@@ -138,20 +136,19 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 	}
 
 	/* package private */ class Index${index.name?cap_first} extends TreeIndex implements Iterable<${field.related.name}> {
-
-		public Index${index.name?cap_first}(${field.related.name} record) {
-			super(record.store, null, ${index.flagPos}, ${index.fieldPos});
+		public Index${index.name?cap_first}() {
+			super(store(), null, ${index.flagPos}, ${index.fieldPos});
 		}
 <#list 1..index.javaTypes?size as i>
 
-		public Index${index.name?cap_first}(${field.related.name} record<#list index.javaTypes[0..*i] as t>, ${t} key${t?index + 1}</#list>) {
-			super(record.store, new Key() {
+		public Index${index.name?cap_first}(<#list index.javaTypes[0..*i] as t>${t} key${t?index + 1}<#if t?has_next>, </#if></#list>) {
+			super(store(), new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert record.store.validate(recNr);
-					${field.related.name} rec = record.copy(recNr);
+					assert store().validate(recNr);
+					${field.related.name} rec = new ${field.related.name}(store(), recNr);
 					int o = 0;
 <#list index.javaTypes[0..*i] as t>
 					o = RedBlackTree.compare(key${t?index + 1}, rec.${index.retrieve[t?index]});
@@ -197,19 +194,18 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		@Override
 		public Iterator<${field.related.name}> iterator() {
 			return new Iterator<>() {
-				int rec = first();
+				int nextRec = search();
 
 				@Override
 				public boolean hasNext() {
-					return rec >= 0;
+					return nextRec > 0;
 				}
-				
+
 				@Override
 				public ${field.related.name} next() {
-					rec = toNext(rec);
-					if (rec >= 0)
-						return null;
-					return new ${field.related.name}(store, rec);
+					int n = nextRec;
+					nextRec = toNext(nextRec);
+					return n <= 0 ? null : new ${field.related.name}(store, n);
 				}
 			};
 		}
@@ -224,23 +220,23 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 </#if>
 <#list table.indexes as index><#if !table.parent??>
 
-	public class Index${index.name?cap_first} extends TreeIndex implements Iterable<${table.name}> {
-		public Index${index.name?cap_first}() {
-			super(${table.name}.this.store, null, ${index.flagPos}, ${index.fieldPos});
+	public static class Index${index.name?cap_first} extends TreeIndex implements Iterable<${table.name}> {
+		public Index${index.name?cap_first}(Store store) {
+			super(store, null, ${index.flagPos}, ${index.fieldPos});
 		}
 <#list 1..index.javaTypes?size as i>
 
-		public Index${index.name?cap_first}(<#list index.javaTypes[0..*i] as t>${t} key${t?index + 1}<#if t?has_next>, </#if></#list>) {
-			super(${table.name}.this.store, new Key() {
+		public Index${index.name?cap_first}(Store store<#list index.javaTypes[0..*i] as t>, ${t} key${t?index + 1}</#list>) {
+			super(store, new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert ${table.name}.this.store.validate(recNr);
-					${table.name} res = new ${table.name}(${table.name}.this.store, recNr);
+					assert store.validate(recNr);
+					${table.name} rec = new ${table.name}(store, recNr);
 					int o = 0;
 <#list index.javaTypes[0..*i] as t>
-					o = RedBlackTree.compare(key${t?index + 1}, res.${index.retrieve[t?index]});
+					o = RedBlackTree.compare(key${t?index + 1}, rec.${index.retrieve[t?index]});
 <#if t?has_next>
 					if (o != 0)
 						return o;
@@ -283,19 +279,18 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		@Override
 		public Iterator<${table.name}> iterator() {
 			return new Iterator<>() {
-				int rec = first();
+				int nextRec = search();
 
 				@Override
 				public boolean hasNext() {
-					return rec >= 0;
+					return nextRec > 0;
 				}
-				
+
 				@Override
 				public ${table.name} next() {
-					rec = toNext(rec);
-					if (rec >= 0)
-						return null;
-					return new ${table.name}(store, rec);
+					int n = nextRec;
+					nextRec = toNext(nextRec);
+					return n <= 0 ? null : new ${table.name}(store, n);
 				}
 			};
 		}
@@ -367,38 +362,35 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		return write.toString();
 	}
 
-	public ${table.name} parse(Parser parser<#if table.parent??>, ${table.parent.name} parent</#if>) {
+	public static void parse(Parser parser, <#if table.parent??>${table.parent.name} parent<#else>Store store</#if>) {
 		while (parser.getSub()) {
 ${table.keyFields}<#rt>
 			if (parser.isDelete(nextRec)) {
-				try (Change${table.name} record = new Change${table.name}(this)) {
-					store.free(record.rec());
+				try (Change${table.name} record = new Change${table.name}(<#if table.parent??>parent<#else>store</#if>, nextRec)) {
+					<#if table.parent??>parent.</#if>store.free(record.rec());
 				}
 				continue;
 			}
 			if (nextRec == 0) {
-				try (Change${table.name} record = new Change${table.name}(<#if table.parent??>parent, 0<#else>store</#if>)) {
+				try (Change${table.name} record = new Change${table.name}(<#if table.parent??>parent<#else>store</#if>, 0)) {
 ${table.setKeys}
 					record.parseFields(parser);
 				}
 			} else {
-				try (Change${table.name} record = new Change${table.name}(this)) {
+				try (Change${table.name} record = new Change${table.name}(<#if table.parent??>parent<#else>store</#if>, nextRec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
-		return this;
 	}
 
 <#if table.includes?size &gt; 0>
 	@Override
 </#if>
-	public boolean parseKey(Parser parser) {
+	public ${table.name} parseKey(Parser parser) {
 ${table.parseKeys}<#rt>
 		parser.finishRelation();
-		if (nextRec != 0)
-			rec = nextRec;
-		return nextRec != 0;
+		return nextRec <= 0 ? null : new ${table.name}(store, nextRec);
 	}
 
 	@Override
@@ -431,32 +423,6 @@ ${table.parseKeys}<#rt>
 			return null;
 		}
 </#if>
-	}
-
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-<#assign max = table.fields?size>
-<#list table.includes as incl>
-<#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
-			return ${incl.name}.super.iterate${incl.name}(field - ${max});
-<#assign max = nmax>
-</#list>
-		switch (field) {
-<#list table.fields as field>
-<#if field.type == 'SET'>
-		case ${1 + field?index}:
-<#list 1..field.index.keys?size as i>
-			if (key.length > ${index.javaTypes?size - i})
-				return new Index${field.index.name?cap_first}(new ${field.related.name}(store)<#list field.index.javaTypes[0..*i] as t>, (${t}) key[${t?index}]</#list>);
-</#list>
-			return get${field.name?cap_first}();
-<#elseif field.type == 'ARRAY'>
-		case ${1 + field?index}:
-			return get${field.name?cap_first}();
-</#if></#list>
-		default:
-			return null;
-		}
 	}
 
 	@Override

@@ -11,56 +11,42 @@ public class MinArray implements RecordInterface {
 		this.elm = elm;
 	}
 
-	/**
-	 * return the next field defined on this record: -2 means unknown field -1 means
-	 * end of fields found 0 is a special value.. this is not an object but a single
-	 * value >0 is a field pointer
-	 */
 	@Override
-	public int next(int field) {
-		int res = array.next(field);
-		if (type(res) == null)
-			return -2;
-		if (array instanceof InterObject) {
-			while (res != -2) {
-				String n = name(res);
-				if (!n.equals(elm))
-					return res;
-				res = array.next(res);
-				if (type(res) == null)
-					return -2;
-			}
+	public MinArray start() {
+		return null;
+	}
+
+	@Override
+	public MinArray next() {
+		RecordInterface next = array.next();
+		while (next != null && !next.name().equals(elm)) {
+			next = next.next();
 		}
-		return res;
+		return new MinArray(next, elm);
 	}
 
 	@Override
-	public String name(int field) {
-		return array.name(field);
-	}
-
-	@Override
-	public FieldType type(int field) {
-		return array.type(field);
-	}
-
-	@Override
-	public int getSize() {
-		return array.getSize(); // TODO correctly determine size
-	}
-
-	@Override
-	public Object get(int field) {
-		return array.get(field);
-	}
-
-	@Override
-	public boolean exists() {
-		return true;
+	public String name() {
+		return array.name();
 	}
 
 	@Override
 	public FieldType type() {
 		return array.type();
+	}
+
+	@Override
+	public int size() {
+		return array.size(); // TODO correctly determine size
+	}
+
+	@Override
+	public Object java() {
+		return array.java();
+	}
+
+	@Override
+	public MinArray copy() {
+		return new MinArray(array, elm);
 	}
 }

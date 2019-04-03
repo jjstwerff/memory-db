@@ -330,7 +330,7 @@ public class Field {
 		case RELATION:
 			return "return new " + related.getName() + "(store, rec == 0 ? 0 : store.getInt(rec, " + (pos >> 3) + "));";
 		case SET:
-			return "return new Index" + getUpperName() + "(new " + related.getName() + "(store));";
+			return "return new Index" + getUpperName() + "();";
 		case STRING:
 			return "return rec == 0 ? null : store.getString(store.getInt(rec, " + (pos >> 3) + "));";
 		case OBJECT:

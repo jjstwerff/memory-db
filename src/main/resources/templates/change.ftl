@@ -15,24 +15,22 @@ import ${import};
 public class Change${table.name} extends ${table.name} implements <#if table.includes?size == 0>ChangeInterface</#if><#list table.includes as incl>Change${incl.name}<#if incl?has_next>, </#if></#list> {
 <#if table.parent??>
 	/* package private */ Change${table.name}(${table.parent.name} parent, int rec) {
-		super(parent.store(), rec);
+		super(parent.store(), rec == 0 ? parent.store.allocate(${table.name}.RECORD_SIZE) : rec);
 		if (rec == 0) {
-			rec(store().allocate(${table.name}.RECORD_SIZE));
 <#list table.includes as incl>
 			default${incl.name}();
 </#list>
-		}
 <#list table.fields as field><#if field.default??>
-		set${field.name?cap_first}(${field.default});
+			set${field.name?cap_first}(${field.default});
 </#if><#if field.type == "SET" || field.type == "ARRAY">
-		store.setInt(rec(), ${field.pos / 8}, 0); // ${field.type} ${field.name}
+			store.setInt(rec(), ${field.pos / 8}, 0); // ${field.type} ${field.name}
 </#if></#list>
-		up(parent);
-		if (rec != 0) {
+			up(parent);
+		} else {
 <#list table.indexes as index><#if table.parent.included?size gt 0>
 			new ${table.parent.name}.Index${index.name?cap_first}(up(), this).remove(rec);
 <#else>
-			up().new Index${index.name?cap_first}(this).remove(rec);
+			up().new Index${index.name?cap_first}().remove(rec);
 </#if></#list>
 		}
 	}
@@ -43,30 +41,36 @@ public class Change${table.name} extends ${table.name} implements <#if table.inc
 <#list table.indexes as index><#if table.parent.included?size gt 0>
 			new ${table.parent.name}.Index${index.name?cap_first}(up(), this).remove(rec);
 <#else>
-			up().new Index${index.name?cap_first}(this).remove(rec);
+			up().new Index${index.name?cap_first}().remove(rec);
 </#if></#list>
 		}
 	}
 <#else>
-	public Change${table.name}(Store store) {
-		super(store, store.allocate(${table.name}.RECORD_SIZE));
+	public Change${table.name}(Store store, int rec) {
+		super(store, rec == 0 ? store.allocate(${table.name}.RECORD_SIZE) : rec);
+		if (rec == 0) {
 <#list table.fields as field><#if field.default??>
-		set${field.name?cap_first}(${field.default});
+			set${field.name?cap_first}(${field.default});
 </#if><#if field.type == "SET">
-		store.setInt(rec, ${field.pos / 8}, 0); // SET ${field.name}
+			store.setInt(rec, ${field.pos / 8}, 0); // SET ${field.name}
 </#if><#if field.type == "ARRAY">
-		store.setInt(rec, ${field.pos / 8}, 0); // ARRAY ${field.name}
-		store.setInt(rec, ${(field.pos / 8) + 4}, 0);
+			store.setInt(rec, ${field.pos / 8}, 0); // ARRAY ${field.name}
+			store.setInt(rec, ${(field.pos / 8) + 4}, 0);
 </#if></#list>
 <#list table.includes as incl>
-		default${incl.name}();
+			default${incl.name}();
 </#list>
+		} else {
+<#list table.indexes as index>
+			new Index${index.name?cap_first}(store).remove(rec());
+</#list>
+		}
 	}
 
 	public Change${table.name}(${table.name} current) {
 		super(current.store(), current.rec());
 <#list table.indexes as index>
-		new Index${index.name?cap_first}().remove(rec());
+		new Index${index.name?cap_first}(store).remove(rec());
 </#list>
 	}
 </#if>
@@ -118,7 +122,7 @@ ${table.otherFields}<#rt>
 <#list table.indexes as index><#if table.parent?? && table.parent.included?size gt 0>
 		new Part.Index${index.name?cap_first}(up(), <#if table.parent??>this</#if>).insert(rec());
 <#else>
-		<#if table.parent??>up().</#if>new Index${index.name?cap_first}(<#if table.parent??>this</#if>).insert(rec());
+		<#if table.parent??>up().</#if>new Index${index.name?cap_first}(<#if !table.parent??>store</#if>).insert(rec());
 </#if></#list>
 <#if table.indexes?size == 0>
 		// nothing yet
@@ -167,5 +171,11 @@ ${table.otherFields}<#rt>
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public Change${table.name} copy(int newRec) {
+		assert store.validate(newRec);
+		return new Change${table.name}(<#if table.parent??>up()<#else>store</#if>, newRec);
 	}
 }

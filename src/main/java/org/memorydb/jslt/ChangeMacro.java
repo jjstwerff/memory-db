@@ -8,17 +8,21 @@ import org.memorydb.structure.ChangeInterface;
  * Automatically generated record class for table Macro
  */
 public class ChangeMacro extends Macro implements ChangeInterface {
-	public ChangeMacro(Store store) {
-		super(store, store.allocate(Macro.RECORD_SIZE));
-		setName(null);
-		store.setInt(rec, 8, 0); // SET alternatives
-		store.setInt(rec, 12, 0); // ARRAY matching
-		store.setInt(rec, 16, 0);
+	public ChangeMacro(Store store, int rec) {
+		super(store, rec == 0 ? store.allocate(Macro.RECORD_SIZE) : rec);
+		if (rec == 0) {
+			setName(null);
+			store.setInt(rec, 8, 0); // SET alternatives
+			store.setInt(rec, 12, 0); // ARRAY matching
+			store.setInt(rec, 16, 0);
+		} else {
+			new IndexMacros(store).remove(rec());
+		}
 	}
 
 	public ChangeMacro(Macro current) {
 		super(current.store(), current.rec());
-		new IndexMacros().remove(rec());
+		new IndexMacros(store).remove(rec());
 	}
 
 	public void setName(String value) {
@@ -32,7 +36,7 @@ public class ChangeMacro extends Macro implements ChangeInterface {
 
 	/* package private */ void parseFields(Parser parser) {
 		if (parser.hasSub("alternatives")) {
-			new Alternative(store).parse(parser, this);
+			Macro.parse(parser, store);
 		}
 		if (parser.hasSub("matching")) {
 			try (MatchingArray sub = new MatchingArray(this, -1)) {
@@ -46,7 +50,7 @@ public class ChangeMacro extends Macro implements ChangeInterface {
 
 	@Override
 	public void close() {
-		new IndexMacros().insert(rec());
+		new IndexMacros(store).insert(rec());
 	}
 
 	@Override
@@ -73,5 +77,11 @@ public class ChangeMacro extends Macro implements ChangeInterface {
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public ChangeMacro copy(int newRec) {
+		assert store.validate(newRec);
+		return new ChangeMacro(store, newRec);
 	}
 }

@@ -16,18 +16,19 @@ public class InterArray implements RecordInterface {
 	}
 
 	@Override
-	public String name(int field) {
+	public String name() {
 		return null;
 	}
 
 	@Override
-	public int getSize() {
-		return data.getSize();
+	public int size() {
+		return data.size();
 	}
 
 	@Override
-	public FieldType type(int field) {
-		if (field < 1 || field > data.getSize())
+	public FieldType type() {
+		int field = 0;
+		if (field < 1 || field > data.size())
 			return null;
 		if (lastField != field) {
 			lastField = field;
@@ -37,7 +38,8 @@ public class InterArray implements RecordInterface {
 	}
 
 	@Override
-	public Object get(int field) {
+	public Object java() {
+		int field = 0;
 		if (lastField != field) {
 			lastField = field;
 			lastObject = interpreter.inter(new ArrayArray(data, field - 1));
@@ -46,32 +48,22 @@ public class InterArray implements RecordInterface {
 	}
 
 	@Override
-	public Iterable<? extends RecordInterface> iterate(int field, Object... key) {
-		return data.iterate(field, key);
-	}
-
-	@Override
-	public boolean exists() {
-		return false;
-	}
-
-	@Override
-	public FieldType type() {
-		return FieldType.ARRAY;
-	}
-
-	@Override
 	public String toString() {
 		StringBuilder bld = new StringBuilder();
 		bld.append("[");
 		int pos = 1;
-		while (type(pos) != null) {
+		while (type() != null) {
 			if (pos != 1)
 				bld.append(",");
-			bld.append(get(pos));
-			pos = next(pos);
+			bld.append(java());
+			next();
 		}
 		bld.append("]");
 		return bld.toString();
+	}
+
+	@Override
+	public RecordInterface copy() {
+		return new InterArray(interpreter, data);
 	}
 }

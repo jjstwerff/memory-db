@@ -8,14 +8,18 @@ import org.memorydb.structure.ChangeInterface;
  * Automatically generated record class for table Source
  */
 public class ChangeSource extends Source implements ChangeInterface {
-	public ChangeSource(Store store) {
-		super(store, store.allocate(Source.RECORD_SIZE));
-		setName(null);
+	public ChangeSource(Store store, int rec) {
+		super(store, rec == 0 ? store.allocate(Source.RECORD_SIZE) : rec);
+		if (rec == 0) {
+			setName(null);
+		} else {
+			new IndexSources(store).remove(rec());
+		}
 	}
 
 	public ChangeSource(Source current) {
 		super(current.store(), current.rec());
-		new IndexSources().remove(rec());
+		new IndexSources(store).remove(rec());
 	}
 
 	public void setName(String value) {
@@ -28,7 +32,7 @@ public class ChangeSource extends Source implements ChangeInterface {
 
 	@Override
 	public void close() {
-		new IndexSources().insert(rec());
+		new IndexSources(store).insert(rec());
 	}
 
 	@Override
@@ -51,5 +55,11 @@ public class ChangeSource extends Source implements ChangeInterface {
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public ChangeSource copy(int newRec) {
+		assert store.validate(newRec);
+		return new ChangeSource(store, newRec);
 	}
 }
