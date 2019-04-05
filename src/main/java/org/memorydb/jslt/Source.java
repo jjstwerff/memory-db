@@ -21,17 +21,21 @@ import org.memorydb.structure.TreeIndex;
 public class Source implements MemoryRecord, RecordInterface {
 	/* package private */ final Store store;
 	protected final int rec;
+	private final int field;
 	/* package private */ static final int RECORD_SIZE = 17;
-
-	public Source(Store store) {
-		this.store = store;
-		this.rec = 0;
-	}
 
 	public Source(Store store, int rec) {
 		rec = store.correct(rec);
 		this.store = store;
 		this.rec = rec;
+		this.field = 0;
+	}
+
+	public Source(Store store, int rec, int field) {
+		rec = store.correct(rec);
+		this.store = store;
+		this.rec = rec;
+		this.field = field;
 	}
 
 	@Override
@@ -148,30 +152,34 @@ public class Source implements MemoryRecord, RecordInterface {
 		return write.toString();
 	}
 
-	public static void parse(Parser parser, Store store) {
+	public static Source parse(Parser parser, Store store) {
+		Source rec = null;
 		while (parser.getSub()) {
-			String name = parser.getString("name");
-			int nextRec = new IndexSources(store, name).search();
-			if (parser.isDelete(nextRec)) {
-				try (ChangeSource record = new ChangeSource(store, nextRec)) {
-					store.free(record.rec());
-				}
+			rec = parseKey(parser, store);
+			if (parser.isDelete()) {
+				if (rec != null)
+					try (ChangeSource record = new ChangeSource(rec)) {
+						store.free(record.rec());
+					}
 				continue;
 			}
-			if (nextRec == 0) {
+			if (rec == null) {
 				try (ChangeSource record = new ChangeSource(store, 0)) {
+					String name = parser.getString("name");
 					record.setName(name);
 					record.parseFields(parser);
+					return record;
 				}
 			} else {
-				try (ChangeSource record = new ChangeSource(store, nextRec)) {
+				try (ChangeSource record = new ChangeSource(rec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
+		return rec;
 	}
 
-	public Source parseKey(Parser parser) {
+	public static Source parseKey(Parser parser, Store store) {
 		String name = parser.getString("name");
 		int nextRec = new IndexSources(store, name).search();
 		parser.finishRelation();
@@ -180,7 +188,6 @@ public class Source implements MemoryRecord, RecordInterface {
 
 	@Override
 	public Object java() {
-		int field = 0;
 		switch (field) {
 		case 1:
 			return getName();
@@ -191,8 +198,9 @@ public class Source implements MemoryRecord, RecordInterface {
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		switch (field) {
+		case 0:
+			return FieldType.OBJECT;
 		case 1:
 			return FieldType.STRING;
 		default:
@@ -202,7 +210,6 @@ public class Source implements MemoryRecord, RecordInterface {
 
 	@Override
 	public String name() {
-		int field = 0;
 		switch (field) {
 		case 1:
 			return "name";
@@ -212,12 +219,17 @@ public class Source implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
+	public Source start() {
+		return new Source(store, rec, 1);
+	}
+
+	@Override
 	public Source next() {
-		return null;
+		return field >= 1 ? null : new Source(store, rec, field + 1);
 	}
 
 	@Override
 	public Source copy() {
-		return new Source(store, rec);
+		return new Source(store, rec, field);
 	}
 }

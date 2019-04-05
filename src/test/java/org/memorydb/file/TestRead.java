@@ -72,7 +72,7 @@ public class TestRead extends ErrorCheck {
 						+ "  ], setIndexes=[\n" //
 						+ "  ], freeBits=[\n" //
 						+ "  ], size=0, related=false, full=false\n" //
-						+ "]\n", project.parse(parser).toString());
+						+ "]\n", Project.parse(parser, meta.store()).toString());
 			}
 			// TODO prevent double index field in Timeline
 			try (Parser parser = new DBParser(file("record3.txt", new String[] { //
@@ -102,7 +102,7 @@ public class TestRead extends ErrorCheck {
 						+ "  ], setIndexes=[\n" //
 						+ "  ], freeBits=[\n" //
 						+ "  ], size=0, related=false, full=false\n" //
-						+ "]\n", project.parse(parser).toString());
+						+ "]\n", Project.parse(parser, meta.store()).toString());
 			}
 			Assert.assertEquals("used: 2kb records:8 size: 156kb\n" //
 					+ "free: 154kb spaces:2\n" //
@@ -330,7 +330,7 @@ public class TestRead extends ErrorCheck {
 			Project project = meta.addProject();
 			try (Parser parser = new DBParser(file("problem.txt", lines))) {
 				try {
-					project.parse(parser);
+					Project.parse(parser, meta.store());
 				} catch (MutationException e) {
 					parser.error(e.getMessage());
 					throw e;

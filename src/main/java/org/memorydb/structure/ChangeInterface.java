@@ -1,6 +1,6 @@
 package org.memorydb.structure;
 
-public interface ChangeInterface extends RecordInterface, AutoCloseable {
+public interface ChangeInterface extends RecordInterface {
 	boolean java(Object val);
 
 	/**
@@ -25,10 +25,5 @@ public interface ChangeInterface extends RecordInterface, AutoCloseable {
 	 */
 	default ChangeInterface add(String field) {
 		return null;
-	}
-
-	@Override
-	default void close() {
-		// nothing
 	}
 }

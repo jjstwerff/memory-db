@@ -21,17 +21,21 @@ import org.memorydb.structure.TreeIndex;
 public class Macro implements MemoryRecord, RecordInterface {
 	/* package private */ final Store store;
 	protected final int rec;
+	private final int field;
 	/* package private */ static final int RECORD_SIZE = 25;
-
-	public Macro(Store store) {
-		this.store = store;
-		this.rec = 0;
-	}
 
 	public Macro(Store store, int rec) {
 		rec = store.correct(rec);
 		this.store = store;
 		this.rec = rec;
+		this.field = 0;
+	}
+
+	public Macro(Store store, int rec, int field) {
+		rec = store.correct(rec);
+		this.store = store;
+		this.rec = rec;
+		this.field = field;
 	}
 
 	@Override
@@ -253,30 +257,34 @@ public class Macro implements MemoryRecord, RecordInterface {
 		return write.toString();
 	}
 
-	public static void parse(Parser parser, Store store) {
+	public static Macro parse(Parser parser, Store store) {
+		Macro rec = null;
 		while (parser.getSub()) {
-			String name = parser.getString("name");
-			int nextRec = new IndexMacros(store, name).search();
-			if (parser.isDelete(nextRec)) {
-				try (ChangeMacro record = new ChangeMacro(store, nextRec)) {
-					store.free(record.rec());
-				}
+			rec = parseKey(parser, store);
+			if (parser.isDelete()) {
+				if (rec != null)
+					try (ChangeMacro record = new ChangeMacro(rec)) {
+						store.free(record.rec());
+					}
 				continue;
 			}
-			if (nextRec == 0) {
+			if (rec == null) {
 				try (ChangeMacro record = new ChangeMacro(store, 0)) {
+					String name = parser.getString("name");
 					record.setName(name);
 					record.parseFields(parser);
+					return record;
 				}
 			} else {
-				try (ChangeMacro record = new ChangeMacro(store, nextRec)) {
+				try (ChangeMacro record = new ChangeMacro(rec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
+		return rec;
 	}
 
-	public Macro parseKey(Parser parser) {
+	public static Macro parseKey(Parser parser, Store store) {
 		String name = parser.getString("name");
 		int nextRec = new IndexMacros(store, name).search();
 		parser.finishRelation();
@@ -285,7 +293,6 @@ public class Macro implements MemoryRecord, RecordInterface {
 
 	@Override
 	public Object java() {
-		int field = 0;
 		switch (field) {
 		case 1:
 			return getName();
@@ -296,8 +303,9 @@ public class Macro implements MemoryRecord, RecordInterface {
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		switch (field) {
+		case 0:
+			return FieldType.OBJECT;
 		case 1:
 			return FieldType.STRING;
 		case 2:
@@ -311,7 +319,6 @@ public class Macro implements MemoryRecord, RecordInterface {
 
 	@Override
 	public String name() {
-		int field = 0;
 		switch (field) {
 		case 1:
 			return "name";
@@ -325,12 +332,17 @@ public class Macro implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
+	public Macro start() {
+		return new Macro(store, rec, 1);
+	}
+
+	@Override
 	public Macro next() {
-		return null;
+		return field >= 3 ? null : new Macro(store, rec, field + 1);
 	}
 
 	@Override
 	public Macro copy() {
-		return new Macro(store, rec);
+		return new Macro(store, rec, field);
 	}
 }

@@ -256,19 +256,19 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 			setFunction(valueFunction == null ? null : function);
 		}
 		if (parser.hasSub("fnParm1")) {
-			setFnParm1(new Expr(store()).parse(parser));
+			setFnParm1(Expr.parse(parser, store()));
 		}
 		if (parser.hasSub("fnParm2")) {
-			setFnParm2(new Expr(store()).parse(parser));
+			setFnParm2(Expr.parse(parser, store()));
 		}
 		if (parser.hasSub("conExpr")) {
-			setConExpr(new Expr(store()).parse(parser));
+			setConExpr(Expr.parse(parser, store()));
 		}
 		if (parser.hasSub("conTrue")) {
-			setConTrue(new Expr(store()).parse(parser));
+			setConTrue(Expr.parse(parser, store()));
 		}
 		if (parser.hasSub("conFalse")) {
-			setConFalse(new Expr(store()).parse(parser));
+			setConFalse(Expr.parse(parser, store()));
 		}
 		if (parser.hasField("number")) {
 			setNumber(parser.getLong("number"));
@@ -280,28 +280,19 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 			setString(parser.getString("string"));
 		}
 		if (parser.hasSub("array")) {
-			try (ArrayArray sub = new ArrayArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			ArrayArray sub = new ArrayArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasSub("append")) {
-			try (AppendArray sub = new AppendArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			AppendArray sub = new AppendArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasSub("object")) {
-			try (ObjectArray sub = new ObjectArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			ObjectArray sub = new ObjectArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasField("boolean")) {
 			Boolean valueBoolean = parser.getBoolean("boolean");
@@ -311,22 +302,19 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 		}
 		if (parser.hasField("macro")) {
 			parser.getRelation("macro", (recNr, idx) -> {
-				Macro relRec = new Macro(store());
-				boolean found = relRec.parseKey(parser) != null;
-				setMacro(relRec);
-				return found;
+				Macro relRec = Macro.parseKey(parser, store());
+				ChangeOperator old = (ChangeOperator) this.copy(recNr);
+				old.setMacro(relRec);
+				return relRec != null;
 			}, rec());
 		}
 		if (parser.hasSub("callParms")) {
-			try (CallParmsArray sub = new CallParmsArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			CallParmsArray sub = new CallParmsArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasSub("filter")) {
-			setFilter(new Expr(store()).parse(parser));
+			setFilter(Expr.parse(parser, store()));
 		}
 		if (parser.hasField("filterDeep")) {
 			Boolean valueFilterDeep = parser.getBoolean("filterDeep");
@@ -335,37 +323,28 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 			setFilterDeep(valueFilterDeep);
 		}
 		if (parser.hasSub("filterExpr")) {
-			setFilterExpr(new Expr(store()).parse(parser));
+			setFilterExpr(Expr.parse(parser, store()));
 		}
 		if (parser.hasSub("sort")) {
-			setSort(new Expr(store()).parse(parser));
+			setSort(Expr.parse(parser, store()));
 		}
 		if (parser.hasSub("sortParms")) {
-			try (SortParmsArray sub = new SortParmsArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			SortParmsArray sub = new SortParmsArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasSub("if")) {
-			setIf(new Expr(store()).parse(parser));
+			setIf(Expr.parse(parser, store()));
 		}
 		if (parser.hasSub("ifTrue")) {
-			try (IfTrueArray sub = new IfTrueArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			IfTrueArray sub = new IfTrueArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasSub("ifFalse")) {
-			try (IfFalseArray sub = new IfFalseArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			IfFalseArray sub = new IfFalseArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasField("listenSource")) {
 			setListenSource(parser.getString("listenSource"));
@@ -379,11 +358,6 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 		if (parser.hasField("varNr")) {
 			setVarNr(parser.getInt("varNr"));
 		}
-	}
-
-	@Override
-	default void close() {
-		// nothing
 	}
 
 	default boolean setOperator(int field, Object value) {

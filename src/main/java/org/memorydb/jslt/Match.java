@@ -1,6 +1,5 @@
 package org.memorydb.jslt;
 
-import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.RecordData;
@@ -19,8 +18,6 @@ public interface Match extends MemoryRecord, RecordInterface {
 
 	@Override
 	Store store();
-
-	Match parseKey(Parser parser);
 
 	default ChangeMatch changeMatch() {
 		if (this instanceof MobjectArray)

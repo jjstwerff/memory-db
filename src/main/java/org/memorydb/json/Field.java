@@ -101,37 +101,36 @@ public class Field implements Part {
 		return write.toString();
 	}
 
-	public Field parse(Parser parser, Part parent) {
+	public static Field parse(Parser parser, Part parent) {
+		Field rec = null;
 		while (parser.getSub()) {
-			String name = parser.getString("name");
-			int nextRec = new Part.IndexObject(parent, name).search();
-			if (parser.isDelete(nextRec)) {
-				try (ChangeField record = new ChangeField(this)) {
-					store.free(record.rec());
-				}
+			rec = parseKey(parser, parent);
+			if (parser.isDelete()) {
+				if (rec != null)
+					try (ChangeField record = new ChangeField(rec)) {
+						parent.store().free(record.rec());
+					}
 				continue;
 			}
-			if (nextRec == 0) {
+			if (rec == null) {
 				try (ChangeField record = new ChangeField(parent, 0)) {
-					record.setName(name);
+					record.setName(parser.getString("name"));
 					record.parseFields(parser);
 				}
 			} else {
-				try (ChangeField record = new ChangeField(this)) {
+				try (ChangeField record = new ChangeField(rec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
-		return this;
+		return rec;
 	}
 
-	@Override
-	public boolean parseKey(Parser parser) {
-		Part parent = up();
+	public static Field parseKey(Parser parser, Part parent) {
 		String name = parser.getString("name");
-		int nextRec = new Part.IndexObject(parent, name).search();
+		int rec = new Part.IndexObject(parent, name).search();
 		parser.finishRelation();
-		return nextRec != 0;
+		return rec <= 0 ? null : new Field(parent.store(), rec);
 	}
 
 	@Override

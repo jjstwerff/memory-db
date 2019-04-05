@@ -1,6 +1,5 @@
 package org.memorydb.jslt;
 
-import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.RecordData;
@@ -23,9 +22,6 @@ public interface Operator extends ResultType {
 	default int resulttypePosition() {
 		return operatorPosition() + 13;
 	}
-
-	@Override
-	Operator parseKey(Parser parser);
 
 	default ChangeOperator changeOperator() {
 		if (this instanceof ObjectArray)
@@ -206,7 +202,7 @@ public interface Operator extends ResultType {
 		return new Expr(store(), getOperation() != Operation.FILTER ? 0 : store().getInt(rec(), operatorPosition() + 1));
 	}
 
-	@FieldData(name = "filterDeep", type = "BOOLEAN", related = Expr.class, when = "FILTER", mandatory = false)
+	@FieldData(name = "filterDeep", type = "BOOLEAN", when = "FILTER", mandatory = false)
 	default boolean isFilterDeep() {
 		return getOperation() != Operation.FILTER ? false : (store().getByte(rec(), operatorPosition() + 5) & 1) > 0;
 	}

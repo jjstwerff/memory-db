@@ -9,14 +9,14 @@ public class Field {
 	private final Type type;
 	private final Record related;
 	private boolean auto; // auto increment type field
-	private int pos; // bit position within the parent record (bits for BOOLEAN / NULL_BOOLEAN fields)
+	private int pos; // bit position within the parent record (bits for BOOLEAN / NULL_BOOLEAN)
 	private Index index = null; // possible index on related record
 	private List<String> values;
 	private boolean key;
 	private boolean mandatory = false;
 	private String defaultValue;
-	private String when = null; // indicate that this field is optional given that the condition field is the given value
-	private boolean condition = false; // indicate that this field is a condition to other fields (for now only ENUMERATE type allowed)
+	private String when = null; // this field is optional given that the condition field is the given value
+	private boolean condition = false; // this is a condition to other fields (only ENUMERATE type allowed)
 
 	public Field(Record table, String name, Type type, String... values) {
 		if (type == Type.RELATION || type == Type.ARRAY || type == Type.SUB)
@@ -381,12 +381,12 @@ public class Field {
 		case OBJECT:
 			return "return new " + related.getName() + "(" + store + ", " + test + " ? 0 : " + store + ".getInt(" + apos + "));";
 		case SET:
-			return "return " + test + " ? null : new Index" + getUpperName() + "(this, new " + related.getName() + "(" + store + "));";
+			return "return " + test + " ? null : new Index" + getUpperName() + "(this);";
 		case STRING:
 			return "return " + test + " ? null : " + store + ".getString(" + store + ".getInt(" + apos + "));";
 		case STRING_POINTER:
-			return "return " + test + " ? null : " + store + ".getString(store.getInt(" + apos + "), " + store + ".getInt(rec, alloc, idx * " + table.getSize() + " + "
-					+ (8 + (pos >> 3)) + "));";
+			return "return " + test + " ? null : " + store + ".getString(store.getInt(" + apos + "), " + store + ".getInt(rec, alloc, idx * "
+					+ table.getSize() + " + " + (8 + (pos >> 3)) + "));";
 		default:
 			throw new GenerateException("Unknown type: '" + type + "'");
 		}
@@ -424,8 +424,8 @@ public class Field {
 		case ARRAY:
 			return null;
 		case BOOLEAN:
-			return test + "store.setByte(rec, " + (pos >> 3) + ", (store.getByte(rec, " + (pos >> 3) + ") & " + (255 - (1 << (pos & 7))) + ") + (value ? " + (1 << (pos & 7))
-					+ " : 0))" + end;
+			return test + "store.setByte(rec, " + (pos >> 3) + ", (store.getByte(rec, " + (pos >> 3) + ") & " + (255 - (1 << (pos & 7)))
+					+ ") + (value ? " + (1 << (pos & 7)) + " : 0))" + end;
 		case BYTE:
 			return test + "store.setByte(rec, " + (pos >> 3) + ", value)" + end;
 		case DATE:
@@ -434,7 +434,8 @@ public class Field {
 					+ "store.setLong(rec, " + (pos >> 3) + ", value == null ? 0 : DateTime.getLong(value))" + end;
 		case ENUMERATE:
 			return test + "if (value == null)\n" //
-					+ (mandatory ? "\t\t\t" + setEnum("store.", false, "0") + ";\n" : "\t\t\tthrow new MutationException(\"Mandatory '" + name + "' field\");\n") //
+					+ (mandatory ? "\t\t\t" + setEnum("store.", false, "0") + ";\n"
+							: "\t\t\tthrow new MutationException(\"Mandatory '" + name + "' field\");\n") //
 					+ "\t\t" + setEnum("store.", false, "1 + value.ordinal()") + end;
 		case FLOAT:
 			return test + (mandatory ? "if (value == Integer.MIN_VALUE)\n" //
@@ -451,8 +452,8 @@ public class Field {
 		case NULL_BOOLEAN:
 			return test + (mandatory ? "if (value == null)\n" //
 					+ "			throw new MutationException(\"Mandatory '" + name + "' field\");\n" : "") //
-					+ "store.setByte(rec, " + (pos >> 3) + ", (store.getByte(rec, " + (pos >> 3) + ") & " + (255 - (3 << (pos & 7))) + ") + (value == null ? 0 : value ? "
-					+ (3 << (pos & 7)) + " : " + (1 << (pos & 7)) + "))" + end;
+					+ "store.setByte(rec, " + (pos >> 3) + ", (store.getByte(rec, " + (pos >> 3) + ") & " + (255 - (3 << (pos & 7)))
+					+ ") + (value == null ? 0 : value ? " + (3 << (pos & 7)) + " : " + (1 << (pos & 7)) + "))" + end;
 		case RELATION:
 			StringBuilder extra = new StringBuilder();
 			extra.append(end);
@@ -464,7 +465,8 @@ public class Field {
 		case STRING:
 			return test + "store.setInt(rec, " + (pos >> 3) + ", store.putString(value))" + end;
 		case STRING_POINTER:
-			return test + "store.setInt(rec, " + (pos >> 3) + ", value.getPos()); store.setInt(rec, " + (4 + (pos >> 3)) + ", value.getLength())" + end;
+			return test + "store.setInt(rec, " + (pos >> 3) + ", value.getPos()); store.setInt(rec, " + (4 + (pos >> 3)) + ", value.getLength())"
+					+ end;
 		default:
 			throw new GenerateException("Unknown type: '" + type + "'");
 		}
@@ -494,7 +496,8 @@ public class Field {
 		case ARRAY:
 			return null;
 		case BOOLEAN:
-			return test + store + ".setByte(" + apos + ", (" + store + ".getByte(" + apos + ") & " + (255 - (1 << (pos & 7))) + ") + (value ? " + (1 << (pos & 7)) + " : 0))" + end;
+			return test + store + ".setByte(" + apos + ", (" + store + ".getByte(" + apos + ") & " + (255 - (1 << (pos & 7))) + ") + (value ? "
+					+ (1 << (pos & 7)) + " : 0))" + end;
 		case BYTE:
 			return test + store + ".setByte(" + apos + ", value)" + end;
 		case DATE:
@@ -516,8 +519,8 @@ public class Field {
 		case LONG:
 			return test + store + ".setLong(" + apos + ", value)" + end;
 		case NULL_BOOLEAN:
-			return test + store + ".setByte(" + apos + ", (" + store + ".getByte(" + apos + ") & " + (255 - (3 << (pos & 7))) + ") + (value == null ? 0 : value ? "
-					+ (3 << (pos & 7)) + " : " + (1 << (pos & 7)) + "))" + end;
+			return test + store + ".setByte(" + apos + ", (" + store + ".getByte(" + apos + ") & " + (255 - (3 << (pos & 7)))
+					+ ") + (value == null ? 0 : value ? " + (3 << (pos & 7)) + " : " + (1 << (pos & 7)) + "))" + end;
 		case RELATION:
 		case OBJECT:
 			return test + store + ".setInt(" + apos + ", value == null ? 0 : value.rec())" + end;
@@ -526,7 +529,8 @@ public class Field {
 		case STRING:
 			return test + store + ".setInt(" + apos + ", " + store + ".putString(value))" + end;
 		case STRING_POINTER:
-			return store + ".setInt(" + apos + ", value.getPos()); " + store + ".setInt(alloc, idx * " + table.getSize() + " + " + (8 + (pos >> 3)) + ", value.getLength())" + end;
+			return store + ".setInt(" + apos + ", value.getPos()); " + store + ".setInt(alloc, idx * " + table.getSize() + " + " + (8 + (pos >> 3))
+					+ ", value.getLength())" + end;
 		default:
 			throw new GenerateException("Unknown type: '" + type + "'");
 		}
@@ -560,10 +564,11 @@ public class Field {
 				if (def.equals("false"))
 					res.append(store + "setByte(" + apos + ", " + store + "getByte(" + apos + ") & " + (255 - (1 << (fps & 7))) + ")");
 				else if (def.equals("true"))
-					res.append(store + "setByte(" + apos + ", (" + store + "getByte(" + apos + ") & " + (255 - (1 << (fps & 7))) + ") + (" + (1 << (fps & 7)) + "))");
+					res.append(store + "setByte(" + apos + ", (" + store + "getByte(" + apos + ") & " + (255 - (1 << (fps & 7))) + ") + ("
+							+ (1 << (fps & 7)) + "))");
 				else
-					res.append(store + "setByte(" + apos + ", (" + store + "getByte(" + apos + ") & " + (255 - (1 << (fps & 7))) + ") + (" + def + " ? " + (1 << (fps & 7))
-							+ " : 0))");
+					res.append(store + "setByte(" + apos + ", (" + store + "getByte(" + apos + ") & " + (255 - (1 << (fps & 7))) + ") + (" + def
+							+ " ? " + (1 << (fps & 7)) + " : 0))");
 				break;
 			case BYTE:
 				res.append(store + "setByte(" + apos + ", " + def + ")");
@@ -593,8 +598,8 @@ public class Field {
 				res.append(store + "setLong(" + apos + ", " + def + ")");
 				break;
 			case NULL_BOOLEAN:
-				res.append(store + "setByte(" + apos + ", (store.getByte(" + apos + ") & " + (255 - (3 << (fps & 7))) + ") + (value == null ? 0 : " + def + " ? " + (3 << (fps & 7))
-						+ " : " + (1 << (pos & 7)) + "))");
+				res.append(store + "setByte(" + apos + ", (store.getByte(" + apos + ") & " + (255 - (3 << (fps & 7))) + ") + (value == null ? 0 : "
+						+ def + " ? " + (3 << (fps & 7)) + " : " + (1 << (pos & 7)) + "))");
 				break;
 			case OBJECT:
 				res.append(store + "setInt(" + apos + ", 0)");
@@ -609,8 +614,8 @@ public class Field {
 				res.append(store + "setInt(" + apos + ", " + (def.equals("null") ? "0" : "store.putString(" + def + ")") + ")");
 				break;
 			case STRING_POINTER:
-				res.append(store + "setInt(" + apos + ", " + def + ".getPos()); " + store + "setInt(alloc, idx * " + table.getSize() + " + " + (8 + (fps >> 3)) + ", " + def
-						+ ".getLength())");
+				res.append(store + "setInt(" + apos + ", " + def + ".getPos()); " + store + "setInt(alloc, idx * " + table.getSize() + " + "
+						+ (8 + (fps >> 3)) + ", " + def + ".getLength())");
 				break;
 			default:
 				break;
@@ -633,9 +638,10 @@ public class Field {
 		if (b == 8)
 			return store + "setByte" + code + (pos >> 3) + ", " + value + ")";
 		if ((pos & 7) == 0)
-			return store + "setByte" + code + (pos >> 3) + ", (" + store + "getByte" + code + (pos >> 3) + ") & " + (255 - ((2 << b) - 1) << (pos & 7)) + ") + " + value + ")";
-		return store + "setByte" + code + (pos >> 3) + ", (" + store + "getByte" + code + (pos >> 3) + ") & " + (255 - ((2 << b) - 1) << (pos & 7)) + ") + (" + value + " << "
-				+ (pos & 7) + "))";
+			return store + "setByte" + code + (pos >> 3) + ", (" + store + "getByte" + code + (pos >> 3) + ") & "
+					+ (255 - ((2 << b) - 1) << (pos & 7)) + ") + " + value + ")";
+		return store + "setByte" + code + (pos >> 3) + ", (" + store + "getByte" + code + (pos >> 3) + ") & " + (255 - ((2 << b) - 1) << (pos & 7))
+				+ ") + (" + value + " << " + (pos & 7) + "))";
 	}
 
 	public Record getRelated() {
@@ -678,7 +684,7 @@ public class Field {
 	}
 
 	public String getArrayFields() {
-		return related.getArrayFields(table);
+		return related.getArrayFields(this);
 	}
 
 	public boolean isCondition() {

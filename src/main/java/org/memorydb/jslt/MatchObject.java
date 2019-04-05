@@ -3,7 +3,6 @@ package org.memorydb.jslt;
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
@@ -13,17 +12,21 @@ import org.memorydb.structure.Store;
 public class MatchObject implements Match {
 	/* package private */ final Store store;
 	protected final int rec;
+	private final int field;
 	/* package private */ static final int RECORD_SIZE = 17;
-
-	public MatchObject(Store store) {
-		this.store = store;
-		this.rec = 0;
-	}
 
 	public MatchObject(Store store, int rec) {
 		rec = store.correct(rec);
 		this.store = store;
 		this.rec = rec;
+		this.field = 0;
+	}
+
+	public MatchObject(Store store, int rec, int field) {
+		rec = store.correct(rec);
+		this.store = store;
+		this.rec = rec;
+		this.field = field;
 	}
 
 	@Override
@@ -75,30 +78,31 @@ public class MatchObject implements Match {
 		return write.toString();
 	}
 
-	public static void parse(Parser parser, Store store) {
+	public static MatchObject parse(Parser parser, Store store) {
+		MatchObject rec = null;
 		while (parser.getSub()) {
-			int nextRec = 0;
-			if (parser.isDelete(nextRec)) {
-				try (ChangeMatchObject record = new ChangeMatchObject(store, nextRec)) {
+			rec = parseKey(parser, store);
+			if (parser.isDelete()) {
+				if (rec != null) {
+					ChangeMatchObject record = new ChangeMatchObject(rec);
 					store.free(record.rec());
 				}
 				continue;
 			}
-			if (nextRec == 0) {
-				try (ChangeMatchObject record = new ChangeMatchObject(store, 0)) {
+			if (rec == null) {
+				ChangeMatchObject record = new ChangeMatchObject(store, 0);
 
-					record.parseFields(parser);
-				}
+				record.parseFields(parser);
+				return record;
 			} else {
-				try (ChangeMatchObject record = new ChangeMatchObject(store, nextRec)) {
-					record.parseFields(parser);
-				}
+				ChangeMatchObject record = new ChangeMatchObject(rec);
+				record.parseFields(parser);
 			}
 		}
+		return rec;
 	}
 
-	@Override
-	public MatchObject parseKey(Parser parser) {
+	public static MatchObject parseKey(Parser parser, Store store) {
 		int nextRec = 0;
 		parser.finishRelation();
 		return nextRec <= 0 ? null : new MatchObject(store, nextRec);
@@ -106,29 +110,31 @@ public class MatchObject implements Match {
 
 	@Override
 	public Object java() {
-		int field = 0;
 		return Match.super.getMatch(field);
 	}
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		return Match.super.typeMatch(field);
 	}
 
 	@Override
 	public String name() {
-		int field = 0;
 		return Match.super.nameMatch(field);
 	}
 
 	@Override
+	public MatchObject start() {
+		return new MatchObject(store, rec, 1);
+	}
+
+	@Override
 	public MatchObject next() {
-		return null;
+		return field >= 15 ? null : new MatchObject(store, rec, field + 1);
 	}
 
 	@Override
 	public MatchObject copy() {
-		return new MatchObject(store, rec);
+		return new MatchObject(store, rec, field);
 	}
 }

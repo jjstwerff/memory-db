@@ -1,6 +1,7 @@
 package org.memorydb.json;
 
-import org.memorydb.file.Parser;
+import java.util.Iterator;
+
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.RecordData;
@@ -12,7 +13,6 @@ import org.memorydb.structure.TreeIndex;
 import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -24,8 +24,6 @@ public interface Part extends MemoryRecord, RecordInterface {
 
 	@Override
 	Store store();
-
-	boolean parseKey(Parser parser);
 
 	default ChangePart changePart() {
 		if (this instanceof Field)
@@ -53,8 +51,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 		}
 	}
 
-	@FieldData(name = "type", type = "ENUMERATE", enumerate = { "ARRAY", "BOOLEAN", "FLOAT", "NUMBER", "NULL", "OBJECT",
-			"STRING" }, condition = true, mandatory = false)
+	@FieldData(name = "type", type = "ENUMERATE", enumerate = { "ARRAY", "BOOLEAN", "FLOAT", "NUMBER", "NULL", "OBJECT", "STRING" }, condition = true, mandatory = false)
 	default Type getType() {
 		int data = rec() == 0 ? 0 : store().getByte(rec(), partPosition() + 0) & 31;
 		if (data <= 0)
@@ -67,21 +64,12 @@ public interface Part extends MemoryRecord, RecordInterface {
 		return getType() != Type.ARRAY ? null : new ArrayArray(this, -1);
 	}
 
+	default ArrayArray getArray(int index) {
+		return getType() != Type.ARRAY ? new ArrayArray(store(), 0, -1) : new ArrayArray(this, index);
+	}
+
 	default ArrayArray addArray() {
 		return getType() != Type.ARRAY ? new ArrayArray(store(), 0, -1) : getArray().add();
-	}
-
-	default RecordInterface index(int index) {
-		if (index < 0 || index >= size() || getType() != Type.ARRAY)
-			return null;
-		return new ArrayArray(this, index);
-	}
-
-	default RecordInterface field(String name) {
-		if (name == null || getType() != Type.OBJECT)
-			return null;
-		int pos = new IndexObject(this, name).search();
-		return pos <= 0 ? null : new Field(store(), pos);
 	}
 
 	@FieldData(name = "boolean", type = "BOOLEAN", when = "BOOLEAN", mandatory = false)
@@ -104,12 +92,17 @@ public interface Part extends MemoryRecord, RecordInterface {
 		return getType() != Type.OBJECT ? null : new IndexObject(this);
 	}
 
+	default Field getObject(String key1) {
+		int res = new IndexObject(this, key1).search();
+		return res <= 0 ? null : new Field(store(), res);
+	}
+
 	default ChangeField addObject() {
 		return new ChangeField(this, 0);
 	}
 
-	/* package private */ class IndexObject extends TreeIndex implements Iterable<Field> {
-		private Part record;
+	/* package private */ static class IndexObject extends TreeIndex implements Iterable<Field> {
+		private final Part record;
 
 		public IndexObject(Part record) {
 			super(record.store(), null, 64, 9);
@@ -179,10 +172,8 @@ public interface Part extends MemoryRecord, RecordInterface {
 				@Override
 				public Field next() {
 					int n = nextRec;
-					if (n <= 0)
-						return null;
 					nextRec = toNext(nextRec);
-					return new Field(record.store(), n);
+					return n <= 0 ? null : new Field(store, n);
 				}
 			};
 		}
@@ -201,7 +192,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 		if (fldArray != null) {
 			write.sub("array");
 			for (ArrayArray sub : fldArray)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		if (getType() == Type.BOOLEAN)
@@ -212,7 +203,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 		if (fldObject != null) {
 			write.sub("object");
 			for (Field sub : fldObject)
-				sub.output(write, iterate - 1);
+				sub.output(write, iterate);
 			write.endSub();
 		}
 		write.field("value", getValue());
@@ -311,6 +302,19 @@ public interface Part extends MemoryRecord, RecordInterface {
 		}
 	}
 
+	default ArrayArray index(int index) {
+		if (index < 0 || index >= size() || getType() != Type.ARRAY)
+			return null;
+		return new ArrayArray(this, index);
+	}
+
+	default RecordInterface field(String name) {
+		if (name == null || getType() != Type.OBJECT)
+			return null;
+		int pos = new IndexObject(this, name).search();
+		return pos <= 0 ? null : new Field(store(), pos);
+	}
+
 	@Override
 	default int size() {
 		if (getType() != Type.ARRAY)
@@ -319,9 +323,5 @@ public interface Part extends MemoryRecord, RecordInterface {
 		if (array == null)
 			return 0;
 		return array.size();
-	}
-
-	default FieldType typePart() {
-		return getFieldType();
 	}
 }

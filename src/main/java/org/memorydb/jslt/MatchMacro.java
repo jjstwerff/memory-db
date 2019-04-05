@@ -57,7 +57,6 @@ public class MatchMacro {
 				inter.setStackFrame(previousFrame);
 				return null;
 			case FIELD:
-				int f = -1;
 				RecordInterface rec = cur instanceof RecordInterface ? (RecordInterface) cur : null;
 				if (rec != null && rec.type() == FieldType.OBJECT)
 					data = rec.field(matching.getField()); // search the field name

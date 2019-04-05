@@ -49,7 +49,7 @@ public class JsltStructure {
 		oper.field("macro", Type.RELATION, macro).when("CALL");
 		oper.field("callParms", Type.ARRAY, step).when("CALL");
 		oper.field("filter", Type.OBJECT, expr).when("FILTER");
-		oper.field("filterDeep", Type.BOOLEAN, expr).when("FILTER");
+		oper.field("filterDeep", Type.BOOLEAN).when("FILTER");
 		oper.field("filterExpr", Type.OBJECT, expr).when("FILTER");
 		oper.field("sort", Type.OBJECT, expr).when("SORT");
 		oper.field("sortParms", Type.ARRAY, step).when("SORT");

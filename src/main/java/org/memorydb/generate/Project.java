@@ -79,7 +79,7 @@ public class Project {
 	}
 
 	public void verify() {
-		for(Record record: tables.values())
+		for (Record record : tables.values())
 			record.verify();
 	}
 
@@ -101,8 +101,8 @@ public class Project {
 
 	public Collection<String> getImports() {
 		Set<String> imports = new TreeSet<>();
-		for (Index i: indexes) {
-			for (String f: i.getJavaTypes()) {
+		for (Index i : indexes) {
+			for (String f : i.getJavaTypes()) {
 				if (f.equals("LocalDateTime"))
 					imports.add("java.time.LocalDateTime");
 			}

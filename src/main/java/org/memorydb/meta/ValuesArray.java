@@ -9,7 +9,6 @@ import org.memorydb.structure.ChangeInterface;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
@@ -103,13 +102,17 @@ public class ValuesArray implements MemoryRecord, ChangeInterface, Iterable<Valu
 	public ValuesArray add() {
 		if (parent.rec() == 0)
 			return this;
-		alloc = alloc == 0 ? store.allocate(8 + 12) : store.resize(alloc, (12 + (idx + 1) * 8) / 8);
+		if (alloc == 0) {
+			alloc = store.allocate(8 + 12);
+			up(parent);
+		} else
+			alloc = store.resize(alloc, (12 + (idx + 1) * 8) / 8);
 		store.setInt(parent.rec(), 13, alloc);
-		store.setInt(alloc, 4, size+1);
-		ValuesArray res =  new ValuesArray(up(), size);
+		size++;
+		store.setInt(alloc, 4, size);
+		ValuesArray res = new ValuesArray(parent, size - 1);
 		res.setValue(null);
 		res.setDescription(null);
-		size++;
 		return res;
 	}
 
@@ -198,11 +201,6 @@ public class ValuesArray implements MemoryRecord, ChangeInterface, Iterable<Valu
 	}
 
 	@Override
-	public void close() {
-		// nothing
-	}
-
-	@Override
 	public String name() {
 		int field = 0;
 		if (idx == -1)
@@ -265,7 +263,17 @@ public class ValuesArray implements MemoryRecord, ChangeInterface, Iterable<Valu
 	}
 
 	@Override
-	public RecordInterface next() {
+	public ValuesArray index(int idx) {
+		return null;
+	}
+
+	@Override
+	public ValuesArray start() {
+		return null;
+	}
+
+	@Override
+	public ValuesArray next() {
 		return null;
 	}
 

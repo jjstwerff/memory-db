@@ -6,11 +6,9 @@ import java.util.NoSuchElementException;
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.handler.CorruptionException;
-import org.memorydb.structure.ChangeInterface;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
@@ -251,23 +249,13 @@ public class ObjectArray implements MemoryRecord, ChangeOperator, Iterable<Objec
 		setName(null);
 		parseOperator(parser);
 		if (parser.hasSub("name")) {
-			setName(new Expr(store).parse(parser));
+			setName(Expr.parse(parser, store()));
 		}
 	}
 
 	@Override
 	public int operatorPosition() {
 		return idx * 22 + 17 + 4;
-	}
-
-	@Override
-	public ObjectArray parseKey(Parser parser) {
-		return null;
-	}
-
-	@Override
-	public void close() {
-		// nothing
 	}
 
 	@Override
@@ -331,7 +319,17 @@ public class ObjectArray implements MemoryRecord, ChangeOperator, Iterable<Objec
 	}
 
 	@Override
-	public RecordInterface next() {
+	public ObjectArray index(int idx) {
+		return null;
+	}
+
+	@Override
+	public ObjectArray start() {
+		return null;
+	}
+
+	@Override
+	public ObjectArray next() {
 		return null;
 	}
 

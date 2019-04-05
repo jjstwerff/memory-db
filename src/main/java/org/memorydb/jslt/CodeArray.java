@@ -5,10 +5,8 @@ import java.util.NoSuchElementException;
 
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
-import org.memorydb.structure.ChangeInterface;
 import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
@@ -174,16 +172,6 @@ public class CodeArray implements MemoryRecord, ChangeOperator, Iterable<CodeArr
 	}
 
 	@Override
-	public CodeArray parseKey(Parser parser) {
-		return null;
-	}
-
-	@Override
-	public void close() {
-		// nothing
-	}
-
-	@Override
 	public String name() {
 		int field = 0;
 		if (idx == -1)
@@ -234,7 +222,17 @@ public class CodeArray implements MemoryRecord, ChangeOperator, Iterable<CodeArr
 	}
 
 	@Override
-	public RecordInterface next() {
+	public CodeArray index(int idx) {
+		return null;
+	}
+
+	@Override
+	public CodeArray start() {
+		return null;
+	}
+
+	@Override
+	public CodeArray next() {
 		return null;
 	}
 

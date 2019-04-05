@@ -17,19 +17,18 @@ public class InterSort implements RecordInterface, Comparator<RecordInterface> {
 	public int compare(RecordInterface o1, RecordInterface o2) {
 		boolean desc = false;
 		for (int i = 0; i < parms.size(); i++) {
-			try (SortParmsArray parm = new SortParmsArray(parms, i)) {
-				if (parm.getOperation() == Operation.BOOLEAN) {
-					desc = parm.isBoolean();
-					continue;
-				}
-				interpreter.setCurrent(o1.java());
-				Object r1 = interpreter.inter(parm);
-				interpreter.setCurrent(o2.java());
-				Object r2 = interpreter.inter(parm);
-				int r = interpreter.compare(r1, r2);
-				if (r != 0)
-					return desc ? -r : r;
+			SortParmsArray parm = new SortParmsArray(parms, i);
+			if (parm.getOperation() == Operation.BOOLEAN) {
+				desc = parm.isBoolean();
+				continue;
 			}
+			interpreter.setCurrent(o1.java());
+			Object r1 = interpreter.inter(parm);
+			interpreter.setCurrent(o2.java());
+			Object r2 = interpreter.inter(parm);
+			int r = interpreter.compare(r1, r2);
+			if (r != 0)
+				return desc ? -r : r;
 		}
 		return 0;
 	}

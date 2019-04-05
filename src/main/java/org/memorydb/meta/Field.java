@@ -17,22 +17,32 @@ import java.util.Map;
 public class Field implements MemoryRecord, RecordInterface {
 	/* package private */ final Store store;
 	protected final int rec;
+	private final int field;
 	/* package private */ static final int RECORD_SIZE = 55;
-
-	public Field(Store store) {
-		this.store = store;
-		this.rec = 0;
-	}
 
 	public Field(Store store, int rec) {
 		rec = store.correct(rec);
 		this.store = store;
 		this.rec = rec;
+		this.field = 0;
+	}
+
+	public Field(Store store, int rec, int field) {
+		rec = store.correct(rec);
+		this.store = store;
+		this.rec = rec;
+		this.field = field;
 	}
 
 	@Override
 	public int rec() {
 		return rec;
+	}
+
+	@Override
+	public Field copy(int newRec) {
+		assert store.validate(newRec);
+		return new Field(store, newRec);
 	}
 
 	@Override
@@ -236,46 +246,49 @@ public class Field implements MemoryRecord, RecordInterface {
 		return write.toString();
 	}
 
-	public Field parse(Parser parser, Record parent) {
+	public static Field parse(Parser parser, Record parent) {
+		Field rec = null;
 		while (parser.getSub()) {
-			String name = parser.getString("name");
-			int nextRec = parent.new IndexFieldName(name).search();
-			if (parser.isDelete(nextRec)) {
-				try (ChangeField record = new ChangeField(this)) {
-					store.free(record.rec());
-				}
+			rec = parseKey(parser, parent);
+			if (parser.isDelete()) {
+				if (rec != null)
+					try (ChangeField record = new ChangeField(rec)) {
+						parent.store.free(record.rec());
+					}
 				continue;
 			}
-			if (nextRec == 0) {
+			if (rec == null) {
 				try (ChangeField record = new ChangeField(parent, 0)) {
+					String name = parser.getString("name");
 					record.setName(name);
 					record.parseFields(parser);
+					return record;
 				}
 			} else {
-				try (ChangeField record = new ChangeField(this)) {
+				try (ChangeField record = new ChangeField(rec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
-		return this;
+		return rec;
 	}
 
-	public Field parseKey(Parser parser) {
+	public static Field parseKey(Parser parser, Record parent) {
 		int rec[] = new int[1];
+		Project on = parent.up();
 		parser.getRelation("Record", (recNr, idx) -> {
-			rec[0] = up().parseKey(parser).rec();
+			rec[0] = Record.parseKey(parser, on).rec();
 			return true;
-		}, rec());
-		Record parent = rec[0] > 0 ? up().copy(rec[0]) : up();
+		}, -1);
+		parent = rec[0] > 0 ? parent.copy(rec[0]) : parent;
 		String name = parser.getString("name");
 		int nextRec = parent.new IndexFieldName(name).search();
 		parser.finishRelation();
-		return nextRec == 0 ? null: new Field(store, nextRec);
+		return nextRec <= 0 ? null : new Field(parent.store(), nextRec);
 	}
 
 	@Override
 	public Object java() {
-		int field = 0;
 		switch (field) {
 		case 1:
 			return getName();
@@ -318,8 +331,9 @@ public class Field implements MemoryRecord, RecordInterface {
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		switch (field) {
+		case 0:
+			return FieldType.OBJECT;
 		case 1:
 			return FieldType.STRING;
 		case 2:
@@ -365,7 +379,6 @@ public class Field implements MemoryRecord, RecordInterface {
 
 	@Override
 	public String name() {
-		int field = 0;
 		switch (field) {
 		case 1:
 			return "name";
@@ -411,18 +424,17 @@ public class Field implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
+	public Field start() {
+		return new Field(store, rec, 1);
+	}
+
+	@Override
 	public Field next() {
-		return null;
+		return field >= 19 ? null : new Field(store, rec, field + 1);
 	}
 
 	@Override
 	public Field copy() {
-		return new Field(store, rec);
-	}
-
-	@Override
-	public Field copy(int rec) {
-		assert store.validate(rec);
-		return new Field(store, rec);
+		return new Field(store, rec, field);
 	}
 }

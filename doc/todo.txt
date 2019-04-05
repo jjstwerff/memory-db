@@ -1,20 +1,16 @@
 Fix code generation for new model:
-- should parseKey return the normal record of the change... we can always change the normal
-- should parse return the first found record?
-- better implement AddArray with underlying start/next/index
-
-- fix code generation on Meta data
-	remove rec assignments or rec(..) calls
-- fix game world
-	array names duplicates
-- fix first unit tests
-	allocate space again
-- simple iterators
+- start tests on structures including parsing
 - add non-boxing methods
+- array names duplicates
+	automatic name of the record where it is used & name of parameter
+	possibly add numbers when more than one 
+- record without place in the structure (no index, no parent)
 - add a couple of more unit tests for edge cases
- fix first unit tests
+    fix first unit tests
 	introduce world data & generate & checks on it
 	simple iterators / up / search / long
+- deletes of records
+	verify to not add deleted records to indexes.. validation in unittest?
 
 MatchMacro:
 - validate that the stack is empty

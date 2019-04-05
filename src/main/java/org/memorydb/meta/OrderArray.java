@@ -9,7 +9,6 @@ import org.memorydb.structure.ChangeInterface;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
@@ -94,16 +93,25 @@ public class OrderArray implements MemoryRecord, ChangeInterface, Iterable<Order
 		return size;
 	}
 
+	public void clear() {
+		size = 0;
+		store.setInt(alloc, 4, size);
+	}
+
 	@Override
 	public OrderArray add() {
 		if (parent.rec() == 0)
 			return this;
-		alloc = alloc == 0 ? store.allocate(4 + 12) : store.resize(alloc, (12 + (idx + 1) * 4) / 8);
+		if (alloc == 0) {
+			alloc = store.allocate(4 + 12);
+			up(parent);
+		} else
+			alloc = store.resize(alloc, (12 + (idx + 1) * 4) / 8);
 		store.setInt(parent.rec(), 17, alloc);
-		store.setInt(alloc, 4, size + 1);
-		OrderArray res = new OrderArray(parent, size);
-		res.setField(null);
 		size++;
+		store.setInt(alloc, 4, size);
+		OrderArray res = new OrderArray(parent, size - 1);
+		res.setField(null);
 		return res;
 	}
 
@@ -172,18 +180,12 @@ public class OrderArray implements MemoryRecord, ChangeInterface, Iterable<Order
 		setField(null);
 		if (parser.hasField("field")) {
 			parser.getRelation("field", (recNr, idx) -> {
-				Field relRec = up();
-				if (relRec != null)
-					relRec = relRec.parseKey(parser);
-				setField(relRec);
+				Field relRec = Field.parseKey(parser, up().up());
+				OrderArray old = new OrderArray(store, recNr, idx);
+				old.setField(relRec);
 				return relRec != null;
 			}, idx);
 		}
-	}
-
-	@Override
-	public void close() {
-		// nothing
 	}
 
 	@Override
@@ -239,7 +241,17 @@ public class OrderArray implements MemoryRecord, ChangeInterface, Iterable<Order
 	}
 
 	@Override
-	public RecordInterface next() {
+	public OrderArray index(int idx) {
+		return null;
+	}
+
+	@Override
+	public OrderArray start() {
+		return null;
+	}
+
+	@Override
+	public OrderArray next() {
 		return null;
 	}
 

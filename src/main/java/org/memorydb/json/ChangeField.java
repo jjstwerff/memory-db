@@ -6,14 +6,14 @@ import org.memorydb.structure.ChangeInterface;
 /**
  * Automatically generated record class for table Field
  */
-public class ChangeField extends Field implements ChangePart {
-	/* package private */ ChangeField(Part parent, int recNr) {
-		super(parent.store(), recNr == 0 ? parent.store().allocate(Field.RECORD_SIZE) : recNr);
-		if (recNr == 0) {
+public class ChangeField extends Field implements AutoCloseable, ChangePart {
+	/* package private */ ChangeField(Part parent, int rec) {
+		super(parent.store(), rec == 0 ? parent.store().allocate(Field.RECORD_SIZE) : rec);
+		if (rec == 0) {
+			defaultPart();
 			setName(null);
 			up(parent);
-		}
-		if (recNr != 0) {
+		} else {
 			new Part.IndexObject(this).remove(rec);
 		}
 	}
@@ -48,7 +48,7 @@ public class ChangeField extends Field implements ChangePart {
 
 	@Override
 	public void close() {
-		new Part.IndexObject(up()).insert(rec());
+		new Part.IndexObject(this).insert(rec());
 	}
 
 	@Override
@@ -75,5 +75,11 @@ public class ChangeField extends Field implements ChangePart {
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public ChangeField copy(int newRec) {
+		assert store.validate(newRec);
+		return new ChangeField(up(), newRec);
 	}
 }

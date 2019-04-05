@@ -141,7 +141,7 @@ public interface ChangeMatch extends ChangeInterface, Match {
 
 	default void parseMatch(Parser parser) {
 		if (parser.hasSub("variable")) {
-			setVariable(new Variable(store()).parse(parser));
+			setVariable(Variable.parse(parser, store()));
 		}
 		if (parser.hasField("type")) {
 			String valueType = parser.getString("type");
@@ -151,12 +151,9 @@ public interface ChangeMatch extends ChangeInterface, Match {
 			setType(valueType == null ? null : type);
 		}
 		if (parser.hasSub("marray")) {
-			try (MarrayArray sub = new MarrayArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			MarrayArray sub = new MarrayArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasField("boolean")) {
 			Boolean valueBoolean = parser.getBoolean("boolean");
@@ -174,12 +171,9 @@ public interface ChangeMatch extends ChangeInterface, Match {
 			setString(parser.getString("string"));
 		}
 		if (parser.hasSub("mobject")) {
-			try (MobjectArray sub = new MobjectArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			MobjectArray sub = new MobjectArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasField("cparm")) {
 			setCparm(parser.getString("cparm"));
@@ -189,22 +183,19 @@ public interface ChangeMatch extends ChangeInterface, Match {
 		}
 		if (parser.hasField("macro")) {
 			parser.getRelation("macro", (recNr, idx) -> {
-				Macro relRec = new Macro(store());
-				boolean found = relRec.parseKey(parser) != null;
-				setMacro(relRec);
-				return found;
+				Macro relRec = Macro.parseKey(parser, store());
+				ChangeMatch old = (ChangeMatch) this.copy(recNr);
+				old.setMacro(relRec);
+				return relRec != null;
 			}, rec());
 		}
 		if (parser.hasSub("mparms")) {
-			try (MparmsArray sub = new MparmsArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			MparmsArray sub = new MparmsArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasSub("mmatch")) {
-			setMmatch(new MatchObject(store()).parse(parser));
+			setMmatch(MatchObject.parse(parser, store()));
 		}
 		if (parser.hasField("mmin")) {
 			setMmin((byte) parser.getInt("mmin"));
@@ -212,11 +203,6 @@ public interface ChangeMatch extends ChangeInterface, Match {
 		if (parser.hasField("mmax")) {
 			setMmax((byte) parser.getInt("mmax"));
 		}
-	}
-
-	@Override
-	default void close() {
-		// nothing
 	}
 
 	default boolean setMatch(int field, Object value) {

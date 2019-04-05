@@ -34,7 +34,7 @@ public class WorldStructure {
 		category.field("type", Type.ENUMERATE, "RACE", "ORGANISATION", "PROJECT", "JOB", "PERSON", "BUILDING", "ITEM", "COUNTRY", "TOWN", "GROUP", "ANIMAL", "PLANT", "VEHICLE",
 				"BLUEPRINT", "PAPERS", "POWER", "ACTION", "TERRAIN", "NODE");
 		category.field("name", Type.STRING);
-		category.field("specials", Type.ARRAY, specials);
+		category.field("default_specials", Type.ARRAY, specials);
 		category.field("dependency", Type.ARRAY, dependency);
 		category.field("effect", Type.ARRAY, effect);
 		category.field("description", Type.STRING);
@@ -45,10 +45,11 @@ public class WorldStructure {
 		effect.field("item", Type.RELATION, category);
 		effect.field("number", Type.BYTE);
 
-		Record relation = project.record("State"); // possible states between things in the world
+		Record relation = project.table("State"); // possible states between things in the world
 		relation.field("type", Type.ENUMERATE, "OWNER", "FAMILY", "ROMANCE", "MEMBER", "FRIENDSHIP", "FAVOR", "FACT", "JOB", "POLITICS");
 		relation.field("level", Type.BYTE);
 		relation.field("name", Type.STRING);
+		relation.index("relations", "name");
 
 		/* FUTURE... map of the world
 		Record point = project.record("Point"); // single point on the map
@@ -70,15 +71,16 @@ public class WorldStructure {
 		Record item = project.table("Item"); // actual things in the world (items, persons, organizations, nations)
 		item.field("category", Type.RELATION, category);
 		item.field("number", Type.INTEGER);
-		item.field("specials", Type.ARRAY, specials);
+		item.field("item_specials", Type.ARRAY, specials);
 		item.field("relation", Type.ARRAY, relations);
 		item.field("position", Type.INTEGER); // position on the world
+		item.index("items", "number");
 
-		relations.field("type", relation);
-		relations.field("with", item);
+		relations.field("type", Type.RELATION, relation);
+		relations.field("with", Type.RELATION, item);
 		relations.field("started", Type.INTEGER); // actual started or planned to start
 		relations.field("stopped", Type.INTEGER); // actual stopped or planned to stop
-		relations.field("specials", Type.ARRAY, specials);
+		relations.field("relation_specials", Type.ARRAY, specials);
 
 		/* FUTURE.. movement of groups in action
 		Record step = project.record("Step"); // A step on the route

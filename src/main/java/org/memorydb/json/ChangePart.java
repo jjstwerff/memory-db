@@ -82,12 +82,9 @@ public interface ChangePart extends ChangeInterface, Part {
 			setType(valueType == null ? null : type);
 		}
 		if (parser.hasSub("array")) {
-			try (ArrayArray sub = new ArrayArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			ArrayArray sub = new ArrayArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasField("boolean")) {
 			Boolean valueBoolean = parser.getBoolean("boolean");
@@ -102,16 +99,11 @@ public interface ChangePart extends ChangeInterface, Part {
 			setNumber(parser.getLong("number"));
 		}
 		if (parser.hasSub("object")) {
-			new Field(store()).parse(parser, this);
+			Field.parse(parser, this);
 		}
 		if (parser.hasField("value")) {
 			setValue(parser.getString("value"));
 		}
-	}
-
-	@Override
-	default void close() {
-		// nothing
 	}
 
 	default boolean setPart(int field, Object value) {

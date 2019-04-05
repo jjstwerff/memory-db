@@ -193,12 +193,8 @@ public class DBParser implements Parser {
 
 	/** Returns true if the last read sub record should be deleted */
 	@Override
-	public boolean isDelete(int rec) {
-		if (!delete)
-			return false;
-		if (rec == 0)
-			scanner.error("Could not find to be deleted record");
-		return true;
+	public boolean isDelete() {
+		return delete;
 	}
 
 	private boolean scanFields(Level level) {

@@ -26,6 +26,12 @@ public class Json implements Part {
 	}
 
 	@Override
+	public Json copy(int newRec) {
+		assert store.validate(newRec);
+		return new Json(store, newRec);
+	}
+
+	@Override
 	public Store store() {
 		return store;
 	}
@@ -63,52 +69,40 @@ public class Json implements Part {
 		return write.toString();
 	}
 
-	public Json parse(Parser parser) {
+	public static Json parse(Parser parser, Store store) {
+		Json rec = null;
 		while (parser.getSub()) {
-			int nextRec = 0;
-			if (parser.isDelete(nextRec)) {
-				try (ChangeJson record = new ChangeJson(this)) {
-					store.free(record.rec());
-				}
+			rec = parseKey(parser, store);
+			if (parser.isDelete()) {
+				if (rec != null)
+					try (ChangeJson record = new ChangeJson(rec)) {
+						store.free(record.rec());
+					}
 				continue;
 			}
-			if (nextRec == 0) {
-				try (ChangeJson record = new ChangeJson(store)) {
+			if (rec == null) {
+				try (ChangeJson record = new ChangeJson(store, 0)) {
+
 					record.parseFields(parser);
+					return record;
 				}
 			} else {
-				try (ChangeJson record = new ChangeJson(this)) {
+				try (ChangeJson record = new ChangeJson(rec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
-		return this;
+		return rec;
 	}
 
-	@Override
-	public boolean parseKey(Parser parser) {
+	public static Json parseKey(Parser parser, Store store) {
+		int nextRec = 0;
 		parser.finishRelation();
-		return true;
-	}
-
-	@Override
-	public FieldType type() {
-		return Part.super.typePart();
-	}
-
-	@Override
-	public String name() {
-		return null;
+		return nextRec <= 0 ? null : new Json(store, nextRec);
 	}
 
 	@Override
 	public Json copy() {
 		return new Json(store, rec);
-	}
-
-	@Override
-	public Json copy(int newRec) {
-		assert store.validate(newRec);
-		return new Json(store, newRec);
 	}
 }

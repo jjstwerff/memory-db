@@ -6,8 +6,11 @@ package ${project.package};
 <#list table.fields as field>
 <#if field.type == "SET"><#assign hasIndexes=true></#if>
 </#list>
+<#if hasIndexes>
 
-import org.memorydb.file.Parser;
+import java.util.Iterator;
+</#if>
+
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.RecordData;
@@ -44,11 +47,6 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 		return ${table.name?lower_case}Position() + ${table.includePos(incl, null)};
 	}
 </#list>
-
-<#if table.includes?size &gt; 0>
-	@Override
-</#if>
-	${table.name} parseKey(Parser parser);
 
 	default Change${table.name?cap_first} change${table.name}() {
 <#list table.included as ext>
@@ -106,8 +104,7 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 <#elseif field.type == "SET"><#assign index=field.index>
 
 	default ${field.related.name} get${field.name?cap_first}(<#list index.javaTypes[0..*index.javaTypes?size] as t>${t} key${t?index + 1}<#if t?has_next>, </#if></#list>) {
-		${field.related.name} resultRec = new ${field.related.name}(store());
-		int res = new Index${index.name?cap_first}(this, resultRec<#list index.javaTypes[0..*index.javaTypes?size] as t>, key${t?index + 1}</#list>).search();
+		int res = new Index${index.name?cap_first}(this<#list index.javaTypes[0..*index.javaTypes?size] as t>, key${t?index + 1}</#list>).search();
 		return res <= 0 ? null : new ${field.related.name}(store(), res);
 	}
 
@@ -115,26 +112,26 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 		return new Change${field.related.name}(this, 0);
 	}
 
-	/* package private */ class Index${index.name?cap_first} extends TreeIndex<${field.related.name}> implements RecordInterface {
-		private final ${table.name} ${table.name?lower_case};
+	/* package private */ static class Index${index.name?cap_first} extends TreeIndex implements Iterable<${field.related.name}> {
+		private final ${table.name} record;
 
-		public Index${index.name?cap_first}(${table.name} ${table.name?lower_case}, ${field.related.name} record) {
-			super(record, null, ${index.flagPos}, ${index.fieldPos});
-			this.${table.name?lower_case} = ${table.name?lower_case};
+		public Index${index.name?cap_first}(${table.name} record) {
+			super(record.store(), null, ${index.flagPos}, ${index.fieldPos});
+			this.record = record;
 		}
 <#list 1..index.javaTypes?size as i>
 
-		public Index${index.name?cap_first}(${table.name} ${table.name?lower_case}, ${field.related.name} record<#list index.javaTypes[0..*i] as t>, ${t} key${t?index + 1}</#list>) {
-			super(record, new Key() {
+		public Index${index.name?cap_first}(${table.name} record<#list index.javaTypes[0..*i] as t>, ${t} key${t?index + 1}</#list>) {
+			super(record.store(), new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
 					assert record.store().validate(recNr);
-					record.rec(recNr);
+					${field.related.name} rec = new ${field.related.name}(record.store(), recNr);
 					int o = 0;
 <#list index.javaTypes[0..*i] as t>
-					o = RedBlackTree.compare(key${t?index + 1}, record.${index.retrieve[t?index]});
+					o = RedBlackTree.compare(key${t?index + 1}, rec.${index.retrieve[t?index]});
 <#if t?has_next>
 					if (o != 0)
 						return o;
@@ -147,7 +144,7 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 					return IndexOperation.EQ;
 				}
 			}, ${index.flagPos}, ${index.fieldPos});
-			this.${table.name?lower_case} = ${table.name?lower_case};
+			this.record = record;
 		}
 </#list>
 
@@ -173,8 +170,8 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 
 		@Override
 		protected int compareTo(int a, int b) {
-			${field.related.name} recA = new ${field.related.name}(${table.name?lower_case}.store(), a);
-			${field.related.name} recB = new ${field.related.name}(${table.name?lower_case}.store(), b);
+			${field.related.name} recA = new ${field.related.name}(record.store(), a);
+			${field.related.name} recB = new ${field.related.name}(record.store(), b);
 			int o = 0;
 <#list index.retrieve as retrieve>
 			o = compare(recA.${retrieve}, recB.${retrieve});
@@ -186,8 +183,22 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 		}
 
 		@Override
-		protected String toString(int rec) {
-			return new ${field.related.name}(${table.name?lower_case}.store(), rec).toString();
+		public Iterator<${field.related.name}> iterator() {
+			return new Iterator<>() {
+				int nextRec = search();
+
+				@Override
+				public boolean hasNext() {
+					return nextRec > 0;
+				}
+
+				@Override
+				public ${field.related.name} next() {
+					int n = nextRec;
+					nextRec = toNext(nextRec);
+					return n <= 0 ? null : new ${field.related.name}(store, n);
+				}
+			};
 		}
 	}
 </#if></#list>

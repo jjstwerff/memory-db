@@ -26,7 +26,7 @@ public class Data implements AutoCloseable {
 	}
 
 	public ChangeJson addJson() {
-		return new ChangeJson(store);
+		return new ChangeJson(store, 0);
 	}
 
 	@Override

@@ -36,17 +36,28 @@ public class Generate {
 			if (!record.getIncluded().isEmpty()) {
 				template(ftl, "include", project, record.getName(), TABLE, record);
 				for (Field field : record.getFields())
-					if (field.getType() == Type.ARRAY)
-						template(ftl, "array", project, field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1) + "Array", "field", field);
+					generateArray(field, record.getName());
 				template(ftl, "changeIncl", project, "Change" + record.getName(), TABLE, record);
 			}
 			if (record.isFull()) {
 				template(ftl, "record", project, record.getName(), TABLE, record);
 				for (Field field : record.getFields())
-					if (field.getType() == Type.ARRAY)
-						template(ftl, "array", project, field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1) + "Array", "field", field);
+					generateArray(field, record.getName());
 				template(ftl, "change", project, "Change" + record.getName(), TABLE, record);
 			}
+		}
+	}
+
+	private void generateArray(Field field, String on) {
+		if (field.getType() != Type.ARRAY)
+			return;
+		String recName = field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1) + "Array";
+		Map<String, Object> viewModel = new TreeMap<>();
+		viewModel.put("field", field);
+		viewModel.put("on", on);
+		template(ftl, "array", project, recName, viewModel);
+		for (Field sub: field.getRelated().getFields()) {
+			generateArray(sub, recName);
 		}
 	}
 
@@ -56,9 +67,13 @@ public class Generate {
 
 	private static void template(Configuration ftl, String name, Project project, String file, String dataName, Object data) {
 		Map<String, Object> viewModel = new TreeMap<>();
-		viewModel.put("project", project);
 		if (dataName != null)
 			viewModel.put(dataName, data);
+		template(ftl, name, project, file, viewModel);
+	}
+
+	private static void template(Configuration ftl, String name, Project project, String file, Map<String, Object> viewModel) {
+		viewModel.put("project", project);
 		Path out = Paths.get(project.getDir() + File.separator + file + ".java");
 		checkDirectory(out);
 		try (BufferedWriter writer = Files.newBufferedWriter(out)) {

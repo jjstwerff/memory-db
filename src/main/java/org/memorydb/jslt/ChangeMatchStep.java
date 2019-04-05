@@ -320,7 +320,7 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 			setAfalse(parser.getInt("afalse"));
 		}
 		if (parser.hasSub("avar")) {
-			setAvar(new Variable(store()).parse(parser));
+			setAvar(Variable.parse(parser, store()));
 		}
 		if (parser.hasField("tstack")) {
 			setTstack(parser.getInt("tstack"));
@@ -330,10 +330,10 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 		}
 		if (parser.hasField("tmacro")) {
 			parser.getRelation("tmacro", (recNr, idx) -> {
-				Macro relRec = new Macro(store());
-				boolean found = relRec.parseKey(parser) != null;
-				setTmacro(relRec);
-				return found;
+				Macro relRec = Macro.parseKey(parser, store());
+				ChangeMatchStep old = (ChangeMatchStep) this.copy(recNr);
+				old.setTmacro(relRec);
+				return relRec != null;
 			}, rec());
 		}
 		if (parser.hasField("tfalse")) {
@@ -380,16 +380,16 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 			setTtfalse(parser.getInt("ttfalse"));
 		}
 		if (parser.hasSub("vwrite")) {
-			setVwrite(new Variable(store()).parse(parser));
+			setVwrite(Variable.parse(parser, store()));
 		}
 		if (parser.hasField("vwrange")) {
 			setVwrange(parser.getInt("vwrange"));
 		}
 		if (parser.hasSub("vstart")) {
-			setVstart(new Variable(store()).parse(parser));
+			setVstart(Variable.parse(parser, store()));
 		}
 		if (parser.hasSub("vadd")) {
-			setVadd(new Variable(store()).parse(parser));
+			setVadd(Variable.parse(parser, store()));
 		}
 		if (parser.hasField("varange")) {
 			setVarange(parser.getInt("varange"));
@@ -406,11 +406,6 @@ public interface ChangeMatchStep extends ChangeInterface, MatchStep {
 		if (parser.hasField("notfinished")) {
 			setNotfinished(parser.getInt("notfinished"));
 		}
-	}
-
-	@Override
-	default void close() {
-		// nothing
 	}
 
 	default boolean setMatchStep(int field, Object value) {

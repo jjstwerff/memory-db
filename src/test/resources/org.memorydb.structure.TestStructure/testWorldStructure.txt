@@ -1,0 +1,69 @@
+Records
+name=Field, parent=Record, size=49, related=true, full=true, fields=
+  name=name, type=STRING, pos=32, key=true
+  name=type, type=ENUMERATE, pos=64
+  name=auto, type=BOOLEAN, pos=72
+  name=pos, type=INTEGER, pos=80, mandatory=true
+  name=index, type=RELATION, related=Index, pos=112
+  name=values, type=ARRAY, related=Str, pos=144
+  name=key, type=BOOLEAN, pos=176
+  name=mandatory, type=BOOLEAN, pos=184
+  name=default, type=STRING, pos=192
+  name=description, type=STRING, pos=224
+  name=related, type=RELATION, related=Record, pos=360
+  name=upRecord, type=RELATION, related=Record, pos=328
+& indexes=
+  index=fieldOnName, pos=33, parentPos=12
+name=FreeBits, parent=Record, size=25, full=true, fields=
+  name=size, type=INTEGER, pos=32, key=true
+  name=pos, type=INTEGER, pos=64
+  name=upRecord, type=RELATION, related=Record, pos=168
+& indexes=
+  index=freeBits, pos=13, parentPos=20
+name=Index, parent=Project, size=42, related=true, full=true, fields=
+  name=name, type=STRING, pos=32, key=true
+  name=indexFields, type=ARRAY, related=Str, pos=64
+  name=fieldPos, type=INTEGER, pos=96
+  name=flagPos, type=INTEGER, pos=128
+  name=parentPos, type=INTEGER, pos=160
+  name=primary, type=BOOLEAN, pos=192
+  name=record, type=RELATION, related=Record, pos=200
+  name=upRecord, type=RELATION, related=Project, pos=304
+& indexes=
+  index=indexes, pos=30, parentPos=12
+name=Project, size=33, related=true, full=true, fields=
+  name=name, type=STRING, pos=32, key=true
+  name=pack, type=STRING, pos=64
+  name=indexes, type=SET, related=Index, pos=96
+  name=records, type=SET, related=Record, pos=128
+  name=dir, type=STRING, pos=160
+& indexes=
+  index=meta, pos=25, parentPos=12
+name=RecField, size=4, fields=
+  name=field, type=RELATION, related=Field, pos=0
+name=Record, parent=Project, size=51, related=true, full=true, fields=
+  name=name, type=STRING, pos=32, key=true
+  name=fields, type=ARRAY, related=RecField, pos=64
+  name=fieldOnName, type=SET, related=Field, pos=96
+  name=setIndexes, type=SET, related=SetIndex, pos=128
+  name=freeBits, type=SET, related=FreeBits, pos=160
+  name=parent, type=RELATION, related=Record, pos=192
+  name=size, type=INTEGER, pos=224, mandatory=true
+  name=related, type=BOOLEAN, pos=256
+  name=full, type=BOOLEAN, pos=264
+  name=description, type=STRING, pos=272
+  name=upRecord, type=RELATION, related=Project, pos=376
+& indexes=
+  index=records, pos=39, parentPos=16
+name=SetIndex, parent=Record, size=21, full=true, fields=
+  name=index, type=RELATION, related=Index, pos=32, key=true
+  name=upRecord, type=RELATION, related=Record, pos=136
+& indexes=
+  index=setIndexes, pos=9, parentPos=16
+name=Str, size=4, fields=
+  name=str, type=STRING, pos=0
+
+Indexes
+name=meta, record=Project, fields=[
+	field=name
+], fieldPos=200, flagPos=192, parentPos=12, primary=true

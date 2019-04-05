@@ -3,29 +3,26 @@ package org.memorydb.meta;
 import org.memorydb.file.Parser;
 import org.memorydb.structure.Store;
 import org.memorydb.structure.ChangeInterface;
-import java.util.Iterator;
 
 /**
  * Automatically generated record class for table Project
  */
-public class ChangeProject extends Project implements ChangeInterface {
+public class ChangeProject extends Project implements AutoCloseable, ChangeInterface {
 	public ChangeProject(Store store, int rec) {
 		super(store, rec == 0 ? store.allocate(Project.RECORD_SIZE) : rec);
 		if (rec == 0) {
-			store.setInt(rec(), 4, 0); // SET records
+			store.setInt(rec, 4, 0); // SET records
 			setMain(null);
 			setPack(null);
 			setDirectory(null);
 		} else {
-			new IndexMeta().remove(rec());
+			new IndexMeta(store).remove(rec());
 		}
 	}
 
 	public ChangeProject(Project current) {
 		super(current.store(), current.rec());
-		if (rec != 0) {
-			new IndexMeta().remove(rec());
-		}
+		new IndexMeta(store).remove(rec());
 	}
 
 	public void setMain(Record value) {
@@ -42,16 +39,14 @@ public class ChangeProject extends Project implements ChangeInterface {
 
 	/* package private */ void parseFields(Parser parser) {
 		if (parser.hasSub("records")) {
-			parse(parser);
+			Record.parse(parser, this);
 		}
 		if (parser.hasField("main")) {
 			parser.getRelation("main", (recNr, idx) -> {
-				Iterator<Record> iterator = getRecords().iterator();
-				Record relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				if (relRec != null)
-					relRec = relRec.parseKey(parser);
-				ChangeProject old = copy(recNr);
-				old.setMain(relRec);
+				Record relRec = Record.parseKey(parser, this);
+				try (ChangeProject old = (ChangeProject) this.copy(recNr)) {
+					old.setMain(relRec);
+				}
 				return relRec != null;
 			}, rec());
 		}
@@ -62,7 +57,7 @@ public class ChangeProject extends Project implements ChangeInterface {
 
 	@Override
 	public void close() {
-		new IndexMeta().insert(rec());
+		new IndexMeta(store).insert(rec());
 	}
 
 	@Override
@@ -98,8 +93,8 @@ public class ChangeProject extends Project implements ChangeInterface {
 	}
 
 	@Override
-	public ChangeProject copy(int rec) {
-		assert store.validate(rec);
-		return new ChangeProject(store, rec);
+	public ChangeProject copy(int newRec) {
+		assert store.validate(newRec);
+		return new ChangeProject(store, newRec);
 	}
 }

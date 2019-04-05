@@ -25,11 +25,6 @@ public class ChangeExpr extends Expr implements ChangeOperator {
 	}
 
 	@Override
-	public void close() {
-		// nothing yet
-	}
-
-	@Override
 	public boolean java(Object value) {
 		int field = 0;
 		if (field > 0 && field <= 28)

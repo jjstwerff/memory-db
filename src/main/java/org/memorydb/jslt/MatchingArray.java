@@ -172,16 +172,6 @@ public class MatchingArray implements MemoryRecord, ChangeMatchStep, Iterable<Ma
 	}
 
 	@Override
-	public MatchingArray parseKey(Parser parser) {
-		return null;
-	}
-
-	@Override
-	public void close() {
-		// nothing
-	}
-
-	@Override
 	public String name() {
 		int field = 0;
 		if (idx == -1)
@@ -232,7 +222,7 @@ public class MatchingArray implements MemoryRecord, ChangeMatchStep, Iterable<Ma
 	}
 
 	@Override
-	public MatchingArray index(int pos) {
+	public MatchingArray index(int idx) {
 		return null;
 	}
 

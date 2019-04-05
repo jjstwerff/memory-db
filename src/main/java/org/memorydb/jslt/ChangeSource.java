@@ -7,7 +7,7 @@ import org.memorydb.structure.ChangeInterface;
 /**
  * Automatically generated record class for table Source
  */
-public class ChangeSource extends Source implements ChangeInterface {
+public class ChangeSource extends Source implements AutoCloseable, ChangeInterface {
 	public ChangeSource(Store store, int rec) {
 		super(store, rec == 0 ? store.allocate(Source.RECORD_SIZE) : rec);
 		if (rec == 0) {

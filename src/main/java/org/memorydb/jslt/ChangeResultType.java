@@ -40,11 +40,6 @@ public interface ChangeResultType extends ChangeInterface, ResultType {
 		}
 	}
 
-	@Override
-	default void close() {
-		// nothing
-	}
-
 	default boolean setResultType(int field, Object value) {
 		switch (field) {
 		case 1:

@@ -24,7 +24,9 @@ import org.memorydb.structure.Key;
 import org.memorydb.structure.MemoryRecord;
 </#if>
 import org.memorydb.structure.RecordData;
+<#if table.includes?size == 0>
 import org.memorydb.structure.RecordInterface;
+</#if>
 <#if hasIndexes>
 import org.memorydb.structure.RedBlackTree;
 </#if>
@@ -43,17 +45,21 @@ import ${import};
 public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord, RecordInterface<#else><#list table.includes as incl>${incl.name}<#if incl?has_next>, </#if></#list></#if> {
 	/* package private */ final Store store;
 	protected final int rec;
+	private final int field;
 	/* package private */ static final int RECORD_SIZE = ${table.totalSize};
-
-	public ${table.name}(Store store) {
-		this.store = store;
-		this.rec = 0;
-	}
 
 	public ${table.name}(Store store, int rec) {
 		rec = store.correct(rec);
 		this.store = store;
 		this.rec = rec;
+		this.field = 0;
+	}
+
+	public ${table.name}(Store store, int rec, int field) {
+		rec = store.correct(rec);
+		this.store = store;
+		this.rec = rec;
+		this.field = field;
 	}
 
 	@Override
@@ -362,40 +368,59 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		return write.toString();
 	}
 
-	public static void parse(Parser parser, <#if table.parent??>${table.parent.name} parent<#else>Store store</#if>) {
+	public static ${table.name} parse(Parser parser, <#if table.parent??>${table.parent.name} parent<#else>Store store</#if>) {
+		${table.name} rec = null;
 		while (parser.getSub()) {
-${table.keyFields}<#rt>
-			if (parser.isDelete(nextRec)) {
-				try (Change${table.name} record = new Change${table.name}(<#if table.parent??>parent<#else>store</#if>, nextRec)) {
+			rec = parseKey(parser, <#if table.parent??>parent<#else>store</#if>);
+			if (parser.isDelete()) {
+<#if table.object>
+				if (rec != null) {
+					Change${table.name} record = new Change${table.name}(rec);
 					<#if table.parent??>parent.</#if>store.free(record.rec());
 				}
+<#else>
+				if (rec != null)
+					try (Change${table.name} record = new Change${table.name}(rec)) {
+						<#if table.parent??>parent.</#if>store.free(record.rec());
+					}
+</#if>
 				continue;
 			}
-			if (nextRec == 0) {
+			if (rec == null) {
+<#if table.object>
+				Change${table.name} record = new Change${table.name}(<#if table.parent??>parent<#else>store</#if>, 0);
+${table.keyFields}${table.setKeys}
+				record.parseFields(parser);
+				return record;
+<#else>
 				try (Change${table.name} record = new Change${table.name}(<#if table.parent??>parent<#else>store</#if>, 0)) {
-${table.setKeys}
+${table.keyFields}${table.setKeys}
 					record.parseFields(parser);
+					return record;
 				}
+</#if>
 			} else {
-				try (Change${table.name} record = new Change${table.name}(<#if table.parent??>parent<#else>store</#if>, nextRec)) {
+<#if table.object>
+				Change${table.name} record = new Change${table.name}(rec);
+				record.parseFields(parser);
+<#else>
+				try (Change${table.name} record = new Change${table.name}(rec)) {
 					record.parseFields(parser);
 				}
+</#if>
 			}
 		}
+		return rec;
 	}
 
-<#if table.includes?size &gt; 0>
-	@Override
-</#if>
-	public ${table.name} parseKey(Parser parser) {
+	public static ${table.name} parseKey(Parser parser, <#if table.parent??>${table.parent.name} parent<#else>Store store</#if>) {
 ${table.parseKeys}<#rt>
 		parser.finishRelation();
-		return nextRec <= 0 ? null : new ${table.name}(store, nextRec);
+		return nextRec <= 0 ? null : new ${table.name}(<#if table.parent??>parent.store()<#else>store</#if>, nextRec);
 	}
 
 	@Override
 	public Object java() {
-		int field = 0;
 <#assign max = table.fields?size>
 <#if max == 0 && table.includes?size == 1>
 <#list table.includes as incl>
@@ -409,7 +434,7 @@ ${table.parseKeys}<#rt>
 <#assign max = nmax>
 </#list>
 </#if>
-<#if max &gt; 0>
+<#if table.fields?size &gt; 0>
 		switch (field) {
 <#list table.fields as field>
 <#if field.type == 'BOOLEAN'>
@@ -427,7 +452,6 @@ ${table.parseKeys}<#rt>
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 <#assign max = table.fields?size>
 <#if max == 0 && table.includes?size == 1>
 <#list table.includes as incl>
@@ -443,6 +467,8 @@ ${table.parseKeys}<#rt>
 </#if>
 <#if table.fields?size &gt; 0>
 		switch (field) {
+		case 0:
+			return FieldType.OBJECT;
 <#list table.fields as field>
 		case ${1 + field?index}:
 <#if field.type == 'SET' || field.type == 'ARRAY'>
@@ -465,7 +491,6 @@ ${table.parseKeys}<#rt>
 
 	@Override
 	public String name() {
-		int field = 0;
 <#assign max = table.fields?size>
 <#if max == 0 && table.includes?size == 1>
 <#list table.includes as incl>
@@ -492,12 +517,17 @@ ${table.parseKeys}<#rt>
 	}
 
 	@Override
+	public ${table.name?cap_first} start() {
+		return new ${table.name?cap_first}(store, rec, 1);
+	}
+
+	@Override
 	public ${table.name?cap_first} next() {
-		return null;
+		return field >= ${table.totalFields} ? null : new ${table.name?cap_first}(store, rec, field + 1);
 	}
 
 	@Override
 	public ${table.name?cap_first} copy() {
-		return new ${table.name?cap_first}(store, rec);
+		return new ${table.name?cap_first}(store, rec, field);
 	}
 }

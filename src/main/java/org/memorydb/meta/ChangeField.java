@@ -2,15 +2,12 @@ package org.memorydb.meta;
 
 import org.memorydb.file.Parser;
 import org.memorydb.structure.ChangeInterface;
-import org.memorydb.structure.MemoryRecord;
-
-import java.util.Iterator;
 import org.memorydb.handler.MutationException;
 
 /**
  * Automatically generated record class for table Field
  */
-public class ChangeField extends Field implements MemoryRecord, ChangeInterface {
+public class ChangeField extends Field implements AutoCloseable, ChangeInterface {
 	/* package private */ ChangeField(Record parent, int rec) {
 		super(parent.store(), rec == 0 ? parent.store().allocate(Field.RECORD_SIZE) : rec);
 		if (rec == 0) {
@@ -161,75 +158,59 @@ public class ChangeField extends Field implements MemoryRecord, ChangeInterface 
 			setKey(valueKey);
 		}
 		if (parser.hasSub("values")) {
-			try (ValuesArray sub = new ValuesArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			ValuesArray sub = new ValuesArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasField("related")) {
 			parser.getRelation("related", (recNr, idx) -> {
-				Iterator<Record> iterator = up().up().getRecords().iterator();
-				Record relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				if (relRec != null)
-					relRec = relRec.parseKey(parser);
-				ChangeField old = copy(recNr);
-				old.setRelated(relRec);
+				Record relRec = Record.parseKey(parser, up().up());
+				try (ChangeField old = (ChangeField) this.copy(recNr)) {
+					old.setRelated(relRec);
+				}
 				return relRec != null;
 			}, rec());
 		}
 		if (parser.hasField("record")) {
 			parser.getRelation("record", (recNr, idx) -> {
-				Iterator<Record> iterator = up().up().getRecords().iterator();
-				Record relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				if (relRec != null)
-					relRec = relRec.parseKey(parser);
-				ChangeField old = copy(recNr);
-				old.setRecord(relRec);
+				Record relRec = Record.parseKey(parser, up().up());
+				try (ChangeField old = (ChangeField) this.copy(recNr)) {
+					old.setRecord(relRec);
+				}
 				return relRec != null;
 			}, rec());
 		}
 		if (parser.hasField("content")) {
 			parser.getRelation("content", (recNr, idx) -> {
-				Iterator<Record> iterator = up().up().getRecords().iterator();
-				Record relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				if (relRec != null)
-					relRec = relRec.parseKey(parser);
-				ChangeField old = copy(recNr);
-				old.setContent(relRec);
+				Record relRec = Record.parseKey(parser, up().up());
+				try (ChangeField old = (ChangeField) this.copy(recNr)) {
+					old.setContent(relRec);
+				}
 				return relRec != null;
 			}, rec());
 		}
 		if (parser.hasField("child")) {
 			parser.getRelation("child", (recNr, idx) -> {
-				Iterator<Record> iterator = up().up().getRecords().iterator();
-				Record relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				if (relRec != null)
-					relRec = relRec.parseKey(parser);
-				ChangeField old = copy(recNr);
-				old.setChild(relRec);
+				Record relRec = Record.parseKey(parser, up().up());
+				try (ChangeField old = (ChangeField) this.copy(recNr)) {
+					old.setChild(relRec);
+				}
 				return relRec != null;
 			}, rec());
 		}
 		if (parser.hasField("to")) {
 			parser.getRelation("to", (recNr, idx) -> {
-				Iterator<Record> iterator = up().up().getRecords().iterator();
-				Record relRec = iterator != null && iterator.hasNext() ? iterator.next() : null;
-				if (relRec != null)
-					relRec = relRec.parseKey(parser);
-				ChangeField old = copy(recNr);
-				old.setTo(relRec);
+				Record relRec = Record.parseKey(parser, up().up());
+				try (ChangeField old = (ChangeField) this.copy(recNr)) {
+					old.setTo(relRec);
+				}
 				return relRec != null;
 			}, rec());
 		}
 		if (parser.hasSub("order")) {
-			try (OrderArray sub = new OrderArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			OrderArray sub = new OrderArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasField("mandatory")) {
 			Boolean valueMandatory = parser.getBoolean("mandatory");
@@ -357,8 +338,8 @@ public class ChangeField extends Field implements MemoryRecord, ChangeInterface 
 	}
 
 	@Override
-	public ChangeField copy(int rec) {
-		assert store.validate(rec);
-		return new ChangeField(up(), rec);
+	public ChangeField copy(int newRec) {
+		assert store.validate(newRec);
+		return new ChangeField(up(), newRec);
 	}
 }

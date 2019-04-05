@@ -19,19 +19,23 @@ import org.memorydb.structure.TreeIndex;
  */
 @RecordData(name = "Project")
 public class Project implements MemoryRecord, RecordInterface {
-	/* package private */ Store store;
+	/* package private */ final Store store;
 	protected final int rec;
+	private final int field;
 	/* package private */ static final int RECORD_SIZE = 29;
-
-	public Project(Store store) {
-		this.store = store;
-		this.rec = 0;
-	}
 
 	public Project(Store store, int rec) {
 		rec = store.correct(rec);
 		this.store = store;
 		this.rec = rec;
+		this.field = 0;
+	}
+
+	public Project(Store store, int rec, int field) {
+		rec = store.correct(rec);
+		this.store = store;
+		this.rec = rec;
+		this.field = field;
 	}
 
 	@Override
@@ -40,9 +44,9 @@ public class Project implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public Project copy(int rec) {
-		assert store.validate(rec);
-		return new Project(store, rec);
+	public Project copy(int newRec) {
+		assert store.validate(newRec);
+		return new Project(store, newRec);
 	}
 
 	@Override
@@ -61,7 +65,8 @@ public class Project implements MemoryRecord, RecordInterface {
 	}
 
 	public Record getRecords(String key1) {
-		return new Record(store, new IndexRecords(key1).search());
+		int res = new IndexRecords(key1).search();
+		return res <= 0 ? null : new Record(store, res);
 	}
 
 	public ChangeRecord addRecords() {
@@ -95,12 +100,12 @@ public class Project implements MemoryRecord, RecordInterface {
 
 		@Override
 		protected int readTop() {
-			return store.getInt(rec(), 4);
+			return store.getInt(rec, 4);
 		}
 
 		@Override
 		protected void changeTop(int value) {
-			store.setInt(rec(), 4, value);
+			store.setInt(rec, 4, value);
 		}
 
 		@Override
@@ -114,7 +119,7 @@ public class Project implements MemoryRecord, RecordInterface {
 
 		@Override
 		public Iterator<Record> iterator() {
-			return new Iterator<Record>() {
+			return new Iterator<>() {
 				int nextRec = search();
 
 				@Override
@@ -126,7 +131,7 @@ public class Project implements MemoryRecord, RecordInterface {
 				public Record next() {
 					int n = nextRec;
 					nextRec = toNext(nextRec);
-					return new Record(store(), n);
+					return n <= 0 ? null : new Record(store, n);
 				}
 			};
 		}
@@ -147,19 +152,19 @@ public class Project implements MemoryRecord, RecordInterface {
 		return rec == 0 ? null : store.getString(store.getInt(rec, 16));
 	}
 
-	public class IndexMeta extends TreeIndex implements Iterable<Project> {
-		public IndexMeta() {
-			super(store(), null, 160, 21);
+	public static class IndexMeta extends TreeIndex implements Iterable<Project> {
+		public IndexMeta(Store store) {
+			super(store, null, 160, 21);
 		}
 
-		public IndexMeta(String key1) {
-			super(store(), new Key() {
+		public IndexMeta(Store store, String key1) {
+			super(store, new Key() {
 				@Override
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					assert store().validate(recNr);
-					Project rec = Project.this.copy(recNr);
+					assert store.validate(recNr);
+					Project rec = new Project(store, recNr);
 					int o = 0;
 					o = RedBlackTree.compare(key1, rec.getPack());
 					return o;
@@ -205,7 +210,7 @@ public class Project implements MemoryRecord, RecordInterface {
 				public Project next() {
 					int n = nextRec;
 					nextRec = toNext(nextRec);
-					return new Project(store, n);
+					return n <= 0 ? null : new Project(store, n);
 				}
 			};
 		}
@@ -244,42 +249,42 @@ public class Project implements MemoryRecord, RecordInterface {
 		return write.toString();
 	}
 
-	public Project parse(Parser parser) {
+	public static Project parse(Parser parser, Store store) {
+		Project rec = null;
 		while (parser.getSub()) {
-			String pack = parser.getString("pack");
-			int nextRec = new IndexMeta(pack).search();
-			if (parser.isDelete(nextRec)) {
-				try (ChangeProject record = new ChangeProject(this)) {
-					store.free(record.rec());
-				}
+			rec = parseKey(parser, store);
+			if (parser.isDelete()) {
+				if (rec != null)
+					try (ChangeProject record = new ChangeProject(rec)) {
+						store.free(record.rec());
+					}
 				continue;
 			}
-			if (nextRec == 0) {
-				try (ChangeProject record = new ChangeProject(store, rec)) {
+			if (rec == null) {
+				try (ChangeProject record = new ChangeProject(store, 0)) {
+					String pack = parser.getString("pack");
 					record.setPack(pack);
 					record.parseFields(parser);
+					return record;
 				}
 			} else {
-				try (ChangeProject record = new ChangeProject(this)) {
+				try (ChangeProject record = new ChangeProject(rec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
-		return this;
+		return rec;
 	}
 
-	public Project parseKey(Parser parser) {
+	public static Project parseKey(Parser parser, Store store) {
 		String pack = parser.getString("pack");
-		int nextRec = new IndexMeta(pack).search();
+		int nextRec = new IndexMeta(store, pack).search();
 		parser.finishRelation();
-		if (nextRec == 0)
-			return null;
-		return copy(nextRec);
+		return nextRec <= 0 ? null : new Project(store, nextRec);
 	}
 
 	@Override
 	public Object java() {
-		int field = 0;
 		switch (field) {
 		case 2:
 			return getMain();
@@ -294,8 +299,9 @@ public class Project implements MemoryRecord, RecordInterface {
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		switch (field) {
+		case 0:
+			return FieldType.OBJECT;
 		case 1:
 			return FieldType.ARRAY;
 		case 2:
@@ -311,7 +317,6 @@ public class Project implements MemoryRecord, RecordInterface {
 
 	@Override
 	public String name() {
-		int field = 0;
 		switch (field) {
 		case 1:
 			return "records";
@@ -327,12 +332,17 @@ public class Project implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
+	public Project start() {
+		return new Project(store, rec, 1);
+	}
+
+	@Override
 	public Project next() {
-		return null;
+		return field >= 4 ? null : new Project(store, rec, field + 1);
 	}
 
 	@Override
 	public Project copy() {
-		return new Project(store, rec);
+		return new Project(store, rec, field);
 	}
 }

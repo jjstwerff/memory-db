@@ -12,10 +12,10 @@ import ${import};
 /**
  * Automatically generated record class for table ${table.name}
  */
-public class Change${table.name} extends ${table.name} implements <#if table.includes?size == 0>ChangeInterface</#if><#list table.includes as incl>Change${incl.name}<#if incl?has_next>, </#if></#list> {
+public class Change${table.name} extends ${table.name} implements <#if !table.object>AutoCloseable, </#if><#if table.includes?size == 0>ChangeInterface</#if><#list table.includes as incl>Change${incl.name}<#if incl?has_next>, </#if></#list> {
 <#if table.parent??>
 	/* package private */ Change${table.name}(${table.parent.name} parent, int rec) {
-		super(parent.store(), rec == 0 ? parent.store.allocate(${table.name}.RECORD_SIZE) : rec);
+		super(parent.store(), rec == 0 ? parent.store().allocate(${table.name}.RECORD_SIZE) : rec);
 		if (rec == 0) {
 <#list table.includes as incl>
 			default${incl.name}();
@@ -28,7 +28,7 @@ public class Change${table.name} extends ${table.name} implements <#if table.inc
 			up(parent);
 		} else {
 <#list table.indexes as index><#if table.parent.included?size gt 0>
-			new ${table.parent.name}.Index${index.name?cap_first}(up(), this).remove(rec);
+			new ${table.parent.name}.Index${index.name?cap_first}(this).remove(rec);
 <#else>
 			up().new Index${index.name?cap_first}().remove(rec);
 </#if></#list>
@@ -39,7 +39,7 @@ public class Change${table.name} extends ${table.name} implements <#if table.inc
 		super(current.store, current.rec);
 		if (rec != 0) {
 <#list table.indexes as index><#if table.parent.included?size gt 0>
-			new ${table.parent.name}.Index${index.name?cap_first}(up(), this).remove(rec);
+			new ${table.parent.name}.Index${index.name?cap_first}(this).remove(rec);
 <#else>
 			up().new Index${index.name?cap_first}().remove(rec);
 </#if></#list>
@@ -117,10 +117,11 @@ ${table.otherFields}<#rt>
 </#list>
 	}
 
+<#if !table.object>
 	@Override
 	public void close() {
 <#list table.indexes as index><#if table.parent?? && table.parent.included?size gt 0>
-		new Part.Index${index.name?cap_first}(up(), <#if table.parent??>this</#if>).insert(rec());
+		new Part.Index${index.name?cap_first}(<#if table.parent??>this</#if>).insert(rec());
 <#else>
 		<#if table.parent??>up().</#if>new Index${index.name?cap_first}(<#if !table.parent??>store</#if>).insert(rec());
 </#if></#list>
@@ -129,6 +130,7 @@ ${table.otherFields}<#rt>
 </#if>
 	}
 
+</#if>
 	@Override
 	public boolean java(Object value) {
 		int field = 0;

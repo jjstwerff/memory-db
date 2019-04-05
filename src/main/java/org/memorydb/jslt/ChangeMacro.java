@@ -7,7 +7,7 @@ import org.memorydb.structure.ChangeInterface;
 /**
  * Automatically generated record class for table Macro
  */
-public class ChangeMacro extends Macro implements ChangeInterface {
+public class ChangeMacro extends Macro implements AutoCloseable, ChangeInterface {
 	public ChangeMacro(Store store, int rec) {
 		super(store, rec == 0 ? store.allocate(Macro.RECORD_SIZE) : rec);
 		if (rec == 0) {
@@ -36,15 +36,12 @@ public class ChangeMacro extends Macro implements ChangeInterface {
 
 	/* package private */ void parseFields(Parser parser) {
 		if (parser.hasSub("alternatives")) {
-			Macro.parse(parser, store);
+			Alternative.parse(parser, this);
 		}
 		if (parser.hasSub("matching")) {
-			try (MatchingArray sub = new MatchingArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			MatchingArray sub = new MatchingArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 	}
 

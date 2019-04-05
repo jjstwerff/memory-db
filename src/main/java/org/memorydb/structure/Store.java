@@ -381,6 +381,10 @@ public class Store implements Closeable {
 		free.insert(rec);
 	}
 
+	public boolean isFreed(int rec) {
+		return internalGetInt(rec) < 0;
+	}
+
 	public boolean isCommit() {
 		return commit;
 	}

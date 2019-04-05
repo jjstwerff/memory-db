@@ -3,7 +3,6 @@ package org.memorydb.jslt;
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
@@ -13,17 +12,21 @@ import org.memorydb.structure.Store;
 public class Expr implements Operator {
 	/* package private */ final Store store;
 	protected final int rec;
+	private final int field;
 	/* package private */ static final int RECORD_SIZE = 22;
-
-	public Expr(Store store) {
-		this.store = store;
-		this.rec = 0;
-	}
 
 	public Expr(Store store, int rec) {
 		rec = store.correct(rec);
 		this.store = store;
 		this.rec = rec;
+		this.field = 0;
+	}
+
+	public Expr(Store store, int rec, int field) {
+		rec = store.correct(rec);
+		this.store = store;
+		this.rec = rec;
+		this.field = field;
 	}
 
 	@Override
@@ -75,30 +78,31 @@ public class Expr implements Operator {
 		return write.toString();
 	}
 
-	public static void parse(Parser parser, Store store) {
+	public static Expr parse(Parser parser, Store store) {
+		Expr rec = null;
 		while (parser.getSub()) {
-			int nextRec = 0;
-			if (parser.isDelete(nextRec)) {
-				try (ChangeExpr record = new ChangeExpr(store, nextRec)) {
+			rec = parseKey(parser, store);
+			if (parser.isDelete()) {
+				if (rec != null) {
+					ChangeExpr record = new ChangeExpr(rec);
 					store.free(record.rec());
 				}
 				continue;
 			}
-			if (nextRec == 0) {
-				try (ChangeExpr record = new ChangeExpr(store, 0)) {
+			if (rec == null) {
+				ChangeExpr record = new ChangeExpr(store, 0);
 
-					record.parseFields(parser);
-				}
+				record.parseFields(parser);
+				return record;
 			} else {
-				try (ChangeExpr record = new ChangeExpr(store, nextRec)) {
-					record.parseFields(parser);
-				}
+				ChangeExpr record = new ChangeExpr(rec);
+				record.parseFields(parser);
 			}
 		}
+		return rec;
 	}
 
-	@Override
-	public Expr parseKey(Parser parser) {
+	public static Expr parseKey(Parser parser, Store store) {
 		int nextRec = 0;
 		parser.finishRelation();
 		return nextRec <= 0 ? null : new Expr(store, nextRec);
@@ -106,29 +110,31 @@ public class Expr implements Operator {
 
 	@Override
 	public Object java() {
-		int field = 0;
 		return Operator.super.getOperator(field);
 	}
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		return Operator.super.typeOperator(field);
 	}
 
 	@Override
 	public String name() {
-		int field = 0;
 		return Operator.super.nameOperator(field);
 	}
 
 	@Override
+	public Expr start() {
+		return new Expr(store, rec, 1);
+	}
+
+	@Override
 	public Expr next() {
-		return null;
+		return field >= 30 ? null : new Expr(store, rec, field + 1);
 	}
 
 	@Override
 	public Expr copy() {
-		return new Expr(store, rec);
+		return new Expr(store, rec, field);
 	}
 }

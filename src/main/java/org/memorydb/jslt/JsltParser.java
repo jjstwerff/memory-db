@@ -117,8 +117,7 @@ public class JsltParser {
 			if (scanner.matches("...")) {
 				curAlt.setAnyParm(true);
 				scanner.expect(")");
-			}
-			else if (!scanner.matches(")")) {
+			} else if (!scanner.matches(")")) {
 				parseParameter();
 				while (scanner.matches(",")) {
 					if (scanner.matches("...")) {
@@ -128,13 +127,12 @@ public class JsltParser {
 						parseParameter();
 				}
 				if (scanner.matches("if")) {
-					try (ChangeExpr data = new ChangeExpr(store, 0)) {
-						remember();
-						spot = data;
-						parseCond();
-						restore();
-						curAlt.setIf(data);
-					}
+					ChangeExpr data = new ChangeExpr(store, 0);
+					remember();
+					spot = data;
+					parseCond();
+					restore();
+					curAlt.setIf(data);
 				}
 				scanner.expect(")");
 			}
@@ -196,54 +194,50 @@ public class JsltParser {
 				scanner.setState(state);
 				match.setType(Type.ARRAY);
 				match.setVariable(null);
-				try (ChangeMatch addM = match.addMarray()) {
-					ChangeMatch m = match;
+				ChangeMatch addM = match.addMarray();
+				ChangeMatch m = match;
+				match = addM;
+				parseMVar();
+				match = m;
+				while (scanner.matches("+")) {
+					addM = match.addMarray();
+					m = match;
 					match = addM;
 					parseMVar();
 					match = m;
-				}
-				while (scanner.matches("+")) {
-					try (ChangeMatch addM = match.addMarray()) {
-						ChangeMatch m = match;
-						match = addM;
-						parseMVar();
-						match = m;
-					}
 				}
 			}
 		}
 
 		private void parseMVar() {
 			parseMMulti();
-			if (scanner.matches(":"))
-				try (ChangeVariable var = new ChangeVariable(store, 0)) {
-					var.setName(scanner.parseIdentifier());
-					var.setType(ResultType.Type.NULL);
-					match.setVariable(var);
-					parms.put(var.getName(), new Parm(var, parms.size()));
-				}
+			if (scanner.matches(":")) {
+				ChangeVariable var = new ChangeVariable(store, 0);
+				var.setName(scanner.parseIdentifier());
+				var.setType(ResultType.Type.NULL);
+				match.setVariable(var);
+				parms.put(var.getName(), new Parm(var, parms.size()));
+			}
 		}
 
 		private void parseMMulti() {
 			parseMPart();
 			if (scanner.matches("*")) {
-				try (ChangeMatchObject sub = new ChangeMatchObject(store, 0)) {
-					copyMatch(sub, true);
-					match.setType(Type.MULTIPLE);
-					match.setMmin((byte) 0);
-					match.setMmax((byte) -1);
-					match.setMmatch(sub);
-					match.setVariable(null);
-				}
+				ChangeMatchObject sub = new ChangeMatchObject(store, 0);
+				copyMatch(sub, true);
+				match.setType(Type.MULTIPLE);
+				match.setMmin((byte) 0);
+				match.setMmax((byte) -1);
+				match.setMmatch(sub);
+				match.setVariable(null);
 			} else if (scanner.matches("?")) {
-				try (ChangeMatchObject sub = new ChangeMatchObject(store, 0)) {
-					copyMatch(sub, true);
-					match.setType(Type.MULTIPLE);
-					match.setMmin((byte) 0);
-					match.setMmax((byte) 1);
-					match.setMmatch(sub);
-					match.setVariable(null);
-				}
+				ChangeMatchObject sub = new ChangeMatchObject(store, 0);
+				copyMatch(sub, true);
+				match.setType(Type.MULTIPLE);
+				match.setMmin((byte) 0);
+				match.setMmax((byte) 1);
+				match.setMmatch(sub);
+				match.setVariable(null);
 			}
 		}
 
@@ -275,53 +269,52 @@ public class JsltParser {
 				parseNumber();
 				copySpot(match, spot);
 			} else if (scanner.hasIdentifier()) {
-				try (ChangeVariable var = new ChangeVariable(store, 0)) {
-					String id = scanner.parseIdentifier();
-					Macro m;
-					if ((m = getMacro(id)) != null) {
-						match.setType(Type.MACRO);
-						match.setMacro(m);
-					} else if (parms.containsKey(id)) {
-						match.setType(Type.CONSTANT);
-						Parm parm = parms.get(id);
-						match.setConstant(parm.position);
-						match.setCparm(parm.name);
-					} else {
-						switch (id) {
-						case "string":
-							var.setType(ResultType.Type.STRING);
-							break;
-						case "number":
-							var.setType(ResultType.Type.NUMBER);
-							break;
-						case "float":
-							var.setType(ResultType.Type.FLOAT);
-							break;
-						case "boolean":
-							var.setType(ResultType.Type.BOOLEAN);
-							break;
-						case "array":
-							var.setType(ResultType.Type.ARRAY);
-							break;
-						case "object":
-							var.setType(ResultType.Type.OBJECT);
-							break;
-						default:
-							var.setName(id);
-							var.setType(ResultType.Type.NULL);
-							break;
-						}
-						var.setRecord(null);
-						if (var.getType() != ResultType.Type.NULL) {
-							scanner.expect(":");
-							var.setName(scanner.parseIdentifier());
-						}
-						var.setNr(parms.size());
-						var.setMultiple(false);
-						match.setVariable(var);
-						match.setType(Type.ANY);
-						parms.put(var.getName(), new Parm(var, parms.size()));
+				ChangeVariable var = new ChangeVariable(store, 0);
+				String id = scanner.parseIdentifier();
+				Macro m;
+				if ((m = getMacro(id)) != null) {
+					match.setType(Type.MACRO);
+					match.setMacro(m);
+				} else if (parms.containsKey(id)) {
+					match.setType(Type.CONSTANT);
+					Parm parm = parms.get(id);
+					match.setConstant(parm.position);
+					match.setCparm(parm.name);
+				} else {
+					switch (id) {
+					case "string":
+						var.setType(ResultType.Type.STRING);
+						break;
+					case "number":
+						var.setType(ResultType.Type.NUMBER);
+						break;
+					case "float":
+						var.setType(ResultType.Type.FLOAT);
+						break;
+					case "boolean":
+						var.setType(ResultType.Type.BOOLEAN);
+						break;
+					case "array":
+						var.setType(ResultType.Type.ARRAY);
+						break;
+					case "object":
+						var.setType(ResultType.Type.OBJECT);
+						break;
+					default:
+						var.setName(id);
+						var.setType(ResultType.Type.NULL);
+						break;
 					}
+					var.setRecord(null);
+					if (var.getType() != ResultType.Type.NULL) {
+						scanner.expect(":");
+						var.setName(scanner.parseIdentifier());
+					}
+					var.setNr(parms.size());
+					var.setMultiple(false);
+					match.setVariable(var);
+					match.setType(Type.ANY);
+					parms.put(var.getName(), new Parm(var, parms.size()));
 				}
 			} else
 				scanner.error("Syntax error");
@@ -374,10 +367,10 @@ public class JsltParser {
 			Type type = match.getType();
 			sub.setType(type);
 			sub.setVariable(match.getVariable());
-			if (multiple && match.getVariable().rec() != 0)
-				try (ChangeVariable change = sub.getVariable().change()) {
-					change.setMultiple(true);
-				}
+			if (multiple && match.getVariable().rec() != 0) {
+				ChangeVariable change = sub.getVariable().change();
+				change.setMultiple(true);
+			}
 			if (type != null)
 				switch (type) {
 				case ANY:
@@ -439,19 +432,17 @@ public class JsltParser {
 			while (true) {
 				boolean in = scanner.matches("in");
 				if (in || scanner.matches("for")) {
-					try (ChangeExpr temp = new ChangeExpr(store, 0)) {
-						move(temp, spot);
-						spot.setOperation(Operation.FUNCTION);
-						spot.setFunction(in ? Function.PER : Function.FOR);
-						spot.setFnParm2(temp);
-					}
-					try (ChangeExpr data = new ChangeExpr(store, 0)) {
-						remember();
-						spot = data;
-						parseCond();
-						restore();
-						spot.setFnParm1(data);
-					}
+					ChangeExpr temp = new ChangeExpr(store, 0);
+					move(temp, spot);
+					spot.setOperation(Operation.FUNCTION);
+					spot.setFunction(in ? Function.PER : Function.FOR);
+					spot.setFnParm2(temp);
+					ChangeExpr data = new ChangeExpr(store, 0);
+					remember();
+					spot = data;
+					parseCond();
+					restore();
+					spot.setFnParm1(data);
 				} else {
 					return;
 				}
@@ -461,26 +452,23 @@ public class JsltParser {
 		private void parseCond() {
 			parseOr();
 			if (scanner.matches("?")) {
-				try (ChangeExpr expr = new ChangeExpr(store, 0)) {
-					move(expr, spot);
-					spot.setOperation(Operation.CONDITION);
-					spot.setConExpr(expr);
-				}
-				try (ChangeExpr cTrue = new ChangeExpr(store, 0)) {
-					remember();
-					spot = cTrue;
-					parseCond();
-					restore();
-					spot.setConTrue(cTrue);
-				}
+				ChangeExpr expr = new ChangeExpr(store, 0);
+				move(expr, spot);
+				spot.setOperation(Operation.CONDITION);
+				spot.setConExpr(expr);
+				ChangeExpr cTrue = new ChangeExpr(store, 0);
+				remember();
+				spot = cTrue;
+				parseCond();
+				restore();
+				spot.setConTrue(cTrue);
 				scanner.expect(":");
-				try (ChangeExpr cFalse = new ChangeExpr(store, 0)) {
-					remember();
-					spot = cFalse;
-					parseCond();
-					restore();
-					spot.setConFalse(cFalse);
-				}
+				ChangeExpr cFalse = new ChangeExpr(store, 0);
+				remember();
+				spot = cFalse;
+				parseCond();
+				restore();
+				spot.setConFalse(cFalse);
 			}
 		}
 
@@ -492,19 +480,17 @@ public class JsltParser {
 					fn = Function.OR;
 				else
 					return;
-				try (ChangeExpr parm1 = new ChangeExpr(store, 0)) {
-					move(parm1, spot);
-					spot.setOperation(Operation.FUNCTION);
-					spot.setFunction(fn);
-					spot.setFnParm1(parm1);
-				}
-				try (ChangeExpr parm2 = new ChangeExpr(store, 0)) {
-					remember();
-					spot = parm2;
-					parseAnd();
-					restore();
-					spot.setFnParm2(parm2);
-				}
+				ChangeExpr parm1 = new ChangeExpr(store, 0);
+				move(parm1, spot);
+				spot.setOperation(Operation.FUNCTION);
+				spot.setFunction(fn);
+				spot.setFnParm1(parm1);
+				ChangeExpr parm2 = new ChangeExpr(store, 0);
+				remember();
+				spot = parm2;
+				parseAnd();
+				restore();
+				spot.setFnParm2(parm2);
 			}
 		}
 
@@ -516,19 +502,17 @@ public class JsltParser {
 					fn = Function.AND;
 				else
 					return;
-				try (ChangeExpr parm1 = new ChangeExpr(store, 0)) {
-					move(parm1, spot);
-					spot.setOperation(Operation.FUNCTION);
-					spot.setFunction(fn);
-					spot.setFnParm1(parm1);
-				}
-				try (ChangeExpr parm2 = new ChangeExpr(store, 0)) {
-					remember();
-					spot = parm2;
-					parseTest();
-					restore();
-					spot.setFnParm2(parm2);
-				}
+				ChangeExpr parm1 = new ChangeExpr(store, 0);
+				move(parm1, spot);
+				spot.setOperation(Operation.FUNCTION);
+				spot.setFunction(fn);
+				spot.setFnParm1(parm1);
+				ChangeExpr parm2 = new ChangeExpr(store, 0);
+				remember();
+				spot = parm2;
+				parseTest();
+				restore();
+				spot.setFnParm2(parm2);
 			}
 		}
 
@@ -551,19 +535,17 @@ public class JsltParser {
 				}
 				if (fn == null)
 					return;
-				try (ChangeExpr parm1 = new ChangeExpr(store, 0)) {
-					move(parm1, spot);
-					spot.setOperation(Operation.FUNCTION);
-					spot.setFunction(fn);
-					spot.setFnParm1(parm1);
-				}
-				try (ChangeExpr parm2 = new ChangeExpr(store, 0)) {
-					remember();
-					spot = parm2;
-					parseAdd();
-					restore();
-					spot.setFnParm2(parm2);
-				}
+				ChangeExpr parm1 = new ChangeExpr(store, 0);
+				move(parm1, spot);
+				spot.setOperation(Operation.FUNCTION);
+				spot.setFunction(fn);
+				spot.setFnParm1(parm1);
+				ChangeExpr parm2 = new ChangeExpr(store, 0);
+				remember();
+				spot = parm2;
+				parseAdd();
+				restore();
+				spot.setFnParm2(parm2);
 			}
 		}
 
@@ -578,19 +560,17 @@ public class JsltParser {
 				}
 				if (fn == null)
 					return;
-				try (ChangeExpr parm1 = new ChangeExpr(store, 0)) {
-					move(parm1, spot);
-					spot.setOperation(Operation.FUNCTION);
-					spot.setFunction(fn);
-					spot.setFnParm1(parm1);
-				}
-				try (ChangeExpr parm2 = new ChangeExpr(store, 0)) {
-					remember();
-					spot = parm2;
-					parseMult();
-					restore();
-					spot.setFnParm2(parm2);
-				}
+				ChangeExpr parm1 = new ChangeExpr(store, 0);
+				move(parm1, spot);
+				spot.setOperation(Operation.FUNCTION);
+				spot.setFunction(fn);
+				spot.setFnParm1(parm1);
+				ChangeExpr parm2 = new ChangeExpr(store, 0);
+				remember();
+				spot = parm2;
+				parseMult();
+				restore();
+				spot.setFnParm2(parm2);
 			}
 		}
 
@@ -607,19 +587,17 @@ public class JsltParser {
 				}
 				if (fn == null)
 					return;
-				try (ChangeExpr parm1 = new ChangeExpr(store, 0)) {
-					move(parm1, spot);
-					spot.setOperation(Operation.FUNCTION);
-					spot.setFunction(fn);
-					spot.setFnParm1(parm1);
-				}
-				try (ChangeExpr parm2 = new ChangeExpr(store, 0)) {
-					remember();
-					spot = parm2;
-					parseSingle();
-					restore();
-					spot.setFnParm2(parm2);
-				}
+				ChangeExpr parm1 = new ChangeExpr(store, 0);
+				move(parm1, spot);
+				spot.setOperation(Operation.FUNCTION);
+				spot.setFunction(fn);
+				spot.setFnParm1(parm1);
+				ChangeExpr parm2 = new ChangeExpr(store, 0);
+				remember();
+				spot = parm2;
+				parseSingle();
+				restore();
+				spot.setFnParm2(parm2);
 			}
 		}
 
@@ -628,99 +606,87 @@ public class JsltParser {
 			while (scanner.peek("[") || scanner.peek(".")) {
 				if (scanner.peek("..[")) {
 					scanner.matches("..");
-					try (ChangeExpr struc = new ChangeExpr(store, 0)) {
+					ChangeExpr struc = new ChangeExpr(store, 0);
+					move(struc, spot);
+					spot.setOperation(Operation.FILTER);
+					spot.setFilterDeep(true);
+					spot.setFilter(struc);
+					ChangeExpr data = new ChangeExpr(store, 0);
+					spot.setFilterExpr(data);
+					spot = data;
+				}
+				if (scanner.matches(".")) {
+					if (scanner.matches(".")) {
+						ChangeExpr struc = new ChangeExpr(store, 0);
 						move(struc, spot);
 						spot.setOperation(Operation.FILTER);
 						spot.setFilterDeep(true);
 						spot.setFilter(struc);
 					}
-					try (ChangeExpr data = new ChangeExpr(store, 0)) {
-						spot.setFilterExpr(data);
-						spot = data;
-					}
-				}
-				if (scanner.matches(".")) {
-					if (scanner.matches(".")) {
-						try (ChangeExpr struc = new ChangeExpr(store, 0)) {
-							move(struc, spot);
-							spot.setOperation(Operation.FILTER);
-							spot.setFilterDeep(true);
-							spot.setFilter(struc);
-						}
-					}
 					String id = scanner.parseIdentifier();
 					if (scanner.matches("(")) {
 						if (id.equals("length")) {
-							try (ChangeExpr struc = new ChangeExpr(store, 0)) {
-								move(struc, spot);
-								spot.setOperation(Operation.FUNCTION);
-								spot.setFunction(Function.LENGTH);
-								spot.setType(ResultType.Type.NUMBER);
-								spot.setFnParm1(struc);
-							}
+							ChangeExpr struc = new ChangeExpr(store, 0);
+							move(struc, spot);
+							spot.setOperation(Operation.FUNCTION);
+							spot.setFunction(Function.LENGTH);
+							spot.setType(ResultType.Type.NUMBER);
+							spot.setFnParm1(struc);
 						} else if (id.equals("name")) {
-							try (ChangeExpr struc = new ChangeExpr(store, 0)) {
-								move(struc, spot);
-								spot.setOperation(Operation.FUNCTION);
-								spot.setFunction(Function.NAME);
-								spot.setType(ResultType.Type.STRING);
-								spot.setFnParm1(struc);
-							}
+							ChangeExpr struc = new ChangeExpr(store, 0);
+							move(struc, spot);
+							spot.setOperation(Operation.FUNCTION);
+							spot.setFunction(Function.NAME);
+							spot.setType(ResultType.Type.STRING);
+							spot.setFnParm1(struc);
 						} else if (id.equals("type")) {
-							try (ChangeExpr struc = new ChangeExpr(store, 0)) {
-								move(struc, spot);
-								spot.setOperation(Operation.FUNCTION);
-								spot.setFunction(Function.TYPE);
-								spot.setType(ResultType.Type.STRING);
-								spot.setFnParm1(struc);
-							}
+							ChangeExpr struc = new ChangeExpr(store, 0);
+							move(struc, spot);
+							spot.setOperation(Operation.FUNCTION);
+							spot.setFunction(Function.TYPE);
+							spot.setType(ResultType.Type.STRING);
+							spot.setFnParm1(struc);
 						} else if (id.equals("first")) {
-							try (ChangeExpr struc = new ChangeExpr(store, 0)) {
-								move(struc, spot);
-								spot.setOperation(Operation.FUNCTION);
-								spot.setFunction(Function.FIRST);
-								spot.setType(ResultType.Type.BOOLEAN);
-								spot.setFnParm1(struc);
-							}
+							ChangeExpr struc = new ChangeExpr(store, 0);
+							move(struc, spot);
+							spot.setOperation(Operation.FUNCTION);
+							spot.setFunction(Function.FIRST);
+							spot.setType(ResultType.Type.BOOLEAN);
+							spot.setFnParm1(struc);
 						} else if (id.equals("last")) {
-							try (ChangeExpr struc = new ChangeExpr(store, 0)) {
-								move(struc, spot);
-								spot.setOperation(Operation.FUNCTION);
-								spot.setFunction(Function.LAST);
-								spot.setType(ResultType.Type.BOOLEAN);
-								spot.setFnParm1(struc);
-							}
+							ChangeExpr struc = new ChangeExpr(store, 0);
+							move(struc, spot);
+							spot.setOperation(Operation.FUNCTION);
+							spot.setFunction(Function.LAST);
+							spot.setType(ResultType.Type.BOOLEAN);
+							spot.setFnParm1(struc);
 						} else if (id.equals("index")) {
-							try (ChangeExpr struc = new ChangeExpr(store, 0)) {
-								move(struc, spot);
-								spot.setOperation(Operation.FUNCTION);
-								spot.setFunction(Function.INDEX);
-								spot.setType(ResultType.Type.NUMBER);
-								spot.setFnParm1(struc);
-							}
+							ChangeExpr struc = new ChangeExpr(store, 0);
+							move(struc, spot);
+							spot.setOperation(Operation.FUNCTION);
+							spot.setFunction(Function.INDEX);
+							spot.setType(ResultType.Type.NUMBER);
+							spot.setFnParm1(struc);
 							if (!scanner.peek(")")) {
-								try (ChangeExpr idx = new ChangeExpr(store, 0)) {
-									remember();
-									spot = idx;
-									parseExpr();
-									restore();
-									spot.setFnParm2(idx);
-								}
+								ChangeExpr idx = new ChangeExpr(store, 0);
+								remember();
+								spot = idx;
+								parseExpr();
+								restore();
+								spot.setFnParm2(idx);
 							}
 						}
 						scanner.expect(")");
 					} else {
-						try (ChangeExpr struc = new ChangeExpr(store, 0)) {
-							move(struc, spot);
-							spot.setOperation(Operation.FUNCTION);
-							spot.setFunction(Function.ELEMENT);
-							spot.setFnParm1(struc);
-						}
-						try (ChangeExpr parm = new ChangeExpr(store, 0)) {
-							parm.setOperation(Operation.STRING);
-							parm.setString(id);
-							spot.setFnParm2(parm);
-						}
+						ChangeExpr struc = new ChangeExpr(store, 0);
+						move(struc, spot);
+						spot.setOperation(Operation.FUNCTION);
+						spot.setFunction(Function.ELEMENT);
+						spot.setFnParm1(struc);
+						ChangeExpr parm = new ChangeExpr(store, 0);
+						parm.setOperation(Operation.STRING);
+						parm.setString(id);
+						spot.setFnParm2(parm);
 					}
 				} else
 					parseElements();
@@ -762,12 +728,11 @@ public class JsltParser {
 				SortParmsArray callParms;
 				boolean extra = false;
 				if (spot.getOperation() != Operation.SORT) {
-					try (ChangeExpr struc = new ChangeExpr(store, 0)) {
-						move(struc, spot);
-						spot.setOperation(Operation.SORT);
-						callParms = spot.getSortParms();
-						spot.setSort(struc);
-					}
+					ChangeExpr struc = new ChangeExpr(store, 0);
+					move(struc, spot);
+					spot.setOperation(Operation.SORT);
+					callParms = spot.getSortParms();
+					spot.setSort(struc);
 				} else {
 					extra = true;
 					callParms = spot.getSortParms();
@@ -782,52 +747,47 @@ public class JsltParser {
 				parseExpr();
 				restore();
 			} else if (first && scanner.matches("?")) {
-				try (ChangeExpr temp = new ChangeExpr(store, 0)) {
-					move(temp, spot);
-					spot.setOperation(Operation.FILTER);
-					spot.setFilterDeep(false);
-					spot.setFilter(temp);
-				}
-				try (ChangeExpr data = new ChangeExpr(store, 0)) {
-					remember();
-					spot = data;
-					parseExpr();
-					restore();
-					spot.setFilterExpr(data);
-				}
+				ChangeExpr temp = new ChangeExpr(store, 0);
+				move(temp, spot);
+				spot.setOperation(Operation.FILTER);
+				spot.setFilterDeep(false);
+				spot.setFilter(temp);
+				ChangeExpr data = new ChangeExpr(store, 0);
+				remember();
+				spot = data;
+				parseExpr();
+				restore();
+				spot.setFilterExpr(data);
 			} else {
-				try (ChangeExpr struc = new ChangeExpr(store, 0)) {
-					move(struc, spot);
-					spot.setOperation(Operation.FUNCTION);
-					spot.setFunction(Function.ELEMENT);
-					spot.setFnParm1(struc);
+				ChangeExpr struc = new ChangeExpr(store, 0);
+				move(struc, spot);
+				spot.setOperation(Operation.FUNCTION);
+				spot.setFunction(Function.ELEMENT);
+				spot.setFnParm1(struc);
+				ChangeExpr parm = new ChangeExpr(store, 0);
+				remember();
+				spot = parm;
+				if (!scanner.peek(":"))
+					parseExpr();
+				else {
+					parm.setOperation(Operation.NUMBER);
+					parm.setNumber(Long.MIN_VALUE);
 				}
-				try (ChangeExpr parm = new ChangeExpr(store, 0)) {
-					remember();
-					spot = parm;
-					if (!scanner.peek(":"))
-						parseExpr();
-					else {
-						parm.setOperation(Operation.NUMBER);
-						parm.setNumber(Long.MIN_VALUE);
-					}
-					restore();
-					spot.setFnParm2(parm);
-				}
+				restore();
+				spot.setFnParm2(parm);
 			}
 			if (spot.getOperation() == Operation.CALL) {
 				CallParmsArray callParms = spot.getCallParms();
 				remember();
-				try (ChangeExpr from = new ChangeExpr(store, 0)) {
-					spot = from;
-					if (!scanner.peek(":"))
-						parseExpr();
-					else {
-						from.setOperation(Operation.NUMBER);
-						from.setNumber(Long.MIN_VALUE);
-					}
-					move(callParms.add(), from);
+				ChangeExpr from = new ChangeExpr(store, 0);
+				spot = from;
+				if (!scanner.peek(":"))
+					parseExpr();
+				else {
+					from.setOperation(Operation.NUMBER);
+					from.setNumber(Long.MIN_VALUE);
 				}
+				move(callParms.add(), from);
 				if (!scanner.matches(":")) {
 					CallParmsArray add = callParms.add();
 					add.setOperation(Operation.NUMBER);
@@ -837,22 +797,20 @@ public class JsltParser {
 					add.setNumber(1);
 					return;
 				}
-				try (ChangeExpr to = new ChangeExpr(store, 0)) {
-					spot = to;
-					if (!scanner.peek(":") && !scanner.peek("]"))
-						parseExpr();
-					else {
-						to.setOperation(Operation.NUMBER);
-						to.setNumber(Long.MIN_VALUE);
-					}
-					move(callParms.add(), to);
+				ChangeExpr to = new ChangeExpr(store, 0);
+				spot = to;
+				if (!scanner.peek(":") && !scanner.peek("]"))
+					parseExpr();
+				else {
+					to.setOperation(Operation.NUMBER);
+					to.setNumber(Long.MIN_VALUE);
 				}
+				move(callParms.add(), to);
 				if (scanner.matches(":")) {
-					try (ChangeExpr step = new ChangeExpr(store, 0)) {
-						spot = step;
-						parseExpr();
-						move(callParms.add(), step);
-					}
+					ChangeExpr step = new ChangeExpr(store, 0);
+					spot = step;
+					parseExpr();
+					move(callParms.add(), step);
 				} else {
 					CallParmsArray add = callParms.add();
 					add.setOperation(Operation.NUMBER);
@@ -863,31 +821,28 @@ public class JsltParser {
 			}
 			if (scanner.matches(":")) {
 				CallParmsArray callParms;
-				try (ChangeExpr struc = new ChangeExpr(spot.getFnParm1());
-						ChangeExpr from = new ChangeExpr(spot.getFnParm2())) {
-					spot.setOperation(Operation.CALL);
-					callParms = spot.getCallParms();
-					spot.setMacro(slice);
-					move(callParms.add(), struc);
-					move(callParms.add(), from);
-				}
+				ChangeExpr struc = new ChangeExpr(spot.getFnParm1());
+				ChangeExpr from = new ChangeExpr(spot.getFnParm2());
+				spot.setOperation(Operation.CALL);
+				callParms = spot.getCallParms();
+				spot.setMacro(slice);
+				move(callParms.add(), struc);
+				move(callParms.add(), from);
 				remember();
-				try (ChangeExpr to = new ChangeExpr(store, 0)) {
-					spot = to;
-					if (!scanner.peek(":") && !scanner.peek("]"))
-						parseExpr();
-					else {
-						to.setOperation(Operation.NUMBER);
-						to.setNumber(Long.MIN_VALUE);
-					}
-					move(callParms.add(), to);
+				ChangeExpr to = new ChangeExpr(store, 0);
+				spot = to;
+				if (!scanner.peek(":") && !scanner.peek("]"))
+					parseExpr();
+				else {
+					to.setOperation(Operation.NUMBER);
+					to.setNumber(Long.MIN_VALUE);
 				}
+				move(callParms.add(), to);
 				if (scanner.matches(":")) {
-					try (ChangeExpr step = new ChangeExpr(store, 0)) {
-						spot = step;
-						parseExpr();
-						move(callParms.add(), step);
-					}
+					ChangeExpr step = new ChangeExpr(store, 0);
+					spot = step;
+					parseExpr();
+					move(callParms.add(), step);
 				} else {
 					CallParmsArray add = callParms.add();
 					add.setOperation(Operation.NUMBER);
@@ -901,13 +856,12 @@ public class JsltParser {
 			if (scanner.matches("not") || scanner.matches("!")) {
 				spot.setOperation(Operation.FUNCTION);
 				spot.setFunction(Function.NOT);
-				try (ChangeExpr parm1 = new ChangeExpr(store, 0)) {
-					remember();
-					spot = parm1;
-					parseSingle();
-					restore();
-					spot.setFnParm1(parm1);
-				}
+				ChangeExpr parm1 = new ChangeExpr(store, 0);
+				remember();
+				spot = parm1;
+				parseSingle();
+				restore();
+				spot.setFnParm1(parm1);
 			} else if (scanner.matches("(")) {
 				parseExpr();
 				scanner.expect(")");
@@ -978,13 +932,12 @@ public class JsltParser {
 			}
 			if (scanner.matches("(")) { // found macro call
 				if (id.equals("length")) {
-					try (ChangeExpr struc = new ChangeExpr(store, 0)) {
-						move(struc, spot);
-						spot.setOperation(Operation.FUNCTION);
-						spot.setFunction(Function.LENGTH);
-						spot.setType(ResultType.Type.NUMBER);
-						spot.setFnParm1(struc);
-					}
+					ChangeExpr struc = new ChangeExpr(store, 0);
+					move(struc, spot);
+					spot.setOperation(Operation.FUNCTION);
+					spot.setFunction(Function.LENGTH);
+					spot.setType(ResultType.Type.NUMBER);
+					spot.setFnParm1(struc);
 					scanner.expect(")");
 					return;
 				}
@@ -1013,21 +966,19 @@ public class JsltParser {
 		private void parseForEach() {
 			spot.setOperation(Operation.FUNCTION);
 			spot.setFunction(Function.EACH);
-			try (ChangeExpr init = new ChangeExpr(store, 0)) {
-				remember();
-				spot = init;
-				parseExpr();
-				restore();
-				spot.setFnParm1(init);
-			}
+			ChangeExpr init = new ChangeExpr(store, 0);
+			remember();
+			spot = init;
+			parseExpr();
+			restore();
+			spot.setFnParm1(init);
 			scanner.expect(",");
-			try (ChangeExpr each = new ChangeExpr(store, 0)) {
-				remember();
-				spot = each;
-				parseExpr();
-				restore();
-				spot.setFnParm2(each);
-			}
+			ChangeExpr each = new ChangeExpr(store, 0);
+			remember();
+			spot = each;
+			parseExpr();
+			restore();
+			spot.setFnParm2(each);
 			scanner.expect(")");
 		}
 
@@ -1071,22 +1022,20 @@ public class JsltParser {
 			default:
 			}
 			scanner.expect("(");
-			try (ChangeExpr f = new ChangeExpr(store, 0)) {
-				remember();
-				spot = f;
-				parseExpr();
-				restore();
-				spot.setFnParm1(f);
-			}
+			ChangeExpr f = new ChangeExpr(store, 0);
+			remember();
+			spot = f;
+			parseExpr();
+			restore();
+			spot.setFnParm1(f);
 			if (parms > 1) {
 				scanner.expect(",");
-				try (ChangeExpr s = new ChangeExpr(store, 0)) {
-					remember();
-					spot = s;
-					parseExpr();
-					restore();
-					spot.setFnParm2(s);
-				}
+				ChangeExpr s = new ChangeExpr(store, 0);
+				remember();
+				spot = s;
+				parseExpr();
+				restore();
+				spot.setFnParm2(s);
 			}
 			scanner.expect(")");
 		}
@@ -1116,7 +1065,20 @@ public class JsltParser {
 			ObjectArray obj = spot.getObject();
 			remember();
 			ObjectArray add = obj.add();
-			try (ChangeExpr expr = new ChangeExpr(store, 0)) {
+			ChangeExpr expr = new ChangeExpr(store, 0);
+			spot = expr;
+			if (scanner.hasIdentifier()) {
+				spot.setOperation(Operation.STRING);
+				spot.setString(scanner.parseIdentifier());
+			} else
+				parseExpr();
+			add.setName(expr);
+			scanner.expect(":");
+			spot = add;
+			parseExpr();
+			while (scanner.matches(",")) {
+				add = obj.add();
+				expr = new ChangeExpr(store, 0);
 				spot = expr;
 				if (scanner.hasIdentifier()) {
 					spot.setOperation(Operation.STRING);
@@ -1124,21 +1086,6 @@ public class JsltParser {
 				} else
 					parseExpr();
 				add.setName(expr);
-			}
-			scanner.expect(":");
-			spot = add;
-			parseExpr();
-			while (scanner.matches(",")) {
-				add = obj.add();
-				try (ChangeExpr expr = new ChangeExpr(store, 0)) {
-					spot = expr;
-					if (scanner.hasIdentifier()) {
-						spot.setOperation(Operation.STRING);
-						spot.setString(scanner.parseIdentifier());
-					} else
-						parseExpr();
-					add.setName(expr);
-				}
 				scanner.expect(":");
 				spot = add;
 				parseExpr();
@@ -1220,69 +1167,66 @@ public class JsltParser {
 			spot = arr.add();
 			parseExpr();
 			if (scanner.matches(":")) {
-				try (ChangeExpr temp = new ChangeExpr(store, 0)) {
-					move(temp, spot);
-					spot.setOperation(Operation.FUNCTION);
-					spot.setFunction(Function.LAYOUT);
-					spot.setFnParm2(temp);
+				ChangeExpr temp = new ChangeExpr(store, 0);
+				move(temp, spot);
+				spot.setOperation(Operation.FUNCTION);
+				spot.setFunction(Function.LAYOUT);
+				spot.setFnParm2(temp);
+				ChangeExpr data = new ChangeExpr(store, 0);
+				data.setOperation(Operation.OBJECT);
+				data.setType(ResultType.Type.OBJECT);
+				ObjectArray obj = data.getObject();
+				if (scanner.matches("<"))
+					setObject(obj, "align", "L"); // left
+				else if (scanner.matches(">"))
+					setObject(obj, "align", "R"); // right
+				else if (scanner.matches("^"))
+					setObject(obj, "align", "C"); // center
+				if (scanner.matches("..."))
+					setObject(obj, "align", "T"); // tail
+				if (scanner.matches("+"))
+					setObject(obj, "sign", "+");
+				else if (scanner.matches("-"))
+					setObject(obj, "sign", "-");
+				if (scanner.matches("#"))
+					setObject(obj, "alternative", true);
+				if (scanner.matches("0"))
+					setObject(obj, "leadingZero", true);
+				if (scanner.hasNumber())
+					setObject(obj, "width", scanner.parseSimpleNumber());
+				else if (scanner.matches("{")) {
+					ObjectArray fld = obj.add();
+					setName(fld, "width");
+					remember();
+					spot = fld;
+					parseExpr();
+					restore();
+					scanner.expect("}");
 				}
-				try (ChangeExpr data = new ChangeExpr(store, 0)) {
-					data.setOperation(Operation.OBJECT);
-					data.setType(ResultType.Type.OBJECT);
-					ObjectArray obj = data.getObject();
-					if (scanner.matches("<"))
-						setObject(obj, "align", "L"); // left
-					else if (scanner.matches(">"))
-						setObject(obj, "align", "R"); // right
-					else if (scanner.matches("^"))
-						setObject(obj, "align", "C"); // center
-					if (scanner.matches("..."))
-						setObject(obj, "align", "T"); // tail
-					if (scanner.matches("+"))
-						setObject(obj, "sign", "+");
-					else if (scanner.matches("-"))
-						setObject(obj, "sign", "-");
-					if (scanner.matches("#"))
-						setObject(obj, "alternative", true);
-					if (scanner.matches("0"))
-						setObject(obj, "leadingZero", true);
+				if (scanner.matches(","))
+					setObject(obj, "separator", ",");
+				else if (scanner.matches("_"))
+					setObject(obj, "separator", "_");
+				if (scanner.matches("..."))
+					setObject(obj, "align", "H"); // head
+				if (scanner.matches(".")) {
 					if (scanner.hasNumber())
-						setObject(obj, "width", scanner.parseSimpleNumber());
+						setObject(obj, "precision", scanner.parseSimpleNumber());
 					else if (scanner.matches("{")) {
 						ObjectArray fld = obj.add();
-						setName(fld, "width");
+						setName(fld, "precision");
 						remember();
 						spot = fld;
 						parseExpr();
 						restore();
 						scanner.expect("}");
 					}
-					if (scanner.matches(","))
-						setObject(obj, "separator", ",");
-					else if (scanner.matches("_"))
-						setObject(obj, "separator", "_");
-					if (scanner.matches("..."))
-						setObject(obj, "align", "H"); // head
-					if (scanner.matches(".")) {
-						if (scanner.hasNumber())
-							setObject(obj, "precision", scanner.parseSimpleNumber());
-						else if (scanner.matches("{")) {
-							ObjectArray fld = obj.add();
-							setName(fld, "precision");
-							remember();
-							spot = fld;
-							parseExpr();
-							restore();
-							scanner.expect("}");
-						}
-					}
-					if (scanner.peek("b") || scanner.peek("c") || scanner.peek("e") || scanner.peek("E")
-							|| scanner.peek("f") || scanner.peek("F") || scanner.peek("g") || scanner.peek("G")
-							|| scanner.peek("o") || scanner.peek("x") || scanner.peek("X")) {
-						setObject(obj, "type", scanner.getChar());
-					}
-					spot.setFnParm1(data);
 				}
+				if (scanner.peek("b") || scanner.peek("c") || scanner.peek("e") || scanner.peek("E") || scanner.peek("f") || scanner.peek("F")
+						|| scanner.peek("g") || scanner.peek("G") || scanner.peek("o") || scanner.peek("x") || scanner.peek("X")) {
+					setObject(obj, "type", scanner.getChar());
+				}
+				spot.setFnParm1(data);
 			}
 			restore();
 			scanner.expect("}");
@@ -1291,32 +1235,30 @@ public class JsltParser {
 		private void setObject(ObjectArray obj, String name, Object value) {
 			ObjectArray fld = obj.add();
 			setName(fld, name);
-			try (ChangeExpr expr = new ChangeExpr(store, 0)) {
-				if (value instanceof Boolean) {
-					fld.setOperation(Operation.BOOLEAN);
-					fld.setBoolean((Boolean) value);
-				} else if (value instanceof String) {
-					fld.setOperation(Operation.STRING);
-					fld.setString((String) value);
-				} else if (value instanceof Character) {
-					fld.setOperation(Operation.STRING);
-					fld.setString("" + value);
-				} else if (value instanceof Long) {
-					fld.setOperation(Operation.NUMBER);
-					fld.setNumber((Long) value);
-				} else if (value instanceof Integer) {
-					fld.setOperation(Operation.NUMBER);
-					fld.setNumber((Integer) value);
-				}
+			ChangeExpr expr = new ChangeExpr(store, 0);
+			if (value instanceof Boolean) {
+				fld.setOperation(Operation.BOOLEAN);
+				fld.setBoolean((Boolean) value);
+			} else if (value instanceof String) {
+				fld.setOperation(Operation.STRING);
+				fld.setString((String) value);
+			} else if (value instanceof Character) {
+				fld.setOperation(Operation.STRING);
+				fld.setString("" + value);
+			} else if (value instanceof Long) {
+				fld.setOperation(Operation.NUMBER);
+				fld.setNumber((Long) value);
+			} else if (value instanceof Integer) {
+				fld.setOperation(Operation.NUMBER);
+				fld.setNumber((Integer) value);
 			}
 		}
 
 		private void setName(ObjectArray fld, String name) {
-			try (ChangeExpr expr = new ChangeExpr(store, 0)) {
-				expr.setOperation(Operation.STRING);
-				expr.setString(name);
-				fld.setName(expr);
-			}
+			ChangeExpr expr = new ChangeExpr(store, 0);
+			expr.setOperation(Operation.STRING);
+			expr.setString(name);
+			fld.setName(expr);
 		}
 
 		private void parseNumber() {

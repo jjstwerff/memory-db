@@ -10,7 +10,7 @@ package ${project.package};
 <#list rec.fields as rfield>
 <#if rfield.type == "SET"><#assign hasIndexes=true></#if>
 <#if rfield.type == "ARRAY"><#assign hasArrays=true></#if>
-<#if rfield.isMandatory()><#assign hasMandatory=true></#if>
+<#if rfield.isMandatory() || rfield.type == "BOOLEAN" || rfield.type == "ENUMERATE"><#assign hasMandatory=true></#if>
 </#list>
 
 import java.util.Iterator;
@@ -21,9 +21,11 @@ import org.memorydb.file.Write;
 <#if table.included?size gt 0>
 import org.memorydb.handler.CorruptionException;
 </#if>
-import org.memorydb.structure.ChangeInterface;
 <#if hasMandatory>
 import org.memorydb.handler.MutationException;
+</#if>
+<#if rec.includes?size == 0>
+import org.memorydb.structure.ChangeInterface;
 </#if>
 <#if rec.fields?size gt 0>
 import org.memorydb.structure.FieldData;
@@ -37,7 +39,6 @@ import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RedBlackTree;
 </#if>
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 <#list rec.imports as import>
 import ${import};
@@ -50,18 +51,20 @@ import ${import};
 @RecordData(name = "${rec.name}"<#if field.description??>, description = "${rec.description}"</#if>)
 public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.includes?size == 0>ChangeInterface, </#if><#list rec.includes as incl>Change${incl.name}, </#list>Iterable<${field.name?cap_first}Array> {
 	private final Store store;
-	private final ${table.name} parent;
+	private final ${on} parent;
 	private final int idx;
 	private int alloc;
 	private int size;
 
-	/* package private */ ${field.name?cap_first}Array(${table.name} parent, int idx) {
+	/* package private */ ${field.name?cap_first}Array(${on} parent, int idx) {
 		this.store = parent.store();
 		this.parent = parent;
 		this.idx = idx;
 		if (parent.rec() != 0) {
 <#if table.included?size gt 0>
 			this.alloc = store.getInt(parent.rec(), parent.${table.name?lower_case}Position() + ${(field.pos / 8)});
+<#elseif on != table.name>
+			this.alloc = store.getInt(parent.rec(), parent.index() * ${table.size} + ${(field.pos / 8)});
 <#else>
 			this.alloc = store.getInt(parent.rec(), ${(field.pos / 8)});
 </#if>
@@ -110,8 +113,11 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 		return new ${field.name?cap_first}Array(store, rec, -1);
 	}
 
-	private void up(${table.name} record) {
+	private void up(${on} record) {
 		store.setInt(alloc, 8, record.rec());
+<#if on != table.name>
+		store.setInt(alloc, 12, record.index());
+</#if>
 <#if table.included?size gt 0>
 <#assign nr=1>
 <#list table.included as incl><#if incl.full>
@@ -127,7 +133,7 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 	}
 
 	@Override
-	public ${table.name} up() {
+	public ${on} up() {
 <#if table.included?size gt 0>
 		if (alloc == 0)
 			return null;
@@ -143,8 +149,10 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 		default:
 			throw new CorruptionException("Unknown upRecord type");
 		}
+<#elseif on != table.name>
+		return new ${on}(store, store.getInt(alloc, 8), store.getInt(alloc, 12));
 <#else>
-		return new ${table.name}(store, store.getInt(alloc, 8));
+		return new ${on}(store, store.getInt(alloc, 8));
 </#if>
 	}
 
@@ -174,6 +182,8 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 			alloc = store.resize(alloc, (${table.reserve()} + (idx + 1) * ${rec.totalSize?c}) / 8);
 <#if table.included?size gt 0>
 		store.setInt(parent.rec(), parent.${table.name?lower_case}Position() + ${field.pos / 8}, alloc);
+<#elseif on != table.name>
+		store.setInt(parent.rec(), parent.index() * ${table.size} + ${(field.pos / 8)}, alloc);
 <#else>
 		store.setInt(parent.rec(), ${field.pos / 8}, alloc);
 </#if>
@@ -183,7 +193,7 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 <#list rec.fields as field><#if field.default??>
 		res.set${field.name?cap_first}(${field.default});
 </#if><#if field.type == "SET" || field.type == "ARRAY">
-		store.setInt(rec, ${field.pos / 8}, 0); // ${field.type} ${field.name}
+		store.setInt(rec(), ${field.pos / 8}, 0); // ${field.type} ${field.name}
 </#if></#list>
 		return res;
 	}
@@ -293,7 +303,7 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 <#list rec.fields as field><#if field.default??>
 		set${field.name?cap_first}(${field.default});
 </#if><#if field.type == "SET" || field.type == "ARRAY">
-		store.setInt(rec, ${field.pos / 8}, 0); // ${field.type} ${field.name}
+		store.setInt(rec(), ${field.pos / 8}, 0); // ${field.type} ${field.name}
 </#if></#list>
 <#list rec.includes as incl>
 		parse${incl.name}(parser);
@@ -307,18 +317,6 @@ ${field.arrayFields}<#rt>
 		return ${rec.includePos(incl, table)};
 	}
 </#list>
-<#if rec.includes?size gt 0>
-
-	@Override
-	public ${field.name?cap_first}Array parseKey(Parser parser) {
-		return null;
-	}
-</#if>
-
-	@Override
-	public void close() {
-		// nothing
-	}
 
 	@Override
 	public String name() {
@@ -426,7 +424,17 @@ ${field.arrayFields}<#rt>
 	}
 
 	@Override
-	public RecordInterface next() {
+	public ${field.name?cap_first}Array index(int idx) {
+		return null;
+	}
+
+	@Override
+	public ${field.name?cap_first}Array start() {
+		return null;
+	}
+
+	@Override
+	public ${field.name?cap_first}Array next() {
 		return null;
 	}
 

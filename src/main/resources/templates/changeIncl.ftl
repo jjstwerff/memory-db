@@ -42,11 +42,6 @@ public interface Change${table.name} extends <#if table.includes?size == 0>Chang
 ${table.otherFields}<#rt>
 	}
 
-	@Override
-	default void close() {
-		// nothing
-	}
-
 	default boolean set${table.name}(int field, Object value) {
 <#assign max = table.fields?size>
 <#list table.includes as incl>

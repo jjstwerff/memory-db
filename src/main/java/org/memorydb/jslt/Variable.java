@@ -4,7 +4,6 @@ import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
@@ -14,17 +13,21 @@ import org.memorydb.structure.Store;
 public class Variable implements ResultType {
 	/* package private */ final Store store;
 	protected final int rec;
+	private final int field;
 	/* package private */ static final int RECORD_SIZE = 18;
-
-	public Variable(Store store) {
-		this.store = store;
-		this.rec = 0;
-	}
 
 	public Variable(Store store, int rec) {
 		rec = store.correct(rec);
 		this.store = store;
 		this.rec = rec;
+		this.field = 0;
+	}
+
+	public Variable(Store store, int rec, int field) {
+		rec = store.correct(rec);
+		this.store = store;
+		this.rec = rec;
+		this.field = field;
 	}
 
 	@Override
@@ -94,30 +97,31 @@ public class Variable implements ResultType {
 		return write.toString();
 	}
 
-	public static void parse(Parser parser, Store store) {
+	public static Variable parse(Parser parser, Store store) {
+		Variable rec = null;
 		while (parser.getSub()) {
-			int nextRec = 0;
-			if (parser.isDelete(nextRec)) {
-				try (ChangeVariable record = new ChangeVariable(store, nextRec)) {
+			rec = parseKey(parser, store);
+			if (parser.isDelete()) {
+				if (rec != null) {
+					ChangeVariable record = new ChangeVariable(rec);
 					store.free(record.rec());
 				}
 				continue;
 			}
-			if (nextRec == 0) {
-				try (ChangeVariable record = new ChangeVariable(store, 0)) {
+			if (rec == null) {
+				ChangeVariable record = new ChangeVariable(store, 0);
 
-					record.parseFields(parser);
-				}
+				record.parseFields(parser);
+				return record;
 			} else {
-				try (ChangeVariable record = new ChangeVariable(store, nextRec)) {
-					record.parseFields(parser);
-				}
+				ChangeVariable record = new ChangeVariable(rec);
+				record.parseFields(parser);
 			}
 		}
+		return rec;
 	}
 
-	@Override
-	public Variable parseKey(Parser parser) {
+	public static Variable parseKey(Parser parser, Store store) {
 		int nextRec = 0;
 		parser.finishRelation();
 		return nextRec <= 0 ? null : new Variable(store, nextRec);
@@ -125,7 +129,6 @@ public class Variable implements ResultType {
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (field > 3 && field <= 5)
 			return ResultType.super.getResultType(field - 3);
 		switch (field) {
@@ -142,10 +145,11 @@ public class Variable implements ResultType {
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (field > 3 && field <= 5)
 			return ResultType.super.typeResultType(field - 3);
 		switch (field) {
+		case 0:
+			return FieldType.OBJECT;
 		case 1:
 			return FieldType.STRING;
 		case 2:
@@ -159,7 +163,6 @@ public class Variable implements ResultType {
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (field > 3 && field <= 5)
 			return ResultType.super.nameResultType(field - 3);
 		switch (field) {
@@ -175,12 +178,17 @@ public class Variable implements ResultType {
 	}
 
 	@Override
+	public Variable start() {
+		return new Variable(store, rec, 1);
+	}
+
+	@Override
 	public Variable next() {
-		return null;
+		return field >= 5 ? null : new Variable(store, rec, field + 1);
 	}
 
 	@Override
 	public Variable copy() {
-		return new Variable(store, rec);
+		return new Variable(store, rec, field);
 	}
 }

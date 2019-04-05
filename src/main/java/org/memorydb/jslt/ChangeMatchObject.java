@@ -25,11 +25,6 @@ public class ChangeMatchObject extends MatchObject implements ChangeMatch {
 	}
 
 	@Override
-	public void close() {
-		// nothing yet
-	}
-
-	@Override
 	public boolean java(Object value) {
 		int field = 0;
 		if (field > 0 && field <= 15)

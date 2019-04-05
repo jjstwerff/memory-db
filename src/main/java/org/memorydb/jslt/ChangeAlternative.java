@@ -7,9 +7,9 @@ import org.memorydb.handler.MutationException;
 /**
  * Automatically generated record class for table Alternative
  */
-public class ChangeAlternative extends Alternative implements ChangeInterface {
+public class ChangeAlternative extends Alternative implements AutoCloseable, ChangeInterface {
 	/* package private */ ChangeAlternative(Macro parent, int rec) {
-		super(parent.store(), rec == 0 ? parent.store.allocate(Alternative.RECORD_SIZE) : rec);
+		super(parent.store(), rec == 0 ? parent.store().allocate(Alternative.RECORD_SIZE) : rec);
 		if (rec == 0) {
 			setNr(0);
 			store.setInt(rec(), 8, 0); // ARRAY parameters
@@ -58,12 +58,9 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 
 	/* package private */ void parseFields(Parser parser) {
 		if (parser.hasSub("parameters")) {
-			try (ParametersArray sub = new ParametersArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			ParametersArray sub = new ParametersArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 		if (parser.hasField("anyParm")) {
 			Boolean valueAnyParm = parser.getBoolean("anyParm");
@@ -72,15 +69,12 @@ public class ChangeAlternative extends Alternative implements ChangeInterface {
 			setAnyParm(valueAnyParm);
 		}
 		if (parser.hasSub("if")) {
-			setIf(new Expr(store).parse(parser));
+			setIf(Expr.parse(parser, store()));
 		}
 		if (parser.hasSub("code")) {
-			try (CodeArray sub = new CodeArray(this, -1)) {
-				while (parser.getSub()) {
-					sub.add();
-					sub.parse(parser);
-				}
-			}
+			CodeArray sub = new CodeArray(this, -1);
+			while (parser.getSub())
+				sub.add().parse(parser);
 		}
 	}
 

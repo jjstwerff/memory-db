@@ -27,7 +27,7 @@ public interface Parser extends AutoCloseable {
 	void close();
 
 	/** Returns true if the last read sub record should be deleted */
-	boolean isDelete(int rec);
+	boolean isDelete();
 
 	void error(String msg);
 

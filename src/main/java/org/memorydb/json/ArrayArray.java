@@ -173,16 +173,6 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 	}
 
 	@Override
-	public boolean parseKey(Parser parser) {
-		return false;
-	}
-
-	@Override
-	public void close() {
-		// nothing
-	}
-
-	@Override
 	public Type getType() {
 		if (idx == -1)
 			return parent.getType();
@@ -194,7 +184,7 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 
 	@Override
 	public FieldType type() {
-		return typePart();
+		return getFieldType();
 	}
 
 	@Override

@@ -29,12 +29,8 @@ public class Meta implements AutoCloseable {
 
 	@FieldData(name = "meta", type = "SET", related = Project.class)
 	public Project getMeta(String key1) {
-		Project rec = new Project(store);
-		Project.IndexMeta idx = rec.new IndexMeta(key1);
-		int res = idx.search();
-		if (res == 0)
-			return rec;
-		return new Project(store, res);
+		int res = new Project.IndexMeta(store, key1).search();
+		return res <= 0 ? null : new Project(store, res);
 	}
 
 	public ChangeProject addProject() {

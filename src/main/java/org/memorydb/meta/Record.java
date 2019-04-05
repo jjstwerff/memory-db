@@ -21,12 +21,21 @@ import org.memorydb.structure.TreeIndex;
 public class Record implements MemoryRecord, RecordInterface {
 	/* package private */ final Store store;
 	protected final int rec;
+	private final int field;
 	/* package private */ static final int RECORD_SIZE = 37;
 
 	public Record(Store store, int rec) {
 		rec = store.correct(rec);
 		this.store = store;
 		this.rec = rec;
+		this.field = 0;
+	}
+
+	public Record(Store store, int rec, int field) {
+		rec = store.correct(rec);
+		this.store = store;
+		this.rec = rec;
+		this.field = field;
 	}
 
 	@Override
@@ -35,9 +44,9 @@ public class Record implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
-	public Record copy(int rec) {
-		assert store.validate(rec);
-		return new Record(store, rec);
+	public Record copy(int newRec) {
+		assert store.validate(newRec);
+		return new Record(store, newRec);
 	}
 
 	@Override
@@ -61,7 +70,8 @@ public class Record implements MemoryRecord, RecordInterface {
 	}
 
 	public Field getFieldName(String key1) {
-		return new Field(store, new IndexFieldName(key1).search());
+		int res = new IndexFieldName(key1).search();
+		return res <= 0 ? null : new Field(store, res);
 	}
 
 	public ChangeField addFieldName() {
@@ -69,7 +79,6 @@ public class Record implements MemoryRecord, RecordInterface {
 	}
 
 	/* package private */ class IndexFieldName extends TreeIndex implements Iterable<Field> {
-
 		public IndexFieldName() {
 			super(store(), null, 112, 15);
 		}
@@ -81,9 +90,9 @@ public class Record implements MemoryRecord, RecordInterface {
 					if (recNr < 0)
 						return -1;
 					assert store().validate(recNr);
-					Field old = new Field(store(), recNr);
+					Field rec = new Field(store(), recNr);
 					int o = 0;
-					o = RedBlackTree.compare(key1, old.getName());
+					o = RedBlackTree.compare(key1, rec.getName());
 					return o;
 				}
 
@@ -115,7 +124,7 @@ public class Record implements MemoryRecord, RecordInterface {
 
 		@Override
 		public Iterator<Field> iterator() {
-			return new Iterator<Field>() {
+			return new Iterator<>() {
 				int nextRec = search();
 
 				@Override
@@ -127,7 +136,7 @@ public class Record implements MemoryRecord, RecordInterface {
 				public Field next() {
 					int n = nextRec;
 					nextRec = toNext(nextRec);
-					return new Field(store(), n);
+					return n <= 0 ? null : new Field(store, n);
 				}
 			};
 		}
@@ -139,7 +148,8 @@ public class Record implements MemoryRecord, RecordInterface {
 	}
 
 	public Field getFields(int key1) {
-		return new Field(store, new IndexFields(key1).search());
+		int res = new IndexFields(key1).search();
+		return res <= 0 ? null : new Field(store, res);
 	}
 
 	public ChangeField addFields() {
@@ -147,7 +157,6 @@ public class Record implements MemoryRecord, RecordInterface {
 	}
 
 	/* package private */ class IndexFields extends TreeIndex implements Iterable<Field> {
-
 		public IndexFields() {
 			super(store(), null, 216, 28);
 		}
@@ -158,9 +167,10 @@ public class Record implements MemoryRecord, RecordInterface {
 				public int compareTo(int recNr) {
 					if (recNr < 0)
 						return -1;
-					Field old = new Field(store(), recNr);
+					assert store().validate(recNr);
+					Field rec = new Field(store(), recNr);
 					int o = 0;
-					o = RedBlackTree.compare(key1, old.getNr());
+					o = RedBlackTree.compare(key1, rec.getNr());
 					return o;
 				}
 
@@ -204,7 +214,7 @@ public class Record implements MemoryRecord, RecordInterface {
 				public Field next() {
 					int n = nextRec;
 					nextRec = toNext(nextRec);
-					return new Field(store, n);
+					return n <= 0 ? null : new Field(store, n);
 				}
 			};
 		}
@@ -267,41 +277,42 @@ public class Record implements MemoryRecord, RecordInterface {
 		return write.toString();
 	}
 
-	public Record parse(Parser parser, Project parent) {
+	public static Record parse(Parser parser, Project parent) {
+		Record rec = null;
 		while (parser.getSub()) {
-			String name = parser.getString("name");
-			int nextRec = parent.new IndexRecords(name).search();
-			if (parser.isDelete(nextRec)) {
-				try (ChangeRecord record = new ChangeRecord(this)) {
-					store.free(record.rec());
-				}
+			rec = parseKey(parser, parent);
+			if (parser.isDelete()) {
+				if (rec != null)
+					try (ChangeRecord record = new ChangeRecord(rec)) {
+						parent.store.free(record.rec());
+					}
 				continue;
 			}
-			if (nextRec == 0) {
+			if (rec == null) {
 				try (ChangeRecord record = new ChangeRecord(parent, 0)) {
+					String name = parser.getString("name");
 					record.setName(name);
 					record.parseFields(parser);
+					return record;
 				}
 			} else {
-				try (ChangeRecord record = new ChangeRecord(this)) {
+				try (ChangeRecord record = new ChangeRecord(rec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
-		return this;
+		return rec;
 	}
 
-	public Record parseKey(Parser parser) {
-		Project parent = up();
+	public static Record parseKey(Parser parser, Project parent) {
 		String name = parser.getString("name");
 		int nextRec = parent.new IndexRecords(name).search();
 		parser.finishRelation();
-		return nextRec == 0 ? null : new Record(store, nextRec);
+		return nextRec <= 0 ? null : new Record(parent.store(), nextRec);
 	}
 
 	@Override
 	public Object java() {
-		int field = 0;
 		switch (field) {
 		case 1:
 			return getName();
@@ -316,8 +327,9 @@ public class Record implements MemoryRecord, RecordInterface {
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		switch (field) {
+		case 0:
+			return FieldType.OBJECT;
 		case 1:
 			return FieldType.STRING;
 		case 2:
@@ -335,7 +347,6 @@ public class Record implements MemoryRecord, RecordInterface {
 
 	@Override
 	public String name() {
-		int field = 0;
 		switch (field) {
 		case 1:
 			return "name";
@@ -353,12 +364,17 @@ public class Record implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
+	public Record start() {
+		return new Record(store, rec, 1);
+	}
+
+	@Override
 	public Record next() {
-		return null;
+		return field >= 5 ? null : new Record(store, rec, field + 1);
 	}
 
 	@Override
 	public Record copy() {
-		return new Record(store, rec);
+		return new Record(store, rec, field);
 	}
 }

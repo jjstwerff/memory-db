@@ -15,17 +15,21 @@ import org.memorydb.structure.Store;
 public class Alternative implements MemoryRecord, RecordInterface {
 	/* package private */ final Store store;
 	protected final int rec;
+	private final int field;
 	/* package private */ static final int RECORD_SIZE = 34;
-
-	public Alternative(Store store) {
-		this.store = store;
-		this.rec = 0;
-	}
 
 	public Alternative(Store store, int rec) {
 		rec = store.correct(rec);
 		this.store = store;
 		this.rec = rec;
+		this.field = 0;
+	}
+
+	public Alternative(Store store, int rec, int field) {
+		rec = store.correct(rec);
+		this.store = store;
+		this.rec = rec;
+		this.field = field;
 	}
 
 	@Override
@@ -142,40 +146,42 @@ public class Alternative implements MemoryRecord, RecordInterface {
 		return write.toString();
 	}
 
-	public static void parse(Parser parser, Macro parent) {
+	public static Alternative parse(Parser parser, Macro parent) {
+		Alternative rec = null;
 		while (parser.getSub()) {
-			int nr = parser.getInt("nr");
-			int nextRec = parent.new IndexAlternatives(nr).search();
-			if (parser.isDelete(nextRec)) {
-				try (ChangeAlternative record = new ChangeAlternative(parent, nextRec)) {
-					parent.store.free(record.rec());
-				}
+			rec = parseKey(parser, parent);
+			if (parser.isDelete()) {
+				if (rec != null)
+					try (ChangeAlternative record = new ChangeAlternative(rec)) {
+						parent.store.free(record.rec());
+					}
 				continue;
 			}
-			if (nextRec == 0) {
+			if (rec == null) {
 				try (ChangeAlternative record = new ChangeAlternative(parent, 0)) {
+					int nr = parser.getInt("nr");
 					record.setNr(nr);
 					record.parseFields(parser);
+					return record;
 				}
 			} else {
-				try (ChangeAlternative record = new ChangeAlternative(parent, nextRec)) {
+				try (ChangeAlternative record = new ChangeAlternative(rec)) {
 					record.parseFields(parser);
 				}
 			}
 		}
+		return rec;
 	}
 
-	public Alternative parseKey(Parser parser) {
-		Macro parent = up();
+	public static Alternative parseKey(Parser parser, Macro parent) {
 		int nr = parser.getInt("nr");
 		int nextRec = parent.new IndexAlternatives(nr).search();
 		parser.finishRelation();
-		return nextRec <= 0 ? null : new Alternative(store, nextRec);
+		return nextRec <= 0 ? null : new Alternative(parent.store(), nextRec);
 	}
 
 	@Override
 	public Object java() {
-		int field = 0;
 		switch (field) {
 		case 1:
 			return getNr();
@@ -190,8 +196,9 @@ public class Alternative implements MemoryRecord, RecordInterface {
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		switch (field) {
+		case 0:
+			return FieldType.OBJECT;
 		case 1:
 			return FieldType.INTEGER;
 		case 2:
@@ -209,7 +216,6 @@ public class Alternative implements MemoryRecord, RecordInterface {
 
 	@Override
 	public String name() {
-		int field = 0;
 		switch (field) {
 		case 1:
 			return "nr";
@@ -227,12 +233,17 @@ public class Alternative implements MemoryRecord, RecordInterface {
 	}
 
 	@Override
+	public Alternative start() {
+		return new Alternative(store, rec, 1);
+	}
+
+	@Override
 	public Alternative next() {
-		return null;
+		return field >= 5 ? null : new Alternative(store, rec, field + 1);
 	}
 
 	@Override
 	public Alternative copy() {
-		return new Alternative(store, rec);
+		return new Alternative(store, rec, field);
 	}
 }

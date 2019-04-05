@@ -53,11 +53,6 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 	}
 
 	@Override
-	public void close() {
-		// nothing yet
-	}
-
-	@Override
 	public boolean java(Object value) {
 		int field = 0;
 		if (field > 3 && field <= 5)

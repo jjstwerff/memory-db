@@ -7,10 +7,12 @@ import org.memorydb.structure.ChangeInterface;
 /**
  * Automatically generated record class for table Json
  */
-public class ChangeJson extends Json implements ChangePart {
-	public ChangeJson(Store store) {
-		super(store, store.allocate(Json.RECORD_SIZE));
-		defaultPart();
+public class ChangeJson extends Json implements AutoCloseable, ChangePart {
+	public ChangeJson(Store store, int rec) {
+		super(store, rec == 0 ? store.allocate(Json.RECORD_SIZE) : rec);
+		if (rec == 0) {
+			defaultPart();
+		}
 	}
 
 	public ChangeJson(Json current) {
