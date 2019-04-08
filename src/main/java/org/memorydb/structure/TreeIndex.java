@@ -1,10 +1,10 @@
 package org.memorydb.structure;
 
-public abstract class TreeIndex extends RedBlackTree {
-	private final Key key;
+public abstract class TreeIndex extends RedBlackTree implements RecordInterface {
+	protected final Key key;
 	protected final Store store;
-	private final int flag; // position of flag bit inside record
-	private final int field; // position of left/right field in bytes
+	protected final int flag; // position of flag bit inside record
+	protected final int field; // position of left/right field in bytes
 
 	public TreeIndex(Store store, Key key, int flag, int field) {
 		this.key = key;

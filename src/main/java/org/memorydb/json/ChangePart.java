@@ -27,16 +27,16 @@ public interface ChangePart extends ChangeInterface, Part {
 				store().setByte(rec(), partPosition() + 1, store().getByte(rec(), partPosition() + 1) & 254);
 				break;
 			case FLOAT:
-				store().setLong(rec(), partPosition() + 1, Double.doubleToLongBits(0.0));
+				store().setLong(rec(), partPosition() + 1, Double.doubleToLongBits(Double.NaN));
 				break;
 			case NUMBER:
-				store().setLong(rec(), partPosition() + 1, 0L);
+				store().setLong(rec(), partPosition() + 1, Long.MIN_VALUE);
 				break;
 			case OBJECT:
 				store().setInt(rec(), partPosition() + 1, 0);
 				break;
 			case STRING:
-				store().setInt(rec(), partPosition() + 1, 0);
+				store().setInt(rec(), partPosition() + 1, Integer.MIN_VALUE);
 				break;
 			default:
 				break;

@@ -231,19 +231,6 @@ public interface Match extends MemoryRecord, RecordInterface {
 		}
 	}
 
-	default Iterable<? extends RecordInterface> iterateMatch(int field, @SuppressWarnings("unused") Object... key) {
-		switch (field) {
-		case 3:
-			return getMarray();
-		case 8:
-			return getMobject();
-		case 12:
-			return getMparms();
-		default:
-			return null;
-		}
-	}
-
 	default FieldType typeMatch(int field) {
 		switch (field) {
 		case 1:

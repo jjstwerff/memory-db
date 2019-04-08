@@ -125,6 +125,43 @@ public class Item implements MemoryRecord, RecordInterface {
 			}, 192, 25);
 		}
 
+		private IndexItems(Store store, Key key, int flag, int field) {
+			super(store, key, flag, field);
+		}
+
+		@Override
+		public IndexItems copy() {
+			return new IndexItems(store, key, flag, field);
+		}
+
+		@Override
+		public Item field(String name) {
+			try {
+				int r = new IndexItems(store, Integer.parseInt(name)).search();
+				return r <= 0 ? null : new IterRecord(store, r);
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+
+		@Override
+		public Item start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		private class IterRecord extends Item {
+			private IterRecord(Store store, int r) {
+				super(store, r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(store, r);
+			}
+		}
+
 		@Override
 		protected int readTop() {
 			return store.getInt(0, 20);

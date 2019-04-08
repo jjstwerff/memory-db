@@ -1,0 +1,7 @@
+import testing as t
+
+def _1data('abcd':x): x
+def _2chain(('a'? + 'b'? + 'c'? + 'd'):x): x
+
+t.assert("data", "abcd", _1data("abcd")) +
+t.assert("chain", "abcd", _2chain("abcd"))

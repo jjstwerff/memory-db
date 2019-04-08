@@ -12,6 +12,7 @@ public class ChangeJson extends Json implements AutoCloseable, ChangePart {
 		super(store, rec == 0 ? store.allocate(Json.RECORD_SIZE) : rec);
 		if (rec == 0) {
 			defaultPart();
+		} else {
 		}
 	}
 
@@ -31,7 +32,7 @@ public class ChangeJson extends Json implements AutoCloseable, ChangePart {
 	@Override
 	public boolean java(Object value) {
 		int field = 0;
-		if (field >= 0 && field <= 7)
+		if (field > 0 && field <= 7)
 			return ChangePart.super.setPart(field - 0, value);
 		switch (field) {
 		default:
@@ -42,11 +43,17 @@ public class ChangeJson extends Json implements AutoCloseable, ChangePart {
 	@Override
 	public ChangeInterface add() {
 		int field = 0;
-		if (field >= 0 && field <= 7)
+		if (field > 0 && field <= 7)
 			return ChangePart.super.addPart(field - 0);
 		switch (field) {
 		default:
 			return null;
 		}
+	}
+
+	@Override
+	public ChangeJson copy(int newRec) {
+		assert store.validate(newRec);
+		return new ChangeJson(store, newRec);
 	}
 }

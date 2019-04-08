@@ -69,9 +69,9 @@ public class MobjectArray implements MemoryRecord, ChangeMatch, Iterable<Mobject
 	}
 
 	@Override
-	public MobjectArray copy(int rec) {
-		assert store.validate(rec);
-		return new MobjectArray(store, rec, -1);
+	public MobjectArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new MobjectArray(store, newRec, -1);
 	}
 
 	private void up(Match record) {
@@ -133,7 +133,7 @@ public class MobjectArray implements MemoryRecord, ChangeMatch, Iterable<Mobject
 			alloc = store.allocate(17 + 17);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (17 + (idx + 1) * 17) / 8);
+			alloc = store.resize(alloc, (17 + (size + 1) * 17) / 8);
 		store.setInt(parent.rec(), parent.matchPosition() + 5, alloc);
 		size++;
 		store.setInt(alloc, 4, size);
@@ -219,13 +219,12 @@ public class MobjectArray implements MemoryRecord, ChangeMatch, Iterable<Mobject
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
-		if (field >= 1 && field <= 16)
-			return nameMatch(field - 1);
-		switch (field) {
-		case 1:
+		if (idx >= 1 && idx <= 16)
+			return nameMatch(idx - 1);
+		switch (idx) {
+		case 0:
 			return "name";
 		default:
 			return null;
@@ -234,13 +233,12 @@ public class MobjectArray implements MemoryRecord, ChangeMatch, Iterable<Mobject
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
-		if (field >= 1 && field <= 16)
-			return typeMatch(field - 1);
-		switch (field) {
-		case 1:
+			return FieldType.OBJECT;
+		if (idx >= 1 && idx <= 16)
+			return typeMatch(idx - 1);
+		switch (idx) {
+		case 0:
 			return FieldType.STRING;
 		default:
 			return null;
@@ -249,13 +247,12 @@ public class MobjectArray implements MemoryRecord, ChangeMatch, Iterable<Mobject
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new MobjectArray(parent, field - 1);
-		if (field >= 1 && field <= 16)
-			return getMatch(field - 1);
-		switch (field) {
-		case 1:
+			return this;
+		if (idx >= 1 && idx <= 16)
+			return getMatch(idx - 1);
+		switch (idx) {
+		case 0:
 			return getName();
 		default:
 			return null;
@@ -264,11 +261,10 @@ public class MobjectArray implements MemoryRecord, ChangeMatch, Iterable<Mobject
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
-		if (field >= 1 && field <= 16)
-			return setMatch(field - 1, value);
-		switch (field) {
-		case 1:
+		if (idx >= 1 && idx <= 16)
+			return setMatch(idx - 1, value);
+		switch (idx) {
+		case 0:
 			if (value instanceof String)
 				setName((String) value);
 			return value instanceof String;
@@ -279,17 +275,22 @@ public class MobjectArray implements MemoryRecord, ChangeMatch, Iterable<Mobject
 
 	@Override
 	public MobjectArray index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new MobjectArray(parent, idx);
 	}
 
 	@Override
 	public MobjectArray start() {
-		return null;
+		return new MobjectArray(parent, 0);
 	}
 
 	@Override
 	public MobjectArray next() {
-		return null;
+		return idx + 1 >= size ? null : new MobjectArray(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

@@ -40,7 +40,7 @@ public class JsltInterpreter {
 		inter.dir = dir;
 		inter.data = data;
 		Writer write = new StringWriter();
-		int main = new Macro.IndexMacros(jsltStore, "main").search();;
+		int main = new Macro.IndexMacros(jsltStore, "main").search();
 		for (CodeArray code : new Macro(jsltStore, main).getAlternatives(0).getCode())
 			inter.show(write, inter.inter(code));
 		if (errors != null)
@@ -80,13 +80,13 @@ public class JsltInterpreter {
 	}
 
 	public Object inter(Operator code) {
-		if (code.getOperation() == null)
+		if (code == null || code.getOperation() == null)
 			return null;
 		switch (code.getOperation()) {
 		case ARRAY:
-			return new InterArray(this, code.getArray());
+			return new InterArray(this, code.getArray(), -1);
 		case OBJECT:
-			return new InterObject(this, code.getObject());
+			return new InterObject(this, code.getObject(), -1);
 		case APPEND:
 			StringBuilder bld = new StringBuilder();
 			for (AppendArray app : code.getAppend())
@@ -244,11 +244,11 @@ public class JsltInterpreter {
 		while (elm != null) {
 			write.field(elm.name());
 			if (elm.type() == FieldType.OBJECT)
-				iterateObject(maxDepth - 1, write, elm);
+				iterateObject(maxDepth - 1, write, (RecordInterface) elm.java());
 			else if (elm.type() == FieldType.ARRAY)
-				iterateArray(maxDepth, write, elm);
+				iterateArray(maxDepth, write, (RecordInterface) elm.java());
 			else
-				write.element(elm);
+				write.element(elm.java());
 			elm = elm.next();
 		}
 		write.endObject();
@@ -259,11 +259,11 @@ public class JsltInterpreter {
 		RecordInterface elm = rec.start();
 		while (elm != null) {
 			if (elm.type() == FieldType.OBJECT)
-				iterateObject(maxDepth, write, elm);
+				iterateObject(maxDepth, write, (RecordInterface) elm.java());
 			else if (elm.type() == FieldType.ARRAY)
-				iterateArray(maxDepth, write, elm);
+				iterateArray(maxDepth, write, (RecordInterface) elm.java());
 			else
-				write.element(elm);
+				write.element(elm.java());
 			elm = elm.next();
 		}
 		write.endArray();
@@ -329,19 +329,16 @@ public class JsltInterpreter {
 			if (r1.type() == FieldType.ARRAY && r2.type() == FieldType.ARRAY) {
 				RecordInterface e1 = r1.start();
 				RecordInterface e2 = r2.start();
-				while (true) {
-					int c = compare(e1, e2);
+				while (e1 != null || e2 != null) {
+					int c = compare(e1.java(), e2.java());
 					if (c != 0)
 						return c;
-					if (e1.testLast())
-						return -1;
-					if (e2.testLast())
-						return 1;
-					e1.next();
-					e2.next();
+					e1 = e1.next();
+					e2 = e2.next();
 				}
 			}
-		}
+		} else if (t1 instanceof RecordInterface)
+			return compare(((RecordInterface)t1).java(), t2);
 		return 0;
 	}
 
@@ -361,7 +358,11 @@ public class JsltInterpreter {
 			} else if (p1 instanceof Double) {
 				return ((Double) p1) + getFloat(p2);
 			} else if (p1 instanceof RecordInterface) {
-				return new AddArray((RecordInterface) p1, p2, p2 instanceof RecordInterface && ((RecordInterface) p2).type() == FieldType.ARRAY);
+				RecordInterface r = ((RecordInterface) p1);
+				if (r.type() == FieldType.OBJECT)
+					return p2 instanceof RecordInterface && ((RecordInterface) p2).type() == FieldType.OBJECT ? new MergeObject(r, (RecordInterface) p2)
+							: null;
+				return new AddArray(r, p2, p2 instanceof RecordInterface && ((RecordInterface) p2).type() == FieldType.ARRAY);
 			}
 			return null;
 		case AND:
@@ -371,7 +372,7 @@ public class JsltInterpreter {
 		case BOOLEAN:
 			return getBoolean(p1);
 		case PER:
-			return new InterMap(this, code.getFnParm2(), p1, 0);
+			return new InterMap(this, code.getFnParm2(), p1);
 		case FOR:
 			if (p1 instanceof String)
 				curFor = new StringArray((String) p1, -1);
@@ -383,7 +384,7 @@ public class JsltInterpreter {
 			running = p1;
 			RecordInterface elm = curFor.start();
 			while (elm != null) {
-				current = elm;
+				current = elm.java();
 				RecordInterface remFor = curFor;
 				running = inter(code.getFnParm2());
 				curFor = remFor;
@@ -422,12 +423,14 @@ public class JsltInterpreter {
 						return null;
 					if (s < 0)
 						s += rec.size();
-					return rec.index((int) s);
+					RecordInterface iElm = rec.index((int) s);
+					return iElm == null ? null : iElm.java();
 				} else if (p2 instanceof String) {
 					String name = getString(p2);
 					if (name == null)
 						return null;
-					return rec.field(name);
+					RecordInterface field = rec.field(name);
+					return field == null ? null : field.java();
 				}
 			} else if (p1 instanceof String) {
 				long s = getNumber(p2);
@@ -450,7 +453,7 @@ public class JsltInterpreter {
 				return ((String) p1).equals(getString(p2));
 			else if (p1 instanceof Boolean)
 				return ((Boolean) p1) == getBoolean(p2);
-			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
+			else if (p1 instanceof RecordInterface || p2 instanceof RecordInterface)
 				return compare(p1, p2) == 0;
 			else if (p1 == null)
 				return p2 == null || (p2 instanceof Long && (Long) p2 == Long.MIN_VALUE) || (p2 instanceof Double && Double.isNaN((Double) p2));
@@ -466,7 +469,7 @@ public class JsltInterpreter {
 				return (Double) p1 >= getFloat(p2);
 			else if (p1 instanceof String)
 				return ((String) p1).compareTo(getString(p2)) >= 0;
-			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
+			else if (p1 instanceof RecordInterface || p2 instanceof RecordInterface)
 				return compare(p1, p2) >= 0;
 			return null;
 		case GT:
@@ -476,7 +479,7 @@ public class JsltInterpreter {
 				return (Double) p1 > getFloat(p2);
 			else if (p1 instanceof String)
 				return ((String) p1).compareTo(getString(p2)) > 0;
-			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
+			else if (p1 instanceof RecordInterface || p2 instanceof RecordInterface)
 				return compare(p1, p2) > 0;
 			return null;
 		case INDEX:
@@ -496,7 +499,7 @@ public class JsltInterpreter {
 				return (Double) p1 <= getFloat(p2);
 			else if (p1 instanceof String)
 				return ((String) p1).compareTo(getString(p2)) <= 0;
-			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
+			else if (p1 instanceof RecordInterface || p2 instanceof RecordInterface)
 				return compare(p1, p2) <= 0;
 			return null;
 		case LENGTH:
@@ -530,7 +533,7 @@ public class JsltInterpreter {
 				return (Double) p1 < getFloat(p2);
 			else if (p1 instanceof String)
 				return ((String) p1).compareTo(getString(p2)) < 0;
-			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
+			else if (p1 instanceof RecordInterface || p2 instanceof RecordInterface)
 				return compare(p1, p2) <= 0;
 			return null;
 		case MIN:
@@ -583,7 +586,7 @@ public class JsltInterpreter {
 				return !((String) p1).equals(getString(p2));
 			else if (p1 instanceof Boolean)
 				return ((Boolean) p1) != getBoolean(p2);
-			else if (p1 instanceof RecordInterface && p2 instanceof RecordInterface)
+			else if (p1 instanceof RecordInterface || p2 instanceof RecordInterface)
 				return compare(p1, p2) != 0;
 			return false;
 		case NEG:
@@ -674,27 +677,27 @@ public class JsltInterpreter {
 		while (fld != null) {
 			switch (fld.name()) {
 			case "width":
-				Object w = layout.java();
+				Object w = fld.java();
 				if (w instanceof Operator)
 					width = ((Long) inter((Operator) w)).intValue();
 				else
 					width = ((Long) w).intValue();
 				break;
 			case "precision":
-				Object p = layout.java();
+				Object p = fld.java();
 				if (p instanceof Operator)
 					precision = ((Long) inter((Operator) p)).intValue();
 				else
 					precision = ((Long) p).intValue();
 				break;
 			case "align":
-				align = (String) layout.java();
+				align = (String) fld.java();
 				break;
 			case "type":
-				type = (String) layout.java();
+				type = (String) fld.java();
 				break;
 			case "separator":
-				separator = (String) layout.java();
+				separator = (String) fld.java();
 				break;
 			case "leadingZero":
 				leadingZero = true;
@@ -733,12 +736,12 @@ public class JsltInterpreter {
 		}
 		DecimalFormat formatter = null;
 		if (type.equals("e"))
-			formatter = (DecimalFormat) new DecimalFormat("0.#E0");
+			formatter = new DecimalFormat("0.#E0");
 		else if (type.equals("g")) {
 			if (obj instanceof Double) {
 				int exp = Math.getExponent((Double) obj);
 				if (exp < -6 || exp > 6)
-					formatter = (DecimalFormat) new DecimalFormat("0.#E0");
+					formatter = new DecimalFormat("0.#E0");
 			}
 		}
 		if (formatter == null)
@@ -766,8 +769,8 @@ public class JsltInterpreter {
 		else
 			formatter.setGroupingSize(3);
 		if (obj instanceof Long)
-			return formatter.format((Long) obj);
-		return formatter.format((Double) obj);
+			return formatter.format(obj);
+		return formatter.format(obj);
 	}
 
 	private String separate(String separator, String res, int spaces) {
@@ -816,7 +819,7 @@ public class JsltInterpreter {
 		return Long.MIN_VALUE;
 	}
 
-	private String getString(Object val) {
+	/* package private */ String getString(Object val) {
 		if (val == null)
 			return "";
 		if (val instanceof Long) {
@@ -892,6 +895,8 @@ public class JsltInterpreter {
 
 	public void setStackFrame(int stackFrame) {
 		this.stackFrame = stackFrame;
+		while (stackFrame > stack.size())
+			stack.add(null);
 	}
 
 	public Object getStackElement(int elm) {

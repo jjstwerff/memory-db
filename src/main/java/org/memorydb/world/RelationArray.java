@@ -69,9 +69,9 @@ public class RelationArray implements MemoryRecord, ChangeInterface, Iterable<Re
 	}
 
 	@Override
-	public RelationArray copy(int rec) {
-		assert store.validate(rec);
-		return new RelationArray(store, rec, -1);
+	public RelationArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new RelationArray(store, newRec, -1);
 	}
 
 	private void up(Item record) {
@@ -106,15 +106,15 @@ public class RelationArray implements MemoryRecord, ChangeInterface, Iterable<Re
 			alloc = store.allocate(20 + 12);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (12 + (idx + 1) * 20) / 8);
+			alloc = store.resize(alloc, (12 + (size + 1) * 20) / 8);
 		store.setInt(parent.rec(), 16, alloc);
 		size++;
 		store.setInt(alloc, 4, size);
 		RelationArray res = new RelationArray(parent, size - 1);
 		res.setType(null);
 		res.setWith(null);
-		res.setStarted(0);
-		res.setStopped(0);
+		res.setStarted(Integer.MIN_VALUE);
+		res.setStopped(Integer.MIN_VALUE);
 		store.setInt(rec(), 16, 0); // ARRAY relation_specials
 		return res;
 	}
@@ -231,8 +231,8 @@ public class RelationArray implements MemoryRecord, ChangeInterface, Iterable<Re
 	public void parse(Parser parser) {
 		setType(null);
 		setWith(null);
-		setStarted(0);
-		setStopped(0);
+		setStarted(Integer.MIN_VALUE);
+		setStopped(Integer.MIN_VALUE);
 		store.setInt(rec(), 16, 0); // ARRAY relation_specials
 		if (parser.hasField("type")) {
 			parser.getRelation("type", (recNr, idx) -> {
@@ -265,19 +265,18 @@ public class RelationArray implements MemoryRecord, ChangeInterface, Iterable<Re
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
-		switch (field) {
-		case 1:
+		switch (idx) {
+		case 0:
 			return "type";
-		case 2:
+		case 1:
 			return "with";
-		case 3:
+		case 2:
 			return "started";
-		case 4:
+		case 3:
 			return "stopped";
-		case 5:
+		case 4:
 			return "relation_specials";
 		default:
 			return null;
@@ -286,19 +285,18 @@ public class RelationArray implements MemoryRecord, ChangeInterface, Iterable<Re
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
-		switch (field) {
+			return FieldType.OBJECT;
+		switch (idx) {
+		case 0:
+			return FieldType.OBJECT;
 		case 1:
 			return FieldType.OBJECT;
 		case 2:
-			return FieldType.OBJECT;
+			return FieldType.INTEGER;
 		case 3:
 			return FieldType.INTEGER;
 		case 4:
-			return FieldType.INTEGER;
-		case 5:
 			return FieldType.ARRAY;
 		default:
 			return null;
@@ -307,17 +305,16 @@ public class RelationArray implements MemoryRecord, ChangeInterface, Iterable<Re
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new RelationArray(parent, field - 1);
-		switch (field) {
-		case 1:
+			return this;
+		switch (idx) {
+		case 0:
 			return getType();
-		case 2:
+		case 1:
 			return getWith();
-		case 3:
+		case 2:
 			return getStarted();
-		case 4:
+		case 3:
 			return getStopped();
 		default:
 			return null;
@@ -326,21 +323,20 @@ public class RelationArray implements MemoryRecord, ChangeInterface, Iterable<Re
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
-		switch (field) {
-		case 1:
+		switch (idx) {
+		case 0:
 			if (value instanceof State)
 				setType((State) value);
 			return value instanceof State;
-		case 2:
+		case 1:
 			if (value instanceof Item)
 				setWith((Item) value);
 			return value instanceof Item;
-		case 3:
+		case 2:
 			if (value instanceof Integer)
 				setStarted((Integer) value);
 			return value instanceof Integer;
-		case 4:
+		case 3:
 			if (value instanceof Integer)
 				setStopped((Integer) value);
 			return value instanceof Integer;
@@ -351,17 +347,22 @@ public class RelationArray implements MemoryRecord, ChangeInterface, Iterable<Re
 
 	@Override
 	public RelationArray index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new RelationArray(parent, idx);
 	}
 
 	@Override
 	public RelationArray start() {
-		return null;
+		return new RelationArray(parent, 0);
 	}
 
 	@Override
 	public RelationArray next() {
-		return null;
+		return idx + 1 >= size ? null : new RelationArray(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

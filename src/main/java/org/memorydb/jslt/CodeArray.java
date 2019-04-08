@@ -67,9 +67,9 @@ public class CodeArray implements MemoryRecord, ChangeOperator, Iterable<CodeArr
 	}
 
 	@Override
-	public CodeArray copy(int rec) {
-		assert store.validate(rec);
-		return new CodeArray(store, rec, -1);
+	public CodeArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new CodeArray(store, newRec, -1);
 	}
 
 	private void up(Alternative record) {
@@ -104,7 +104,7 @@ public class CodeArray implements MemoryRecord, ChangeOperator, Iterable<CodeArr
 			alloc = store.allocate(18 + 12);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (12 + (idx + 1) * 18) / 8);
+			alloc = store.resize(alloc, (12 + (size + 1) * 18) / 8);
 		store.setInt(parent.rec(), 17, alloc);
 		size++;
 		store.setInt(alloc, 4, size);
@@ -173,67 +173,56 @@ public class CodeArray implements MemoryRecord, ChangeOperator, Iterable<CodeArr
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
-		if (field >= 0 && field <= 28)
-			return nameOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+		if (idx >= 0 && idx <= 28)
+			return nameOperator(idx - 0);
+		return null;
 	}
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
-		if (field >= 0 && field <= 28)
-			return typeOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+			return FieldType.OBJECT;
+		if (idx >= 0 && idx <= 28)
+			return typeOperator(idx - 0);
+		return null;
 	}
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new CodeArray(parent, field - 1);
-		if (field >= 0 && field <= 28)
-			return getOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+			return this;
+		if (idx >= 0 && idx <= 28)
+			return getOperator(idx - 0);
+		return null;
 	}
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
-		if (field >= 0 && field <= 28)
-			return setOperator(field - 0, value);
-		switch (field) {
-		default:
-			return false;
-		}
+		if (idx >= 0 && idx <= 28)
+			return setOperator(idx - 0, value);
+		return false;
 	}
 
 	@Override
 	public CodeArray index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new CodeArray(parent, idx);
 	}
 
 	@Override
 	public CodeArray start() {
-		return null;
+		return new CodeArray(parent, 0);
 	}
 
 	@Override
 	public CodeArray next() {
-		return null;
+		return idx + 1 >= size ? null : new CodeArray(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

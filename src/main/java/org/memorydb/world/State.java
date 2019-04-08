@@ -120,6 +120,39 @@ public class State implements MemoryRecord, RecordInterface {
 			}, 80, 11);
 		}
 
+		private IndexRelations(Store store, Key key, int flag, int field) {
+			super(store, key, flag, field);
+		}
+
+		@Override
+		public IndexRelations copy() {
+			return new IndexRelations(store, key, flag, field);
+		}
+
+		@Override
+		public State field(String name) {
+			int r = new IndexRelations(store, name).search();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		@Override
+		public State start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		private class IterRecord extends State {
+			private IterRecord(Store store, int r) {
+				super(store, r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(store, r);
+			}
+		}
+
 		@Override
 		protected int readTop() {
 			return store.getInt(0, 16);

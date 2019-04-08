@@ -253,7 +253,7 @@ public class Field implements MemoryRecord, RecordInterface {
 			if (parser.isDelete()) {
 				if (rec != null)
 					try (ChangeField record = new ChangeField(rec)) {
-						parent.store.free(record.rec());
+						parent.store().free(record.rec());
 					}
 				continue;
 			}

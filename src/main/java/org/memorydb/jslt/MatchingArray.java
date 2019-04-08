@@ -67,9 +67,9 @@ public class MatchingArray implements MemoryRecord, ChangeMatchStep, Iterable<Ma
 	}
 
 	@Override
-	public MatchingArray copy(int rec) {
-		assert store.validate(rec);
-		return new MatchingArray(store, rec, -1);
+	public MatchingArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new MatchingArray(store, newRec, -1);
 	}
 
 	private void up(Macro record) {
@@ -104,7 +104,7 @@ public class MatchingArray implements MemoryRecord, ChangeMatchStep, Iterable<Ma
 			alloc = store.allocate(13 + 12);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (12 + (idx + 1) * 13) / 8);
+			alloc = store.resize(alloc, (12 + (size + 1) * 13) / 8);
 		store.setInt(parent.rec(), 12, alloc);
 		size++;
 		store.setInt(alloc, 4, size);
@@ -173,67 +173,56 @@ public class MatchingArray implements MemoryRecord, ChangeMatchStep, Iterable<Ma
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
-		if (field >= 0 && field <= 33)
-			return nameMatchStep(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+		if (idx >= 0 && idx <= 42)
+			return nameMatchStep(idx - 0);
+		return null;
 	}
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
-		if (field >= 0 && field <= 33)
-			return typeMatchStep(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+			return FieldType.OBJECT;
+		if (idx >= 0 && idx <= 42)
+			return typeMatchStep(idx - 0);
+		return null;
 	}
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new MatchingArray(parent, field - 1);
-		if (field >= 0 && field <= 33)
-			return getMatchStep(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+			return this;
+		if (idx >= 0 && idx <= 42)
+			return getMatchStep(idx - 0);
+		return null;
 	}
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
-		if (field >= 0 && field <= 33)
-			return setMatchStep(field - 0, value);
-		switch (field) {
-		default:
-			return false;
-		}
+		if (idx >= 0 && idx <= 42)
+			return setMatchStep(idx - 0, value);
+		return false;
 	}
 
 	@Override
 	public MatchingArray index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new MatchingArray(parent, idx);
 	}
 
 	@Override
 	public MatchingArray start() {
-		return null;
+		return new MatchingArray(parent, 0);
 	}
 
 	@Override
 	public MatchingArray next() {
-		return null;
+		return idx + 1 >= size ? null : new MatchingArray(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

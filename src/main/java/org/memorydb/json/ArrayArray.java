@@ -6,8 +6,8 @@ import java.util.NoSuchElementException;
 import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.handler.CorruptionException;
+import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
@@ -15,7 +15,7 @@ import org.memorydb.structure.Store;
  */
 
 @RecordData(name = "Value")
-public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
+public class ArrayArray implements MemoryRecord, ChangePart, Iterable<ArrayArray> {
 	private final Store store;
 	private final Part parent;
 	private final int idx;
@@ -111,15 +111,24 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 		return size;
 	}
 
+	public void clear() {
+		size = 0;
+		store.setInt(alloc, 4, size);
+	}
+
 	@Override
 	public ArrayArray add() {
 		if (parent.rec() == 0)
 			return this;
-		alloc = alloc == 0 ? store.allocate(9 + 17) : store.resize(alloc, (17 + (idx + 1) * 9) / 8);
+		if (alloc == 0) {
+			alloc = store.allocate(9 + 17);
+			up(parent);
+		} else
+			alloc = store.resize(alloc, (17 + (idx + 1) * 9) / 8);
 		store.setInt(parent.rec(), parent.partPosition() + 1, alloc);
-		store.setInt(alloc, 4, size + 1);
-		ArrayArray res = new ArrayArray(parent, size);
 		size++;
+		store.setInt(alloc, 4, size);
+		ArrayArray res = new ArrayArray(parent, size - 1);
 		return res;
 	}
 
@@ -139,6 +148,16 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 					throw new NoSuchElementException();
 				element++;
 				return new ArrayArray(ArrayArray.this, element);
+			}
+
+			@Override
+			public void remove() {
+				if (alloc == 0 || element > size || element < 0)
+					throw new NoSuchElementException();
+				store.copy(alloc, (element + 1) * 9 + 17, element * 9 + 17, size * 17);
+				element--;
+				size--;
+				store.setInt(alloc, 4, size);
 			}
 		};
 	}
@@ -176,15 +195,7 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 	public Type getType() {
 		if (idx == -1)
 			return parent.getType();
-		int data = rec() == 0 ? 0 : store().getByte(rec(), partPosition() + 0) & 31;
-		if (data <= 0 || data > Type.values().length)
-			return null;
-		return Type.values()[data - 1];
-	}
-
-	@Override
-	public FieldType type() {
-		return getFieldType();
+		return ChangePart.super.getType();
 	}
 
 	@Override
@@ -198,7 +209,22 @@ public class ArrayArray implements ChangePart, Iterable<ArrayArray> {
 	}
 
 	@Override
-	public RecordInterface copy() {
+	public ArrayArray index(int idx) {
+		return idx < 0 || idx >= size ? null : new ArrayArray(parent, idx);
+	}
+
+	@Override
+	public Part start() {
+		return idx >= 0 ? ChangePart.super.start() : new ArrayArray(parent, 0);
+	}
+
+	@Override
+	public ArrayArray next() {
+		return idx + 1 >= size ? null : new ArrayArray(parent, idx + 1);
+	}
+
+	@Override
+	public ArrayArray copy() {
 		return new ArrayArray(parent, idx);
 	}
 }

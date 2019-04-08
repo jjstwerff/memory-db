@@ -68,9 +68,9 @@ public class MparmsArray implements MemoryRecord, ChangeOperator, Iterable<Mparm
 	}
 
 	@Override
-	public MparmsArray copy(int rec) {
-		assert store.validate(rec);
-		return new MparmsArray(store, rec, -1);
+	public MparmsArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new MparmsArray(store, newRec, -1);
 	}
 
 	private void up(Match record) {
@@ -132,7 +132,7 @@ public class MparmsArray implements MemoryRecord, ChangeOperator, Iterable<Mparm
 			alloc = store.allocate(18 + 17);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (17 + (idx + 1) * 18) / 8);
+			alloc = store.resize(alloc, (17 + (size + 1) * 18) / 8);
 		store.setInt(parent.rec(), parent.matchPosition() + 9, alloc);
 		size++;
 		store.setInt(alloc, 4, size);
@@ -201,67 +201,56 @@ public class MparmsArray implements MemoryRecord, ChangeOperator, Iterable<Mparm
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
-		if (field >= 0 && field <= 28)
-			return nameOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+		if (idx >= 0 && idx <= 28)
+			return nameOperator(idx - 0);
+		return null;
 	}
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
-		if (field >= 0 && field <= 28)
-			return typeOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+			return FieldType.OBJECT;
+		if (idx >= 0 && idx <= 28)
+			return typeOperator(idx - 0);
+		return null;
 	}
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new MparmsArray(parent, field - 1);
-		if (field >= 0 && field <= 28)
-			return getOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+			return this;
+		if (idx >= 0 && idx <= 28)
+			return getOperator(idx - 0);
+		return null;
 	}
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
-		if (field >= 0 && field <= 28)
-			return setOperator(field - 0, value);
-		switch (field) {
-		default:
-			return false;
-		}
+		if (idx >= 0 && idx <= 28)
+			return setOperator(idx - 0, value);
+		return false;
 	}
 
 	@Override
 	public MparmsArray index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new MparmsArray(parent, idx);
 	}
 
 	@Override
 	public MparmsArray start() {
-		return null;
+		return new MparmsArray(parent, 0);
 	}
 
 	@Override
 	public MparmsArray next() {
-		return null;
+		return idx + 1 >= size ? null : new MparmsArray(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

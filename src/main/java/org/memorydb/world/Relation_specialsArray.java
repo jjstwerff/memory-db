@@ -70,9 +70,9 @@ public class Relation_specialsArray implements MemoryRecord, ChangeInterface, It
 	}
 
 	@Override
-	public Relation_specialsArray copy(int rec) {
-		assert store.validate(rec);
-		return new Relation_specialsArray(store, rec, -1);
+	public Relation_specialsArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new Relation_specialsArray(store, newRec, -1);
 	}
 
 	private void up(RelationArray record) {
@@ -108,7 +108,7 @@ public class Relation_specialsArray implements MemoryRecord, ChangeInterface, It
 			alloc = store.allocate(6 + 16);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (16 + (idx + 1) * 6) / 8);
+			alloc = store.resize(alloc, (16 + (size + 1) * 6) / 8);
 		store.setInt(parent.rec(), parent.index() * 20 + 16, alloc);
 		size++;
 		store.setInt(alloc, 4, size);
@@ -229,15 +229,14 @@ public class Relation_specialsArray implements MemoryRecord, ChangeInterface, It
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
-		switch (field) {
-		case 1:
+		switch (idx) {
+		case 0:
 			return "special";
-		case 2:
+		case 1:
 			return "known";
-		case 3:
+		case 2:
 			return "level";
 		default:
 			return null;
@@ -246,15 +245,14 @@ public class Relation_specialsArray implements MemoryRecord, ChangeInterface, It
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
-		switch (field) {
-		case 1:
 			return FieldType.OBJECT;
-		case 2:
+		switch (idx) {
+		case 0:
+			return FieldType.OBJECT;
+		case 1:
 			return FieldType.BOOLEAN;
-		case 3:
+		case 2:
 			return FieldType.INTEGER;
 		default:
 			return null;
@@ -263,15 +261,14 @@ public class Relation_specialsArray implements MemoryRecord, ChangeInterface, It
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new Relation_specialsArray(parent, field - 1);
-		switch (field) {
-		case 1:
+			return this;
+		switch (idx) {
+		case 0:
 			return getSpecial();
-		case 2:
+		case 1:
 			return isKnown();
-		case 3:
+		case 2:
 			return getLevel();
 		default:
 			return null;
@@ -280,17 +277,16 @@ public class Relation_specialsArray implements MemoryRecord, ChangeInterface, It
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
-		switch (field) {
-		case 1:
+		switch (idx) {
+		case 0:
 			if (value instanceof Special)
 				setSpecial((Special) value);
 			return value instanceof Special;
-		case 2:
+		case 1:
 			if (value instanceof Boolean)
 				setKnown((Boolean) value);
 			return value instanceof Boolean;
-		case 3:
+		case 2:
 			if (value instanceof Byte)
 				setLevel((Byte) value);
 			return value instanceof Byte;
@@ -301,17 +297,22 @@ public class Relation_specialsArray implements MemoryRecord, ChangeInterface, It
 
 	@Override
 	public Relation_specialsArray index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new Relation_specialsArray(parent, idx);
 	}
 
 	@Override
 	public Relation_specialsArray start() {
-		return null;
+		return new Relation_specialsArray(parent, 0);
 	}
 
 	@Override
 	public Relation_specialsArray next() {
-		return null;
+		return idx + 1 >= size ? null : new Relation_specialsArray(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

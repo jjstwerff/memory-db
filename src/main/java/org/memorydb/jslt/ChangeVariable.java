@@ -13,8 +13,7 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 		super(store, rec == 0 ? store.allocate(Variable.RECORD_SIZE) : rec);
 		if (rec == 0) {
 			setName(null);
-			setNr(0);
-			setMultiple(false);
+			setNr(Integer.MIN_VALUE);
 			defaultResultType();
 		} else {
 		}
@@ -32,10 +31,6 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 		store.setInt(rec, 8, value);
 	}
 
-	public void setMultiple(boolean value) {
-		store.setByte(rec, 12, (store.getByte(rec, 12) & 254) + (value ? 1 : 0));
-	}
-
 	/* package private */ void parseFields(Parser parser) {
 		if (parser.hasField("name")) {
 			setName(parser.getString("name"));
@@ -43,20 +38,14 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 		if (parser.hasField("nr")) {
 			setNr(parser.getInt("nr"));
 		}
-		if (parser.hasField("multiple")) {
-			Boolean valueMultiple = parser.getBoolean("multiple");
-			if (valueMultiple == null)
-				throw new MutationException("Mandatory 'multiple' field");
-			setMultiple(valueMultiple);
-		}
 		parseResultType(parser);
 	}
 
 	@Override
 	public boolean java(Object value) {
 		int field = 0;
-		if (field > 3 && field <= 5)
-			return ChangeResultType.super.setResultType(field - 3, value);
+		if (field > 2 && field <= 4)
+			return ChangeResultType.super.setResultType(field - 2, value);
 		switch (field) {
 		case 1:
 			if (value instanceof String)
@@ -66,10 +55,6 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 			if (value instanceof Integer)
 				setNr((Integer) value);
 			return value instanceof Integer;
-		case 3:
-			if (value instanceof Boolean)
-				setMultiple((Boolean) value);
-			return value instanceof Boolean;
 		default:
 			return false;
 		}
@@ -78,8 +63,8 @@ public class ChangeVariable extends Variable implements ChangeResultType {
 	@Override
 	public ChangeInterface add() {
 		int field = 0;
-		if (field > 3 && field <= 5)
-			return ChangeResultType.super.addResultType(field - 3);
+		if (field > 2 && field <= 4)
+			return ChangeResultType.super.addResultType(field - 2);
 		switch (field) {
 		default:
 			return null;

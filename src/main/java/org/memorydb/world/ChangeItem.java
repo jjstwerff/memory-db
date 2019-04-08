@@ -12,12 +12,12 @@ public class ChangeItem extends Item implements AutoCloseable, ChangeInterface {
 		super(store, rec == 0 ? store.allocate(Item.RECORD_SIZE) : rec);
 		if (rec == 0) {
 			setCategory(null);
-			setNumber(0);
-			store.setInt(rec, 12, 0); // ARRAY item_specials
-			store.setInt(rec, 16, 0);
-			store.setInt(rec, 16, 0); // ARRAY relation
-			store.setInt(rec, 20, 0);
-			setPosition(0);
+			setNumber(Integer.MIN_VALUE);
+			store.setInt(rec(), 12, 0); // ARRAY item_specials
+			store.setInt(rec(), 16, 0);
+			store.setInt(rec(), 16, 0); // ARRAY relation
+			store.setInt(rec(), 20, 0);
+			setPosition(Integer.MIN_VALUE);
 		} else {
 			new IndexItems(store).remove(rec());
 		}
@@ -54,7 +54,7 @@ public class ChangeItem extends Item implements AutoCloseable, ChangeInterface {
 		if (parser.hasField("category")) {
 			parser.getRelation("category", (recNr, idx) -> {
 				Category relRec = Category.parseKey(parser, store());
-				try (ChangeItem old = (ChangeItem) this.copy(recNr)) {
+				try (ChangeItem old = this.copy(recNr)) {
 					old.setCategory(relRec);
 				}
 				return relRec != null;

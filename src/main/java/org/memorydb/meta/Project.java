@@ -98,6 +98,44 @@ public class Project implements MemoryRecord, RecordInterface {
 			}, 192, 25);
 		}
 
+		private IndexRecords(Store store, Key key, int flag, int field) {
+			super(store, key, flag, field);
+		}
+
+		@Override
+		public FieldType type() {
+			return FieldType.OBJECT;
+		}
+
+		@Override
+		public IndexRecords copy() {
+			return new IndexRecords(store, key, flag, field);
+		}
+
+		@Override
+		public Record field(String name) {
+			int r = new IndexRecords(name).search();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		@Override
+		public Record start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		private class IterRecord extends Record {
+			private IterRecord(Store store, int r) {
+				super(store, r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(store, r);
+			}
+		}
+
 		@Override
 		protected int readTop() {
 			return store.getInt(rec, 4);
@@ -175,6 +213,39 @@ public class Project implements MemoryRecord, RecordInterface {
 					return IndexOperation.EQ;
 				}
 			}, 160, 21);
+		}
+
+		private IndexMeta(Store store, Key key, int flag, int field) {
+			super(store, key, flag, field);
+		}
+
+		@Override
+		public IndexMeta copy() {
+			return new IndexMeta(store, key, flag, field);
+		}
+
+		@Override
+		public Project field(String name) {
+			int r = new IndexMeta(store, name).search();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		@Override
+		public Project start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		private class IterRecord extends Project {
+			private IterRecord(Store store, int r) {
+				super(store, r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(store, r);
+			}
 		}
 
 		@Override

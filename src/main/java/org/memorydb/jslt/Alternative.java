@@ -153,7 +153,7 @@ public class Alternative implements MemoryRecord, RecordInterface {
 			if (parser.isDelete()) {
 				if (rec != null)
 					try (ChangeAlternative record = new ChangeAlternative(rec)) {
-						parent.store.free(record.rec());
+						parent.store().free(record.rec());
 					}
 				continue;
 			}

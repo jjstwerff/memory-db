@@ -25,7 +25,9 @@ import org.memorydb.structure.MemoryRecord;
 import org.memorydb.structure.RedBlackTree;
 import org.memorydb.structure.TreeIndex;
 </#if>
+<#if table.includes?size == 0>
 import org.memorydb.structure.RecordInterface;
+</#if>
 import org.memorydb.structure.Store;
 <#list table.imports as import>
 import ${import};
@@ -148,6 +150,45 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 		}
 </#list>
 
+		private Index${index.name?cap_first}(${table.name} record, Key key, int flag, int field) {
+			super(record.store(), key, flag, field);
+			this.record = record;
+		}
+
+		@Override
+		public FieldType type() {
+			return FieldType.OBJECT;
+		}
+
+		@Override
+		public Index${index.name?cap_first} copy() {
+			return new Index${index.name?cap_first}(record, key, flag, field);
+		}
+
+		@Override
+		public ${field.related.name} field(String name) {
+			int r = new Index${index.name?cap_first}(record, name).search();
+			return r <= 0 ? null : new IterRecord(r);
+		}
+
+		@Override
+		public ${field.related.name} start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(r);
+		}
+
+		private class IterRecord extends ${field.related.name} {
+			private IterRecord(int r) {
+				super(record.store(), r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(r);
+			}
+		}
+
 		@Override
 		public int first() {
 			return super.first();
@@ -253,32 +294,6 @@ public interface ${table.name} extends <#if table.includes?size == 0>MemoryRecor
 		case ${1 + field?index}:
 			return is${field.name?cap_first}();
 <#elseif field.type != "SET" && field.type != "ARRAY" && field.name != "upRecord">
-		case ${1 + field?index}:
-			return get${field.name?cap_first}();
-</#if></#list>
-		default:
-			return null;
-		}
-	}
-
-	default Iterable<? extends RecordInterface> iterate${table.name}(int field, <#if !table.fieldIndex>@SuppressWarnings("unused") </#if>Object... key) {
-<#assign max = table.fields?size>
-<#list table.includes as incl>
-<#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
-			return iterate${incl.name}(field - ${max});
-<#assign max = nmax>
-</#list>
-		switch (field) {
-<#list table.fields as field>
-<#if field.type == 'SET'>
-		case ${1 + field?index}:
-<#list 1..field.index.keys?size as i>
-			if (key.length > ${index.javaTypes?size - i})
-				return new Index${field.index.name?cap_first}(this, new ${field.related.name}(store())<#list field.index.javaTypes[0..*i] as t>, (${t}) key[${t?index}]</#list>);
-</#list>
-			return get${field.name?cap_first}();
-<#elseif field.type == 'ARRAY'>
 		case ${1 + field?index}:
 			return get${field.name?cap_first}();
 </#if></#list>

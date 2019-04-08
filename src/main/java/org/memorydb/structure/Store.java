@@ -157,7 +157,7 @@ public class Store implements Closeable {
 	}
 
 	public boolean validate(int rec) {
-		if (DO_CHECKS && (rec < 0 || rec >= length))
+		if (DO_CHECKS && (rec < 2 || rec >= length))
 			throw new CorruptionException("Record " + rec + " outside allocation with size " + length);
 		return rec >= 0 && rec < length;
 	}
@@ -170,13 +170,13 @@ public class Store implements Closeable {
 	}
 
 	public void internalSetInt(int rec, int value) {
-		if (DO_CHECKS)
+		if (DO_CHECKS && rec != 0)
 			assert validate(rec);
 		unsafe.putInt(addr + 8L * rec, value);
 	}
 
 	public int internalGetInt(int rec) {
-		if (DO_CHECKS)
+		if (DO_CHECKS && rec != 0)
 			assert validate(rec);
 		return unsafe.getInt(addr + 8L * rec);
 	}

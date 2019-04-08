@@ -31,13 +31,13 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 				store().setInt(rec(), operatorPosition() + 9, 0);
 				break;
 			case NUMBER:
-				store().setLong(rec(), operatorPosition() + 1, 0L);
+				store().setLong(rec(), operatorPosition() + 1, Long.MIN_VALUE);
 				break;
 			case FLOAT:
-				store().setLong(rec(), operatorPosition() + 1, Double.doubleToLongBits(0.0));
+				store().setLong(rec(), operatorPosition() + 1, Double.doubleToLongBits(Double.NaN));
 				break;
 			case STRING:
-				store().setInt(rec(), operatorPosition() + 1, 0);
+				store().setInt(rec(), operatorPosition() + 1, Integer.MIN_VALUE);
 				break;
 			case ARRAY:
 				store().setInt(rec(), operatorPosition() + 1, 0);
@@ -70,12 +70,12 @@ public interface ChangeOperator extends Operator, ChangeResultType {
 				store().setInt(rec(), operatorPosition() + 9, 0);
 				break;
 			case READ:
-				store().setInt(rec(), operatorPosition() + 1, 0);
-				store().setInt(rec(), operatorPosition() + 5, 0);
+				store().setInt(rec(), operatorPosition() + 1, Integer.MIN_VALUE);
+				store().setInt(rec(), operatorPosition() + 5, Integer.MIN_VALUE);
 				break;
 			case VARIABLE:
-				store().setInt(rec(), operatorPosition() + 1, 0);
-				store().setInt(rec(), operatorPosition() + 5, 0);
+				store().setInt(rec(), operatorPosition() + 1, Integer.MIN_VALUE);
+				store().setInt(rec(), operatorPosition() + 5, Integer.MIN_VALUE);
 				break;
 			default:
 				break;

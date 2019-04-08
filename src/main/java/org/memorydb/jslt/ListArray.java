@@ -14,9 +14,9 @@ public class ListArray implements RecordInterface {
 		this.field = field;
 	}
 
-	public ListArray(int field) {
+	public ListArray() {
 		this.list = new ArrayList<>();
-		this.field = field;
+		this.field = -1;
 	}
 
 	@Override
@@ -26,11 +26,28 @@ public class ListArray implements RecordInterface {
 
 	@Override
 	public FieldType type() {
-		return field < 0 ? FieldType.ARRAY : field > list.size() ? null : JsltInterpreter.type(list.get(field));
+		return field < 0 ? FieldType.ARRAY : field >= list.size() ? null : JsltInterpreter.type(list.get(field));
+	}
+
+	@Override
+	public RecordInterface start() {
+		if (field < 0)
+			return new ListArray(list, 0);
+		Object o = list.get(field);
+		if (o instanceof RecordInterface)
+			return ((RecordInterface) o).start();
+		return null;
+	}
+
+	@Override
+	public RecordInterface next() {
+		return field < 0 || field + 1 >= list.size() ? null : new ListArray(list, field + 1);
 	}
 
 	@Override
 	public Object java() {
+		if (field < 0 || field >= list.size())
+			return null;
 		return list.get(field);
 	}
 

@@ -67,9 +67,9 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 	}
 
 	@Override
-	public ParametersArray copy(int rec) {
-		assert store.validate(rec);
-		return new ParametersArray(store, rec, -1);
+	public ParametersArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new ParametersArray(store, newRec, -1);
 	}
 
 	private void up(Alternative record) {
@@ -104,7 +104,7 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 			alloc = store.allocate(13 + 12);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (12 + (idx + 1) * 13) / 8);
+			alloc = store.resize(alloc, (12 + (size + 1) * 13) / 8);
 		store.setInt(parent.rec(), 8, alloc);
 		size++;
 		store.setInt(alloc, 4, size);
@@ -173,67 +173,56 @@ public class ParametersArray implements MemoryRecord, ChangeMatch, Iterable<Para
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
-		if (field >= 0 && field <= 15)
-			return nameMatch(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+		if (idx >= 0 && idx <= 15)
+			return nameMatch(idx - 0);
+		return null;
 	}
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
-		if (field >= 0 && field <= 15)
-			return typeMatch(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+			return FieldType.OBJECT;
+		if (idx >= 0 && idx <= 15)
+			return typeMatch(idx - 0);
+		return null;
 	}
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new ParametersArray(parent, field - 1);
-		if (field >= 0 && field <= 15)
-			return getMatch(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+			return this;
+		if (idx >= 0 && idx <= 15)
+			return getMatch(idx - 0);
+		return null;
 	}
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
-		if (field >= 0 && field <= 15)
-			return setMatch(field - 0, value);
-		switch (field) {
-		default:
-			return false;
-		}
+		if (idx >= 0 && idx <= 15)
+			return setMatch(idx - 0, value);
+		return false;
 	}
 
 	@Override
 	public ParametersArray index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new ParametersArray(parent, idx);
 	}
 
 	@Override
 	public ParametersArray start() {
-		return null;
+		return new ParametersArray(parent, 0);
 	}
 
 	@Override
 	public ParametersArray next() {
-		return null;
+		return idx + 1 >= size ? null : new ParametersArray(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

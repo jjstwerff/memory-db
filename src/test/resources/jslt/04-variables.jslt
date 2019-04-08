@@ -1,0 +1,7 @@
+import testing as t
+
+def _1data('abcd':x): x
+def _2const('abcd':x + 'e'): x
+
+t.assert("data", "abcd", _1data("abcd")) +
+t.assert("const", "abcd", _2const("abcde"))

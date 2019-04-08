@@ -173,6 +173,57 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 		}
 </#list>
 
+		private Index${index.name?cap_first}(Store store, Key key, int flag, int field) {
+			super(store, key, flag, field);
+		}
+
+		@Override
+		public FieldType type() {
+			return FieldType.OBJECT;
+		}
+
+		@Override
+		public Index${index.name?cap_first} copy() {
+			return new Index${index.name?cap_first}(store, key, flag, field);
+		}
+
+<#if index.javaTypes[0] == "int">
+		@Override
+		public ${field.related.name} field(String name) {
+			try {
+				int r = new Index${index.name?cap_first}(Integer.parseInt(name)).search();
+				return r <= 0 ? null : new IterRecord(store, r);
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+
+<#else>
+		@Override
+		public ${field.related.name} field(String name) {
+			int r = new Index${index.name?cap_first}(name).search();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+</#if>
+		@Override
+		public ${field.related.name} start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		private class IterRecord extends ${field.related.name} {
+			private IterRecord(Store store, int r) {
+				super(store, r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(store, r);
+			}
+		}
+
 		@Override
 		protected int readTop() {
 			return ${index.topGet};
@@ -257,6 +308,51 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 			}, ${index.flagPos}, ${index.fieldPos});
 		}
 </#list>
+
+		private Index${index.name?cap_first}(Store store, Key key, int flag, int field) {
+			super(store, key, flag, field);
+		}
+
+		@Override
+		public Index${index.name?cap_first} copy() {
+			return new Index${index.name?cap_first}(store, key, flag, field);
+		}
+
+<#if index.javaTypes[0] == "int">
+		@Override
+		public ${table.name} field(String name) {
+			try {
+				int r = new Index${index.name?cap_first}(store, Integer.parseInt(name)).search();
+				return r <= 0 ? null : new IterRecord(store, r);
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+<#else>
+		@Override
+		public ${table.name} field(String name) {
+			int r = new Index${index.name?cap_first}(store, name).search();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+</#if>
+
+		@Override
+		public ${table.name} start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		private class IterRecord extends ${table.name} {
+			private IterRecord(Store store, int r) {
+				super(store, r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(store, r);
+			}
+		}
 
 		@Override
 		protected int readTop() {
@@ -376,12 +472,12 @@ public class ${table.name} implements <#if table.includes?size == 0>MemoryRecord
 <#if table.object>
 				if (rec != null) {
 					Change${table.name} record = new Change${table.name}(rec);
-					<#if table.parent??>parent.</#if>store.free(record.rec());
+					<#if table.parent??>parent.store()<#else>store</#if>.free(record.rec());
 				}
 <#else>
 				if (rec != null)
 					try (Change${table.name} record = new Change${table.name}(rec)) {
-						<#if table.parent??>parent.</#if>store.free(record.rec());
+						<#if table.parent??>parent.store()<#else>store</#if>.free(record.rec());
 					}
 </#if>
 				continue;

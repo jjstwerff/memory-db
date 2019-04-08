@@ -108,9 +108,9 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 	}
 
 	@Override
-	public ${field.name?cap_first}Array copy(int rec) {
-		assert store.validate(rec);
-		return new ${field.name?cap_first}Array(store, rec, -1);
+	public ${field.name?cap_first}Array copy(int newRec) {
+		assert store.validate(newRec);
+		return new ${field.name?cap_first}Array(store, newRec, -1);
 	}
 
 	private void up(${on} record) {
@@ -179,7 +179,7 @@ public class ${field.name?cap_first}Array implements MemoryRecord, <#if rec.incl
 			alloc = store.allocate(${rec.totalSize?c} + ${table.reserve()});
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (${table.reserve()} + (idx + 1) * ${rec.totalSize?c}) / 8);
+			alloc = store.resize(alloc, (${table.reserve()} + (size + 1) * ${rec.totalSize?c}) / 8);
 <#if table.included?size gt 0>
 		store.setInt(parent.rec(), parent.${table.name?lower_case}Position() + ${field.pos / 8}, alloc);
 <#elseif on != table.name>
@@ -320,43 +320,46 @@ ${field.arrayFields}<#rt>
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
 <#assign max = rec.fields?size>
 <#list rec.includes as incl>
 <#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
-			return name${incl.name}(field - ${max});
+		if (idx >= ${max} && idx <= ${nmax})
+			return name${incl.name}(idx - ${max});
 <#assign max = nmax>
 </#list>
-		switch (field) {
+<#if rec.fields?has_content>
+		switch (idx) {
 <#list rec.fields as field>
 <#if field.name != "upRecord">
-		case ${1 + field?index}:
+		case ${field?index}:
 			return "${field.name}";
 </#if></#list>
 		default:
 			return null;
 		}
+<#else>
+		return null;
+</#if>
 	}
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
+			return FieldType.OBJECT;
 <#assign max = rec.fields?size>
 <#list rec.includes as incl>
 <#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
-			return type${incl.name}(field - ${max});
+		if (idx >= ${max} && idx <= ${nmax})
+			return type${incl.name}(idx - ${max});
 <#assign max = nmax>
 </#list>
-		switch (field) {
+<#if rec.fields?has_content>
+		switch (idx) {
 <#list rec.fields as field>
 <#if field.name != "upRecord">
-		case ${1 + field?index}:
+		case ${field?index}:
 <#if field.type == 'SET' || field.type == 'ARRAY'>
 			return FieldType.ARRAY;
 <#elseif field.type == "RELATION">
@@ -372,48 +375,54 @@ ${field.arrayFields}<#rt>
 		default:
 			return null;
 		}
+<#else>
+		return null;
+</#if>
 	}
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new ${field.name?cap_first}Array(parent, field - 1);
+			return this;
 <#assign max = rec.fields?size>
 <#list rec.includes as incl>
 <#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
-			return get${incl.name}(field - ${max});
+		if (idx >= ${max} && idx <= ${nmax})
+			return get${incl.name}(idx - ${max});
 <#assign max = nmax>
 </#list>
-		switch (field) {
+<#if rec.fields?has_content>
+		switch (idx) {
 <#list rec.fields as field>
 <#if field.type == 'BOOLEAN'>
-		case ${1 + field?index}:
+		case ${field?index}:
 			return is${field.name?cap_first}();
 <#elseif field.type != "SET" && field.type != "ARRAY" && field.name != "upRecord">
-		case ${1 + field?index}:
+		case ${field?index}:
 			return get${field.name?cap_first}();
 </#if></#list>
 		default:
 			return null;
 		}
+<#else>
+		return null;
+</#if>
 	}
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
 <#assign max = rec.fields?size>
 <#list rec.includes as incl>
 <#assign nmax = max + incl.fields?size>
-		if (field >= ${max} && field <= ${nmax})
-			return set${incl.name}(field - ${max}, value);
+		if (idx >= ${max} && idx <= ${nmax})
+			return set${incl.name}(idx - ${max}, value);
 <#assign max = nmax>
 </#list>
-		switch (field) {
+<#if rec.fields?has_content>
+		switch (idx) {
 <#list rec.fields as field>
 <#if field.type != "SET" && field.type != "ARRAY" && field.name != "upRecord">
-		case ${field?index + 1}:
+		case ${field?index}:
 			if (value instanceof ${field.boxedType})
 				set${field.name?cap_first}((${field.boxedType}) value);
 			return value instanceof ${field.boxedType};
@@ -421,21 +430,29 @@ ${field.arrayFields}<#rt>
 		default:
 			return false;
 		}
+<#else>
+		return false;
+</#if>
 	}
 
 	@Override
 	public ${field.name?cap_first}Array index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new ${field.name?cap_first}Array(parent, idx);
 	}
 
 	@Override
 	public ${field.name?cap_first}Array start() {
-		return null;
+		return new ${field.name?cap_first}Array(parent, 0);
 	}
 
 	@Override
 	public ${field.name?cap_first}Array next() {
-		return null;
+		return idx + 1 >= size ? null : new ${field.name?cap_first}Array(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

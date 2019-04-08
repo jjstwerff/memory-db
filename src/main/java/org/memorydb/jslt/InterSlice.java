@@ -12,6 +12,7 @@ public class InterSlice implements RecordInterface {
 	private final RecordInterface data;
 	private final RecordInterface cur;
 	private final long[] parms;
+	private final int field;
 
 	public InterSlice(JsltInterpreter interpreter, RecordInterface data, CallParmsArray parms) {
 		this.data = data;
@@ -19,12 +20,15 @@ public class InterSlice implements RecordInterface {
 		this.cur = null;
 		for (int p = 0; p < parms.size() - 1; p++)
 			this.parms[p] = interpreter.getNumber(interpreter.inter(new CallParmsArray(parms, p + 1)));
+		this.field = -1;
 	}
 
-	public InterSlice(RecordInterface data, RecordInterface cur, long[] parms) {
+	private InterSlice(RecordInterface data, long[] parms, int field) {
 		this.data = data;
-		this.cur = cur;
 		this.parms = parms;
+		this.field = field;
+		int calc = calc(data.size());
+		this.cur = calc < 0 ? null : data.index(calc);
 	}
 
 	@Override
@@ -34,20 +38,34 @@ public class InterSlice implements RecordInterface {
 
 	@Override
 	public FieldType type() {
-		return cur == null ? data.type() : cur.type();
+		return field < 0 ? data.type() : cur.type();
+	}
+
+	@Override
+	public Object java() {
+		return cur == null ? data.java() : cur.java();
+	}
+
+	@Override
+	public InterSlice index(int idx) {
+		InterSlice res = new InterSlice(data, parms, idx);
+		return res.cur == null ? null : res;
 	}
 
 	@Override
 	public InterSlice start() {
-		return null;
+		InterSlice res = new InterSlice(data, parms, 0);
+		return res.cur == null ? null : res;
 	}
 
 	@Override
 	public InterSlice next() {
-		return null;
+		InterSlice res = new InterSlice(data, parms, field + 1);
+		return res.cur == null ? null : res;
 	}
 
-	private int calc(int field, int size) {
+	private int calc(int size) {
+		int f = field;
 		for (int p = 0; p < parms.length; p += 3) {
 			long start = this.parms[p];
 			long stop = this.parms[p + 1];
@@ -63,8 +81,8 @@ public class InterSlice implements RecordInterface {
 					stop += size;
 				if (stop == Long.MIN_VALUE)
 					stop = -1;
-				if (start + step * (field - 1) > stop)
-					return (int) (start + step * (field - 1));
+				if (start + step * f > stop)
+					return (int) (start + step * f);
 			} else {
 				if (start == Long.MIN_VALUE)
 					start = 0;
@@ -76,18 +94,13 @@ public class InterSlice implements RecordInterface {
 					stop += size;
 				if (stop == Long.MIN_VALUE)
 					stop = size;
-				if (start + step * (field - 1) < stop)
-					return (int) (start + step * (field - 1));
+				if (start + step * f < stop)
+					return (int) (start + step * f);
 			}
 			long skip = (stop - start) / step;
-			field -= skip;
+			f -= skip;
 		}
 		return -1;
-	}
-
-	@Override
-	public Object java() {
-		return data.java();
 	}
 
 	@Override
@@ -129,6 +142,24 @@ public class InterSlice implements RecordInterface {
 
 	@Override
 	public RecordInterface copy() {
-		return new InterSlice(data, cur, parms);
+		return new InterSlice(data, parms, field);
+	}
+
+	@Override
+	public String toString() {
+		if (field >= 0)
+			return cur == null ? null : cur.toString();
+		StringBuilder bld = new StringBuilder();
+		bld.append("[");
+		InterSlice elm = start();
+		int pos = 0;
+		while (elm != null) {
+			if (pos++ != 0)
+				bld.append(",");
+			bld.append(elm.java());
+			elm = elm.next();
+		}
+		bld.append("]");
+		return bld.toString();
 	}
 }

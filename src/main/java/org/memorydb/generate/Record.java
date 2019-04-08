@@ -336,7 +336,7 @@ public class Record implements Comparable<Record> {
 		}
 		if (parent != null && !parent.getIncluded().isEmpty()) {
 			bld.append(ind).append("int nextRec = new " + parent.getName() + ".Index").append(index.getName().substring(0, 1).toUpperCase()).append(index.getName().substring(1));
-			bld.append("(parent, this, ");
+			bld.append("(parent, ");
 		} else if (parent != null) {
 			bld.append(ind).append("int nextRec = parent.new Index").append(index.getName().substring(0, 1).toUpperCase()).append(index.getName().substring(1)).append("(");
 		} else {

@@ -1,0 +1,24 @@
+import testing as t
+
+def till('a'* + 'abc'): true
+def var(x* + 'abc'): x
+def digit(x if x >= '0' and x <= '9'): x
+def single(digit:x + 'a'): x
+def eager('aab'*:x): x
+def znumber(digit*:x + '00'): x
+def chain(('a'? + 'b'? + 'c'?):x): x
+
+t.assert("2falseStarts", true, till("aaabc")) +
+t.assert("1falseStart", true, till("aabc")) +
+t.assert("tail", true, till("abc")) +
+t.assert("tooMuch", null, till("abca")) +
+t.assert("nothing", null, till("abbc")) +
+t.assert("var", "a", var("aabc")) +
+t.assert("var", "ab", var("ababc")) +
+t.assert("digit", "1", single("1a")) +
+t.assert("digits", "", single("12a")) +
+t.assert("eager", "", eager("")) +
+t.assert("eager1", "aab", eager("aab")) +
+t.assert("eager2", "aabaab", eager("aabaab")) +
+t.assert("znumber", "123", znumber("12300")) +
+t.assert("chain", "abc", chain("abc"))

@@ -69,9 +69,9 @@ public class DependencyArray implements MemoryRecord, ChangeInterface, Iterable<
 	}
 
 	@Override
-	public DependencyArray copy(int rec) {
-		assert store.validate(rec);
-		return new DependencyArray(store, rec, -1);
+	public DependencyArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new DependencyArray(store, newRec, -1);
 	}
 
 	private void up(Category record) {
@@ -106,7 +106,7 @@ public class DependencyArray implements MemoryRecord, ChangeInterface, Iterable<
 			alloc = store.allocate(5 + 12);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (12 + (idx + 1) * 5) / 8);
+			alloc = store.resize(alloc, (12 + (size + 1) * 5) / 8);
 		store.setInt(parent.rec(), 13, alloc);
 		size++;
 		store.setInt(alloc, 4, size);
@@ -207,13 +207,12 @@ public class DependencyArray implements MemoryRecord, ChangeInterface, Iterable<
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
-		switch (field) {
-		case 1:
+		switch (idx) {
+		case 0:
 			return "on";
-		case 2:
+		case 1:
 			return "number";
 		default:
 			return null;
@@ -222,13 +221,12 @@ public class DependencyArray implements MemoryRecord, ChangeInterface, Iterable<
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
-		switch (field) {
-		case 1:
 			return FieldType.OBJECT;
-		case 2:
+		switch (idx) {
+		case 0:
+			return FieldType.OBJECT;
+		case 1:
 			return FieldType.INTEGER;
 		default:
 			return null;
@@ -237,13 +235,12 @@ public class DependencyArray implements MemoryRecord, ChangeInterface, Iterable<
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new DependencyArray(parent, field - 1);
-		switch (field) {
-		case 1:
+			return this;
+		switch (idx) {
+		case 0:
 			return getOn();
-		case 2:
+		case 1:
 			return getNumber();
 		default:
 			return null;
@@ -252,13 +249,12 @@ public class DependencyArray implements MemoryRecord, ChangeInterface, Iterable<
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
-		switch (field) {
-		case 1:
+		switch (idx) {
+		case 0:
 			if (value instanceof Category)
 				setOn((Category) value);
 			return value instanceof Category;
-		case 2:
+		case 1:
 			if (value instanceof Byte)
 				setNumber((Byte) value);
 			return value instanceof Byte;
@@ -269,17 +265,22 @@ public class DependencyArray implements MemoryRecord, ChangeInterface, Iterable<
 
 	@Override
 	public DependencyArray index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new DependencyArray(parent, idx);
 	}
 
 	@Override
 	public DependencyArray start() {
-		return null;
+		return new DependencyArray(parent, 0);
 	}
 
 	@Override
 	public DependencyArray next() {
-		return null;
+		return idx + 1 >= size ? null : new DependencyArray(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

@@ -34,20 +34,20 @@ public interface ChangeMatch extends ChangeInterface, Match {
 				store().setByte(rec(), matchPosition() + 5, store().getByte(rec(), matchPosition() + 5) & 254);
 				break;
 			case FLOAT:
-				store().setLong(rec(), matchPosition() + 5, Double.doubleToLongBits(0.0));
+				store().setLong(rec(), matchPosition() + 5, Double.doubleToLongBits(Double.NaN));
 				break;
 			case NUMBER:
-				store().setLong(rec(), matchPosition() + 5, 0L);
+				store().setLong(rec(), matchPosition() + 5, Long.MIN_VALUE);
 				break;
 			case STRING:
-				store().setInt(rec(), matchPosition() + 5, 0);
+				store().setInt(rec(), matchPosition() + 5, Integer.MIN_VALUE);
 				break;
 			case OBJECT:
 				store().setInt(rec(), matchPosition() + 5, 0);
 				break;
 			case CONSTANT:
-				store().setInt(rec(), matchPosition() + 5, 0);
-				store().setInt(rec(), matchPosition() + 9, 0);
+				store().setInt(rec(), matchPosition() + 5, Integer.MIN_VALUE);
+				store().setInt(rec(), matchPosition() + 9, Integer.MIN_VALUE);
 				break;
 			case MACRO:
 				store().setInt(rec(), matchPosition() + 5, 0);

@@ -14,14 +14,14 @@ public class ChangeField extends Field implements AutoCloseable, ChangePart {
 			setName(null);
 			up(parent);
 		} else {
-			new Part.IndexObject(this).remove(rec);
+			new Part.IndexObject(up()).remove(rec);
 		}
 	}
 
 	/* package private */ ChangeField(Field current) {
 		super(current.store, current.rec);
 		if (rec != 0) {
-			new Part.IndexObject(this).remove(rec);
+			new Part.IndexObject(up()).remove(rec);
 		}
 	}
 
@@ -48,7 +48,7 @@ public class ChangeField extends Field implements AutoCloseable, ChangePart {
 
 	@Override
 	public void close() {
-		new Part.IndexObject(this).insert(rec());
+		new Part.IndexObject(up()).insert(rec());
 	}
 
 	@Override

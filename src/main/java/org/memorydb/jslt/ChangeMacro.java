@@ -12,9 +12,9 @@ public class ChangeMacro extends Macro implements AutoCloseable, ChangeInterface
 		super(store, rec == 0 ? store.allocate(Macro.RECORD_SIZE) : rec);
 		if (rec == 0) {
 			setName(null);
-			store.setInt(rec, 8, 0); // SET alternatives
-			store.setInt(rec, 12, 0); // ARRAY matching
-			store.setInt(rec, 16, 0);
+			store.setInt(rec(), 8, 0); // SET alternatives
+			store.setInt(rec(), 12, 0); // ARRAY matching
+			store.setInt(rec(), 16, 0);
 		} else {
 			new IndexMacros(store).remove(rec());
 		}

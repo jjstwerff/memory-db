@@ -22,7 +22,7 @@ public class InterMult implements RecordInterface {
 	public InterMult next() {
 		RecordInterface next = cur.next();
 		if (next == null) {
-			if (number == 0)
+			if (number <= 1)
 				return null;
 			return new InterMult(data, data.start(), number - 1);
 		}

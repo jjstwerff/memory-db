@@ -103,6 +103,44 @@ public class Record implements MemoryRecord, RecordInterface {
 			}, 112, 15);
 		}
 
+		private IndexFieldName(Store store, Key key, int flag, int field) {
+			super(store, key, flag, field);
+		}
+
+		@Override
+		public FieldType type() {
+			return FieldType.OBJECT;
+		}
+
+		@Override
+		public IndexFieldName copy() {
+			return new IndexFieldName(store, key, flag, field);
+		}
+
+		@Override
+		public Field field(String name) {
+			int r = new IndexFieldName(name).search();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		@Override
+		public Field start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		private class IterRecord extends Field {
+			private IterRecord(Store store, int r) {
+				super(store, r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(store, r);
+			}
+		}
+
 		@Override
 		protected int readTop() {
 			return store.getInt(rec, 8);
@@ -179,6 +217,48 @@ public class Record implements MemoryRecord, RecordInterface {
 					return IndexOperation.EQ;
 				}
 			}, 216, 28);
+		}
+
+		private IndexFields(Store store, Key key, int flag, int field) {
+			super(store, key, flag, field);
+		}
+
+		@Override
+		public FieldType type() {
+			return FieldType.OBJECT;
+		}
+
+		@Override
+		public IndexFields copy() {
+			return new IndexFields(store, key, flag, field);
+		}
+
+		@Override
+		public Field field(String name) {
+			try {
+				int r = new IndexFields(Integer.parseInt(name)).search();
+				return r <= 0 ? null : new IterRecord(store, r);
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+
+		@Override
+		public Field start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		private class IterRecord extends Field {
+			private IterRecord(Store store, int r) {
+				super(store, r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(store, r);
+			}
 		}
 
 		@Override
@@ -284,7 +364,7 @@ public class Record implements MemoryRecord, RecordInterface {
 			if (parser.isDelete()) {
 				if (rec != null)
 					try (ChangeRecord record = new ChangeRecord(rec)) {
-						parent.store.free(record.rec());
+						parent.store().free(record.rec());
 					}
 				continue;
 			}

@@ -130,6 +130,45 @@ public interface Part extends MemoryRecord, RecordInterface {
 			this.record = record;
 		}
 
+		private IndexObject(Part record, Key key, int flag, int field) {
+			super(record.store(), key, flag, field);
+			this.record = record;
+		}
+
+		@Override
+		public FieldType type() {
+			return FieldType.OBJECT;
+		}
+
+		@Override
+		public IndexObject copy() {
+			return new IndexObject(record, key, flag, field);
+		}
+
+		@Override
+		public Field field(String name) {
+			int r = new IndexObject(record, name).search();
+			return r <= 0 ? null : new IterRecord(r);
+		}
+
+		@Override
+		public Field start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(r);
+		}
+
+		private class IterRecord extends Field {
+			private IterRecord(int r) {
+				super(record.store(), r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(r);
+			}
+		}
+
 		@Override
 		public int first() {
 			return super.first();
@@ -278,7 +317,7 @@ public interface Part extends MemoryRecord, RecordInterface {
 		}
 	}
 
-	default FieldType getFieldType() {
+	default FieldType type() {
 		Type type = getType();
 		if (type == null)
 			return null;

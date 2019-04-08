@@ -4,7 +4,6 @@ import org.memorydb.file.Parser;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 
 /**
@@ -59,7 +58,6 @@ public class Field implements Part {
 	}
 
 	@Override
-	@FieldData(name = "upRecord", type = "RELATION", related = Part.class, mandatory = false)
 	public Part up() {
 		if (rec == 0)
 			return null;
@@ -84,6 +82,7 @@ public class Field implements Part {
 		write.endRecord();
 	}
 
+	@Override
 	public String keys() {
 		StringBuilder res = new StringBuilder();
 		if (rec == 0)
@@ -114,8 +113,10 @@ public class Field implements Part {
 			}
 			if (rec == null) {
 				try (ChangeField record = new ChangeField(parent, 0)) {
-					record.setName(parser.getString("name"));
+					String name = parser.getString("name");
+					record.setName(name);
 					record.parseFields(parser);
+					return record;
 				}
 			} else {
 				try (ChangeField record = new ChangeField(rec)) {
@@ -128,14 +129,9 @@ public class Field implements Part {
 
 	public static Field parseKey(Parser parser, Part parent) {
 		String name = parser.getString("name");
-		int rec = new Part.IndexObject(parent, name).search();
+		int nextRec = new Part.IndexObject(parent, name).search();
 		parser.finishRelation();
-		return rec <= 0 ? null : new Field(parent.store(), rec);
-	}
-
-	@Override
-	public FieldType type() {
-		return Part.super.getFieldType();
+		return nextRec <= 0 ? null : new Field(parent.store(), nextRec);
 	}
 
 	@Override
@@ -144,7 +140,7 @@ public class Field implements Part {
 	}
 
 	@Override
-	public RecordInterface copy() {
+	public Field copy() {
 		return new Field(store, rec);
 	}
 }

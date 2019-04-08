@@ -4,14 +4,14 @@ name=a, alternatives=[
     operation=NUMBER, number=1
   ]
 ], matching=[
-  type=TEST_STACK, tstack=0, tsfalse=3
-  type=ALT, altnr=553, afalse=3
-  type=ERROR, error=No matching macro named 'a' found, efrom=0, etill=0
+  type=TEST_STACK, tstack=0, tsfalse=2
+  type=ALT, altnr=550, afalse=2
+  type=JUMP, jump=MISS
 ]
 name=b, alternatives=[
   nr=0, parameters=[
     variable=[
-      name=val, nr=0, multiple=false, type=NUMBER
+      name=val, nr=0, type=NUMBER
     ], type=ANY
   ], anyParm=false, code=[
     operation=FUNCTION, function=ADD, fnParm1=[
@@ -22,7 +22,7 @@ name=b, alternatives=[
   ]
   nr=1, parameters=[
     variable=[
-      name=val, nr=0, multiple=false, type=STRING
+      name=val, nr=0, type=STRING
     ], type=ANY
   ], anyParm=false, code=[
     operation=FUNCTION, function=ADD, fnParm1=[
@@ -34,7 +34,7 @@ name=b, alternatives=[
   nr=2, parameters=[
     type=NUMBER, number=0
     variable=[
-      name=val2, nr=0, multiple=false, type=NUMBER
+      name=val2, nr=0, type=NUMBER
     ], type=ANY
   ], anyParm=false, code=[
     operation=FUNCTION, function=MUL, fnParm1=[
@@ -46,17 +46,17 @@ name=b, alternatives=[
   nr=3, parameters=[
     type=STRING, string=
     variable=[
-      name=val2, nr=0, multiple=false, type=NUMBER
+      name=val2, nr=0, type=NUMBER
     ], type=ANY
   ], anyParm=false, code=[
     operation=VARIABLE, varName=val2, varNr=0
   ]
   nr=4, parameters=[
     variable=[
-      name=val, nr=0, multiple=false, type=NUMBER
+      name=val, nr=0, type=NUMBER
     ], type=ANY
     variable=[
-      name=val2, nr=1, multiple=false, type=NUMBER
+      name=val2, nr=1, type=NUMBER
     ], type=ANY
   ], anyParm=false, code=[
     operation=FUNCTION, function=ADD, fnParm1=[
@@ -70,33 +70,33 @@ name=b, alternatives=[
     operation=NULL
   ]
 ], matching=[
-  type=TEST_STACK, tstack=1, tsfalse=8
-  type=PARM, parm=0, pfalse=5
-  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=5
-  type=ALT, altnr=642, afalse=5
-  type=PARM, parm=0, pfalse=8
-  type=TEST_TYPE, ttype=TYPE_STRING, ttfalse=8
-  type=ALT, altnr=793, afalse=8
-  type=TEST_STACK, tstack=2, tsfalse=26
-  type=PARM, parm=0, pfalse=15
-  type=TEST_NUMBER, mnumber=0, mnfalse=15
-  type=PARM, parm=1, pfalse=15
-  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=15
+  type=TEST_STACK, tstack=1, tsfalse=7
+  type=PARM, parm=0, pfalse=4
+  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=4
+  type=ALT, altnr=639, afalse=4
+  type=PARM, parm=0, pfalse=7
+  type=TEST_TYPE, ttype=TYPE_STRING, ttfalse=7
+  type=ALT, altnr=789, afalse=7
+  type=TEST_STACK, tstack=2, tsfalse=25
+  type=PARM, parm=0, pfalse=14
+  type=TEST_NUMBER, mnumber=0, mnfalse=14
+  type=PARM, parm=1, pfalse=14
+  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=14
   type=STACK, stack=1
-  type=ALT, altnr=944, afalse=15
-  type=PARM, parm=0, pfalse=21
-  type=TEST_STRING, mstring=, msfalse=21
-  type=PARM, parm=1, pfalse=21
-  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=21
+  type=ALT, altnr=939, afalse=14
+  type=PARM, parm=0, pfalse=20
+  type=TEST_STRING, tstring=, mtsfalse=20
+  type=PARM, parm=1, pfalse=20
+  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=20
   type=STACK, stack=1
-  type=ALT, altnr=1095, afalse=21
-  type=PARM, parm=0, pfalse=26
-  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=26
-  type=PARM, parm=1, pfalse=26
-  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=26
-  type=ALT, altnr=1202, afalse=26
-  type=ALT, altnr=1371, afalse=27
-  type=ERROR, error=No matching macro named 'b' found, efrom=0, etill=0
+  type=ALT, altnr=1089, afalse=20
+  type=PARM, parm=0, pfalse=25
+  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=25
+  type=PARM, parm=1, pfalse=25
+  type=TEST_TYPE, ttype=TYPE_NUMBER, ttfalse=25
+  type=ALT, altnr=1195, afalse=25
+  type=ALT, altnr=1362, afalse=26
+  type=JUMP, jump=MISS
 ]
 name=main, alternatives=[
   nr=0, parameters=[
@@ -173,24 +173,24 @@ name=main, alternatives=[
     ]
   ]
 ], matching=[
-  type=TEST_STACK, tstack=0, tsfalse=3
-  type=ALT, altnr=1460, afalse=3
-  type=ERROR, error=No matching macro named 'main' found, efrom=0, etill=0
+  type=TEST_STACK, tstack=0, tsfalse=2
+  type=ALT, altnr=1451, afalse=2
+  type=JUMP, jump=MISS
 ]
 name=slice, alternatives=[
 ], matching=[
-  type=ERROR, error=No matching macro named 'slice' found, efrom=0, etill=0
+  type=JUMP, jump=MISS
 ]
 name=t.assert, alternatives=[
   nr=0, parameters=[
     variable=[
-      name=name, nr=0, multiple=false, type=STRING
+      name=name, nr=0, type=STRING
     ], type=ANY
     variable=[
-      name=should, nr=1, multiple=false, type=NULL
+      name=should, nr=1, type=NULL
     ], type=ANY
     variable=[
-      name=was, nr=2, multiple=false, type=NULL
+      name=was, nr=2, type=NULL
     ], type=ANY
   ], anyParm=false, code=[
     operation=CONDITION, conExpr=[
@@ -227,9 +227,9 @@ name=t.assert, alternatives=[
     ]
   ]
 ], matching=[
-  type=TEST_STACK, tstack=3, tsfalse=5
-  type=PARM, parm=0, pfalse=5
-  type=TEST_TYPE, ttype=TYPE_STRING, ttfalse=5
-  type=ALT, altnr=55, afalse=5
-  type=ERROR, error=No matching macro named 't.assert' found, efrom=0, etill=0
+  type=TEST_STACK, tstack=3, tsfalse=4
+  type=PARM, parm=0, pfalse=4
+  type=TEST_TYPE, ttype=TYPE_STRING, ttfalse=4
+  type=ALT, altnr=55, afalse=4
+  type=JUMP, jump=MISS
 ]

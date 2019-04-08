@@ -72,13 +72,6 @@ public interface ResultType extends MemoryRecord, RecordInterface {
 		}
 	}
 
-	default Iterable<? extends RecordInterface> iterateResultType(int field, @SuppressWarnings("unused") Object... key) {
-		switch (field) {
-		default:
-			return null;
-		}
-	}
-
 	default FieldType typeResultType(int field) {
 		switch (field) {
 		case 1:

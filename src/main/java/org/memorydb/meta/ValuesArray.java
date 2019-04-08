@@ -69,9 +69,9 @@ public class ValuesArray implements MemoryRecord, ChangeInterface, Iterable<Valu
 	}
 
 	@Override
-	public ValuesArray copy(int rec) {
-		assert store.validate(rec);
-		return new ValuesArray(store, rec, -1);
+	public ValuesArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new ValuesArray(store, newRec, -1);
 	}
 
 	private void up(Field record) {
@@ -106,7 +106,7 @@ public class ValuesArray implements MemoryRecord, ChangeInterface, Iterable<Valu
 			alloc = store.allocate(8 + 12);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (12 + (idx + 1) * 8) / 8);
+			alloc = store.resize(alloc, (12 + (size + 1) * 8) / 8);
 		store.setInt(parent.rec(), 13, alloc);
 		size++;
 		store.setInt(alloc, 4, size);
@@ -202,13 +202,12 @@ public class ValuesArray implements MemoryRecord, ChangeInterface, Iterable<Valu
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
-		switch (field) {
-		case 1:
+		switch (idx) {
+		case 0:
 			return "value";
-		case 2:
+		case 1:
 			return "description";
 		default:
 			return null;
@@ -217,13 +216,12 @@ public class ValuesArray implements MemoryRecord, ChangeInterface, Iterable<Valu
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
-		switch (field) {
-		case 1:
+			return FieldType.OBJECT;
+		switch (idx) {
+		case 0:
 			return FieldType.STRING;
-		case 2:
+		case 1:
 			return FieldType.STRING;
 		default:
 			return null;
@@ -232,13 +230,12 @@ public class ValuesArray implements MemoryRecord, ChangeInterface, Iterable<Valu
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new ValuesArray(parent, field - 1);
-		switch (field) {
-		case 1:
+			return this;
+		switch (idx) {
+		case 0:
 			return getValue();
-		case 2:
+		case 1:
 			return getDescription();
 		default:
 			return null;
@@ -247,13 +244,12 @@ public class ValuesArray implements MemoryRecord, ChangeInterface, Iterable<Valu
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
-		switch (field) {
-		case 1:
+		switch (idx) {
+		case 0:
 			if (value instanceof String)
 				setValue((String) value);
 			return value instanceof String;
-		case 2:
+		case 1:
 			if (value instanceof String)
 				setDescription((String) value);
 			return value instanceof String;
@@ -264,17 +260,22 @@ public class ValuesArray implements MemoryRecord, ChangeInterface, Iterable<Valu
 
 	@Override
 	public ValuesArray index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new ValuesArray(parent, idx);
 	}
 
 	@Override
 	public ValuesArray start() {
-		return null;
+		return new ValuesArray(parent, 0);
 	}
 
 	@Override
 	public ValuesArray next() {
-		return null;
+		return idx + 1 >= size ? null : new ValuesArray(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

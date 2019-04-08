@@ -16,61 +16,64 @@ public class InterMap implements RecordInterface {
 	private final JsltInterpreter interpreter;
 	private final Expr expr;
 	private final Object data;
-	private Object lastValue;
+	private final Object lastValue;
 	private final int index;
 
-	public InterMap(JsltInterpreter interpreter, Expr expr, Object data, int index) {
+	public InterMap(JsltInterpreter interpreter, Expr expr, Object data) {
 		this.interpreter = interpreter;
 		this.expr = expr;
-		this.data = data;
+		if (data instanceof RecordInterface) {
+			RecordInterface rec = (RecordInterface) data;
+			this.data = rec.start();
+		} else
+			this.data = data;
 		this.lastValue = null;
+		this.index = -1;
+	}
+
+	private InterMap(JsltInterpreter interpreter, Expr expr, Object data, int index) {
+		this.interpreter = interpreter;
+		this.expr = expr;
+		interpreter.setIndex(index);
+		interpreter.setFirst(index == 0);
+		if (data instanceof RecordInterface) {
+			RecordInterface rec = (RecordInterface) data;
+			RecordInterface next = rec.next();
+			interpreter.setCurName(rec.name());
+			interpreter.setLast(next == null);
+			interpreter.setCurrent(rec.java());
+			this.data = next;
+		} else if (data instanceof String) {
+			String str = (String) data;
+			boolean last = index + 1 >= str.length();
+			interpreter.setLast(last);
+			interpreter.setCurrent(str.substring(index, index + 1));
+			this.data = last ? null : data;
+		} else if (data instanceof Long) {
+			Long l = (Long) data;
+			boolean last = index + 1 >= l;
+			interpreter.setLast(last);
+			interpreter.setCurrent((long) index);
+			this.data = last ? null : data;
+		} else
+			this.data = null;
+		this.lastValue = interpreter.inter(expr);
 		this.index = index;
 	}
 
 	@Override
 	public RecordInterface start() {
-		return step();
+		return data == null ? null : new InterMap(interpreter, expr, data, 0);
 	}
 
 	@Override
 	public RecordInterface next() {
-		return step();
+		return data == null ? null : new InterMap(interpreter, expr, data, index + 1);
 	}
 
-	private RecordInterface step() {
-		if (data instanceof RecordInterface) {
-			RecordInterface rec = (RecordInterface) data;
-			RecordInterface next = index == 0 ? rec.start() : rec.next();
-			fill(next == null, rec.java());
-			return new InterMap(interpreter, expr, next, index + 1);
-		} else if (data instanceof String) {
-			String str = (String) data;
-			fill(index >= str.length(), str.substring(index, index + 1));
-			return new InterMap(interpreter, expr, str, index + 1);
-		} else if (data instanceof Long) {
-			Long val = (Long) data;
-			fill(index >= val, index);
-			return new InterMap(interpreter, expr, val, index + 1);
-		}
-		return null;
-	}
-
-	private void fill(boolean last, Object data) {
-		interpreter.setIndex(index);
-		interpreter.setFirst(index == 0);
-		interpreter.setLast(last);
-		if (data instanceof RecordInterface) {
-			RecordInterface rec = (RecordInterface) data;
-			interpreter.setCurrent(rec.java());
-			interpreter.setCurName(rec.name());
-		} else if (data instanceof String) {
-			interpreter.setCurrent(((String) data));
-			interpreter.setCurName(null);
-		} else if (data instanceof Long) {
-			interpreter.setCurrent(data);
-			interpreter.setCurName(null);
-		}
-		lastValue = interpreter.inter(expr);
+	@Override
+	public RecordInterface index(int idx) {
+		return idx < 0 || idx >= size() ? null : new InterMap(interpreter, expr, data, index);
 	}
 
 	@Override
@@ -80,7 +83,7 @@ public class InterMap implements RecordInterface {
 
 	@Override
 	public FieldType type() {
-		if (lastValue == null && index == 0)
+		if (index < 0)
 			return FieldType.ARRAY;
 		return JsltInterpreter.type(lastValue);
 	}

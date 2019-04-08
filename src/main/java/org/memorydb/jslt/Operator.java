@@ -3,7 +3,6 @@ package org.memorydb.jslt;
 import org.memorydb.file.Write;
 import org.memorydb.structure.FieldData;
 import org.memorydb.structure.RecordData;
-import org.memorydb.structure.RecordInterface;
 import org.memorydb.structure.Store;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +41,8 @@ public interface Operator extends ResultType {
 			return (MparmsArray) this;
 		if (this instanceof CodeArray)
 			return (CodeArray) this;
+		if (this instanceof ParmsArray)
+			return (ParmsArray) this;
 		if (this instanceof Expr)
 			return new ChangeExpr((Expr) this);
 		return null;
@@ -449,29 +450,6 @@ public interface Operator extends ResultType {
 			return getVarName();
 		case 28:
 			return getVarNr();
-		default:
-			return null;
-		}
-	}
-
-	default Iterable<? extends RecordInterface> iterateOperator(int field, @SuppressWarnings("unused") Object... key) {
-		if (field >= 28 && field <= 30)
-			return iterateResultType(field - 28);
-		switch (field) {
-		case 11:
-			return getArray();
-		case 12:
-			return getAppend();
-		case 13:
-			return getObject();
-		case 16:
-			return getCallParms();
-		case 21:
-			return getSortParms();
-		case 23:
-			return getIfTrue();
-		case 24:
-			return getIfFalse();
 		default:
 			return null;
 		}

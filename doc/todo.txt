@@ -1,25 +1,65 @@
-Fix code generation for new model:
-- start tests on structures including parsing
-- add non-boxing methods
-- array names duplicates
-	automatic name of the record where it is used & name of parameter
-	possibly add numbers when more than one 
-- record without place in the structure (no index, no parent)
-- add a couple of more unit tests for edge cases
-    fix first unit tests
-	introduce world data & generate & checks on it
-	simple iterators / up / search / long
-- deletes of records
-	verify to not add deleted records to indexes.. validation in unittest?
+Tests:
+- array of tokens into parameter
+- part of choice into parameter
+- part after choice into parameter
+- optional part after choice into parameter
+- multiple tokens into a parameter
+
+Analyze:
+- brackets
+	number of current POP's on inner function (parameter with this number?)
+- better code for max-n iterations
+	COUNTER element on stack = number, DECREASE step with jump when 0
+- allow constant n iterations code with counter
+	add a way to note that
+- use COUNTER to remember if a new array is started when that is optionally done
+	validate the end of the array too in this situation
+- add code to force a step into an array element (string inside an array or a sub array)
+	start a new array [] versus a new plus operator
+	create a flag on arrays to indicate the difference
+- redefine predefined macros (i.e. number)
+	this should be an error
+
+Notes: (for projects including code and data)
+- person (name)
+- text (bullets, numbers, links, bold, italic, underline, strike, symbols)
+- code (title, content, language, ordering, definitions(globals/tables/fields/macros))
+- tag (name)
+- priority (level(number of days till needed), tags, done[yes, no])
+- note (title, text, type, priority)
+- cell (position, text)
+- line (definition, cells)
+- type (name, priority)
+- table (title, lines, type, priority, description)
+- image (title, content, description, type, priority)
+- lines (position, directed[yes, no])
+- positions (link, x, y, lines, opened[full, partial, closed])
+- selection (position)
+- page (title, positions, selections, description, type, priority)
+- link (type[table, note, image, page], opened[full, partial, closed], position[left, right, float, center])
+TODO: UUID & persons & deleted flag & old version of texts = difference to current version
+TODO: allow to export notes to a database for 'real' use
+TODO: allow to export code to a project & read back changes
+TODO: allow for calculations (also inside text/code) and following of relations
+
+Code generation:
+	less object cast warnings in meta & world database
 
 MatchMacro:
-- validate that the stack is empty
-- implement stack push / pop
-	validate that each element in a RecordImplementation
-	only a stack of objects, each split-off is a new object.. copy of current
+- STEP:FINISH could be written as STEP:FORWARD with a jump if needed
+- new STEP:LAST / STEP:FIRST should be written to accommodate matching the rest of the data
 - implement type validation & content validation on RecordImplementation type data
 	tests increment the pointers when inside array/object
 	when test is only a type do not increment??
+- STACK.. when positive: remember position & allocate room:
+	keep separate stack position for original parameters
+	free when negative, separate code needed for nextAlternative to free previously needed stack space
+		also free after a support function is called: "pointer" parameter with the moving of the call pointer
+	also create this code for nextAlternative when there is no error
+- validate that the stack is empty when no error is thrown
+- implement matching stack push / pop
+	validate that each element in a RecordImplementation
+	only a stack of objects, each split-off is a new object.. copy of current
 - implement call to function as validation
 	increment array on true
 - implement variable write with element
@@ -27,24 +67,46 @@ MatchMacro:
 	next element on write
 - read the current field name into cur
 
-macro:numb
-1:[3044] type=TEST_STACK, tstack=1, tsfalse=7			// test if there is one parameter
-2:[3044] type=STACK, stack=1							// make room for one actual parameter
-3:[3044] type=PARM, parm=0, pfalse=7					// switch to first parameter
+Fix more unit tests.. evaluate all of the Failing ones
 
-	not needed anymore
-4:[3044] type=TEST_TYPE, ttype=TYPE_ARRAY, ttfalse=7	// test if that is an array...
+Make the language usable:
+- add test with multilevel ADD / SUB between trees ... generic matches / conditional matches
+- add database & language integration tests:
+	. read from a pre-filled database
+	. add to a database array
+	. change the content of a field of an object
+	. replace a whole array
+	. replace a whole object
+	. remove a specific element from an array
+	. remove a field from an object
+- start using Jetty:
+	. normal http requests
+	. web socket communication
+	. read only database (partial) & player owned data
+	. actors actions inside threads (including players)
+	. world state handling in main thread (lock clients for now)
+	. new world state in copy world database to prevent client locks (new file & load before alterations)
 
-[]		 type=START
-[]		 type=VAR_WRITE, vwrite=x
-	VAR_WRITE: write to a variable (same start/finish position for now) & next element
-5:[3044] type=TEST_NUMBER, mnumber=2, mnfalse=7			// test if the array contains a number 2
-[]		 type=FINISH
-	test if this was the last array element
-6:[3044] type=ALT, altnr=553, afalse=7					// calculate alternative expression
-7:[3044] type=ERROR, error=No matching macro named 'numb' found, efrom=0, etill=0
+Fixes on database code generation:
+- special index field types (int) also possible as index(int val) to prevent unneeded conversions
+- implement prev() method
+	create slice implementation for this
+- fix language tests
+	add non-boxing methods for language
+	create non-boxing (long) stack for language.. pointer to data is long with the 2 positions
+- array names duplicates
+	automatic name of the record where it is used & name of parameter
+	possibly add numbers when more than one 
+- error on record without place in the structure (no index, no parent)
+- add unit tests for edge cases
+	parsing of database data from text
+	writing of data into the database from the language + possible errors
+	world data & generate & checks on it
+- deletes of records
+	verify to not add deleted records to indexes
+	test remove all top level objects & verify everything is deleted
 
-
+Rewrite various classes that depend too much on index(int idx)
 
 Structure notation in language:
 - notation for key / mandatory fields
@@ -53,7 +115,6 @@ Structure notation in language:
 
 
 Testing:
-- validate returned errors
 - iterator matching:
 	detection of recursion (calls of functions on the same iterators) & array / object result:
 		create a lazy implementation: array + recursion -> internal array with original position & length & expression
@@ -164,14 +225,10 @@ JSLT:
 - allow simple type casting via macro parameters (long -> double)
 - add more type information from expressions
 - object unwinding in macro definitions
-- array unwinding in macro definitions
-- string unwinding in macro definitions
 
 - add * to jpath ... only 1 level object
 - add [*] to jpath .. only 1 level array
 - add .. to jpath .. possibly more than 1 level
-- allow string align
-- allow numeric layout & align, also via expressions
 - allow date layout & align
 - documentation of RecordInterface, ChangeInterface
 - output from a script can define the input of another script

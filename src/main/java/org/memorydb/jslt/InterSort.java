@@ -62,7 +62,7 @@ public class InterSort implements RecordInterface, Comparator<RecordInterface> {
 
 	@Override
 	public InterSort next() {
-		return position >= mapping.length ? null : new InterSort(mapping, position + 1);
+		return position + 1 >= mapping.length ? null : new InterSort(mapping, position + 1);
 	}
 
 	@Override

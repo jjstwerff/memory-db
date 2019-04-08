@@ -5,14 +5,19 @@ import org.memorydb.structure.RecordInterface;
 public class InterArray implements RecordInterface {
 	private final JsltInterpreter interpreter;
 	private final ArrayArray data;
-	private int lastField;
+	private int field;
 	private Object lastObject;
 
-	public InterArray(JsltInterpreter interpreter, ArrayArray data) {
+	public InterArray(JsltInterpreter interpreter, ArrayArray data, int field) {
 		this.interpreter = interpreter;
 		this.data = data;
-		this.lastField = -1;
-		this.lastObject = null;
+		this.field = field;
+		this.lastObject = field < 0 || field >= data.size() ? null : interpreter.inter(data.index(field));
+	}
+
+	@Override
+	public boolean testLast() {
+		return field == data.size() - 1;
 	}
 
 	@Override
@@ -26,37 +31,54 @@ public class InterArray implements RecordInterface {
 	}
 
 	@Override
-	public FieldType type() {
-		int field = 0;
-		if (field < 1 || field > data.size())
+	public int index() {
+		return field;
+	}
+
+	@Override
+	public InterArray start() {
+		if (data.size() == 0)
 			return null;
-		if (lastField != field) {
-			lastField = field;
-			lastObject = interpreter.inter(new ArrayArray(data, field - 1));
-		}
+		return new InterArray(interpreter, data, 0);
+	}
+
+	@Override
+	public InterArray next() {
+		if (field < 0 || field + 1 >= data.size())
+			return null;
+		return new InterArray(interpreter, data, field + 1);
+	}
+
+	@Override
+	public FieldType type() {
+		if (field < 0)
+			return FieldType.ARRAY;
 		return JsltInterpreter.type(lastObject);
 	}
 
 	@Override
 	public Object java() {
-		int field = 0;
-		if (lastField != field) {
-			lastField = field;
-			lastObject = interpreter.inter(new ArrayArray(data, field - 1));
-		}
 		return lastObject;
 	}
 
 	@Override
+	public InterArray index(int idx) {
+		return idx >= 0 && idx < data.size() ? new InterArray(interpreter, data, idx) : null;
+	}
+
+	@Override
 	public String toString() {
+		if (field >= 0)
+			return lastObject == null ? null : lastObject.toString();
 		StringBuilder bld = new StringBuilder();
 		bld.append("[");
-		int pos = 1;
-		while (type() != null) {
-			if (pos != 1)
+		InterArray elm = start();
+		int pos = 0;
+		while (elm != null) {
+			if (pos++ != 0)
 				bld.append(",");
-			bld.append(java());
-			next();
+			bld.append(elm.java());
+			elm = elm.next();
 		}
 		bld.append("]");
 		return bld.toString();
@@ -64,6 +86,6 @@ public class InterArray implements RecordInterface {
 
 	@Override
 	public RecordInterface copy() {
-		return new InterArray(interpreter, data);
+		return new InterArray(interpreter, data, field);
 	}
 }

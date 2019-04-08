@@ -43,7 +43,7 @@ public class TestJslt extends MemoryTests {
 		jslt("[1, 0] + [3, 2]", "[1,0,3,2]");
 		jslt("[1, 0] + [3, 2] + 'a'", "[1,0,3,2,\"a\"]");
 		jslt("{A:3 * 2 - 5, C:123} + {C:true}", "{\"A\":1,\"C\":true}");
-		jslt("{A:3 * 2 - 5, C:123} + {A:2}", "{\"C\":123,\"A\":2}");
+		jslt("{A:3 * 2 - 5, C:123} + {A:2}", "{\"A\":2,\"C\":123}");
 		jslt("{\"A\":1} + {\"C\":true}", "{\"A\":1,\"C\":true}");
 		jslt("\"a\" != \"aa\"", "true");
 		jslt("\"a\" != \"aa\" or false", "true");
@@ -143,8 +143,7 @@ public class TestJslt extends MemoryTests {
 		for (Path file : files) {
 			Store jsltStore = new Store(3);
 			String result = file.getFileName().toString();
-			if (!result.startsWith("04"))
-				continue;
+			//if (!result.startsWith("05")) continue;
 			System.out.println("Check: " + result);
 			new Parser(new Scanner(file), jsltStore).parse();
 			JsltAnalyzer.analyze(jsltStore);

@@ -11,7 +11,7 @@ public class ChangeProject extends Project implements AutoCloseable, ChangeInter
 	public ChangeProject(Store store, int rec) {
 		super(store, rec == 0 ? store.allocate(Project.RECORD_SIZE) : rec);
 		if (rec == 0) {
-			store.setInt(rec, 4, 0); // SET records
+			store.setInt(rec(), 4, 0); // SET records
 			setMain(null);
 			setPack(null);
 			setDirectory(null);
@@ -44,7 +44,7 @@ public class ChangeProject extends Project implements AutoCloseable, ChangeInter
 		if (parser.hasField("main")) {
 			parser.getRelation("main", (recNr, idx) -> {
 				Record relRec = Record.parseKey(parser, this);
-				try (ChangeProject old = (ChangeProject) this.copy(recNr)) {
+				try (ChangeProject old = this.copy(recNr)) {
 					old.setMain(relRec);
 				}
 				return relRec != null;

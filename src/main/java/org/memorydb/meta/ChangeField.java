@@ -12,7 +12,7 @@ public class ChangeField extends Field implements AutoCloseable, ChangeInterface
 		super(parent.store(), rec == 0 ? parent.store().allocate(Field.RECORD_SIZE) : rec);
 		if (rec == 0) {
 			setName(null);
-			setNr(0);
+			setNr(Integer.MIN_VALUE);
 			setType(Field.Type.STRING);
 			setKey(false);
 			store.setInt(rec(), 13, 0); // ARRAY values
@@ -23,8 +23,8 @@ public class ChangeField extends Field implements AutoCloseable, ChangeInterface
 			setTo(null);
 			store.setInt(rec(), 17, 0); // ARRAY order
 			setMandatory(false);
-			setMinimum(0L);
-			setMaximum(0L);
+			setMinimum(Long.MIN_VALUE);
+			setMaximum(Long.MIN_VALUE);
 			setFormat(null);
 			setDecimals((byte) 0);
 			setDefault(null);
@@ -165,7 +165,7 @@ public class ChangeField extends Field implements AutoCloseable, ChangeInterface
 		if (parser.hasField("related")) {
 			parser.getRelation("related", (recNr, idx) -> {
 				Record relRec = Record.parseKey(parser, up().up());
-				try (ChangeField old = (ChangeField) this.copy(recNr)) {
+				try (ChangeField old = this.copy(recNr)) {
 					old.setRelated(relRec);
 				}
 				return relRec != null;
@@ -174,7 +174,7 @@ public class ChangeField extends Field implements AutoCloseable, ChangeInterface
 		if (parser.hasField("record")) {
 			parser.getRelation("record", (recNr, idx) -> {
 				Record relRec = Record.parseKey(parser, up().up());
-				try (ChangeField old = (ChangeField) this.copy(recNr)) {
+				try (ChangeField old = this.copy(recNr)) {
 					old.setRecord(relRec);
 				}
 				return relRec != null;
@@ -183,7 +183,7 @@ public class ChangeField extends Field implements AutoCloseable, ChangeInterface
 		if (parser.hasField("content")) {
 			parser.getRelation("content", (recNr, idx) -> {
 				Record relRec = Record.parseKey(parser, up().up());
-				try (ChangeField old = (ChangeField) this.copy(recNr)) {
+				try (ChangeField old = this.copy(recNr)) {
 					old.setContent(relRec);
 				}
 				return relRec != null;
@@ -192,7 +192,7 @@ public class ChangeField extends Field implements AutoCloseable, ChangeInterface
 		if (parser.hasField("child")) {
 			parser.getRelation("child", (recNr, idx) -> {
 				Record relRec = Record.parseKey(parser, up().up());
-				try (ChangeField old = (ChangeField) this.copy(recNr)) {
+				try (ChangeField old = this.copy(recNr)) {
 					old.setChild(relRec);
 				}
 				return relRec != null;
@@ -201,7 +201,7 @@ public class ChangeField extends Field implements AutoCloseable, ChangeInterface
 		if (parser.hasField("to")) {
 			parser.getRelation("to", (recNr, idx) -> {
 				Record relRec = Record.parseKey(parser, up().up());
-				try (ChangeField old = (ChangeField) this.copy(recNr)) {
+				try (ChangeField old = this.copy(recNr)) {
 					old.setTo(relRec);
 				}
 				return relRec != null;

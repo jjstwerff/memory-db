@@ -215,6 +215,7 @@ public class JsltParser {
 				ChangeVariable var = new ChangeVariable(store, 0);
 				var.setName(scanner.parseIdentifier());
 				var.setType(ResultType.Type.NULL);
+				var.setNr(parms.size());
 				match.setVariable(var);
 				parms.put(var.getName(), new Parm(var, parms.size()));
 			}
@@ -229,7 +230,6 @@ public class JsltParser {
 				match.setMmin((byte) 0);
 				match.setMmax((byte) -1);
 				match.setMmatch(sub);
-				match.setVariable(null);
 			} else if (scanner.matches("?")) {
 				ChangeMatchObject sub = new ChangeMatchObject(store, 0);
 				copyMatch(sub, true);
@@ -237,7 +237,6 @@ public class JsltParser {
 				match.setMmin((byte) 0);
 				match.setMmax((byte) 1);
 				match.setMmatch(sub);
-				match.setVariable(null);
 			}
 		}
 
@@ -311,7 +310,6 @@ public class JsltParser {
 						var.setName(scanner.parseIdentifier());
 					}
 					var.setNr(parms.size());
-					var.setMultiple(false);
 					match.setVariable(var);
 					match.setType(Type.ANY);
 					parms.put(var.getName(), new Parm(var, parms.size()));
@@ -363,13 +361,16 @@ public class JsltParser {
 			scanner.expect("}");
 		}
 
+		/**
+		 * Also leave the variable on multiple=true and when the content is only a single variable
+		 */
 		private void copyMatch(ChangeMatch sub, boolean multiple) {
 			Type type = match.getType();
 			sub.setType(type);
-			sub.setVariable(match.getVariable());
-			if (multiple && match.getVariable().rec() != 0) {
-				ChangeVariable change = sub.getVariable().change();
-				change.setMultiple(true);
+			if (multiple && type == Type.ANY && match.getVariable().rec() != 0) {
+				sub.setVariable(null);
+			} else {
+				sub.setVariable(match.getVariable());
 			}
 			if (type != null)
 				switch (type) {
@@ -1235,7 +1236,7 @@ public class JsltParser {
 		private void setObject(ObjectArray obj, String name, Object value) {
 			ObjectArray fld = obj.add();
 			setName(fld, name);
-			ChangeExpr expr = new ChangeExpr(store, 0);
+			// ChangeExpr expr = new ChangeExpr(store, 0);
 			if (value instanceof Boolean) {
 				fld.setOperation(Operation.BOOLEAN);
 				fld.setBoolean((Boolean) value);
@@ -1276,60 +1277,6 @@ public class JsltParser {
 			}
 		}
 
-		/**
-		 * Shallow copy of the jslt operator
-		 */
-		private void move(ChangeOperator into, ChangeOperator from) {
-			Operation operation = from.getOperation();
-			into.setOperation(operation);
-			if (operation != null)
-				switch (operation) {
-				case ARRAY:
-					into.moveArray(from);
-					break;
-				case BOOLEAN:
-					into.setBoolean(from.isBoolean());
-					break;
-				case CALL:
-					into.setMacro(from.getMacro());
-					into.moveCallParms(from);
-					break;
-				case CONDITION:
-					break;
-				case FLOAT:
-					into.setFloat(from.getFloat());
-					break;
-				case FUNCTION:
-					into.setFunction(from.getFunction());
-					into.setFnParm1(from.getFnParm1());
-					into.setFnParm2(from.getFnParm2());
-					break;
-				case SORT:
-					into.setSort(from.getSort());
-					into.getSortParms().moveArray(from.getSortParms());
-					break;
-				case NUMBER:
-					into.setNumber(from.getNumber());
-					break;
-				case OBJECT:
-					into.moveObject(from);
-					break;
-				case STRING:
-					into.setString(from.getString());
-					break;
-				case VARIABLE:
-					into.setVarName(from.getVarName());
-					into.setVarNr(from.getVarNr());
-					break;
-				case READ:
-					into.setListenSource(from.getListenSource());
-					into.setListemNr(from.getListemNr());
-					break;
-				default:
-					break;
-				}
-		}
-
 		private void remember() {
 			stack.add(spot);
 		}
@@ -1338,5 +1285,59 @@ public class JsltParser {
 			spot = stack.get(stack.size() - 1);
 			stack.remove(stack.size() - 1);
 		}
+	}
+
+	/**
+	 * Shallow copy of the jslt operator
+	 */
+	public static void move(ChangeOperator into, ChangeOperator from) {
+		Operation operation = from.getOperation();
+		into.setOperation(operation);
+		if (operation != null)
+			switch (operation) {
+			case ARRAY:
+				into.moveArray(from);
+				break;
+			case BOOLEAN:
+				into.setBoolean(from.isBoolean());
+				break;
+			case CALL:
+				into.setMacro(from.getMacro());
+				into.moveCallParms(from);
+				break;
+			case CONDITION:
+				break;
+			case FLOAT:
+				into.setFloat(from.getFloat());
+				break;
+			case FUNCTION:
+				into.setFunction(from.getFunction());
+				into.setFnParm1(from.getFnParm1());
+				into.setFnParm2(from.getFnParm2());
+				break;
+			case SORT:
+				into.setSort(from.getSort());
+				into.getSortParms().moveArray(from.getSortParms());
+				break;
+			case NUMBER:
+				into.setNumber(from.getNumber());
+				break;
+			case OBJECT:
+				into.moveObject(from);
+				break;
+			case STRING:
+				into.setString(from.getString());
+				break;
+			case VARIABLE:
+				into.setVarName(from.getVarName());
+				into.setVarNr(from.getVarNr());
+				break;
+			case READ:
+				into.setListenSource(from.getListenSource());
+				into.setListemNr(from.getListemNr());
+				break;
+			default:
+				break;
+			}
 	}
 }

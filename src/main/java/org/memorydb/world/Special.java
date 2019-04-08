@@ -104,6 +104,39 @@ public class Special implements MemoryRecord, RecordInterface {
 			}, 136, 18);
 		}
 
+		private IndexSpecials(Store store, Key key, int flag, int field) {
+			super(store, key, flag, field);
+		}
+
+		@Override
+		public IndexSpecials copy() {
+			return new IndexSpecials(store, key, flag, field);
+		}
+
+		@Override
+		public Special field(String name) {
+			int r = new IndexSpecials(store, name).search();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		@Override
+		public Special start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		private class IterRecord extends Special {
+			private IterRecord(Store store, int r) {
+				super(store, r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(store, r);
+			}
+		}
+
 		@Override
 		protected int readTop() {
 			return store.getInt(0, 12);

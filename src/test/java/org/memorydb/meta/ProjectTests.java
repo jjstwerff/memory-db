@@ -37,6 +37,20 @@ public class ProjectTests extends NormalCheck {
 		return mainTest.getClass().getResource(resName).getFile();
 	}
 
+	protected void compare(Project project) {
+		try {
+			Path temp = Files.createTempDirectory("generate_");
+			String dir = project.getDir();
+			project.setDir(temp + "/" + dir);
+			Generate.project(project);
+			ProcessBuilder pb = new ProcessBuilder("meld", project.getDir(), dir);
+			pb.inheritIO();
+			pb.start();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	protected void validate(Project project) {
 		try {
 			Path temp = Files.createTempDirectory("generate_");

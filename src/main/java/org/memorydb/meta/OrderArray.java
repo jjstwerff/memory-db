@@ -69,9 +69,9 @@ public class OrderArray implements MemoryRecord, ChangeInterface, Iterable<Order
 	}
 
 	@Override
-	public OrderArray copy(int rec) {
-		assert store.validate(rec);
-		return new OrderArray(store, rec, -1);
+	public OrderArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new OrderArray(store, newRec, -1);
 	}
 
 	private void up(Field record) {
@@ -106,7 +106,7 @@ public class OrderArray implements MemoryRecord, ChangeInterface, Iterable<Order
 			alloc = store.allocate(4 + 12);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (12 + (idx + 1) * 4) / 8);
+			alloc = store.resize(alloc, (12 + (size + 1) * 4) / 8);
 		store.setInt(parent.rec(), 17, alloc);
 		size++;
 		store.setInt(alloc, 4, size);
@@ -190,11 +190,10 @@ public class OrderArray implements MemoryRecord, ChangeInterface, Iterable<Order
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
-		switch (field) {
-		case 1:
+		switch (idx) {
+		case 0:
 			return "field";
 		default:
 			return null;
@@ -203,11 +202,10 @@ public class OrderArray implements MemoryRecord, ChangeInterface, Iterable<Order
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
-		switch (field) {
-		case 1:
+			return FieldType.OBJECT;
+		switch (idx) {
+		case 0:
 			return FieldType.OBJECT;
 		default:
 			return null;
@@ -216,11 +214,10 @@ public class OrderArray implements MemoryRecord, ChangeInterface, Iterable<Order
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new OrderArray(parent, field - 1);
-		switch (field) {
-		case 1:
+			return this;
+		switch (idx) {
+		case 0:
 			return getField();
 		default:
 			return null;
@@ -229,9 +226,8 @@ public class OrderArray implements MemoryRecord, ChangeInterface, Iterable<Order
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
-		switch (field) {
-		case 1:
+		switch (idx) {
+		case 0:
 			if (value instanceof Field)
 				setField((Field) value);
 			return value instanceof Field;
@@ -242,17 +238,22 @@ public class OrderArray implements MemoryRecord, ChangeInterface, Iterable<Order
 
 	@Override
 	public OrderArray index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new OrderArray(parent, idx);
 	}
 
 	@Override
 	public OrderArray start() {
-		return null;
+		return new OrderArray(parent, 0);
 	}
 
 	@Override
 	public OrderArray next() {
-		return null;
+		return idx + 1 >= size ? null : new OrderArray(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

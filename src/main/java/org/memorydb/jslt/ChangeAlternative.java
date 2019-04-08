@@ -11,7 +11,7 @@ public class ChangeAlternative extends Alternative implements AutoCloseable, Cha
 	/* package private */ ChangeAlternative(Macro parent, int rec) {
 		super(parent.store(), rec == 0 ? parent.store().allocate(Alternative.RECORD_SIZE) : rec);
 		if (rec == 0) {
-			setNr(0);
+			setNr(Integer.MIN_VALUE);
 			store.setInt(rec(), 8, 0); // ARRAY parameters
 			setAnyParm(false);
 			setIf(null);

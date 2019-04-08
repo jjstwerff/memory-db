@@ -55,7 +55,7 @@ public class ChangeRecord extends Record implements AutoCloseable, ChangeInterfa
 		if (parser.hasField("condition")) {
 			parser.getRelation("condition", (recNr, idx) -> {
 				Field relRec = Field.parseKey(parser, this);
-				try (ChangeRecord old = (ChangeRecord) this.copy(recNr)) {
+				try (ChangeRecord old = this.copy(recNr)) {
 					old.setCondition(relRec);
 				}
 				return relRec != null;

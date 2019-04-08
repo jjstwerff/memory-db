@@ -89,6 +89,39 @@ public class Source implements MemoryRecord, RecordInterface {
 			}, 64, 9);
 		}
 
+		private IndexSources(Store store, Key key, int flag, int field) {
+			super(store, key, flag, field);
+		}
+
+		@Override
+		public IndexSources copy() {
+			return new IndexSources(store, key, flag, field);
+		}
+
+		@Override
+		public Source field(String name) {
+			int r = new IndexSources(store, name).search();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		@Override
+		public Source start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		private class IterRecord extends Source {
+			private IterRecord(Store store, int r) {
+				super(store, r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(store, r);
+			}
+		}
+
 		@Override
 		protected int readTop() {
 			return store.getInt(0, 12);

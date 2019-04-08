@@ -14,12 +14,12 @@ public class ChangeCategory extends Category implements AutoCloseable, ChangeInt
 		if (rec == 0) {
 			setType(null);
 			setName(null);
-			store.setInt(rec, 9, 0); // ARRAY default_specials
-			store.setInt(rec, 13, 0);
-			store.setInt(rec, 13, 0); // ARRAY dependency
-			store.setInt(rec, 17, 0);
-			store.setInt(rec, 17, 0); // ARRAY effect
-			store.setInt(rec, 21, 0);
+			store.setInt(rec(), 9, 0); // ARRAY default_specials
+			store.setInt(rec(), 13, 0);
+			store.setInt(rec(), 13, 0); // ARRAY dependency
+			store.setInt(rec(), 17, 0);
+			store.setInt(rec(), 17, 0); // ARRAY effect
+			store.setInt(rec(), 21, 0);
 			setDescription(null);
 		} else {
 		}

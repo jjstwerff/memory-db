@@ -72,6 +72,13 @@ public interface RecordInterface {
 	 * @param search the field name to search for.
 	 */
 	default RecordInterface field(String search) {
+		RecordInterface elm = start();
+		while (elm != null) {
+			String name = elm.name();
+			if (name != null && name.equals(search))
+				return elm;
+			elm = elm.next();
+		}
 		return null;
 	}
 
@@ -82,6 +89,13 @@ public interface RecordInterface {
 	 */
 	default RecordInterface index(int index) {
 		return null;
+	}
+
+	/**
+	 * Current index on the array
+	 */
+	default int index() {
+		return -1;
 	}
 
 	default FieldType type() {

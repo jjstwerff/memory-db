@@ -1,6 +1,5 @@
 package org.memorydb.structure;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.memorydb.generate.MetaStructure;
 import org.memorydb.generate.Project;
@@ -25,11 +24,10 @@ public class TestStructure extends ProjectTests {
 	}
 
 	@Test
-	@Ignore("Json tables behave slightly different than normal tables")
 	public void testJsonStructure() {
 		Project project = JsonStructure.getProject();
 		assertContent(this, "testJsonStructure.txt", project.toString());
-		validate(project);
+		compare(project);
 	}
 
 	@Test

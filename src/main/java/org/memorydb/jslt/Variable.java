@@ -14,7 +14,7 @@ public class Variable implements ResultType {
 	/* package private */ final Store store;
 	protected final int rec;
 	private final int field;
-	/* package private */ static final int RECORD_SIZE = 18;
+	/* package private */ static final int RECORD_SIZE = 17;
 
 	public Variable(Store store, int rec) {
 		rec = store.correct(rec);
@@ -48,7 +48,7 @@ public class Variable implements ResultType {
 
 	@Override
 	public int resulttypePosition() {
-		return 13;
+		return 12;
 	}
 
 	@Override
@@ -66,18 +66,12 @@ public class Variable implements ResultType {
 		return rec == 0 ? Integer.MIN_VALUE : store.getInt(rec, 8);
 	}
 
-	@FieldData(name = "multiple", type = "BOOLEAN", mandatory = false)
-	public boolean isMultiple() {
-		return rec == 0 ? false : (store.getByte(rec, 12) & 1) > 0;
-	}
-
 	@Override
 	public void output(Write write, int iterate) {
 		if (rec == 0 || iterate <= 0)
 			return;
 		write.field("name", getName());
 		write.field("nr", getNr());
-		write.field("multiple", isMultiple());
 		outputResultType(write, iterate);
 		write.endRecord();
 	}
@@ -129,15 +123,13 @@ public class Variable implements ResultType {
 
 	@Override
 	public Object java() {
-		if (field > 3 && field <= 5)
-			return ResultType.super.getResultType(field - 3);
+		if (field > 2 && field <= 4)
+			return ResultType.super.getResultType(field - 2);
 		switch (field) {
 		case 1:
 			return getName();
 		case 2:
 			return getNr();
-		case 3:
-			return isMultiple();
 		default:
 			return null;
 		}
@@ -145,8 +137,8 @@ public class Variable implements ResultType {
 
 	@Override
 	public FieldType type() {
-		if (field > 3 && field <= 5)
-			return ResultType.super.typeResultType(field - 3);
+		if (field > 2 && field <= 4)
+			return ResultType.super.typeResultType(field - 2);
 		switch (field) {
 		case 0:
 			return FieldType.OBJECT;
@@ -154,8 +146,6 @@ public class Variable implements ResultType {
 			return FieldType.STRING;
 		case 2:
 			return FieldType.INTEGER;
-		case 3:
-			return FieldType.BOOLEAN;
 		default:
 			return null;
 		}
@@ -163,15 +153,13 @@ public class Variable implements ResultType {
 
 	@Override
 	public String name() {
-		if (field > 3 && field <= 5)
-			return ResultType.super.nameResultType(field - 3);
+		if (field > 2 && field <= 4)
+			return ResultType.super.nameResultType(field - 2);
 		switch (field) {
 		case 1:
 			return "name";
 		case 2:
 			return "nr";
-		case 3:
-			return "multiple";
 		default:
 			return null;
 		}
@@ -184,7 +172,7 @@ public class Variable implements ResultType {
 
 	@Override
 	public Variable next() {
-		return field >= 5 ? null : new Variable(store, rec, field + 1);
+		return field >= 4 ? null : new Variable(store, rec, field + 1);
 	}
 
 	@Override

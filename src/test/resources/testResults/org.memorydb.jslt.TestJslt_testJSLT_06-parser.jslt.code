@@ -6,7 +6,7 @@ name=id, alternatives=[
         ]
       ], mmin=0, mmax=-1
       variable=[
-        name=i, nr=0, multiple=false, type=NULL
+        name=i, nr=0, type=NULL
       ], type=ARRAY, marray=[
         type=MACRO, macro={Name=idfirst}, mparms=[
         ]
@@ -16,16 +16,33 @@ name=id, alternatives=[
         ], mmin=0, mmax=-1
       ]
     ]
-  ], code=[
+  ], anyParm=false, code=[
     operation=VARIABLE, varName=i, varNr=0
   ]
+], matching=[
+  type=TEST_STACK, tstack=1, tsfalse=12
+  type=STACK, stack=1
+  type=PARM, parm=0, pfalse=12
+  type=STEP, step=START, missed=12
+  type=PUSH, pushpos=0
+  type=JUMP, jump=CALL, position=10
+  type=POP, poppos=0, popread=true
+  type=CALL, macro={Name=wstoken}, parms=[
+  ], mfalse=12
+  type=STEP, step=FORWARD, missed=12
+  type=JUMP, jump=CONTINUE, position=4
+  type=VAR_WRITE, vwrite=[
+    name=i, nr=0, type=NULL
+  ], vwrange=-1
+  type=ALT, altnr=2112, afalse=12
+  type=JUMP, jump=MISS
 ]
 name=idfirst, alternatives=[
   nr=0, parameters=[
     variable=[
-      name=x, nr=0, multiple=false, type=NULL
+      name=x, nr=0, type=NULL
     ], type=ANY
-  ], if=[
+  ], anyParm=false, if=[
     operation=FUNCTION, function=OR, fnParm1=[
       operation=FUNCTION, function=OR, fnParm1=[
         operation=FUNCTION, function=AND, fnParm1=[
@@ -64,15 +81,19 @@ name=idfirst, alternatives=[
       ]
     ]
   ], code=[
-    operation=BOOLEAN, boolean=true
+    operation=VARIABLE, varName=x, varNr=0
   ]
+], matching=[
+  type=TEST_STACK, tstack=1, tsfalse=2
+  type=ALT, altnr=1011, afalse=2
+  type=JUMP, jump=MISS
 ]
 name=idnext, alternatives=[
   nr=0, parameters=[
     variable=[
-      name=x, nr=0, multiple=false, type=NULL
+      name=x, nr=0, type=NULL
     ], type=ANY
-  ], if=[
+  ], anyParm=false, if=[
     operation=FUNCTION, function=OR, fnParm1=[
       operation=CALL, macro={Name=nrtoken}, callParms=[
         operation=VARIABLE, varName=x, varNr=0
@@ -83,12 +104,16 @@ name=idnext, alternatives=[
       ]
     ]
   ], code=[
-    operation=BOOLEAN, boolean=true
+    operation=VARIABLE, varName=x, varNr=0
   ]
+], matching=[
+  type=TEST_STACK, tstack=1, tsfalse=2
+  type=ALT, altnr=1845, afalse=2
+  type=JUMP, jump=MISS
 ]
 name=main, alternatives=[
   nr=0, parameters=[
-  ], code=[
+  ], anyParm=false, code=[
     operation=FUNCTION, function=ADD, fnParm1=[
       operation=FUNCTION, function=ADD, fnParm1=[
         operation=FUNCTION, function=ADD, fnParm1=[
@@ -190,13 +215,17 @@ name=main, alternatives=[
       ]
     ]
   ]
+], matching=[
+  type=TEST_STACK, tstack=0, tsfalse=2
+  type=ALT, altnr=3051, afalse=2
+  type=JUMP, jump=MISS
 ]
 name=nrtoken, alternatives=[
   nr=0, parameters=[
     variable=[
-      name=x, nr=0, multiple=false, type=NULL
+      name=x, nr=0, type=NULL
     ], type=ANY
-  ], if=[
+  ], anyParm=false, if=[
     operation=FUNCTION, function=AND, fnParm1=[
       operation=FUNCTION, function=GT, fnParm1=[
         operation=VARIABLE, varName=x, varNr=0
@@ -211,8 +240,12 @@ name=nrtoken, alternatives=[
       ]
     ]
   ], code=[
-    operation=BOOLEAN, boolean=true
+    operation=VARIABLE, varName=x, varNr=0
   ]
+], matching=[
+  type=TEST_STACK, tstack=1, tsfalse=2
+  type=ALT, altnr=1560, afalse=2
+  type=JUMP, jump=MISS
 ]
 name=numb, alternatives=[
   nr=0, parameters=[
@@ -222,7 +255,7 @@ name=numb, alternatives=[
         ]
       ], mmin=0, mmax=-1
       variable=[
-        name=n, nr=0, multiple=false, type=NULL
+        name=n, nr=0, type=NULL
       ], type=ARRAY, marray=[
         type=MULTIPLE, mmatch=[
           type=STRING, string=-
@@ -235,26 +268,45 @@ name=numb, alternatives=[
         ], mmin=0, mmax=-1
       ]
     ]
-  ], code=[
+  ], anyParm=false, code=[
     operation=FUNCTION, function=NUMBER, fnParm1=[
       operation=VARIABLE, varName=n, varNr=0
     ]
   ]
+], matching=[
+  type=TEST_STACK, tstack=1, tsfalse=12
+  type=STACK, stack=1
+  type=PARM, parm=0, pfalse=12
+  type=STEP, step=START, missed=12
+  type=PUSH, pushpos=0
+  type=JUMP, jump=CALL, position=10
+  type=POP, poppos=0, popread=true
+  type=CALL, macro={Name=wstoken}, parms=[
+  ], mfalse=12
+  type=STEP, step=FORWARD, missed=12
+  type=JUMP, jump=CONTINUE, position=4
+  type=VAR_WRITE, vwrite=[
+    name=n, nr=0, type=NULL
+  ], vwrange=-1
+  type=ALT, altnr=2439, afalse=12
+  type=JUMP, jump=MISS
 ]
 name=slice, alternatives=[
+], matching=[
+  type=JUMP, jump=MISS
 ]
 name=t.assert, alternatives=[
   nr=0, parameters=[
     variable=[
-      name=name, nr=0, multiple=false, type=STRING
+      name=name, nr=0, type=STRING
     ], type=ANY
     variable=[
-      name=should, nr=1, multiple=false, type=NULL
+      name=should, nr=1, type=NULL
     ], type=ANY
     variable=[
-      name=was, nr=2, multiple=false, type=NULL
+      name=was, nr=2, type=NULL
     ], type=ANY
-  ], code=[
+  ], anyParm=false, code=[
     operation=CONDITION, conExpr=[
       operation=FUNCTION, function=EQ, fnParm1=[
         operation=VARIABLE, varName=should, varNr=1
@@ -288,11 +340,17 @@ name=t.assert, alternatives=[
       ]
     ]
   ]
+], matching=[
+  type=TEST_STACK, tstack=3, tsfalse=4
+  type=PARM, parm=0, pfalse=4
+  type=TEST_TYPE, ttype=TYPE_STRING, ttfalse=4
+  type=ALT, altnr=55, afalse=4
+  type=JUMP, jump=MISS
 ]
 name=token, alternatives=[
   nr=0, parameters=[
     variable=[
-      name=tok, nr=0, multiple=false, type=NULL
+      name=tok, nr=0, type=NULL
     ], type=ANY
     type=ARRAY, marray=[
       type=MULTIPLE, mmatch=[
@@ -301,16 +359,33 @@ name=token, alternatives=[
       ], mmin=0, mmax=-1
       type=CONSTANT, cparm=tok, constant=0
     ]
-  ], code=[
+  ], anyParm=false, code=[
     operation=BOOLEAN, boolean=true
   ]
+], matching=[
+  type=TEST_STACK, tstack=2, tsfalse=14
+  type=PARM, parm=1, pfalse=14
+  type=STEP, step=START, missed=14
+  type=PUSH, pushpos=0
+  type=JUMP, jump=CALL, position=9
+  type=POP, poppos=0, popread=true
+  type=CALL, macro={Name=wstoken}, parms=[
+  ], mfalse=14
+  type=STEP, step=FORWARD, missed=14
+  type=JUMP, jump=CONTINUE, position=3
+  type=TEST_PARM, tparm=0, tpfalse=14
+  type=STEP, step=FORWARD, missed=12
+  type=JUMP, jump=CONTINUE, position=14
+  type=STACK, stack=2
+  type=ALT, altnr=2805, afalse=14
+  type=JUMP, jump=MISS
 ]
 name=wstoken, alternatives=[
   nr=0, parameters=[
     variable=[
-      name=x, nr=0, multiple=false, type=NULL
+      name=x, nr=0, type=NULL
     ], type=ANY
-  ], if=[
+  ], anyParm=false, if=[
     operation=FUNCTION, function=OR, fnParm1=[
       operation=FUNCTION, function=OR, fnParm1=[
         operation=FUNCTION, function=OR, fnParm1=[
@@ -342,6 +417,10 @@ name=wstoken, alternatives=[
       ]
     ]
   ], code=[
-    operation=BOOLEAN, boolean=true
+    operation=VARIABLE, varName=x, varNr=0
   ]
+], matching=[
+  type=TEST_STACK, tstack=1, tsfalse=2
+  type=ALT, altnr=550, afalse=2
+  type=JUMP, jump=MISS
 ]

@@ -68,9 +68,9 @@ public class IfFalseArray implements MemoryRecord, ChangeOperator, Iterable<IfFa
 	}
 
 	@Override
-	public IfFalseArray copy(int rec) {
-		assert store.validate(rec);
-		return new IfFalseArray(store, rec, -1);
+	public IfFalseArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new IfFalseArray(store, newRec, -1);
 	}
 
 	private void up(Operator record) {
@@ -111,8 +111,12 @@ public class IfFalseArray implements MemoryRecord, ChangeOperator, Iterable<IfFa
 			store.setByte(alloc, 12, 9);
 			store.setInt(alloc, 13, record.index());
 		}
-		if (record instanceof Expr)
+		if (record instanceof ParmsArray) {
 			store.setByte(alloc, 12, 10);
+			store.setInt(alloc, 13, record.index());
+		}
+		if (record instanceof Expr)
+			store.setByte(alloc, 12, 11);
 	}
 
 	@Override
@@ -139,6 +143,8 @@ public class IfFalseArray implements MemoryRecord, ChangeOperator, Iterable<IfFa
 		case 9:
 			return new CodeArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
 		case 10:
+			return new ParmsArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
+		case 11:
 			return new Expr(store, store.getInt(alloc, 8));
 		default:
 			throw new CorruptionException("Unknown upRecord type");
@@ -168,7 +174,7 @@ public class IfFalseArray implements MemoryRecord, ChangeOperator, Iterable<IfFa
 			alloc = store.allocate(18 + 17);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (17 + (idx + 1) * 18) / 8);
+			alloc = store.resize(alloc, (17 + (size + 1) * 18) / 8);
 		store.setInt(parent.rec(), parent.operatorPosition() + 9, alloc);
 		size++;
 		store.setInt(alloc, 4, size);
@@ -237,67 +243,56 @@ public class IfFalseArray implements MemoryRecord, ChangeOperator, Iterable<IfFa
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
-		if (field >= 0 && field <= 28)
-			return nameOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+		if (idx >= 0 && idx <= 28)
+			return nameOperator(idx - 0);
+		return null;
 	}
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
-		if (field >= 0 && field <= 28)
-			return typeOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+			return FieldType.OBJECT;
+		if (idx >= 0 && idx <= 28)
+			return typeOperator(idx - 0);
+		return null;
 	}
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new IfFalseArray(parent, field - 1);
-		if (field >= 0 && field <= 28)
-			return getOperator(field - 0);
-		switch (field) {
-		default:
-			return null;
-		}
+			return this;
+		if (idx >= 0 && idx <= 28)
+			return getOperator(idx - 0);
+		return null;
 	}
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
-		if (field >= 0 && field <= 28)
-			return setOperator(field - 0, value);
-		switch (field) {
-		default:
-			return false;
-		}
+		if (idx >= 0 && idx <= 28)
+			return setOperator(idx - 0, value);
+		return false;
 	}
 
 	@Override
 	public IfFalseArray index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new IfFalseArray(parent, idx);
 	}
 
 	@Override
 	public IfFalseArray start() {
-		return null;
+		return new IfFalseArray(parent, 0);
 	}
 
 	@Override
 	public IfFalseArray next() {
-		return null;
+		return idx + 1 >= size ? null : new IfFalseArray(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

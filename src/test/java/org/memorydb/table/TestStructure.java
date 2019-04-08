@@ -3,6 +3,7 @@ package org.memorydb.table;
 import org.junit.Assert;
 import org.junit.Test;
 import org.memorydb.jslt.ChangeMacro;
+import org.memorydb.jslt.MatchStep.Jump;
 import org.memorydb.jslt.MatchStep.Type;
 import org.memorydb.jslt.MatchingArray;
 import org.memorydb.structure.RecordInterface;
@@ -16,7 +17,8 @@ public class TestStructure extends MemoryTests {
 			macro.setName("main");
 			MatchingArray match = macro.addMatching();
 			match.setType(Type.JUMP);
-			match.setJump(10);
+			match.setJump(Jump.CONTINUE);
+			match.setPosition(10);
 			match = macro.addMatching();
 			match.setType(Type.TEST_BOOLEAN);
 			match.setMboolean(true);

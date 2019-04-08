@@ -1,9 +1,9 @@
 import testing as t
 
-def wstoken(x if x == ' ' or x == '\t' or x == '\r' or x == '\n'): true
-def idfirst(x if x > 'a' and x < 'z' or x > 'A' and x < 'Z' or x == '_'): true
-def nrtoken(x if x > '0' and x < '9'): true
-def idnext(x if nrtoken(x) or idfirst(x)): true
+def wstoken(x if x == ' ' or x == '\t' or x == '\r' or x == '\n'): x
+def idfirst(x if x > 'a' and x < 'z' or x > 'A' and x < 'Z' or x == '_'): x
+def nrtoken(x if x > '0' and x < '9'): x
+def idnext(x if nrtoken(x) or idfirst(x)): x
 def id(wstoken* + (idfirst + idnext*):i): i
 def numb(wstoken* + ('-'? + nrtoken + nrtoken*):n): number(n)
 def token(tok, wstoken* + tok): true

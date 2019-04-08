@@ -103,6 +103,48 @@ public class Macro implements MemoryRecord, RecordInterface {
 			}, 168, 22);
 		}
 
+		private IndexAlternatives(Store store, Key key, int flag, int field) {
+			super(store, key, flag, field);
+		}
+
+		@Override
+		public FieldType type() {
+			return FieldType.OBJECT;
+		}
+
+		@Override
+		public IndexAlternatives copy() {
+			return new IndexAlternatives(store, key, flag, field);
+		}
+
+		@Override
+		public Alternative field(String name) {
+			try {
+				int r = new IndexAlternatives(Integer.parseInt(name)).search();
+				return r <= 0 ? null : new IterRecord(store, r);
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+
+		@Override
+		public Alternative start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		private class IterRecord extends Alternative {
+			private IterRecord(Store store, int r) {
+				super(store, r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(store, r);
+			}
+		}
+
 		@Override
 		protected int readTop() {
 			return store.getInt(rec, 8);
@@ -178,6 +220,39 @@ public class Macro implements MemoryRecord, RecordInterface {
 					return IndexOperation.EQ;
 				}
 			}, 128, 17);
+		}
+
+		private IndexMacros(Store store, Key key, int flag, int field) {
+			super(store, key, flag, field);
+		}
+
+		@Override
+		public IndexMacros copy() {
+			return new IndexMacros(store, key, flag, field);
+		}
+
+		@Override
+		public Macro field(String name) {
+			int r = new IndexMacros(store, name).search();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		@Override
+		public Macro start() {
+			int r = first();
+			return r <= 0 ? null : new IterRecord(store, r);
+		}
+
+		private class IterRecord extends Macro {
+			private IterRecord(Store store, int r) {
+				super(store, r);
+			}
+
+			@Override
+			public IterRecord next() {
+				int r = rec <= 0 ? 0 : toNext(rec);
+				return r <= 0 ? null : new IterRecord(store, r);
+			}
 		}
 
 		@Override

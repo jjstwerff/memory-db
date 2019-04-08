@@ -28,7 +28,7 @@ public class Change${table.name} extends ${table.name} implements <#if !table.ob
 			up(parent);
 		} else {
 <#list table.indexes as index><#if table.parent.included?size gt 0>
-			new ${table.parent.name}.Index${index.name?cap_first}(this).remove(rec);
+			new ${table.parent.name}.Index${index.name?cap_first}(up()).remove(rec);
 <#else>
 			up().new Index${index.name?cap_first}().remove(rec);
 </#if></#list>
@@ -39,7 +39,7 @@ public class Change${table.name} extends ${table.name} implements <#if !table.ob
 		super(current.store, current.rec);
 		if (rec != 0) {
 <#list table.indexes as index><#if table.parent.included?size gt 0>
-			new ${table.parent.name}.Index${index.name?cap_first}(this).remove(rec);
+			new ${table.parent.name}.Index${index.name?cap_first}(up()).remove(rec);
 <#else>
 			up().new Index${index.name?cap_first}().remove(rec);
 </#if></#list>
@@ -52,10 +52,10 @@ public class Change${table.name} extends ${table.name} implements <#if !table.ob
 <#list table.fields as field><#if field.default??>
 			set${field.name?cap_first}(${field.default});
 </#if><#if field.type == "SET">
-			store.setInt(rec, ${field.pos / 8}, 0); // SET ${field.name}
+			store.setInt(rec(), ${field.pos / 8}, 0); // SET ${field.name}
 </#if><#if field.type == "ARRAY">
-			store.setInt(rec, ${field.pos / 8}, 0); // ARRAY ${field.name}
-			store.setInt(rec, ${(field.pos / 8) + 4}, 0);
+			store.setInt(rec(), ${field.pos / 8}, 0); // ARRAY ${field.name}
+			store.setInt(rec(), ${(field.pos / 8) + 4}, 0);
 </#if></#list>
 <#list table.includes as incl>
 			default${incl.name}();
@@ -121,7 +121,7 @@ ${table.otherFields}<#rt>
 	@Override
 	public void close() {
 <#list table.indexes as index><#if table.parent?? && table.parent.included?size gt 0>
-		new Part.Index${index.name?cap_first}(<#if table.parent??>this</#if>).insert(rec());
+		new Part.Index${index.name?cap_first}(<#if table.parent??>up()</#if>).insert(rec());
 <#else>
 		<#if table.parent??>up().</#if>new Index${index.name?cap_first}(<#if !table.parent??>store</#if>).insert(rec());
 </#if></#list>

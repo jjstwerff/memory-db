@@ -69,9 +69,9 @@ public class ObjectArray implements MemoryRecord, ChangeOperator, Iterable<Objec
 	}
 
 	@Override
-	public ObjectArray copy(int rec) {
-		assert store.validate(rec);
-		return new ObjectArray(store, rec, -1);
+	public ObjectArray copy(int newRec) {
+		assert store.validate(newRec);
+		return new ObjectArray(store, newRec, -1);
 	}
 
 	private void up(Operator record) {
@@ -112,8 +112,12 @@ public class ObjectArray implements MemoryRecord, ChangeOperator, Iterable<Objec
 			store.setByte(alloc, 12, 9);
 			store.setInt(alloc, 13, record.index());
 		}
-		if (record instanceof Expr)
+		if (record instanceof ParmsArray) {
 			store.setByte(alloc, 12, 10);
+			store.setInt(alloc, 13, record.index());
+		}
+		if (record instanceof Expr)
+			store.setByte(alloc, 12, 11);
 	}
 
 	@Override
@@ -140,6 +144,8 @@ public class ObjectArray implements MemoryRecord, ChangeOperator, Iterable<Objec
 		case 9:
 			return new CodeArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
 		case 10:
+			return new ParmsArray(store, store.getInt(alloc, 8), store.getInt(alloc, 13));
+		case 11:
 			return new Expr(store, store.getInt(alloc, 8));
 		default:
 			throw new CorruptionException("Unknown upRecord type");
@@ -169,7 +175,7 @@ public class ObjectArray implements MemoryRecord, ChangeOperator, Iterable<Objec
 			alloc = store.allocate(22 + 17);
 			up(parent);
 		} else
-			alloc = store.resize(alloc, (17 + (idx + 1) * 22) / 8);
+			alloc = store.resize(alloc, (17 + (size + 1) * 22) / 8);
 		store.setInt(parent.rec(), parent.operatorPosition() + 1, alloc);
 		size++;
 		store.setInt(alloc, 4, size);
@@ -260,13 +266,12 @@ public class ObjectArray implements MemoryRecord, ChangeOperator, Iterable<Objec
 
 	@Override
 	public String name() {
-		int field = 0;
 		if (idx == -1)
 			return null;
-		if (field >= 1 && field <= 29)
-			return nameOperator(field - 1);
-		switch (field) {
-		case 1:
+		if (idx >= 1 && idx <= 29)
+			return nameOperator(idx - 1);
+		switch (idx) {
+		case 0:
 			return "name";
 		default:
 			return null;
@@ -275,13 +280,12 @@ public class ObjectArray implements MemoryRecord, ChangeOperator, Iterable<Objec
 
 	@Override
 	public FieldType type() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : FieldType.OBJECT;
-		if (field >= 1 && field <= 29)
-			return typeOperator(field - 1);
-		switch (field) {
-		case 1:
+			return FieldType.OBJECT;
+		if (idx >= 1 && idx <= 29)
+			return typeOperator(idx - 1);
+		switch (idx) {
+		case 0:
 			return FieldType.OBJECT;
 		default:
 			return null;
@@ -290,13 +294,12 @@ public class ObjectArray implements MemoryRecord, ChangeOperator, Iterable<Objec
 
 	@Override
 	public Object java() {
-		int field = 0;
 		if (idx == -1)
-			return field < 1 || field > size ? null : new ObjectArray(parent, field - 1);
-		if (field >= 1 && field <= 29)
-			return getOperator(field - 1);
-		switch (field) {
-		case 1:
+			return this;
+		if (idx >= 1 && idx <= 29)
+			return getOperator(idx - 1);
+		switch (idx) {
+		case 0:
 			return getName();
 		default:
 			return null;
@@ -305,11 +308,10 @@ public class ObjectArray implements MemoryRecord, ChangeOperator, Iterable<Objec
 
 	@Override
 	public boolean java(Object value) {
-		int field = 0;
-		if (field >= 1 && field <= 29)
-			return setOperator(field - 1, value);
-		switch (field) {
-		case 1:
+		if (idx >= 1 && idx <= 29)
+			return setOperator(idx - 1, value);
+		switch (idx) {
+		case 0:
 			if (value instanceof Expr)
 				setName((Expr) value);
 			return value instanceof Expr;
@@ -320,17 +322,22 @@ public class ObjectArray implements MemoryRecord, ChangeOperator, Iterable<Objec
 
 	@Override
 	public ObjectArray index(int idx) {
-		return null;
+		return idx < 0 || idx >= size ? null : new ObjectArray(parent, idx);
 	}
 
 	@Override
 	public ObjectArray start() {
-		return null;
+		return new ObjectArray(parent, 0);
 	}
 
 	@Override
 	public ObjectArray next() {
-		return null;
+		return idx + 1 >= size ? null : new ObjectArray(parent, idx + 1);
+	}
+
+	@Override
+	public boolean testLast() {
+		return idx == size - 1;
 	}
 
 	@Override

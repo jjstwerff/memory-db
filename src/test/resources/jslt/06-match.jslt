@@ -1,5 +1,0 @@
-import testing as t
-
-def eager(x* + 'abc'): x
-
-t.assert("eager", ['a', 'a', 'b'], eager("aababc"))

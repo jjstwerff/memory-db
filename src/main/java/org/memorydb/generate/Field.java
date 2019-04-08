@@ -282,13 +282,13 @@ public class Field {
 		case BYTE:
 			return "(byte) 0";
 		case FLOAT:
-			return "0.0";
+			return "Double.NaN";
 		case SHORT:
 			return "(short) 0";
 		case INTEGER:
-			return "0";
+			return "Integer.MIN_VALUE";
 		case LONG:
-			return "0L";
+			return "Long.MIN_VALUE";
 		case ARRAY:
 		case SET:
 			return null;
@@ -611,7 +611,7 @@ public class Field {
 					res.append(store + "setInt(" + apos + ", " + def + ".rec())");
 				break;
 			case STRING:
-				res.append(store + "setInt(" + apos + ", " + (def.equals("null") ? "0" : "store.putString(" + def + ")") + ")");
+				res.append(store + "setInt(" + apos + ", " + (def.equals("null") ? "Integer.MIN_VALUE" : "store.putString(" + def + ")") + ")");
 				break;
 			case STRING_POINTER:
 				res.append(store + "setInt(" + apos + ", " + def + ".getPos()); " + store + "setInt(alloc, idx * " + table.getSize() + " + "

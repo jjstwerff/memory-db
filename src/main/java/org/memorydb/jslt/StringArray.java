@@ -18,12 +18,22 @@ public class StringArray implements RecordInterface {
 
 	@Override
 	public StringArray start() {
-		return new StringArray(string, 0);
+		return pos >= 0 || string.isEmpty() ? null : new StringArray(string, 0);
 	}
 
 	@Override
 	public StringArray index(int idx) {
-		return idx < 0 || idx >= string.length() ? null : new StringArray(string, idx);
+		return idx < 0 || idx >= string.length() - pos ? null : new StringArray(string, pos + idx);
+	}
+
+	@Override
+	public int index() {
+		return pos;
+	}
+
+	@Override
+	public int size() {
+		return string.length() - pos;
 	}
 
 	@Override
@@ -43,7 +53,7 @@ public class StringArray implements RecordInterface {
 
 	@Override
 	public String toString() {
-		return string;
+		return string.substring(pos);
 	}
 
 	@Override

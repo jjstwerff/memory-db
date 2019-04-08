@@ -13,16 +13,19 @@ public class MinArray implements RecordInterface {
 
 	@Override
 	public MinArray start() {
-		return null;
+		return getNext(array.start());
 	}
 
 	@Override
 	public MinArray next() {
-		RecordInterface next = array.next();
-		while (next != null && !next.name().equals(elm)) {
+		return getNext(array.next());
+	}
+
+	private MinArray getNext(RecordInterface next) {
+		while (next != null && next.name().equals(elm)) {
 			next = next.next();
 		}
-		return new MinArray(next, elm);
+		return next == null ? null : new MinArray(next, elm);
 	}
 
 	@Override
