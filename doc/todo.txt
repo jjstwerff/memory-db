@@ -4,12 +4,16 @@ Tests:
 - part after choice into parameter
 - optional part after choice into parameter
 - multiple tokens into a parameter
+- other function result into a parameter
+- multiple function results into a parameter
 
 Analyze:
 - brackets
 	number of current POP's on inner function (parameter with this number?)
 - better code for max-n iterations
-	COUNTER element on stack = number, DECREASE step with jump when 0
+	remove a recently written element again if a matching did not work out in the end
+	create method to remove the last value from an array again
+	allow for a part of code to be executed on failure to match
 - allow constant n iterations code with counter
 	add a way to note that
 - use COUNTER to remember if a new array is started when that is optionally done
