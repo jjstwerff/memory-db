@@ -1,4 +1,5 @@
 Tests:
+- start of an array should interpret source as iterator
 - array of tokens into parameter
 - part of choice into parameter
 - part after choice into parameter

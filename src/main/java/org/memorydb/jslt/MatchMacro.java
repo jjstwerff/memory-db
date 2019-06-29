@@ -22,6 +22,7 @@ public class MatchMacro {
 	private RecordInterface data; // current data position
 	private State state;
 	private boolean doCheck; // check on complete iterators
+	private boolean debug; // show debug information
 
 	public MatchMacro(JsltInterpreter inter, Operator code) {
 		this.inter = inter;
@@ -37,6 +38,11 @@ public class MatchMacro {
 		this.stack = new ArrayList<>();
 		this.state = State.INCOMPLETE;
 		this.doCheck = true;
+		this.debug = false;
+	}
+
+	public void setDebug(boolean debug) {
+		this.debug = debug;
 	}
 
 	public MatchMacro(JsltInterpreter inter, MatchingArray code, Object cur) {
@@ -57,7 +63,8 @@ public class MatchMacro {
 	}
 
 	public Object match() {
-		// System.out.println("match: " + macro.getName() + " startFrame:" + startFrame + " stackFrame:" + inter.getStackFrame());
+		// System.out.println("match: " + macro.getName() + " startFrame:" + startFrame
+		// + " stackFrame:" + inter.getStackFrame());
 		int step = 0;
 		MatchingArray code = macro.getMatching();
 		MatchingArray matching = code.start();
@@ -66,7 +73,8 @@ public class MatchMacro {
 				return null;
 			if (matching == null)
 				throw new RuntimeException("Not correctly matching macro " + macro.getName());
-			// System.out.print(" " + matching.index() + ":" + matching);
+			if (debug)
+				System.out.print(" " + matching.index() + ":" + matching);
 			switch (matching.getType()) {
 			case ALT:
 				Alternative alt = new Alternative(macro.store(), matching.getAltnr());
@@ -201,7 +209,8 @@ public class MatchMacro {
 				break;
 			case PUSH:
 				if (cur != null && !(cur instanceof RecordInterface))
-					throw new RuntimeException("Not a parameter pointer to put on stack");
+					throw new RuntimeException("Not a parameter pointer to put on stack: found:" + cur + //
+							(cur == null ? "" : " of type " + cur.getClass().getSimpleName()));
 				stack.add((RecordInterface) cur);
 				matching = matching.next();
 				break;

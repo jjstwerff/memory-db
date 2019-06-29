@@ -30,15 +30,13 @@ public class JsltInterpreter {
 	private RecordInterface curFor = null;
 	private Object running = null;
 	private Dir dir = null;
+	private boolean debug = false;
 
-	public static String interpret(Store jsltStore, RecordInterface data, Dir dir) {
-		return interpret(jsltStore, data, dir, null);
-	}
-
-	public static String interpret(Store jsltStore, RecordInterface data, Dir dir, List<String> errors) {
+	public static String interpret(Store jsltStore, RecordInterface data, Dir dir, List<String> errors, boolean debug) {
 		JsltInterpreter inter = new JsltInterpreter();
 		inter.dir = dir;
 		inter.data = data;
+		inter.debug = debug;
 		Writer write = new StringWriter();
 		int main = new Macro.IndexMacros(jsltStore, "main").search();
 		for (CodeArray code : new Macro(jsltStore, main).getAlternatives(0).getCode())
@@ -133,8 +131,12 @@ public class JsltInterpreter {
 
 	private Object macro(Operator code) {
 		Macro macro = code.getMacro();
-		if (!macro.getName().equals("slice"))
-			return new MatchMacro(this, code).match();
+		if (!macro.getName().equals("slice")) {
+			MatchMacro matchMacro = new MatchMacro(this, code);
+			if (debug)
+				matchMacro.setDebug(debug);
+			return matchMacro.match();
+		}
 		Object parmData = inter(new CallParmsArray(code.getCallParms(), 0));
 		if (parmData instanceof RecordInterface)
 			return new InterSlice(this, (RecordInterface) parmData, code.getCallParms());

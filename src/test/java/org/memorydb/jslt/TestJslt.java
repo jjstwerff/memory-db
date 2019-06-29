@@ -143,7 +143,6 @@ public class TestJslt extends MemoryTests {
 		for (Path file : files) {
 			Store jsltStore = new Store(3);
 			String result = file.getFileName().toString();
-			//if (!result.startsWith("05")) continue;
 			System.out.println("Check: " + result);
 			new Parser(new Scanner(file), jsltStore).parse();
 			JsltAnalyzer.analyze(jsltStore);
@@ -153,7 +152,8 @@ public class TestJslt extends MemoryTests {
 					code.append(m.toString());
 			compare(result, code.toString());
 			List<String> errors = new ArrayList<>();
-			String into = JsltInterpreter.interpret(jsltStore, null, new Dir(Paths.get(getClass().getResource("/files").getFile())), errors);
+			String into = JsltInterpreter.interpret(jsltStore, null, new Dir(Paths.get(getClass().getResource("/files").getFile())), errors,
+					result.startsWith("00"));
 			if (!errors.isEmpty())
 				compare(result + ".error", String.join("\n", errors));
 			Assert.assertEquals(result, "\"\"", into);
